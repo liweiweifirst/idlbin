@@ -134,7 +134,7 @@ pro plot_exoplanet, planetname,bin_level, phaseplot = phaseplot, selfcal=selfcal
      yarr = [planethash[aorname(a),'ycen']]
      bkgd = [ planethash[aorname(a),'bkgd']]
      bmjd = [ planethash[aorname(a),'bmjdarr']]
-     
+     centerpixarr = [ planethash[aorname(a),'centerpixarr6']]
      print, 'testing corrfluxarr', corrfluxarr[0:10]
 
                                 ;check if I should be using pmap corr or not
@@ -164,7 +164,8 @@ pro plot_exoplanet, planetname,bin_level, phaseplot = phaseplot, selfcal=selfcal
      bmjdarr = bmjd[good]
      bkgdarr = bkgd[good]
      phasearr = phase[good]
-     
+     centerpixarr = centerpixarr[good]
+
 ;and a second set for those that are in the sweet spot
      xarrp = xarr[goodpmap]
      yarrp = yarr[goodpmap]
@@ -176,7 +177,8 @@ pro plot_exoplanet, planetname,bin_level, phaseplot = phaseplot, selfcal=selfcal
      bmjdarrp = bmjd[goodpmap]
      bkgdarrp = bkgd[goodpmap]
      phasearrp = phase[goodpmap]
- 
+     centerpixarrp = centerpixarr[goodpmap]
+
 ;     print, 'testing after outlier', flux[0:10]
 ; binning
      numberarr = findgen(n_elements(xarr))
@@ -201,6 +203,7 @@ pro plot_exoplanet, planetname,bin_level, phaseplot = phaseplot, selfcal=selfcal
      bin_xcen = dblarr(n_elements(h))
      bin_ycen = dblarr(n_elements(h))
      bin_phase = dblarr(n_elements(h))
+     bin_centerpix = dblarr(n_elements(h))
 
      bin_fluxp = dblarr(n_elements(hp))
      bin_fluxerrp = dblarr(n_elements(hp))
@@ -214,7 +217,7 @@ pro plot_exoplanet, planetname,bin_level, phaseplot = phaseplot, selfcal=selfcal
      bin_xcenp = dblarr(n_elements(hp))
      bin_ycenp= dblarr(n_elements(hp))
      bin_phasep = dblarr(n_elements(hp))
-
+     bin_centerpixp = dblarr(n_elements(hp))
      c = 0
      for j = 0L, n_elements(h) - 1 do begin
 
@@ -257,6 +260,11 @@ pro plot_exoplanet, planetname,bin_level, phaseplot = phaseplot, selfcal=selfcal
            bin_phase[c]= meanbmjdarr
 ;           print, 'finished first bmjd'
 
+           meanclip, centerpixarr[ri[ri[j]:ri[j+1]-1]], meancenterpix, sigmacenterpix
+           bin_centerpix[c]= meancenterpix
+;           print, 'finished first bmjd'
+
+
 ;            meanclip, phasearr[ri[ri[j]:ri[j+1]-1]], meanphase, sigmaphasearr
 ;            bin_phase[c]= meanphase
 
@@ -289,6 +297,7 @@ pro plot_exoplanet, planetname,bin_level, phaseplot = phaseplot, selfcal=selfcal
 ;     bin_corrfluxerr = bin_corrfluxerr[0:c-1]
      bin_phase = bin_phase[0:c-1]
      bin_ncorr = bin_ncorr[0:c-1]
+     bin_centerpix = bin_centerpix[0:c-1]
 ;     print, 'bin_phase', bin_phase
 ;  bin_bkgderr = bin_bkgderr[0:c-1]
      
@@ -308,6 +317,9 @@ pro plot_exoplanet, planetname,bin_level, phaseplot = phaseplot, selfcal=selfcal
 
            meanclip, yarrp[rip[rip[j]:rip[j+1]-1]], meany, sigmay
            bin_ycenp[cp] = meany   ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
+
+           meanclip, centerpixarrp[ri[ri[j]:ri[j+1]-1]], meancenterpix, sigmacenterpix
+           bin_centerpixp[cp]= meancenterpix
 
            meanclip, bkgdarrp[rip[rip[j]:rip[j+1]-1]], meansky, sigmasky
            bin_bkgdp[cp] = meansky ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
@@ -364,6 +376,7 @@ pro plot_exoplanet, planetname,bin_level, phaseplot = phaseplot, selfcal=selfcal
      bin_corrfluxerrp = bin_corrfluxerrp[0:cp-1]
      bin_phasep = bin_phasep[0:cp-1]
      bin_ncorrp = bin_ncorrp[0:cp-1]
+     bin_centerpixp = bin_centerpixp[0:cp-1]
 ;  bin_bkgderrp = bin_bkgderrp[0:cp-1]
  ;-------------------------------------
 
@@ -430,6 +443,16 @@ pro plot_exoplanet, planetname,bin_level, phaseplot = phaseplot, selfcal=selfcal
         endif
 
      endelse
+
+     if keyword_set(centerpixplot) then begin
+        if a eq 0 then begin
+           cplot = plot((bin_timearr - bin_timearr(0))/60./60., bin_centerpix, '6rs1', sym_size = 0.2, sym_filled = 1, xtitle =  'Time (hrs)', ytitle = 'Central Pixel value', title = planetname) 
+        endif else begin
+           cplot = plot((bin_timearr - bin_timearr(0))/60./60., bin_centerpix, '6rs1', sym_size = 0.2, sym_filled = 1,/overplot) 
+        endelse
+
+     endif
+
 
 ;  pl.yrange = [0.985, 1.005]
      

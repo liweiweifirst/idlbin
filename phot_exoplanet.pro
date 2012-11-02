@@ -70,14 +70,33 @@ planethash = hash()
         back = b[*,2]
         backerr = bs[*,2]
 
-;track the value of the central pixel
-        centerpixval = im[15, 15,*]
-        ;print, 'centerpixval', centerpixval
+;track the value of a column
+        centerpixval1 = findgen(64)
+        centerpixval2 = findgen(64)
+        centerpixval3 = findgen(64)
+        centerpixval4 = findgen(64)
+        centerpixval5 = findgen(64)
+        centerpixval6 = findgen(64)
+        for nframes = 0, 64 - 1 do begin
+           meanclip, im[12, 10:22,nframes], meancol1, sigmacol
+           centerpixval1[nframes] = meancol1
+          meanclip, im[13, 10:22,nframes], meancol2, sigmacol
+           centerpixval2[nframes] = meancol2
+          meanclip, im[14, 10:22,nframes], meancol3, sigmacol
+           centerpixval3[nframes] = meancol3
+          meanclip, im[16, 10:22,nframes], meancol4, sigmacol
+           centerpixval4[nframes] = meancol4
+          meanclip, im[17, 10:22,nframes], meancol5, sigmacol
+           centerpixval5[nframes] = meancol5
+          meanclip, im[18, 10:22,nframes], meancol6, sigmacol
+           centerpixval6[nframes] = meancol6
+        endfor
+
 
 ;--------------------------------
       ;correct for pixel phase effect based on pmaps from Jim
         file_suffix = ['500x500_0043_120409.fits','0p1s_x4_500x500_0043_120124.fits']
-        corrflux = iracpc_pmap_corr(abcdflux,x_center,y_center,ch,/threshold_occ, threshold_val = 20);, file_suffix = file_suffix)
+        corrflux = iracpc_pmap_corr(abcdflux,x_center,y_center,ch,/threshold_occ, threshold_val = 20, file_suffix = file_suffix)
         corrfluxerr = fs        ;leave out the pmap err for now
      
  ;--------------------------------
@@ -94,7 +113,12 @@ planethash = hash()
            utcs = utcsarr[1:*]
            backarr = back[1:*]
            backerrarr = backerr[1:*]
-           centerpixarr = centerpixval[1:*]
+           centerpixarr1 = centerpixval1[1:*]
+           centerpixarr2 = centerpixval2[1:*]
+           centerpixarr3 = centerpixval3[1:*]
+           centerpixarr4 = centerpixval4[1:*]
+           centerpixarr5 = centerpixval5[1:*]
+           centerpixarr6 = centerpixval6[1:*]
 
         endif else begin
            xarr = [xarr, x_center[1:*]]
@@ -108,7 +132,12 @@ planethash = hash()
            utcs = [utcs, utcsarr[1:*]]
            backarr = [backarr, back[1:*]]
            backerrarr = [backerrarr, backerr[1:*]]
-           centerpixarr = [centerpixarr, centerpixval[1:*]]
+           centerpixarr1 = [centerpixarr1, centerpixval1[1:*]]
+           centerpixarr2 = [centerpixarr2, centerpixval2[1:*]]
+           centerpixarr3 = [centerpixarr3, centerpixval3[1:*]]
+           centerpixarr4 = [centerpixarr4, centerpixval4[1:*]]
+           centerpixarr5 = [centerpixarr5, centerpixval5[1:*]]
+           centerpixarr6 = [centerpixarr6, centerpixval6[1:*]]
 
          endelse
         
@@ -119,8 +148,8 @@ planethash = hash()
     ; print, 'fluxarr', fluxarr[0:10]
                                 ;fill in that hash of hases
 
-       keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'utcsarr', 'bkgd', 'bkgderr','centerpixarr']
-       values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd, utcs, backarr, backerrarr, centerpixarr)
+       keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'utcsarr', 'bkgd', 'bkgderr','centerpixarr1','centerpixarr2','centerpixarr3','centerpixarr4','centerpixarr5','centerpixarr6']
+       values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd, utcs, backarr, backerrarr, centerpixarr1, centerpixarr2, centerpixarr3, centerpixarr4, centerpixarr5, centerpixarr6)
        planethash[aorname(a)] = HASH(keys, values)
 
   endfor                        ;for each AOR
