@@ -35,6 +35,7 @@ planethash = hash()
         bmjd_obs = sxpar(header, 'BMJD_OBS')
         utcs_obs = sxpar(header, 'UTCS_OBS')
         ch = sxpar(header, 'CHNLNUM')
+        ronoise = sxpar(header, 'RONOISE')
 
         if i eq 0 then sclk_0 = sxpar(header, 'SCLK_OBS')
 
@@ -59,12 +60,12 @@ planethash = hash()
                                      xfwhm, yfwhm, /WARM
         
       ;choose 3 pixel aperture, 3-7 pixel background
-;       abcdflux = f[*,9]      
-;        fs = fs[*,9]
+       abcdflux = f[*,9]      
+        fs = fs[*,9]
 
 
         ;take out the central pixel
-        abcdflux = b[*,1]
+;        abcdflux = b[*,1]
 
         ;choose [10, 12-20]
 ;        abcdflux = f[*,5]
