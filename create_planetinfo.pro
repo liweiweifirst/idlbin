@@ -4,6 +4,22 @@ function create_planetinfo
   keys =['ra', 'dec','aorname','basedir','chname', 'utmjd_center', 'transit_duration', 'period', 'intended_phase', 'exptime']
 
 ;---
+  planetname = '55cnc'
+  chname = '2'
+  ra_ref = 133.14756
+  dec_ref = 28.330094
+  ;aorname = ['r43981312','r43981568','r43981824','r43981056'] 
+  aorname = ['r43981568'] 
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  ;utmjd_center =  [double(55944.25889), double(55947.20505),double(55949.41467), double(55957.51661)]  
+  utmjd_center =  [double(55947.20505)]  
+  transit_duration=105.7
+  period = 0.73654 
+  intended_phase = 0.5
+  exptime = [0.02]
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime)
+  planetinfo[planetname] = HASH(keys, values)
+;---
   planetname = 'gj436'
   chname = '2'
   ra_ref = 175.5493
