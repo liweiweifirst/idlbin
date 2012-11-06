@@ -34,6 +34,10 @@ planethash = hash()
         bmjd_obs = sxpar(header, 'BMJD_OBS')
         utcs_obs = sxpar(header, 'UTCS_OBS')
         ch = sxpar(header, 'CHNLNUM')
+        ronoise = sxpar(header, 'RONOISE')
+        gain = sxpar(header, 'GAIN')
+        fluxconv = sxpar(header, 'FLUXCONV')
+        exptime = sxpar(header, 'EXPTIME')
 
         if i eq 0 then sclk_0 = sxpar(header, 'SCLK_OBS')
 
@@ -77,20 +81,32 @@ planethash = hash()
         centerpixval4 = findgen(64)
         centerpixval5 = findgen(64)
         centerpixval6 = findgen(64)
+        sigmapixval1 = findgen(64)
+        sigmapixval2 = findgen(64)
+        sigmapixval3 = findgen(64)
+        sigmapixval4 = findgen(64)
+        sigmapixval5 = findgen(64)
+        sigmapixval6 = findgen(64)
         for nframes = 0, 64 - 1 do begin
-           meanclip, im[12, 10:22,nframes], meancol1, sigmacol
+           meanclip, im[13, 6:12,nframes], meancol1, sigmacol
            centerpixval1[nframes] = meancol1
-          meanclip, im[13, 10:22,nframes], meancol2, sigmacol
-           centerpixval2[nframes] = meancol2
-          meanclip, im[14, 10:22,nframes], meancol3, sigmacol
-           centerpixval3[nframes] = meancol3
-          meanclip, im[16, 10:22,nframes], meancol4, sigmacol
+           sigmapixval1[nframes] = sigmacol
+           meanclip, im[13, 18:24,nframes], meancol2, sigmacol
+           centerpixval2[nframes] = meancol2   
+           sigmapixval2[nframes] = sigmacol     
+           meanclip, im[14, 6:12,nframes], meancol3, sigmacol
+           centerpixval3[nframes] = meancol3           
+           sigmapixval3[nframes] = sigmacol
+           meanclip, im[14, 18:24,nframes], meancol4, sigmacol
            centerpixval4[nframes] = meancol4
-          meanclip, im[17, 10:22,nframes], meancol5, sigmacol
+           sigmapixval4[nframes] = sigmacol
+           meanclip, im[13, 6:24,nframes], meancol5, sigmacol
            centerpixval5[nframes] = meancol5
-          meanclip, im[18, 10:22,nframes], meancol6, sigmacol
+           sigmapixval5[nframes] = sigmacol
+           meanclip, im[14, 6:24,nframes], meancol6, sigmacol
            centerpixval6[nframes] = meancol6
-        endfor
+           sigmapixval6[nframes] = sigmacol
+ endfor
 
 
 ;--------------------------------
@@ -100,7 +116,10 @@ planethash = hash()
         corrfluxerr = fs        ;leave out the pmap err for now
      
  ;--------------------------------
+        ;calculate noise pixel
+        np = noisepix(im, x_center, y_center, ronoise, gain, exptime, fluxconv)
 
+;---------------------------------
         if i eq 0 then begin
            xarr = x_center[1:*]
            yarr = y_center[1:*]
@@ -119,6 +138,14 @@ planethash = hash()
            centerpixarr4 = centerpixval4[1:*]
            centerpixarr5 = centerpixval5[1:*]
            centerpixarr6 = centerpixval6[1:*]
+           sigmapixarr1 = sigmapixval1[1:*]
+           sigmapixarr2 = sigmapixval2[1:*]
+           sigmapixarr3 = sigmapixval3[1:*]
+           sigmapixarr4 = sigmapixval4[1:*]
+           sigmapixarr5 = sigmapixval5[1:*]
+           sigmapixarr6 = sigmapixval6[1:*]
+
+           nparr = np[1:*]
 
         endif else begin
            xarr = [xarr, x_center[1:*]]
@@ -138,6 +165,14 @@ planethash = hash()
            centerpixarr4 = [centerpixarr4, centerpixval4[1:*]]
            centerpixarr5 = [centerpixarr5, centerpixval5[1:*]]
            centerpixarr6 = [centerpixarr6, centerpixval6[1:*]]
+           sigmapixarr1 = [sigmapixarr1, sigmapixval1[1:*]]
+           sigmapixarr2 = [sigmapixarr2, sigmapixval2[1:*]]
+           sigmapixarr3 = [sigmapixarr3, sigmapixval3[1:*]]
+           sigmapixarr4 = [sigmapixarr4, sigmapixval4[1:*]]
+           sigmapixarr5 = [sigmapixarr5, sigmapixval5[1:*]]
+           sigmapixarr6 = [sigmapixarr6, sigmapixval6[1:*]]
+
+          nparr = [nparr, np[1:*]]
 
          endelse
         
@@ -148,8 +183,8 @@ planethash = hash()
     ; print, 'fluxarr', fluxarr[0:10]
                                 ;fill in that hash of hases
 
-       keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'utcsarr', 'bkgd', 'bkgderr','centerpixarr1','centerpixarr2','centerpixarr3','centerpixarr4','centerpixarr5','centerpixarr6']
-       values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd, utcs, backarr, backerrarr, centerpixarr1, centerpixarr2, centerpixarr3, centerpixarr4, centerpixarr5, centerpixarr6)
+       keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'utcsarr', 'bkgd', 'bkgderr','np', 'centerpixarr1','centerpixarr2','centerpixarr3','centerpixarr4','centerpixarr5','centerpixarr6','sigmapixarr1','sigmapixarr2','sigmapixarr3','sigmapixarr4','sigmapixarr5','sigmapixarr6']
+       values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd, utcs, backarr, backerrarr, nparr, centerpixarr1, centerpixarr2, centerpixarr3, centerpixarr4, centerpixarr5, centerpixarr6, sigmapixarr1, sigmapixarr2, sigmapixarr3, sigmapixarr4, sigmapixarr5, sigmapixarr6)
        planethash[aorname(a)] = HASH(keys, values)
 
   endfor                        ;for each AOR
@@ -164,3 +199,24 @@ planethash = hash()
 end
 
 
+
+
+;function to calcluate noise pixel
+function noisepix, im, xcen, ycen, ronoise, gain, exptime, fluxconv
+
+  convfac = gain*exptime/fluxconv
+  np = fltarr(64)
+  for npj = 0, 63 do begin
+     indim = im[*,*,npj]
+     indim = indim*convfac
+     
+     aper, indim, xcen[npj], ycen[npj], topflux, topfluxerr, xb, xbs, 1.0, 8,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
+     aper, indim^2, xcen[npj], ycen[npj], bottomflux, bottomfluxerr, xb, xbs, 1.0,8,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
+     
+     beta = topflux^2 / bottomflux
+  ;   print, npj, beta
+     np[npj] = beta
+  endfor
+
+     return, np                 ;this should be a 64 element array
+end

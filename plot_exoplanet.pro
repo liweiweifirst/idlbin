@@ -134,7 +134,7 @@ pro plot_exoplanet, planetname,bin_level, phaseplot = phaseplot, selfcal=selfcal
      yarr = [planethash[aorname(a),'ycen']]
      bkgd = [ planethash[aorname(a),'bkgd']]
      bmjd = [ planethash[aorname(a),'bmjdarr']]
-     centerpixarr = [ planethash[aorname(a),'centerpixarr6']]
+     centerpixarr = [ planethash[aorname(a),'centerpixarr5']]
      print, 'testing corrfluxarr', corrfluxarr[0:10]
 
                                 ;check if I should be using pmap corr or not
@@ -446,7 +446,7 @@ pro plot_exoplanet, planetname,bin_level, phaseplot = phaseplot, selfcal=selfcal
 
      if keyword_set(centerpixplot) then begin
         if a eq 0 then begin
-           cplot = plot((bin_timearr - bin_timearr(0))/60./60., bin_centerpix, '6rs1', sym_size = 0.2, sym_filled = 1, xtitle =  'Time (hrs)', ytitle = 'Central Pixel value', title = planetname) 
+           cplot = plot((bin_timearr - bin_timearr(0))/60./60., bin_centerpix, '6rs1', sym_size = 0.2, sym_filled = 1, xtitle =  'Time (hrs)', ytitle = 'mean Pixel value', title = planetname) 
         endif else begin
            cplot = plot((bin_timearr - bin_timearr(0))/60./60., bin_centerpix, '6rs1', sym_size = 0.2, sym_filled = 1,/overplot) 
         endelse
