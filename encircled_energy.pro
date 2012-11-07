@@ -1,7 +1,12 @@
 pro encircled_energy, planetname
+; this program does photometry to get the encircled energy as a function of aperture size for a staring mode data set
+; the purpose of this code is to look for changes in the slope of that curve as a function of time
+
+
   print, systime()
 
-  ap = [1.5,2.,2.5,3.,3.5,4.,4.5,5.,5.5,6.,6.5,7.,7.5,8.,8.5,9.,9.5,10.]
+  ;ap = [1.5,2.,2.5,3.,3.5,4.,4.5,5.,5.5,6.,6.5,7.,7.5,8.,8.5,9.,9.5,10.]
+  ap =  findgen(45) / 5 + 1.   ;this will make a smoother curve
   back = [11.,15.]              ; [11., 15.5]
 
   planetinfo = create_planetinfo()
@@ -27,7 +32,7 @@ dirname = strcompress(basedir + planetname +'/')
      readcol,strcompress(dirname+'bunclist.txt'),buncname, format = 'A', /silent
 
      nfits = n_elements(fisname)
-     nfits = 1700L
+     nfits = 1700L  ; just run the first half for speed
 
      xarr = dblarr(64*nfits)
      yarr = dblarr(64*nfits)
@@ -52,7 +57,7 @@ dirname = strcompress(basedir + planetname +'/')
 
         convfac = gain*exptime/fluxconv
         adxy, header, ra_ref, dec_ref, xinit, yinit
-        for j = 0, 63 do begin
+        for j = 1, 63 do begin  ;don't use the first frame
            indim = data[*,*,j]
            indim = indim*convfac
            irac_box_centroider, indim, xinit, yinit, 3, 6, 3, ronoise,xcen, ycen, box_f, box_sky, box_c, box_cb, box_np,/MMM
@@ -103,20 +108,34 @@ dirname = strcompress(basedir + planetname +'/')
 
 
 ;test output 
-print, 'bin_flux', bin_flux(0,*)
+  print, 'bin_flux', bin_flux(0,*)
+
+
+;normalize the binned curves
+  for n = 0, n_elements(h) - 1 do begin
+     bin_flux(n,*) = bin_flux(n,*) / bin_flux(n, n_elements(ap)-1)
+  endfor
+
+;test output 
+  print, 'bin_flux', bin_flux(0,*)
+
 
 ;Plot the binned curve of growths
-  for p = 0, n_elements(h) - 1 do begin
-     if p gt 550 and p lt 650 then begin
-        a = plot(ap, bin_flux(p,*), '1b', xtitle = 'Aperture size', ytitle = 'Encircled Energy',/overplot)
+  min = 400
+  for p = min, n_elements(h) - 1 do begin
+     if p eq min then begin
+        a = plot(ap, bin_flux(p,*), '1r', xtitle = 'Aperture size', ytitle = 'Encircled Energy') 
+     endif
+     if p gt 594 and p lt 670 then begin
+        a = plot(ap, bin_flux(p,*), '1b',/overplot)
      endif else begin
-        a = plot(ap, bin_flux(p,*), '1r', xtitle = 'Aperture size', ytitle = 'Encircled Energy',/overplot)
+        a = plot(ap, bin_flux(p,*), '1r', /overplot)
      endelse
      
   endfor
 
 
-save, bin_flux, filename =strcompress(dirname + planetname +'_ee_ch'+chname+'.sav')
+  save, /all, filename =strcompress(dirname + planetname +'_ee_ch'+chname+'.sav')
   print, systime()
 
 end
