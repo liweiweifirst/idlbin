@@ -376,7 +376,9 @@ IF N_ELEMENTS(FILE_DIR) EQ 0 THEN BEGIN
 ;; By default the fits files are located in pmap_dir/ under the location of IRACPC_PMAP_CORR (this program)
    this_struc = ROUTINE_INFO('iracpc_pmap_corr',/SOURCE,/FUNCTIONS)   ;;; Get the path to this program
    this_dir = FILE_DIRNAME(this_struc.path[0],/MARK_DIRECTORY)  ;;; Extract directory name
-   file_dir = this_dir + 'pmap_fits'
+;   file_dir = this_dir + 'pmap_fits'
+   ;; JK
+   file_dir = '/Users/jkrick/irac_warm/pmap/pmap_fits'
 ENDIF
 IF N_ELEMENTS(FILE_SUFFIX) EQ 0 THEN file_suffix = ['500x500_0043_120828.fits','0p1s_x4_500x500_0043_120827.fits']
 IF KEYWORD_SET(THRESHOLD_OCC) THEN BEGIN
