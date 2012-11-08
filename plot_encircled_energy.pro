@@ -47,7 +47,32 @@ l = legend(target = [t2, t], /data, /AUTO_TEXT_COLOR)
   endfor
 
 
-  
+;-----------------------------
+;generate binned plots from the stacked image
+;------------------------------
+
+
+restore,  '/Users/jkrick/irac_warm/pcrs_planets/hd7924/bin_stack.sav'
+
+;the center pixel as a function of time
+m = plot( findgen(850) / 850. * 4., bin_stack(15.0,15.0,*) / max(bin_stack(15.0,15.0,*)), '1r', xtitle = ' TIme(hrs)', ytitle = 'Normalized Flux')
+
+;square annulus from 3 - 1 pixels
+mean_an = fltarr(850)
+for j = 0, 850 - 1 do begin
+   a = total(bin_stack(13:14, 13:17,j) )
+   b =total(bin_stack(15:17, 16:17,j))
+   c =total(bin_stack(16:17, 13:15,j))
+   d =total(bin_stack(15, 13:14,j))
+   sumall = a + b + c + d
+   mean_an(j) = sumall / 24.
+   
+endfor
+
+
+;plotting as a function of time
+m2 = plot(findgen(850)/850. *4., mean_an /max(mean_an) - 0.08, '1r',color = black, /overplot)
+
   print, systime()
 
 end
