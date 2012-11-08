@@ -88,22 +88,22 @@ planethash = hash()
         sigmapixval5 = findgen(64)
         sigmapixval6 = findgen(64)
         for nframes = 0, 64 - 1 do begin
-           meanclip, im[13, 6:12,nframes], meancol1, sigmacol
+           meanclip, im[13, 12:18,nframes], meancol1, sigmacol
            centerpixval1[nframes] = meancol1
            sigmapixval1[nframes] = sigmacol
            meanclip, im[13, 18:24,nframes], meancol2, sigmacol
            centerpixval2[nframes] = meancol2   
            sigmapixval2[nframes] = sigmacol     
-           meanclip, im[14, 6:12,nframes], meancol3, sigmacol
+           meanclip, im[14, 12:18,nframes], meancol3, sigmacol
            centerpixval3[nframes] = meancol3           
            sigmapixval3[nframes] = sigmacol
            meanclip, im[14, 18:24,nframes], meancol4, sigmacol
            centerpixval4[nframes] = meancol4
            sigmapixval4[nframes] = sigmacol
-           meanclip, im[13, 6:24,nframes], meancol5, sigmacol
+           meanclip, im[13, 10:22,nframes], meancol5, sigmacol
            centerpixval5[nframes] = meancol5
            sigmapixval5[nframes] = sigmacol
-           meanclip, im[14, 6:24,nframes], meancol6, sigmacol
+           meanclip, im[14, 10:22,nframes], meancol6, sigmacol
            centerpixval6[nframes] = meancol6
            sigmapixval6[nframes] = sigmacol
  endfor
