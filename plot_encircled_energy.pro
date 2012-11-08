@@ -19,19 +19,29 @@ pro plot_encircled_energy, planetname
 
 
 ;test output 
-  print, 'bin_flux', bin_flux(0,*)
+ ; print, 'bin_flux', bin_flux(0,*)
 
+
+;plot fluxes in an annulus as a function of time
+; I think I can just subtract two adjacent apertures to get an annulus.
+
+;what about the central pixel
+t2 = plot(findgen(n_elements(h))/850*4.0, bin_flux(*,0), '1r', xtitle = 'Time(hrs)', ytitle = 'Binned fluxes', name = '1 pixel aper')
+
+annul3_1 = bin_flux(*,15) - bin_flux(*,7)
+t = plot(findgen(n_elements(h))/850*4.0, annul3_1 +0.15, '1r',color = 'black', /overplot, name = '3pix - 1pix annulus')
+l = legend(target = [t2, t], /data, /AUTO_TEXT_COLOR)
 
 ;Plot the binned curve of growths
   min = 500
   for p = min, 800 do begin
      if p eq min then begin
-        a = plot(ap, bin_flux(p,*), '1r', xtitle = 'Aperture size', ytitle = 'Encircled Energy') 
+;        a = plot(ap, bin_flux(p,*), '1r', xtitle = 'Aperture size', ytitle = 'Encircled Energy') 
      endif
      if p gt 594 and p lt 670 then begin
-        a = plot(ap, bin_flux(p,*), '1b',/overplot)
+;        a = plot(ap, bin_flux(p,*), '1b',/overplot)
      endif else begin
-        a = plot(ap, bin_flux(p,*), '1r', /overplot)
+;        a = plot(ap, bin_flux(p,*), '1r', /overplot)
      endelse
      
   endfor
