@@ -163,7 +163,7 @@ endfor
    
 ;what is the time difference between the first ecliptic and the first cvz?
 if cvzcount gt 0 then begin     ;week 1 (week 2 has no cvzcals)
-   print, 'test', e(0), cvz(0), calstar(e(0)), calstar(cvz(0)), dur_days(calstar(e(0))), dur_days(calstar(cvz(0)))
+   ;print, 'test', e(0), cvz(0), calstar(e(0)), calstar(cvz(0)), dur_days(calstar(e(0))), dur_days(calstar(cvz(0)))
    if dur_days(calstar(e(0))) le dur_days(calstar(cvz(0))) then begin
       elapsed_days = total(dur_days(calstar(e(0)):calstar(cvz(0))))
       elapsed_hrs =   total(dur_hrs(calstar(e(0)):calstar(cvz(0))))
