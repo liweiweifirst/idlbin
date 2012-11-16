@@ -1,8 +1,25 @@
 function create_planetinfo
 
   planetinfo = hash()
-  keys =['ra', 'dec','aorname','basedir','chname', 'utmjd_center', 'transit_duration', 'period', 'intended_phase', 'exptime']
+  keys =['ra', 'dec','aorname','basedir','chname', 'utmjd_center', 'transit_duration', 'period', 'intended_phase', 'exptime','mask', 'maskreg']
 
+;---
+  planetname = 'hd189733'
+  chname = '1' ;!!!
+  ra_ref = 300.18185
+  dec_ref = 22.709912
+  aorname = ['r41592320' ,'r41592832', 'r41591808','r41592576' ,'r41591552','r41592064', 'r41591296'] 
+  basedir = '/Users/jkrick/irac_warm/' 
+  utmjd_center =  55557.94753D 
+  transit_duration=.07574*24.*60.
+  period = 2.21857312
+  intended_phase = 0.0
+  exptime = 0.1
+  mask = 'yes'
+  maskreg = fltarr(32,32)
+  maskreg[13:16, 4:7] =  !Values.F_NAN
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg)
+  planetinfo[planetname] = HASH(keys, values)
 ;---
   planetname = '55cnc'
   chname = '2'
@@ -17,7 +34,7 @@ function create_planetinfo
   period = 0.73654 
   intended_phase = 0.5
   exptime = [0.02]
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime)
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg)
   planetinfo[planetname] = HASH(keys, values)
 ;---
   planetname = 'gj436'
@@ -31,7 +48,7 @@ function create_planetinfo
   period = 2.64385
   intended_phase = 0.0
   exptime = [0.1, 0.4, 0.4, 0.4, 0.4]
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime)
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg)
   planetinfo[planetname] = HASH(keys, values)
 ;---
   planetname = 'hd7924'
@@ -46,7 +63,7 @@ function create_planetinfo
   intended_phase = 0.0
   exptime = 0.1
 
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime)
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg)
   planetinfo[planetname] = HASH(keys, values)
 ;---
   planetname = 'wasp13'
@@ -61,7 +78,7 @@ function create_planetinfo
   intended_phase = 0.5
   exptime = 0.4
 
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase,exptime)
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase,exptime, mask, maskreg)
   planetinfo[planetname] = HASH(keys, values)
   
 ;---
@@ -77,7 +94,7 @@ function create_planetinfo
   intended_phase = 0.5
   exptime = 2
 
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime)
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg)
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
@@ -93,7 +110,7 @@ function create_planetinfo
   intended_phase = 0.5
   exptime = 2
 
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime)
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg)
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
@@ -109,7 +126,7 @@ function create_planetinfo
   intended_phase = 0.5
   exptime = 0.4
 
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime)
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg)
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
@@ -128,7 +145,7 @@ function create_planetinfo
   intended_phase = 0.0
   exptime = 2
 
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime)
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg)
   planetinfo[planetname] = HASH(keys, values)
 
   ;test that this is all working
