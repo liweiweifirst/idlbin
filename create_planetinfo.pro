@@ -10,10 +10,10 @@ function create_planetinfo
   dec_ref = 22.709912
   aorname = ['r41592320' ,'r41592832', 'r41591808','r41592576' ,'r41591552','r41592064', 'r41591296'] 
   basedir = '/Users/jkrick/irac_warm/' 
-  utmjd_center =  55557.94753D 
+  utmjd_center =  55556.83649D; 55557.94753D 
   transit_duration=.07574*24.*60.
   period = 2.21857312
-  intended_phase = 0.0
+  intended_phase = 0
   exptime = 0.1
   mask = 'yes'
   maskreg = fltarr(32,32)
