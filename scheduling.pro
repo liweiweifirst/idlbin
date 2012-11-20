@@ -54,11 +54,11 @@ if skyfltcount gt 1 then print, 'there is more than one skyflt observation, ', s
 
 ;find the pmaps
 pmap = where(strmatch(title, 'pmap*', /fold_case) eq 1, pmapcount)
-   print, '------------------'
-if pmapcount ne 2 then print, 'wrong number of pmaps: ', pmapcount
-if pmapcount eq 2 then print, 'found 2 pmaps which is good'
+;   print, '------------------'
+;if pmapcount ne 2 then print, 'wrong number of pmaps: ', pmapcount
+;if pmapcount eq 2 then print, 'found 2 pmaps which is good'
 ;endif
-     print, '------------------'
+;     print, '------------------'
                          ;re-format duration keyword into floats that can be added together
 dur_days = float(strmid(duration,0,1))
 dur_hrs = float(strmid(duration, 2, 2))
@@ -163,8 +163,9 @@ endfor
    
 ;what is the time difference between the first ecliptic and the first cvz?
 if cvzcount gt 0 then begin     ;week 1 (week 2 has no cvzcals)
-   ;print, 'test', e(0), cvz(0), calstar(e(0)), calstar(cvz(0)), dur_days(calstar(e(0))), dur_days(calstar(cvz(0)))
-   if dur_days(calstar(e(0))) le dur_days(calstar(cvz(0))) then begin
+   print, 'test', e(0), cvz(0), calstar(e(0)), calstar(cvz(0)), dur_days(calstar(e(0))), dur_days(calstar(cvz(0)))
+;   if dur_days(calstar(e(0))) le dur_days(calstar(cvz(0))) then begin
+   if calstar(e(0)) le calstar(cvz(0)) then begin
       elapsed_days = total(dur_days(calstar(e(0)):calstar(cvz(0))))
       elapsed_hrs =   total(dur_hrs(calstar(e(0)):calstar(cvz(0))))
       elapsed_mins =  total(dur_mins(calstar(e(0)):calstar(cvz(0))))
