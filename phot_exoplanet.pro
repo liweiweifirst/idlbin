@@ -1,4 +1,4 @@
-pro phot_exoplanet, planetname
+pro phot_exoplanet, planetname, columntrack = columntrack
 ;do photometry on any IRAC staring mode exoplanet data
 ;now with hashes of hashes!
  
@@ -13,6 +13,8 @@ basedir = planetinfo[planetname, 'basedir']
 ;---------------
 dirname = strcompress(basedir + planetname +'/')
 planethash = hash()
+
+print, 'save filename', strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
 
   for a = 0, n_elements(aorname) - 1 do begin
      print, 'working on ',aorname(a)
@@ -50,10 +52,20 @@ planethash = hash()
            utcsarr[nt]= utcs_obs + 0.5*(frametime/60./60./24.)  + (frametime/60./60./24.) *nt
         endfor
          
-        ;do the photometry
-   
+        ;read in the files
         fits_read, fitsname(i), im, h
         fits_read, buncname(i), unc, hunc
+
+        ;apply mask file if necessary
+        if planetname eq 'hd189733' then begin
+           ;print, 'applying mask for this planet'
+           for j = 0, 63 do begin
+              im[13:16, 4:7, j] = !Values.F_NAN ;mask region with nan set for bad regions
+             ; im[24, 6, j] = !Values.F_NAN  ;bad pixel  but [3,3-7] shouldn't get to this pixel
+           endfor
+
+        endif
+
                                 ; fits_read, covname, covdata, covheader
         get_centroids_for_calstar_jk,im, h, unc, ra_ref, dec_ref,  t, dt, hjd, xft, x3, y3, $
                                      x5, y5, x7, y7, xg, yg, xh, yh, f, b, x3s, y3s, x5s, y5s, $
@@ -75,43 +87,45 @@ planethash = hash()
         backerr = bs[*,2]
 
 ;track the value of a column
-        centerpixval1 = findgen(64)
-        centerpixval2 = findgen(64)
-        centerpixval3 = findgen(64)
-        centerpixval4 = findgen(64)
-        centerpixval5 = findgen(64)
-        centerpixval6 = findgen(64)
-        sigmapixval1 = findgen(64)
-        sigmapixval2 = findgen(64)
-        sigmapixval3 = findgen(64)
-        sigmapixval4 = findgen(64)
-        sigmapixval5 = findgen(64)
-        sigmapixval6 = findgen(64)
-        for nframes = 0, 64 - 1 do begin
-           meanclip, im[13, 12:18,nframes], meancol1, sigmacol
-           centerpixval1[nframes] = meancol1
-           sigmapixval1[nframes] = sigmacol
-           meanclip, im[13, 18:24,nframes], meancol2, sigmacol
-           centerpixval2[nframes] = meancol2   
-           sigmapixval2[nframes] = sigmacol     
-           meanclip, im[14, 12:18,nframes], meancol3, sigmacol
-           centerpixval3[nframes] = meancol3           
-           sigmapixval3[nframes] = sigmacol
-           meanclip, im[14, 18:24,nframes], meancol4, sigmacol
-           centerpixval4[nframes] = meancol4
-           sigmapixval4[nframes] = sigmacol
-           meanclip, im[13, 10:22,nframes], meancol5, sigmacol
-           centerpixval5[nframes] = meancol5
-           sigmapixval5[nframes] = sigmacol
-           meanclip, im[14, 10:22,nframes], meancol6, sigmacol
-           centerpixval6[nframes] = meancol6
-           sigmapixval6[nframes] = sigmacol
- endfor
+        if keyword_set(columntrack) then begin 
+           centerpixval1 = findgen(64)
+           centerpixval2 = findgen(64)
+           centerpixval3 = findgen(64)
+           centerpixval4 = findgen(64)
+           centerpixval5 = findgen(64)
+           centerpixval6 = findgen(64)
+           sigmapixval1 = findgen(64)
+           sigmapixval2 = findgen(64)
+           sigmapixval3 = findgen(64)
+           sigmapixval4 = findgen(64)
+           sigmapixval5 = findgen(64)
+           sigmapixval6 = findgen(64)
+           for nframes = 0, 64 - 1 do begin
+              meanclip, im[13, 12:18,nframes], meancol1, sigmacol
+              centerpixval1[nframes] = meancol1
+              sigmapixval1[nframes] = sigmacol
+              meanclip, im[13, 18:24,nframes], meancol2, sigmacol
+              centerpixval2[nframes] = meancol2   
+              sigmapixval2[nframes] = sigmacol     
+              meanclip, im[14, 12:18,nframes], meancol3, sigmacol
+              centerpixval3[nframes] = meancol3           
+              sigmapixval3[nframes] = sigmacol
+              meanclip, im[14, 18:24,nframes], meancol4, sigmacol
+              centerpixval4[nframes] = meancol4
+              sigmapixval4[nframes] = sigmacol
+              meanclip, im[13, 10:22,nframes], meancol5, sigmacol
+              centerpixval5[nframes] = meancol5
+              sigmapixval5[nframes] = sigmacol
+              meanclip, im[14, 10:22,nframes], meancol6, sigmacol
+              centerpixval6[nframes] = meancol6
+              sigmapixval6[nframes] = sigmacol
+           endfor
+        endif
 
-
+           
 ;--------------------------------
       ;correct for pixel phase effect based on pmaps from Jim
-        file_suffix = ['500x500_0043_120409.fits','0p1s_x4_500x500_0043_120124.fits']
+        file_suffix = ['500x500_0043_120828.fits','0p1s_x4_500x500_0043_120124.fits'];121120 ['500x500_0043_120409.fits','0p1s_x4_500x500_0043_120124.fits']
         corrflux = iracpc_pmap_corr(abcdflux,x_center,y_center,ch,/threshold_occ, threshold_val = 20, file_suffix = file_suffix)
         corrfluxerr = fs        ;leave out the pmap err for now
      
@@ -132,20 +146,23 @@ planethash = hash()
            utcs = utcsarr[1:*]
            backarr = back[1:*]
            backerrarr = backerr[1:*]
-           centerpixarr1 = centerpixval1[1:*]
-           centerpixarr2 = centerpixval2[1:*]
-           centerpixarr3 = centerpixval3[1:*]
-           centerpixarr4 = centerpixval4[1:*]
-           centerpixarr5 = centerpixval5[1:*]
-           centerpixarr6 = centerpixval6[1:*]
-           sigmapixarr1 = sigmapixval1[1:*]
-           sigmapixarr2 = sigmapixval2[1:*]
-           sigmapixarr3 = sigmapixval3[1:*]
-           sigmapixarr4 = sigmapixval4[1:*]
-           sigmapixarr5 = sigmapixval5[1:*]
-           sigmapixarr6 = sigmapixval6[1:*]
-
            nparr = np[1:*]
+
+           if keyword_set(columntrack) then begin 
+              centerpixarr1 = centerpixval1[1:*]
+              centerpixarr2 = centerpixval2[1:*]
+              centerpixarr3 = centerpixval3[1:*]
+              centerpixarr4 = centerpixval4[1:*]
+              centerpixarr5 = centerpixval5[1:*]
+              centerpixarr6 = centerpixval6[1:*]
+              sigmapixarr1 = sigmapixval1[1:*]
+              sigmapixarr2 = sigmapixval2[1:*]
+              sigmapixarr3 = sigmapixval3[1:*]
+              sigmapixarr4 = sigmapixval4[1:*]
+              sigmapixarr5 = sigmapixval5[1:*]
+              sigmapixarr6 = sigmapixval6[1:*]
+           endif
+
 
         endif else begin
            xarr = [xarr, x_center[1:*]]
@@ -159,20 +176,22 @@ planethash = hash()
            utcs = [utcs, utcsarr[1:*]]
            backarr = [backarr, back[1:*]]
            backerrarr = [backerrarr, backerr[1:*]]
-           centerpixarr1 = [centerpixarr1, centerpixval1[1:*]]
-           centerpixarr2 = [centerpixarr2, centerpixval2[1:*]]
-           centerpixarr3 = [centerpixarr3, centerpixval3[1:*]]
-           centerpixarr4 = [centerpixarr4, centerpixval4[1:*]]
-           centerpixarr5 = [centerpixarr5, centerpixval5[1:*]]
-           centerpixarr6 = [centerpixarr6, centerpixval6[1:*]]
-           sigmapixarr1 = [sigmapixarr1, sigmapixval1[1:*]]
-           sigmapixarr2 = [sigmapixarr2, sigmapixval2[1:*]]
-           sigmapixarr3 = [sigmapixarr3, sigmapixval3[1:*]]
-           sigmapixarr4 = [sigmapixarr4, sigmapixval4[1:*]]
-           sigmapixarr5 = [sigmapixarr5, sigmapixval5[1:*]]
-           sigmapixarr6 = [sigmapixarr6, sigmapixval6[1:*]]
+           nparr = [nparr, np[1:*]]
+          if keyword_set(columntrack) then begin 
+              centerpixarr1 = [centerpixarr1, centerpixval1[1:*]]
+              centerpixarr2 = [centerpixarr2, centerpixval2[1:*]]
+              centerpixarr3 = [centerpixarr3, centerpixval3[1:*]]
+              centerpixarr4 = [centerpixarr4, centerpixval4[1:*]]
+              centerpixarr5 = [centerpixarr5, centerpixval5[1:*]]
+              centerpixarr6 = [centerpixarr6, centerpixval6[1:*]]
+              sigmapixarr1 = [sigmapixarr1, sigmapixval1[1:*]]
+              sigmapixarr2 = [sigmapixarr2, sigmapixval2[1:*]]
+              sigmapixarr3 = [sigmapixarr3, sigmapixval3[1:*]]
+              sigmapixarr4 = [sigmapixarr4, sigmapixval4[1:*]]
+              sigmapixarr5 = [sigmapixarr5, sigmapixval5[1:*]]
+              sigmapixarr6 = [sigmapixarr6, sigmapixval6[1:*]]
+           endif
 
-          nparr = [nparr, np[1:*]]
 
          endelse
         
@@ -183,15 +202,25 @@ planethash = hash()
     ; print, 'fluxarr', fluxarr[0:10]
                                 ;fill in that hash of hases
 
-       keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'utcsarr', 'bkgd', 'bkgderr','np', 'centerpixarr1','centerpixarr2','centerpixarr3','centerpixarr4','centerpixarr5','centerpixarr6','sigmapixarr1','sigmapixarr2','sigmapixarr3','sigmapixarr4','sigmapixarr5','sigmapixarr6']
-       values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd, utcs, backarr, backerrarr, nparr, centerpixarr1, centerpixarr2, centerpixarr3, centerpixarr4, centerpixarr5, centerpixarr6, sigmapixarr1, sigmapixarr2, sigmapixarr3, sigmapixarr4, sigmapixarr5, sigmapixarr6)
-       planethash[aorname(a)] = HASH(keys, values)
+          if keyword_set(columntrack) then begin 
+
+             keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'utcsarr', 'bkgd', 'bkgderr','np', 'centerpixarr1','centerpixarr2','centerpixarr3','centerpixarr4','centerpixarr5','centerpixarr6','sigmapixarr1','sigmapixarr2','sigmapixarr3','sigmapixarr4','sigmapixarr5','sigmapixarr6']
+             values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd, utcs, backarr, backerrarr, nparr, centerpixarr1, centerpixarr2, centerpixarr3, centerpixarr4, centerpixarr5, centerpixarr6, sigmapixarr1, sigmapixarr2, sigmapixarr3, sigmapixarr4, sigmapixarr5, sigmapixarr6)
+             planethash[aorname(a)] = HASH(keys, values)
+          endif else begin
+             keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'utcsarr', 'bkgd', 'bkgderr','np']
+             values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd, utcs, backarr, backerrarr, nparr)
+             planethash[aorname(a)] = HASH(keys, values)
+          endelse
 
   endfor                        ;for each AOR
   
   ;test
   save, planethash, filename=strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
-  print, planethash.keys()
+  print, 'saving planethash', strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
+  print, 'time check', systime()
+
+ ; print, planethash.keys()
 ;  print, planethash[aorname(0)].keys()
  ; print, 'testing (planethash[aorname(0),flux])[0:10]',(planethash[aorname(0),'flux'])[0:10]
 ;  print, 'n_elements in hash', n_elements(planethash[aorname(1),'xcen'])
@@ -210,11 +239,11 @@ function noisepix, im, xcen, ycen, ronoise, gain, exptime, fluxconv
      indim = im[*,*,npj]
      indim = indim*convfac
      
-     aper, indim, xcen[npj], ycen[npj], topflux, topfluxerr, xb, xbs, 1.0, 8,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
-     aper, indim^2, xcen[npj], ycen[npj], bottomflux, bottomfluxerr, xb, xbs, 1.0,8,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
+     aper, indim, xcen[npj], ycen[npj], topflux, topfluxerr, xb, xbs, 1.0, 4,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
+     aper, indim^2, xcen[npj], ycen[npj], bottomflux, bottomfluxerr, xb, xbs, 1.0,4,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
      
      beta = topflux^2 / bottomflux
-  ;   print, npj, beta
+;     print, npj, beta
      np[npj] = beta
   endfor
 
