@@ -13,7 +13,9 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
   transit_duration =  planetinfo[planetname, 'transit_duration']
   period =  planetinfo[planetname, 'period']
   intended_phase = planetinfo[planetname, 'intended_phase']
-  
+  stareaor = planetinfo[planetname, 'stareaor']
+  plot_norm= planetinfo[planetname, 'plot_norm']
+  plot_corrnorm = planetinfo[planetname, 'plot_corrnorm']
 ;  bin_level = 63L               ; 63L;*60
   
   dirname = strcompress(basedir + planetname +'/')
@@ -22,7 +24,7 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
   np = planethash[aorname(0),'np']
   ;print, 'testing', np[0:100]
 
-  colorarr = ['blue', 'red','black', 'deep_pink', 'magenta', 'medium_purple', 'orange_red', 'light_pink', 'rosy_brown', 'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki','black', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple' ]
+  colorarr = ['blue', 'red', 'deep_pink', 'magenta', 'medium_purple', 'orange_red', 'light_pink', 'rosy_brown', 'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki','black', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple' ]
 
  ; z = pp_multiplot(multi_layout=[1,3], global_xtitle='Orbital Phase')
 
@@ -448,40 +450,75 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
         if a eq 0 then begin    ; for the first AOR
 ;           pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.3,   sym_filled = 1, title = planetname, color = colorarr[a], yrange = [15.0,15.5], xtitle = 'Orbital Phase', ytitle = 'X position')
 ;           pq = plot(bin_phase, bin_ycen, '1s', sym_size = 0.3,   sym_filled = 1, color = colorarr[a], yrange = [14.7,15.5], xtitle = 'Orbital Ph;ase', ytitle = 'Y position', title = planetname)
-           pr = plot(bin_phase, bin_flux/.0617, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a], yrange = [0.970,1.005], xtitle = 'Orbital Phase', ytitle = 'Normalized Flux', title = planetname) ;, xtitle = 'Orbital Phase', ytitle = 'Normalized Flux',) 
-          if pmapcorr eq 1 then pr = plot(bin_phasep, (bin_corrfluxp/0.0607) -0.017,/overplot, '1s', sym_size = 0.3,   sym_filled = 1, color = colorarr[a]) ;xtitle = 'Orbital Phase', ytitle = 'Normalized Flux', title = planetname
+           pr = plot(bin_phase, bin_flux/plot_norm, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a],  xtitle = 'Orbital Phase', ytitle = 'Normalized Flux', title = planetname) ;yrange = [0.970,1.005],, xtitle = 'Orbital Phase', ytitle = 'Normalized Flux',) 
+          if pmapcorr eq 1 then pr = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm) -0.017,/overplot, '1s', sym_size = 0.3,   sym_filled = 1, color = colorarr[a]) ;xtitle = 'Orbital Phase', ytitle = 'Normalized Flux', title = planetname
 ;           ps= plot(bin_phase, bin_np, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a],  xtitle = 'Orbital Phase', ytitle = 'Noise Pixel', title = planetname) ;, xtitle = 'Orbital Phase', ytitle = 'Normalized Flux',) 
 
           
         endif
         test_med(a) = median(bin_corrfluxp)
         print,'test_med ',  median(bin_corrfluxp)
-        if (a gt 0) and (a le 4) then begin
+        if (a gt 0) and (a le stareaor) then begin
 ;           pp.window.SetCurrent
 ;           pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.3,   sym_filled = 1,color = colorarr[a],  /overplot,/current)
 ;           pq.window.SetCurrent
 ;           pq = plot(bin_phase, bin_ycen, '1s', sym_size = 0.3,   sym_filled = 1, color = colorarr[a], /overplot,/current)
            pr.window.SetCurrent
-           pr = plot(bin_phase, bin_flux/.0617, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a], /overplot,/current) 
-           if pmapcorr eq 1 then pr = plot(bin_phasep, (bin_corrfluxp/0.0607) -0.017,/overplot, 's1', sym_size = 0.3,   sym_filled = 1, color = colorarr[a],/current)
+           pr = plot(bin_phase, bin_flux/plot_norm, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a], /overplot,/current) 
+           if pmapcorr eq 1 then pr = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm) -0.017,/overplot, 's1', sym_size = 0.3,   sym_filled = 1, color = colorarr[a],/current)
 ;           ps.window.SetCurrent
 ;           ps = plot(bin_phase, bin_np, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a], /overplot,/current) ;, xtitle = 'Orbital Phase', ytitle = 'Normalized Flux',) 
         endif
 
 
 
-        if a gt 4 then begin
+        if a gt stareaor then begin
  ;          pp.window.SetCurrent
  ;          pp = plot(bin_phase, bin_xcen, '1s', sym_size = 1,   sym_filled = 1,color = colorarr[a],  /overplot,/current)
  ;          pq.window.SetCurrent
 ;           pq = plot(bin_phase, bin_ycen, '1s', sym_size = 1,   sym_filled = 1, color = colorarr[a], /overplot,/current)
            pr.window.SetCurrent
-           pr = plot(bin_phase, bin_flux/.0617, '1s', sym_size = 1,   sym_filled = 1,  color = colorarr[a], /overplot,/current) 
-           if pmapcorr eq 1 then pr = plot(bin_phasep, (bin_corrfluxp/0.0607) -0.015, '1s', sym_size = 1,   sym_filled = 1, color = colorarr[a],/overplot,/current)
+           pr = plot(bin_phase, bin_flux/(plot_norm) - 0.04, '1s', sym_size = 1,   sym_filled = 1,  color = colorarr[a], /overplot,/current) 
+           if pmapcorr eq 1 then pr = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm) -0.015, '1s', sym_size = 1,   sym_filled = 1, color = colorarr[a],/overplot,/current)
  ;          ps.window.SetCurrent
  ;          ps = plot(bin_phase, bin_np, '1s', sym_size = 1,   sym_filled = 1,  color = colorarr[a], /overplot,/current) ;, xtitle = 'Orbital Phase', ytitle = 'Normalized Flux',) 
         endif
 
+        if a eq n_elements(aorname) - 1 and planetname eq 'hd209458' then begin
+           ;plot curves from Lewis
+           restore, '/Users/jkrick/irac_warm/hd209458/hd209_ch2_for_jessica.sav'
+           ;need to get time in phase
+           time = time / period ; now in phase
+
+           ;need to bin
+           numberarr = findgen(n_elements(time))
+           h = histogram(numberarr, OMIN=om, binsize = bin_level, reverse_indices = ri)
+           print, 'omin', om, 'nh', n_elements(h)
+           bin_corr_flux = dblarr(n_elements(h))
+           bin_time = dblarr(n_elements(h))
+           c = 0
+           for j = 0L, n_elements(h) - 1 do begin
+
+              if (ri[j+1] gt ri[j] + 2)  then begin ;require 3 elements in the bin
+                 
+                 meanclip, time[ri[ri[j]:ri[j+1]-1]], meant, sigmat
+                 bin_time[c] = meant
+
+                 meanclip, corr_flux[ri[ri[j]:ri[j+1]-1]], meanc, sigmac
+                 bin_corr_flux[c] = meanc
+
+                 c = c + 1
+                
+              endif
+           endfor
+
+           bin_time = bin_time[0:c-1]
+           bin_corr_flux = bin_corr_flux[0:c-1]
+
+           pr.window.SetCurrent
+           pk = plot(bin_time, bin_corr_flux - 0.015, '1s', sym_size =  0.3, sym_filled = 1, color = 'black', /overplot, /current)
+        endif
+        
 
      endif else begin  ;make the plot as a function of time
         print, 'making plot as a function of time'
@@ -532,7 +569,7 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
 
   endfor                        ;binning for each AOR
 
-  if keyword_set(phaseplot) then  pr.save, dirname +'binflux_phase.png' else pr.save, dirname +'binflux_time.png'
+ if keyword_set(phaseplot) then  pr.save, dirname +'binflux_phase.png' else pr.save, dirname +'binflux_time.png'
 
 ;make a backgrounds plot as a function of time
 ;  if a eq 0 then  begin
