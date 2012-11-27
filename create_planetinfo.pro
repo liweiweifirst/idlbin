@@ -1,8 +1,26 @@
 function create_planetinfo
 
   planetinfo = hash()
-  keys =['ra', 'dec','aorname','basedir','chname', 'utmjd_center', 'transit_duration', 'period', 'intended_phase', 'exptime','mask', 'maskreg']
+  keys =['ra', 'dec','aorname','basedir','chname', 'utmjd_center', 'transit_duration', 'period', 'intended_phase', 'exptime','mask', 'maskreg','stareaor','plot_norm','plot_corrnorm']
 
+;---
+  planetname = 'hd209458'
+  chname = '2'
+  ra_ref = 330.79488
+  dec_ref = 18.8843175
+  aorname = ['r38703872','r38704128','r38704384','r38701312','r38703360','r38703616','r45188864','r45189120','r45189376','r45189632','r45189888','r45190144','r45190400','r45190656','r45190912','r45191168','r45191424','r45191680','r45191936','r45192192','r45192704','r45195264','r45192960','r45193216','r45193472','r45193984','r45193728','r45195520','r45194240','r45194496','r45194752','r45195008','r45196288','r45195776','r45197312','r45196032','r45196544','r45196800','r45197056','r45197568','r45197824','r45198080','r45192448']
+  basedir = '/Users/jkrick/irac_warm/' 
+  utmjd_center = 55938.54133D; 55942.06608D
+  transit_duration=184.2 ; min
+  period = 3.52474859           ;days intended_phase = 0.0
+  exptime = 0.4
+  intended_phase = 0
+  stareaor = 0
+  plot_norm = 0.46
+  plot_corrnorm = 0.498
+
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
 ;---
   planetname = 'hd189733'
   chname = '1' ;!!!
@@ -15,10 +33,14 @@ function create_planetinfo
   period = 2.21857312
   intended_phase = 0
   exptime = 0.1
+  stareaor = 5
   mask = 'yes'
   maskreg = fltarr(32,32)
   maskreg[13:16, 4:7] =  !Values.F_NAN
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg)
+  plot_norm = 1.
+  plot_corrnorm = 1.
+
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 ;---
   planetname = '55cnc'
@@ -34,7 +56,11 @@ function create_planetinfo
   period = 0.73654 
   intended_phase = 0.5
   exptime = [0.02]
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg)
+  stareaor = 0
+  plot_norm = 1.
+  plot_corrnorm = 1.
+
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 ;---
   planetname = 'gj436'
@@ -48,7 +74,11 @@ function create_planetinfo
   period = 2.64385
   intended_phase = 0.0
   exptime = [0.1, 0.4, 0.4, 0.4, 0.4]
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg)
+  stareaor = 0
+  plot_norm = 1.
+  plot_corrnorm = 1.
+
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 ;---
   planetname = 'hd7924'
@@ -62,8 +92,11 @@ function create_planetinfo
   period = 5.3978
   intended_phase = 0.0
   exptime = 0.1
+  stareaor = 0
+  plot_norm = 1.
+  plot_corrnorm = 1.
 
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg)
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 ;---
   planetname = 'wasp13'
@@ -77,8 +110,11 @@ function create_planetinfo
   period = 4.353011
   intended_phase = 0.5
   exptime = 0.4
+  stareaor = 0
+  plot_norm = 1.
+  plot_corrnorm = 1.
 
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase,exptime, mask, maskreg)
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase,exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
   
 ;---
@@ -93,8 +129,11 @@ function create_planetinfo
   period = 3.752066
   intended_phase = 0.5
   exptime = 2
+  stareaor = 0
+  plot_norm = 1.
+  plot_corrnorm = 1.
 
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg)
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
@@ -109,8 +148,11 @@ function create_planetinfo
   period = 3.118601
   intended_phase = 0.5
   exptime = 2
+  stareaor = 0
+  plot_norm = 1.
+  plot_corrnorm = 1.
 
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg)
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
@@ -125,8 +167,11 @@ function create_planetinfo
   period = 3.21222
   intended_phase = 0.5
   exptime = 0.4
+  stareaor = 0
+  plot_norm = 1.
+  plot_corrnorm = 1.
 
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg)
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
@@ -144,8 +189,11 @@ function create_planetinfo
   period = 2.243752
   intended_phase = 0.0
   exptime = 2
+  stareaor =4
+  plot_norm = 0.0617
+  plot_corrnorm = 0.0607
 
-  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg)
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 
   ;test that this is all working
