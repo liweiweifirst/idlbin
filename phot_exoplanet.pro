@@ -1,4 +1,4 @@
-pro phot_exoplanet, planetname, columntrack = columntrack
+pro phot_exoplanet, planetname, columntrack = columntrack, breatheap = breatheap
 ;do photometry on any IRAC staring mode exoplanet data
 ;now with hashes of hashes!
  
@@ -16,7 +16,7 @@ planethash = hash()
 
 print, 'save filename', strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
 
-  for a = 0, n_elements(aorname) - 1 do begin
+  for a = 2, 2 do begin; , n_elements(aorname) - 1 do begin
      print, 'working on ',aorname(a)
      dir = dirname+ string(aorname(a) ) 
      CD, dir                    ; change directories to the correct AOR directory
@@ -27,6 +27,8 @@ print, 'save filename', strcompress(dirname + planetname +'_phot_ch'+chname+'.sa
 
      readcol,strcompress(dirname +'bcdlist.txt'),fitsname, format = 'A', /silent
      readcol,strcompress(dirname+'bunclist.txt'),buncname, format = 'A', /silent
+
+;     aparr = dblarr(n_elements(fitsname))  ;keep the aperture sizes used
 
      for i =0.D,  n_elements(fitsname) - 1 do begin ;read each cbcd file, find centroid, keep track
         ;print, 'working on ', fitsname(i)         
@@ -40,16 +42,19 @@ print, 'save filename', strcompress(dirname + planetname +'_phot_ch'+chname+'.sa
         gain = sxpar(header, 'GAIN')
         fluxconv = sxpar(header, 'FLUXCONV')
         exptime = sxpar(header, 'EXPTIME')
+        aintbeg = sxpar(header, 'AINTBEG')
+        atimeend = sxpar(header, 'ATIMEEND')
 
         if i eq 0 then sclk_0 = sxpar(header, 'SCLK_OBS')
 
         sclkarr = dblarr(64)
         bmjdarr = fltarr(64)
         utcsarr = fltarr(64)
+        deltatime = (atimeend - aintbeg) / 64  ; real time for each of the 64 frames
         for nt = 0., 64 - 1 do begin
-           sclkarr[nt] = (sclk_obs ) + 0.5*frametime + frametime*nt
-           bmjdarr[nt]= bmjd_obs + 0.5*(frametime/60./60./24.) + (frametime/60./60./24.)*nt
-           utcsarr[nt]= utcs_obs + 0.5*(frametime/60./60./24.)  + (frametime/60./60./24.) *nt
+           sclkarr[nt] = sclk_obs  + deltatime*nt ; 0.5*frametime + frametime*nt
+           bmjdarr[nt]= bmjd_obs + deltatime*nt; 0.5*(frametime/60./60./24.) + (frametime/60./60./24.)*nt
+           utcsarr[nt]= utcs_obs + deltatime*nt;+ 0.5*(frametime/60./60./24.)  + (frametime/60./60./24.) *nt
         endfor
          
         ;read in the files
@@ -73,18 +78,33 @@ print, 'save filename', strcompress(dirname + planetname +'_phot_ch'+chname+'.sa
                                      xp5s, yp5s, xp7s, yp7s, fp, fps, np, flag, ns, sf, $
                                      xfwhm, yfwhm, /WARM
         
-      ;choose 3 pixel aperture, 3-7 pixel background
-       abcdflux = f[*,9]      
-        fs = fs[*,9]
+        x_center = x3
+        y_center = y3
 
+        ;calculate noise pixel
+        np = noisepix(im, x_center, y_center, ronoise, gain, exptime, fluxconv)
+        
+        ; if changing the apertures then use this to calculate photometry
+        if keyword_set(breatheap) then begin
+           abcdflux = betap(im, x_center, y_center, ronoise, gain, exptime, fluxconv,np)
+           ;XXXfake these for now
+           fs = abcdflux
+           back = abcdflux
+           backerr = abcdflux
+        endif else begin
+
+      ;choose 3 pixel aperture, 3-7 pixel background
+           abcdflux = f[*,9]      
+           fs = fs[*,9]
+           
         ;choose [10, 12-20]
 ;        abcdflux = f[*,5]
 ;        fs = fs[*,5]
+           
+           back = b[*,2]
+           backerr = bs[*,2]
+        endelse
 
-        x_center = x3
-        y_center = y3
-        back = b[*,2]
-        backerr = bs[*,2]
 
 ;track the value of a column
         if keyword_set(columntrack) then begin 
@@ -125,15 +145,11 @@ print, 'save filename', strcompress(dirname + planetname +'_phot_ch'+chname+'.sa
            
 ;--------------------------------
       ;correct for pixel phase effect based on pmaps from Jim
-        file_suffix = ['500x500_0043_120828.fits','0p1s_x4_500x500_0043_120124.fits'];121120 ['500x500_0043_120409.fits','0p1s_x4_500x500_0043_120124.fits']
+        file_suffix = ['500x500_0043_120828.fits','0p1s_x4_500x500_0043_121120.fits'];121120 ['500x500_0043_120409.fits','0p1s_x4_500x500_0043_120124.fits']
         corrflux = iracpc_pmap_corr(abcdflux,x_center,y_center,ch,/threshold_occ, threshold_val = 20, file_suffix = file_suffix)
         corrfluxerr = fs        ;leave out the pmap err for now
      
- ;--------------------------------
-        ;calculate noise pixel
-        np = noisepix(im, x_center, y_center, ronoise, gain, exptime, fluxconv)
-
-;---------------------------------
+ ;---------------------------------
         if i eq 0 then begin
            xarr = x_center[1:*]
            yarr = y_center[1:*]
@@ -225,6 +241,13 @@ print, 'save filename', strcompress(dirname + planetname +'_phot_ch'+chname+'.sa
  ; print, 'testing (planethash[aorname(0),flux])[0:10]',(planethash[aorname(0),'flux'])[0:10]
 ;  print, 'n_elements in hash', n_elements(planethash[aorname(1),'xcen'])
   
+
+  ;histogram the aperture sizes if breathing the aperture
+  ;if keyword_set(breathap) then begin
+ ;    plot_hist, aparr, xhist, yhist, bin = 0.05, /noplot
+  ;   b = plot(xhist, yhist, title = 'aperture sizes')
+ ; endif
+
 end
 
 
@@ -249,3 +272,38 @@ function noisepix, im, xcen, ycen, ronoise, gain, exptime, fluxconv
 
      return, np                 ;this should be a 64 element array
 end
+
+
+function betap, im, xcen, ycen, ronoise, gain, exptime, fluxconv, np
+ ;this function does aperture photometry based on an aperture size that is allowed to vary
+  ; as a function of noise pixel
+  ; ref: Knutson et al. 2012
+
+  backap = [3.,7.] 
+  convfac = gain*exptime/fluxconv
+  eim = im * convfac
+
+  varap = sqrt(np)  + 0.2
+  ;print, 'testing vartap', varap
+
+  ;XXX add some way of keeping track of varap
+  ;don't know how to return that
+
+  abcdflux = fltarr(64)
+  for s= 0, 63 do begin
+     eslice = eim[*,*,s]
+     aper, eslice, xcen[s], ycen[s], xf, xfs, xb, xbs, 1.0, varap[s], backap, $
+			      badpix, /FLUX, /EXACT, /SILENT, /NAN, $;
+			      READNOISE=ronoise
+
+     abcdflux[s] = xf/ convfac
+  endfor
+
+
+  return, abcdflux
+end
+
+         ;slice up image
+;           	for s = 0, 63 do begin
+;                   eslice = eim[*, *, s];;;
+
