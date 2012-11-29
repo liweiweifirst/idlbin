@@ -21,7 +21,7 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
   dirname = strcompress(basedir + planetname +'/')
   savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
   restore, savefilename
-  np = planethash[aorname(0),'np']
+;  np = planethash[aorname(0),'np']
   ;print, 'testing', np[0:100]
 
   colorarr = ['blue', 'red', 'deep_pink', 'magenta', 'medium_purple', 'orange_red', 'light_pink', 'rosy_brown', 'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki','black', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple' ]
@@ -61,15 +61,15 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
 
 
 
-;  fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_121120.fits', pmapdata, pmapheader
+  fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_121120.fits', pmapdata, pmapheader
 ;  fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120409.fits', pmapdata, pmapheader
-;  c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [0,500], yrange = [0,500])
-;  for a = 0 , n_elements(aorname) - 1 do begin
-;     xcen500 = 500.* ((planethash[aorname(a),'xcen']) - 14.5)
-;     ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
-;     an = plot(xcen500, ycen500, '6r1s', sym_size = 0.5,   sym_filled = 1, color = colorarr[a],/overplot)
-; endfor
-;  an.save, dirname+'position.png'
+  c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [0,500], yrange = [0,500])
+  for a = 0 , n_elements(aorname) - 1 do begin
+     xcen500 = 500.* ((planethash[aorname(a),'xcen']) - 14.5)
+     ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
+     an = plot(xcen500, ycen500, '6r1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+ endfor
+  an.save, dirname+'position.png'
 ;-----
  
   ;print, 'min', min((planetob[a].timearr - planetob[0].timearr(0))/60./60.)
@@ -450,7 +450,7 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
         if a eq 0 then begin    ; for the first AOR
 ;           pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.3,   sym_filled = 1, title = planetname, color = colorarr[a], yrange = [15.0,15.5], xtitle = 'Orbital Phase', ytitle = 'X position')
 ;           pq = plot(bin_phase, bin_ycen, '1s', sym_size = 0.3,   sym_filled = 1, color = colorarr[a], yrange = [14.7,15.5], xtitle = 'Orbital Ph;ase', ytitle = 'Y position', title = planetname)
-           pr = plot(bin_phase, bin_flux/plot_norm, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a],  xtitle = 'Orbital Phase', ytitle = 'Normalized Flux', title = planetname) ;yrange = [0.970,1.005],, xtitle = 'Orbital Phase', ytitle = 'Normalized Flux',) 
+           pr = plot(bin_phase, bin_flux/plot_norm, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a],  xtitle = 'Orbital Phase', ytitle = 'Normalized Flux', title = planetname, yrange = [0.97, 1.01]) ;yrange = [0.970,1.005],, xtitle = 'Orbital Phase', ytitle = 'Normalized Flux',) 
           if pmapcorr eq 1 then pr = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm) -0.017,/overplot, '1s', sym_size = 0.3,   sym_filled = 1, color = colorarr[a]) ;xtitle = 'Orbital Phase', ytitle = 'Normalized Flux', title = planetname
 ;           ps= plot(bin_phase, bin_np, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a],  xtitle = 'Orbital Phase', ytitle = 'Noise Pixel', title = planetname) ;, xtitle = 'Orbital Phase', ytitle = 'Normalized Flux',) 
 
@@ -464,7 +464,7 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
 ;           pq.window.SetCurrent
 ;           pq = plot(bin_phase, bin_ycen, '1s', sym_size = 0.3,   sym_filled = 1, color = colorarr[a], /overplot,/current)
            pr.window.SetCurrent
-           pr = plot(bin_phase, bin_flux/plot_norm, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a], /overplot,/current) 
+           pr = plot(bin_phase, bin_flux/plot_norm , '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a], /overplot,/current) 
            if pmapcorr eq 1 then pr = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm) -0.017,/overplot, 's1', sym_size = 0.3,   sym_filled = 1, color = colorarr[a],/current)
 ;           ps.window.SetCurrent
 ;           ps = plot(bin_phase, bin_np, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a], /overplot,/current) ;, xtitle = 'Orbital Phase', ytitle = 'Normalized Flux',) 
@@ -478,7 +478,7 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
  ;          pq.window.SetCurrent
 ;           pq = plot(bin_phase, bin_ycen, '1s', sym_size = 1,   sym_filled = 1, color = colorarr[a], /overplot,/current)
            pr.window.SetCurrent
-           pr = plot(bin_phase, bin_flux/(plot_norm) - 0.04, '1s', sym_size = 1,   sym_filled = 1,  color = colorarr[a], /overplot,/current) 
+           pr = plot(bin_phase, bin_flux/(plot_norm) , '1s', sym_size = 1,   sym_filled = 1,  color = colorarr[a], /overplot,/current) 
            if pmapcorr eq 1 then pr = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm) -0.015, '1s', sym_size = 1,   sym_filled = 1, color = colorarr[a],/overplot,/current)
  ;          ps.window.SetCurrent
  ;          ps = plot(bin_phase, bin_np, '1s', sym_size = 1,   sym_filled = 1,  color = colorarr[a], /overplot,/current) ;, xtitle = 'Orbital Phase', ytitle = 'Normalized Flux',) 

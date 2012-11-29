@@ -16,7 +16,7 @@ planethash = hash()
 
 print, 'save filename', strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
 
-  for a = 2, 2 do begin; , n_elements(aorname) - 1 do begin
+  for a = 0,   n_elements(aorname) - 1 do begin
      print, 'working on ',aorname(a)
      dir = dirname+ string(aorname(a) ) 
      CD, dir                    ; change directories to the correct AOR directory
@@ -48,13 +48,18 @@ print, 'save filename', strcompress(dirname + planetname +'_phot_ch'+chname+'.sa
         if i eq 0 then sclk_0 = sxpar(header, 'SCLK_OBS')
 
         sclkarr = dblarr(64)
-        bmjdarr = fltarr(64)
-        utcsarr = fltarr(64)
-        deltatime = (atimeend - aintbeg) / 64  ; real time for each of the 64 frames
+        bmjdarr = dblarr(64)
+        utcsarr = dblarr(64)
+        deltatime = (atimeend - aintbeg) / 64.D  ; real time for each of the 64 frames
         for nt = 0., 64 - 1 do begin
-           sclkarr[nt] = sclk_obs  + deltatime*nt ; 0.5*frametime + frametime*nt
-           bmjdarr[nt]= bmjd_obs + deltatime*nt; 0.5*(frametime/60./60./24.) + (frametime/60./60./24.)*nt
-           utcsarr[nt]= utcs_obs + deltatime*nt;+ 0.5*(frametime/60./60./24.)  + (frametime/60./60./24.) *nt
+           sclkarr[nt] = sclk_obs  + (deltatime*nt)/60./60./24.D ; 0.5*frametime + frametime*nt
+           utcsarr[nt]= utcs_obs + (deltatime*nt)/60./60./24.D;+ 0.5*(frametime/60./60./24.)  + (frametime/60./60./24.) *nt
+
+ ;          print, 'deltattime in seconds', (deltatime*nt)/60./60./24.D, format = '(A, F0)'
+;          print, 'bmjdobs', bmjd_obs, format =  '(A, F0)'
+;           print, 'addition',  bmjd_obs + (deltatime*nt)/60./60./24.D, format =  '(A, F0)'
+           bmjdarr[nt]= bmjd_obs + (deltatime*nt)/60./60./24.D; 0.5*(frametime/60./60./24.) + (frametime/60./60./24.)*nt
+;           print, 'time test', bmjdarr[nt], format = '(A, F0)'
         endfor
          
         ;read in the files
@@ -66,6 +71,14 @@ print, 'save filename', strcompress(dirname + planetname +'_phot_ch'+chname+'.sa
            ;print, 'applying mask for this planet'
            for j = 0, 63 do begin
               im[13:16, 4:7, j] = !Values.F_NAN ;mask region with nan set for bad regions
+             ; im[24, 6, j] = !Values.F_NAN  ;bad pixel  but [3,3-7] shouldn't get to this pixel
+           endfor
+
+        endif
+        if planetname eq 'wasp14' then begin
+           ;print, 'applying mask for this planet'
+           for j = 0, 63 do begin
+              im[4:7, 13:16, j] = !Values.F_NAN ;mask region with nan set for bad regions
              ; im[24, 6, j] = !Values.F_NAN  ;bad pixel  but [3,3-7] shouldn't get to this pixel
            endfor
 
@@ -86,7 +99,7 @@ print, 'save filename', strcompress(dirname + planetname +'_phot_ch'+chname+'.sa
         
         ; if changing the apertures then use this to calculate photometry
         if keyword_set(breatheap) then begin
-           abcdflux = betap(im, x_center, y_center, ronoise, gain, exptime, fluxconv,np)
+           abcdflux = betap(im, x_center, y_center, ronoise, gain, exptime, fluxconv,np, chname)
            ;XXXfake these for now
            fs = abcdflux
            back = abcdflux
@@ -96,7 +109,6 @@ print, 'save filename', strcompress(dirname + planetname +'_phot_ch'+chname+'.sa
       ;choose 3 pixel aperture, 3-7 pixel background
            abcdflux = f[*,9]      
            fs = fs[*,9]
-           
         ;choose [10, 12-20]
 ;        abcdflux = f[*,5]
 ;        fs = fs[*,5]
@@ -257,7 +269,7 @@ end
 function noisepix, im, xcen, ycen, ronoise, gain, exptime, fluxconv
 
   convfac = gain*exptime/fluxconv
-  np = fltarr(64)
+   np = fltarr(64)
   for npj = 0, 63 do begin
      indim = im[*,*,npj]
      indim = indim*convfac
@@ -274,7 +286,7 @@ function noisepix, im, xcen, ycen, ronoise, gain, exptime, fluxconv
 end
 
 
-function betap, im, xcen, ycen, ronoise, gain, exptime, fluxconv, np
+function betap, im, xcen, ycen, ronoise, gain, exptime, fluxconv, np, chname
  ;this function does aperture photometry based on an aperture size that is allowed to vary
   ; as a function of noise pixel
   ; ref: Knutson et al. 2012
@@ -290,13 +302,22 @@ function betap, im, xcen, ycen, ronoise, gain, exptime, fluxconv, np
   ;don't know how to return that
 
   abcdflux = fltarr(64)
+  badpix = [-9., 9.] * 1.D8
+  pxscal1 = [-1.22334117768332D, -1.21641835430637D, -1.22673962032422D, -1.2244968325831D]
+  pxscal1 = abs(pxscal1)
+  pxscal2 = [1.22328355209902D, 1.21585676679388D, 1.22298117494211D, 1.21904995758086D]
+  pscale2 = pxscal1[long(chname) - 1] * pxscal2[long(chname) - 1]
+  scale = pscale2 * !DPI * !DPI / (3600.D * 3600.D * 180.D * 180.D) * 1.0D+06
+
   for s= 0, 63 do begin
      eslice = eim[*,*,s]
      aper, eslice, xcen[s], ycen[s], xf, xfs, xb, xbs, 1.0, varap[s], backap, $
 			      badpix, /FLUX, /EXACT, /SILENT, /NAN, $;
 			      READNOISE=ronoise
-
-     abcdflux[s] = xf/ convfac
+     f = xf/ convfac
+     f = f * scale
+     abcdflux[s] =f 
+;     print, 'varap, abcdflux', varap[s], abcdflux[s]
   endfor
 
 
