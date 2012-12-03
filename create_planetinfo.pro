@@ -16,8 +16,8 @@ function create_planetinfo
   exptime = 0.4
   intended_phase = 0.
   stareaor = 0
-  plot_norm = 1.
-  plot_corrnorm = 1.
+  plot_norm = 0.175
+  plot_corrnorm = 0.175
 
   values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
