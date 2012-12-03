@@ -1,14 +1,14 @@
 pro pixphasecorr_noisepix, planetname
 ;this code implements the Knutson et al. 2012 technique of correcting for pixel phase effect
 ;np is noise pixel
-
+t1 = systime(1)
 ;get all the necessary saved info/photometry
   planetinfo = create_planetinfo()
   aorname = planetinfo[planetname, 'aorname']
   basedir = planetinfo[planetname, 'basedir']
   chname = planetinfo[planetname, 'chname']
   dirname = strcompress(basedir + planetname +'/')
-  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
+  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav')
   restore, savefilename
   np = planethash[aorname(2),'np']   ;the second AOR has phase 0.4- 0.1, so no transits or eclipses
   xcen = planethash[aorname(2), 'xcen']
@@ -24,7 +24,7 @@ pro pixphasecorr_noisepix, planetname
   stdsqrtnp = stddev(sqrtnp)
 
     ;setup an array for the corrected fluxes
-  ni =  n_elements(xcen)
+  ni =   n_elements(xcen)
   flux = dblarr(ni); fltarr(n_elements(flux_m))
   flux_np = dblarr(ni); fltarr(n_elements(flux_m))
   time_0 = time[0:ni - 1]
@@ -89,6 +89,7 @@ pro pixphasecorr_noisepix, planetname
 
      
   endfor
+print,systime(1)-t1
 
 ;  bad = where(finite(flux) lt 1, badcount)
 ;  print, 'nan? ', badcount
@@ -109,7 +110,6 @@ pro pixphasecorr_noisepix, planetname
 ;  plothist, warr_np, xhistnp, yhistnp,bin = 0.5, /noplot
 ;  wp = plot(xhist, yhist, color = 'red')
 ;  wp = plot(xhistnp, yhistnp, color = 'blue', /overplot)
-
 end
 
 
