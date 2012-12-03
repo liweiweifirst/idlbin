@@ -1,7 +1,7 @@
 pro phot_exoplanet, planetname, columntrack = columntrack, breatheap = breatheap
 ;do photometry on any IRAC staring mode exoplanet data
 ;now with hashes of hashes!
- 
+ t1 = systime(1)
 ;run code to read in all the planet parameters
 planetinfo = create_planetinfo()
 chname = planetinfo[planetname, 'chname']
@@ -14,7 +14,6 @@ basedir = planetinfo[planetname, 'basedir']
 dirname = strcompress(basedir + planetname +'/')
 planethash = hash()
 
-print, 'save filename', strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
 
   for a = 0,   n_elements(aorname) - 1 do begin
      print, 'working on ',aorname(a)
@@ -244,9 +243,14 @@ print, 'save filename', strcompress(dirname + planetname +'_phot_ch'+chname+'.sa
   endfor                        ;for each AOR
   
   ;test
-  save, planethash, filename=strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
-  print, 'saving planethash', strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
-  print, 'time check', systime()
+  if keyword_set(breathap) then begin
+     savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav')
+  endif else begin
+     savename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
+  endelse
+  save, planethash, filename=savename
+  print, 'saving planethash', savename
+  print, 'time check', systime(1) - t1
 
  ; print, planethash.keys()
 ;  print, planethash[aorname(0)].keys()
