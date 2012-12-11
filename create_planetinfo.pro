@@ -4,6 +4,24 @@ function create_planetinfo
   keys =['ra', 'dec','aorname','basedir','chname', 'utmjd_center', 'transit_duration', 'period', 'intended_phase', 'exptime','mask', 'maskreg','stareaor','plot_norm','plot_corrnorm']
 
 ;---
+  planetname = 'fake_dec7'
+  chname ='2';  '1'
+  ra_ref = 36.712664
+  dec_ref = 37.550367
+    aorname = ['r0000000000'] ;['r0000000001'] 
+  basedir = '/Users/jkrick/irac_warm/simulation_JI/' 
+  utmjd_center = 55957.14809D
+  transit_duration= 170.0; min  taken from exoplanet transit database
+  period =    1.219867  ;days 
+  exptime = 0.1
+  intended_phase = 0.
+  stareaor = 0
+  plot_norm = 1.
+  plot_corrnorm = 1.
+
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
   planetname = 'wasp33'
   chname = '2'
   ra_ref = 36.712664
