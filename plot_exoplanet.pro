@@ -527,8 +527,8 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
           ; pl = plot((bin_timearr - bin_timearr(0))/60./60., bin_flux/median(bin_flux), '6r1s', sym_size = 0.2,   sym_filled = 1,   xtitle = 'Time (hrs)', ytitle = 'Normalized Flux', title = planetname) 
           ; pl = plot((bin_timearr - bin_timearr(0))/60./60., bin_corrflux/median(bin_corrflux)-0.004, '1s', sym_size = 0.2,   sym_filled = 1, color = 'black',/overplot)
 
-            pl = errorplot((bin_timearr - bin_timearr(0))/60./60., bin_flux/median(bin_flux), bin_fluxerr/median(bin_flux), '6r1s', errorbar_color = 'red',sym_size = 0.2,   sym_filled = 1,   xtitle = 'Time (hrs)', ytitle = 'Normalized Flux', title = planetname) 
-            pl = errorplot((bin_timearrp - bin_timearrp(0))/60./60., bin_corrfluxp/median(bin_corrfluxp)-0.004,bin_corrfluxerrp/ median(bin_corrfluxp),'1s', sym_size = 0.2,   sym_filled = 1, color = 'black',/overplot)
+            pl = errorplot((bin_timearr - bin_timearr(0))/60./60., bin_flux/median(bin_flux), bin_fluxerr/median(bin_flux), '1', errorbar_color = 'black',sym_size = 0.2,   sym_filled = 1,   xtitle = 'Time (hrs)', ytitle = 'Normalized Flux', title = planetname) 
+            pl = errorplot((bin_timearrp - bin_timearrp(0))/60./60., bin_corrfluxp/median(bin_corrfluxp)-0.01,bin_corrfluxerrp/ median(bin_corrfluxp),'1s', sym_size = 0.2,   sym_filled = 1, color = 'grey',/overplot)
         endif else begin        ;for the subsequent AORs, use /overplot
            pl = plot((bin_timearr - bin_timearr(0))/60./60., bin_flux/median(bin_flux), '6r1s', sym_size = 0.2,   sym_filled = 1,  /overplot) 
            pl = plot((bin_timearr - bin_timearr(0))/60./60., bin_corrflux/median(bin_corrflux)-0.005, '1s', sym_size = 0.2,   sym_filled = 1, color = 'black',/overplot)

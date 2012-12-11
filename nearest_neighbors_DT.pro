@@ -1,15 +1,34 @@
 function nearest_neighbors_DT,x,y,DISTANCES=nearest_d,NUMBER=k
-  if n_elements(k) eq 0 then k=6
-  
+ b = 0.8
+  ;help, x
+ ; help, y
   ;; Compute Delaunay triangulation
   triangulate,x,y,CONNECTIVITY=c
+ ; help, c
+ ; print, 'n c', n_elements(c), c(n_elements(c) - 25)
+  ;limit = n_elements(c)
+  
   n=n_elements(x) 
   nearest=lonarr(k,n,/NOZERO)
   nearest_d=fltarr(k,n,/NOZERO)
 
+;  point = 117980
+;  print, 'testing c', c[point], c[point + 1], c[c[point]:c[point+1]-1]
   for point=0L,n-1 do begin 
-     p=c[c[point]:c[point+1]-1] ;start with this point's DT neighbors
-     d=(x[p]-x[point])^2+(y[p]-y[point])^2
+     ;if point eq 0 then help, point
+     ;if point gt limit - 100 then print, 'point', point, c[point], c[point+1]
+     ;if point gt 94300 then print, 'point gt 94300', point, c[point], c[point+1] - 1, c[c[point]], c[c[point+1]]
+    
+     ;triangulate gets bad results in certain cases ????
+     if c[point] gt  c[point+1] - 1 then begin
+        ;the problem case
+                                ;make up a d that lets me know I should ignore this point
+                                ; or just keep the last d which is what doing nothing will do I think
+      endif  else begin
+         p=c[c[point]:c[point+1]-1] ;start with this point's DT neighbors
+         d=(x[p]-x[point])^2+((y[p]-y[point])/b)^2
+     endelse
+                    ; strange triangulate behavior
      for i=1,k do begin 
         s=sort(d)               ; A wasteful priority queue, but anyway
         p=p[s] & d=d[s]
@@ -28,13 +47,14 @@ function nearest_neighbors_DT,x,y,DISTANCES=nearest_d,NUMBER=k
         if cnt gt 0 then begin 
            new=new[wh]
            p=[p[1:*],new]
-           d=[d[1:*],(x[new]-x[point])^2+(y[new]-y[point])^2]
+           d=[d[1:*],(x[new]-x[point])^2+((y[new]-y[point])/b)^2]
         endif else begin 
            p=p[1:*]
            d=d[1:*]
         endelse 
      endfor
+     
   endfor 
   if arg_present(nearest_d) then nearest_d=sqrt(nearest_d)
- return, nearest
+  return, nearest
 end 

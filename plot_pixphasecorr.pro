@@ -5,7 +5,7 @@ pro plot_pixphasecorr, planetname, bin_level
   basedir = planetinfo[planetname, 'basedir']
   chname = planetinfo[planetname, 'chname']
   dirname = strcompress(basedir + planetname +'/')
-  filename =strcompress(dirname + planetname +'_pixphasecorr_ch'+chname+'_varap.sav')
+  filename =strcompress(dirname + planetname +'_pixphasecorr_ch'+chname+'_'+aorname(0) +'.sav')
   restore, filename
 
 ;binning
@@ -28,8 +28,12 @@ pro plot_pixphasecorr, planetname, bin_level
 ;get rid of the bins with no values and low numbers, meaning low overlap
         if (ri[j+1] gt ri[j] + 2)  then begin ;require 3 elements in the bin
         
-           meanclip, corrflux[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
-           bin_corrflux[c] = meanx   ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+           if finite(corrflux[ri[ri[j]]]) gt 0 and finite(corrflux[ri[ri[j+1]-1]]) gt 0 then begin
+              meanclip, corrflux[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
+              bin_corrflux[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+           endif else begin
+              bin_corrflux[c] = alog10(-1)
+           endelse
 
            meanclip, flux_m[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
            bin_flux_m[c] = meanx   ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
@@ -57,14 +61,21 @@ pro plot_pixphasecorr, planetname, bin_level
      bin_time = bin_time[0:c-1]
      bin_time_0 =  bin_time_0[0:c-1]
 
- 
-;plot the results
-  p1 = plot(bin_time, bin_flux_m/ median(bin_flux_m), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname, name = 'raw flux', yrange =[0.96, 1.06])
-  p4 =  plot(bin_time, (bin_corrflux /median( bin_corrflux)) + 0.02, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
-  p2 = plot(bin_time_0, bin_flux/median(bin_flux) -0.02, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
-  p3 = plot(bin_time_0, bin_flux_np /median(bin_flux_np)+ 0.04, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
 
-  l = legend(target = [p1, p4, p2,p3], position = [1.5, 1.18], /data, /auto_text_color)
+    
+
+;plot the results
+  p1 = plot(bin_time/60./60., bin_flux_m/ median(bin_flux_m), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname, name = 'raw flux')
+  p4 =  plot(bin_time/60./60., (bin_corrflux /median( bin_corrflux)) + 0.01, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
+  p2 = plot(bin_time_0/60./60., bin_flux/median(bin_flux)-0.015 , '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
+  p3 = plot(bin_time_0/60./60., bin_flux_np /median(bin_flux_np) + 0.015, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
+
+;  l = legend(target = [p1, p4, p2,p3], position = [1.5, 1.18], /data, /auto_text_color)
+
+
+;plot residuals between position corr and position + np corr
+;resid = bin_flux - bin_flux_np
+;pr = plot(bin_time_0, resid, '1s', sym_size = 0.1, sym_filled = 1, xtitle = 'Time (hrs)', ytitle = 'residual')
 
 
 end

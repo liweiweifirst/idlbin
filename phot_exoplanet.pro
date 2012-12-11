@@ -35,7 +35,7 @@ planethash = hash()
         sclk_obs= sxpar(header, 'SCLK_OBS')
         frametime = sxpar(header, 'FRAMTIME')
         bmjd_obs = sxpar(header, 'BMJD_OBS')
-        utcs_obs = sxpar(header, 'UTCS_OBS')
+        ;utcs_obs = sxpar(header, 'UTCS_OBS')
         ch = sxpar(header, 'CHNLNUM')
         ronoise = sxpar(header, 'RONOISE')
         gain = sxpar(header, 'GAIN')
@@ -48,11 +48,11 @@ planethash = hash()
 
         sclkarr = dblarr(64)
         bmjdarr = dblarr(64)
-        utcsarr = dblarr(64)
+        ;utcsarr = dblarr(64)
         deltatime = (atimeend - aintbeg) / 64.D  ; real time for each of the 64 frames
         for nt = 0., 64 - 1 do begin
            sclkarr[nt] = sclk_obs  + (deltatime*nt)/60./60./24.D ; 0.5*frametime + frametime*nt
-           utcsarr[nt]= utcs_obs + (deltatime*nt)/60./60./24.D;+ 0.5*(frametime/60./60./24.)  + (frametime/60./60./24.) *nt
+          ; utcsarr[nt]= utcs_obs + (deltatime*nt)/60./60./24.D;+ 0.5*(frametime/60./60./24.)  + (frametime/60./60./24.) *nt
 
  ;          print, 'deltattime in seconds', (deltatime*nt)/60./60./24.D, format = '(A, F0)'
 ;          print, 'bmjdobs', bmjd_obs, format =  '(A, F0)'
@@ -170,7 +170,7 @@ planethash = hash()
            corrfluxerrarr = corrfluxerr[1:*]
            timearr = sclkarr[1:*]        
            bmjd = bmjdarr[1:*]
-           utcs = utcsarr[1:*]
+;           utcs = utcsarr[1:*]
            backarr = back[1:*]
            backerrarr = backerr[1:*]
            nparr = np[1:*]
@@ -200,7 +200,7 @@ planethash = hash()
            corrfluxerrarr = [corrfluxerrarr, corrfluxerr[1:*]]
            timearr = [timearr, sclkarr[1:*]]
            bmjd = [bmjd, bmjdarr[1:*]]
-           utcs = [utcs, utcsarr[1:*]]
+;           utcs = [utcs, utcsarr[1:*]]
            backarr = [backarr, back[1:*]]
            backerrarr = [backerrarr, backerr[1:*]]
            nparr = [nparr, np[1:*]]
@@ -231,19 +231,19 @@ planethash = hash()
 
           if keyword_set(columntrack) then begin 
 
-             keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'utcsarr', 'bkgd', 'bkgderr','np', 'centerpixarr1','centerpixarr2','centerpixarr3','centerpixarr4','centerpixarr5','centerpixarr6','sigmapixarr1','sigmapixarr2','sigmapixarr3','sigmapixarr4','sigmapixarr5','sigmapixarr6']
-             values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd, utcs, backarr, backerrarr, nparr, centerpixarr1, centerpixarr2, centerpixarr3, centerpixarr4, centerpixarr5, centerpixarr6, sigmapixarr1, sigmapixarr2, sigmapixarr3, sigmapixarr4, sigmapixarr5, sigmapixarr6)
+             keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr',  'bkgd', 'bkgderr','np', 'centerpixarr1','centerpixarr2','centerpixarr3','centerpixarr4','centerpixarr5','centerpixarr6','sigmapixarr1','sigmapixarr2','sigmapixarr3','sigmapixarr4','sigmapixarr5','sigmapixarr6']
+             values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, centerpixarr1, centerpixarr2, centerpixarr3, centerpixarr4, centerpixarr5, centerpixarr6, sigmapixarr1, sigmapixarr2, sigmapixarr3, sigmapixarr4, sigmapixarr5, sigmapixarr6)
              planethash[aorname(a)] = HASH(keys, values)
           endif else begin
-             keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'utcsarr', 'bkgd', 'bkgderr','np']
-             values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd, utcs, backarr, backerrarr, nparr)
+             keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np']
+             values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr)
              planethash[aorname(a)] = HASH(keys, values)
           endelse
 
   endfor                        ;for each AOR
   
   ;test
-  if keyword_set(breathap) then begin
+  if keyword_set(breatheap) then begin
      savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav')
   endif else begin
      savename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
