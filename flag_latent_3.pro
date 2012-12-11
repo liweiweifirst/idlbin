@@ -1,4 +1,21 @@
+;+
+; NAME:flag_latent
+;
+; PURPOSE: This code is the idl version that was used to make the flag_latent module in the post-cryo pipeline for ch1 only.  It works across AORs to track and flag all saturated sources causing a latent.  
+;
+; INPUTS:  Tested on a PAO with aor's as listed inside the code.
+;
+; OUTPUTS:logfile, master saturated list file which has all saturated sources for the whole PAO, 
+;
+; MODIFICATION HISTORY:
+;Jessica Krick July 2011, initial version
+;Jessica Krick Dec 2012, documentation added
+;
+;-
 pro flag_latent
+;-----------------------
+
+
 
 logdate=string(strmid(systime(0),8,2),format='(i2.2)')+strmid(systime(0),4,3)+strmid(systime(0),22,2)
 logfile = '~/irac_warm/latent/flag_latent/idllog_ch1-'+logdate

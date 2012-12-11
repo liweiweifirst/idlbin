@@ -1,3 +1,16 @@
+;+
+; NAME:flag_latent_ch2
+;
+; PURPOSE: This code is the idl version that was used to make the flag_latent module in the post-cryo pipeline for ch2 only.  Because the ch2 latent does not last very long, the prescription for flagging latents is much simpler than ch1.
+;
+; INPUTS:  Tested on a PAO with aor's as listed inside the code.
+;
+; OUTPUTS:logfile, master saturated list file which has all saturated sources for the whole PAO, 
+;
+; MODIFICATION HISTORY:
+;Jessica Krick July 2011, initial version
+;Jessica Krick Dec 2012, documentation added
+;
 pro flag_latent_ch2
 
 logdate=string(strmid(systime(0),8,2),format='(i2.2)')+strmid(systime(0),4,3)+strmid(systime(0),22,2)
