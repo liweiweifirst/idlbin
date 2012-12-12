@@ -1,7 +1,33 @@
-pro pixphasecorr_noisepix, planetname, breatheap = breatheap
-;this code implements the Knutson et al. 2012 technique of correcting for pixel phase effect
-;np is noise pixel
-t1 = systime(1)
+;+
+; NAME: pixphasecorr_noisepix.pro
+;
+; PURPOSE:
+; This code implements the Knutson et al. 2012 technique of correcting for pixel phase effect
+;
+; CALLING SEQUENCE:
+; pixphasecorr_noisepix, 'hd189733',50, /breatheap
+;
+; INPUTS:
+; planetname= string of the name of the planet corresponding to the correct information in create_planetinfo
+; nn = number of nearest neighbors to use.  Knutson et al uses 50, have tried 100 without much difference.
+
+; KEYWORD PARAMETERS:
+; breatheap = set this keyword if using variable apertures
+;
+; OUTPUTS:
+; plots the normalized raw fluxes, pmap corrected fluxes, position corrected fluxes and postion + noise pixel corrected fluxes.
+; a save file for use in plot_pixphasecorr.pro;
+; a few statistics to compare runs with different values
+;
+; RESTRICTIONS:
+; planet photometry must come from a save file from phot_exoplanet.pro (or have that same format)
+;
+; MODIFICATION HISTORY:
+; Dec 2012 JK initial version
+;-
+pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap
+
+  t1 = systime(1)
 ;get all the necessary saved info/photometry
   planetinfo = create_planetinfo()
   aorname = planetinfo[planetname, 'aorname']
@@ -14,7 +40,7 @@ t1 = systime(1)
 
   for a = 0, n_elements(aorname) - 1 do begin  ;run through all AORs
      print, 'working on aor', aorname(a)
-     np = planethash[aorname(a),'np'] ;the second AOR has phase 0.4- 0.1, so no transits or eclipses
+     np = planethash[aorname(a),'np']  ; np is noise pixel
      xcen = planethash[aorname(a), 'xcen']
      ycen = planethash[aorname(a), 'ycen']
      flux_m = planethash[aorname(a), 'flux']
@@ -32,7 +58,6 @@ t1 = systime(1)
      
      ni =   n_elements(xcen) 
      print, 'ni', ni
-     n = 50                     ; number of nearest neighbors to use; tried 100 doesn't make a difference
      
      xcen = xcen[0:ni-1]
      ycen = ycen[0:ni-1]
@@ -54,8 +79,8 @@ t1 = systime(1)
                                 ;do the nearest neighbors run with triangulation
                                 ;http://www.idlcoyote.com/code_tips/slowloops.html
                                 ;this returns a sorted list of the n nearest neighbors
-     nearest = nearest_neighbors_DT(xcen,ycen,DISTANCES=nearest_d,NUMBER=n)
-     nearest_np = nearest_neighbors_np_DT(xcen,ycen,sqrtnp,DISTANCES=nearest_np_d,NUMBER=n)
+     nearest = nearest_neighbors_DT(xcen,ycen,DISTANCES=nearest_d,NUMBER=nn)
+     nearest_np = nearest_neighbors_np_DT(xcen,ycen,sqrtnp,DISTANCES=nearest_np_d,NUMBER=nn)
      
      for j = 0,   ni - 1 do begin ;for each image (centroid)
  ;--------------------
@@ -144,7 +169,7 @@ t1 = systime(1)
      p2 = plot(time_0/60./60., flux/median(flux) -0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
      p3 = plot(time_0/60./60., flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
      
-                                ; l = legend(target = [p1, p4, p2,p3], position = [1.5, 1.18], /data, /auto_text_color)
+  ; l = legend(target = [p1, p4, p2,p3], position = [1.5, 1.18], /data, /auto_text_color)
      
     print, 'mean and stddev of sigmax', mean(sigmax), stddev(sigmax)
      print, 'mean and stddev of sigmay', mean(sigmay), stddev(sigmay)
@@ -156,7 +181,7 @@ t1 = systime(1)
      if ni gt 12000 then print, 'stddev of raw, pmap, position, position+np corr', stddev(flux_m[12000:ni-1],/nan),stddev(corrflux[12000:ni-1],/nan), stddev(flux[12000:*],/nan), stddev(flux_np[12000:*],/nan)
 
 
-     save, /all, filename =strcompress(dirname + planetname +'_pixphasecorr_ch'+chname+'_'+aorname(a)+'.sav')
+     save, /all, filename =strcompress(dirname + 'pixphasecorr_ch'+chname+'_'+aorname(a)+'.sav')
 
 
   
@@ -201,7 +226,7 @@ end
 
 function weight_np, stdxcen, stdycen, stdsqrtnp,nearestx, nearesty, nearestsqrtnp,  xcenj, ycenj, sqrtnpj, nearestflux
   
-   ;gaussian weighting function
+   ;gaussian weighting function including noise pixel
   gaussx = exp( -((nearestx - xcenj)^2)/(2*stdxcen^2) )
   gaussy = exp(-((nearesty  - ycenj)^2)/(2*stdycen^2) )
   gaussnp = exp(-((nearestsqrtnp  - sqrtnpj)^2)/(2*stdsqrtnp^2) )
