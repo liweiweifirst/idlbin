@@ -13,6 +13,7 @@
 
 ; KEYWORD PARAMETERS:
 ; breatheap = set this keyword if using variable apertures
+; ballard_sigma = set this keyword i=to use the Ballard et al. sigma values instead of those calculated from the nearest neighbors.
 ;
 ; OUTPUTS:
 ; plots the normalized raw fluxes, pmap corrected fluxes, position corrected fluxes and postion + noise pixel corrected fluxes.
@@ -25,7 +26,7 @@
 ; MODIFICATION HISTORY:
 ; Dec 2012 JK initial version
 ;-
-pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap
+pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma = ballard_sigma
 
   t1 = systime(1)
 ;get all the necessary saved info/photometry
@@ -33,17 +34,23 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap
   aorname = planetinfo[planetname, 'aorname']
   basedir = planetinfo[planetname, 'basedir']
   chname = planetinfo[planetname, 'chname']
+  period = planetinfo[planetname, 'period']
+  utmjd_center = planetinfo[planetname, 'utmjd_center']
+  exptime = planetinfo[planetname, 'exptime']
+  transit_duration = planetinfo[planetname, 'transit_duration']
   dirname = strcompress(basedir + planetname +'/')
   if keyword_set(breatheap) then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav') else savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
 
   restore, savefilename
 
-  for a = 0, n_elements(aorname) - 1 do begin  ;run through all AORs
+  for a = 2, 2 do begin; 0, n_elements(aorname) - 1 do begin  ;run through all AORs
      print, 'working on aor', aorname(a)
      np = planethash[aorname(a),'np']  ; np is noise pixel
      xcen = planethash[aorname(a), 'xcen']
      ycen = planethash[aorname(a), 'ycen']
      flux_m = planethash[aorname(a), 'flux']
+     bmjd = planethash[aorname(a),'bmjdarr']
+
      time = (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0)) ; in seconds;/60./60. ; in hours from beginning of obs.
      sqrtnp = sqrt(np)
      
@@ -52,10 +59,11 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap
      corrflux = planethash[aorname(a), 'corrflux'] ;pmap corrected
      
                                 ;calculate standard deviations of entire xcen, ycen,and sqrtnp
-     stdxcen = stddev(xcen)
-     stdycen = stddev(ycen)
-     stdsqrtnp = stddev(sqrtnp)
+     ;stdxcen = stddev(xcen)
+     ;stdycen = stddev(ycen)
+     ;stdsqrtnp = stddev(sqrtnp)
      
+   ;change this to a smaller number to test code in less time than a full run
      ni =   n_elements(xcen) 
      print, 'ni', ni
      
@@ -63,7 +71,7 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap
      ycen = ycen[0:ni-1]
      sqrtnp = sqrtnp[0:ni-1]
      
-                                ;setup an array for the corrected fluxes
+                                ;setup arrays for the corrected fluxes
      flux = dblarr(ni)          ; fltarr(n_elements(flux_m))
      flux_np = dblarr(ni)       ; fltarr(n_elements(flux_m))
      time_0 = time[0:ni - 1]
@@ -76,12 +84,25 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap
      furthesty= dblarr(ni)
      delta_time = dblarr(ni)
      delta_time_np =  dblarr(ni)
+
+
+    ;mask intervals in time where astrophysical signals exist.
+     ;I know where the transits and eclipses are
+     s = mask_signal( bmjd, period, utmjd_center, transit_duration)
+
+       ;make sure the transit doesn't get included as a nearest neighbor
+     ;good = where(s gt 0, ngood, complement = bad)
+     ;print, 'ngood', ngood
+     ;xcen2(bad) = 1E5
+     ;ycen2(bad) = 1E5
+
+  
                                 ;do the nearest neighbors run with triangulation
                                 ;http://www.idlcoyote.com/code_tips/slowloops.html
-                                ;this returns a sorted list of the n nearest neighbors
+                                ;this returns a sorted list of the nn nearest neighbors
+
      nearest = nearest_neighbors_DT(xcen,ycen,DISTANCES=nearest_d,NUMBER=nn)
      nearest_np = nearest_neighbors_np_DT(xcen,ycen,sqrtnp,DISTANCES=nearest_np_d,NUMBER=nn)
-     
      for j = 0,   ni - 1 do begin ;for each image (centroid)
  ;--------------------
   ;find the weighting function without using noise pixel
@@ -113,9 +134,12 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap
         sigmay[j] = stdycen
         
                                 ;fix sigmas to ballard values
-;    stdxcen = 0.017
-;    stdycen = 0.0043
-        
+        if keyword_set(ballard_sigma) then begin
+           ;values from Ballard et al. 2010 PASP
+           stdxcen = 0.017
+           stdycen = 0.0043
+        endif
+
         w = weight(stdxcen, stdycen, nearestx, nearesty,  xcen(j), ycen(j), nearestflux)
         warr[j] = w
                                 ; print, 'testing', flux_m(j), w,  flux_m(j) / w
@@ -147,9 +171,12 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap
         sigma_np[j] = stdsqrtnp
         
                                 ;fix sigmas to ballard values
-                                ;    stdxcen = 0.017
-;     stdycen = 0.0043
-        
+        if keyword_set(ballard_sigma) then begin
+                      ;values from Ballard et al. 2010 PASP
+           stdxcen = 0.017
+           stdycen = 0.0043
+        endif
+
         
         w_np = weight_np(stdxcen, stdycen, stdsqrtnp, nearestx, nearesty, nearestsqrtnp, xcen(j), ycen(j), sqrtnp(j), nearestflux)
         warr_np[j] = w_np
@@ -258,3 +285,31 @@ function distance, xcen, ycen, np, j
 
 end
 
+function mask_signal, bmjd, period, utmjd_center, transit_duration
+       ;turn bmjd into phase
+   bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
+  phase =( bmjd_dist / period )- fix(bmjd_dist/period)
+
+                                ;ok, but now I want -0.5 to 0.5, not 0 to 1
+                                ;need to be careful here because subtracting half a phase will put things off, need something else
+  pa = where(phase gt 0.5,pacount)
+  if pacount gt 0 then phase[pa] = phase[pa] - 1.0
+ ; plothist, phase, xhist, yhist, bin = 0.1,/noplot
+ ; tt = plot(xhist, yhist, xtitle = 'phase')
+                                ;turn transit duration into phase
+  transit_duration = transit_duration / 60/24.       ; now in days
+  transit_phase = transit_duration / period          ; what fraction of the phase is this in transit (or eclipse)
+  print, 'test transit phase', transit_phase
+  
+  bad_t = where(phase ge 0.D - transit_phase and phase le 0.D + transit_phase,n_bad_t)
+  bad_e1 = where(phase ge 0.5 - transit_phase, n_bad_e1)
+  bad_e2 = where(phase le -0.5 + transit_phase, n_bad_e2)
+  
+  print, 'testing fraction of bad phases', (n_bad_t + n_bad_e1 +n_bad_e2 )/  n_elements(phase)
+  
+  s = dblarr(n_elements(phase)) + 1.D
+  s(bad_t) = 0.
+  s(bad_e1) = 0.
+  s(bad_e2) = 0.
+  return, s
+end
