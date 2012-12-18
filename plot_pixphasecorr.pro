@@ -5,14 +5,17 @@ pro plot_pixphasecorr, planetname, bin_level
   basedir = planetinfo[planetname, 'basedir']
   chname = planetinfo[planetname, 'chname']
   dirname = strcompress(basedir + planetname +'/')
-  filename =strcompress(dirname + planetname +'_pixphasecorr_ch'+chname+'_'+aorname(0) +'.sav')
-  restore, filename
+
+  for a = 0, n_elements(aorname) - 1 do begin
+     filename =strcompress(dirname +'pixphasecorr_ch'+chname+'_'+aorname(a) +'.sav')
+     print, a, aorname(a), 'restoring', filename
+     restore, filename
 
 ;binning
      numberarr = findgen(n_elements(flux_m))
      h = histogram(numberarr, OMIN=om, binsize = bin_level, reverse_indices = ri)
      print, 'omin', om, 'nh', n_elements(h)
-
+     
 
 ;mean together the flux values in each phase bin
      bin_corrflux = dblarr(n_elements(h))
@@ -21,7 +24,7 @@ pro plot_pixphasecorr, planetname, bin_level
      bin_flux = dblarr(n_elements(h))
      bin_time = dblarr(n_elements(h))
      bin_time_0 = dblarr(n_elements(h))
-
+     
      c = 0
      for j = 0L, n_elements(h) - 1 do begin
 
@@ -61,14 +64,11 @@ pro plot_pixphasecorr, planetname, bin_level
      bin_time = bin_time[0:c-1]
      bin_time_0 =  bin_time_0[0:c-1]
 
-
-    
-
 ;plot the results
-  p1 = plot(bin_time/60./60., bin_flux_m/ median(bin_flux_m), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname, name = 'raw flux')
-  p4 =  plot(bin_time/60./60., (bin_corrflux /median( bin_corrflux)) + 0.01, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
-  p2 = plot(bin_time_0/60./60., bin_flux/median(bin_flux)-0.015 , '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
-  p3 = plot(bin_time_0/60./60., bin_flux_np /median(bin_flux_np) + 0.015, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
+     p1 = plot(bin_time/60./60., bin_flux_m/ median(bin_flux_m), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname, name = 'raw flux')
+     p4 =  plot(bin_time/60./60., (bin_corrflux /median( bin_corrflux)) + 0.01, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
+     p2 = plot(bin_time_0/60./60., bin_flux/median(bin_flux)-0.015 , '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
+     p3 = plot(bin_time_0/60./60., bin_flux_np /median(bin_flux_np) + 0.015, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
 
 ;  l = legend(target = [p1, p4, p2,p3], position = [1.5, 1.18], /data, /auto_text_color)
 
@@ -77,6 +77,7 @@ pro plot_pixphasecorr, planetname, bin_level
 ;resid = bin_flux - bin_flux_np
 ;pr = plot(bin_time_0, resid, '1s', sym_size = 0.1, sym_filled = 1, xtitle = 'Time (hrs)', ytitle = 'residual')
 
+  endfor                        ; n_elements(aorname)
 
 end
 

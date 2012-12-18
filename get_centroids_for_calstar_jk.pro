@@ -205,7 +205,8 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 	aortime = sxpar(h, 'AORTIME', COUNT=xcount)
 	if (xcount gt 0) then bcdflag = 1 else bcdflag = 0
 	if (acount eq 0) then bcdflag = -bcdflag
- 
+ ;;;XXX
+;bcdflag = 1
 ; Get times
 	if (bcdflag eq 0) then begin
 		areadmod = sxpar(h, 'A0617D00')
@@ -366,7 +367,8 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ; pixel in small search window (5 pixel) around coordinate
 		skip_src = 0
 		adxy, h, ra, dec, xmax, ymax
-
+;                xmax = 15.0
+;                ymax = 15.0
 ; Only continue with images that have a source that not 5 pixels from edge
 		xedge = nx - edge - 1.
 		if (xmax lt edge or xmax gt xedge or ymax lt edge or ymax gt xedge)  then begin;   or eflux[nch-1] gt sat_levels[nch-1, findex])

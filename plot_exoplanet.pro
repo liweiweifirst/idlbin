@@ -1,5 +1,5 @@
 pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfcal, centerpixplot = centerpixplot
-;example call plot_exoplanet, 'wasp15', 63L
+;example call plot_exoplanet, 'wasp15', 2*63L
 
 ; if keyword_set(phaseplot) then print, 'keyword set phase'
 ;run code to read in all the input planet parameters
