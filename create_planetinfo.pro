@@ -122,16 +122,20 @@ function create_planetinfo
   chname = '2'
   ra_ref = 20.496279
   dec_ref = 76.710305
-  aorname = ['r44605184' ] 
+  ;aorname = ['r46981632','r46981888']; 2012
+  ;aorname = ['r44605184' ] ;2011
+  aorname = ['r44605184', 'r46981632','r46981888'] ; both 2011 and 2012
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
-  utmjd_center = 54727.49 - 0.16
+  utmjd_center = 54727.49 - 0.16 ;don't know where this additional change comes from
+  utmjd_center = 55866.43 ;from Stephen
+  ;utmjd_center = 55866.28554017 ; from the Knutson Nov 2011 observation
   transit_duration=77.73 ;guess at 0.01 period
   period = 5.3978
   intended_phase = 0.0
   exptime = 0.1
   stareaor = 0
-  plot_norm = 1.
-  plot_corrnorm = 1.
+  plot_norm = 1.46
+  plot_corrnorm = 1.46
 
   values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)

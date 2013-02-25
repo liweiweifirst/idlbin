@@ -43,7 +43,7 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
 
   restore, savefilename
 
-  for a =  4, 4 do begin; 0, n_elements(aorname) - 1 do begin  ;run through all AORs
+  for a = 1, 1 do begin; 0, n_elements(aorname) - 1 do begin  ;run through all AORs
      print, 'working on aor', aorname(a)
      np = planethash[aorname(a),'np']  ; np is noise pixel
      xcen = planethash[aorname(a), 'xcen']
@@ -52,6 +52,13 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
      bmjd = planethash[aorname(a),'bmjdarr']
 
      time = (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0)) ; in seconds;/60./60. ; in hours from beginning of obs.
+
+     ;now try to get them all within the same [0,1] phase     
+     bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
+     phase =( bmjd_dist / period )- fix(bmjd_dist/period)
+     pa = where(phase gt 0.5,pacount)
+     if pacount gt 0 then phase[pa] = phase[pa] - 1.0
+     
      sqrtnp = sqrt(np)
      
      savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
@@ -64,18 +71,20 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
      ;stdsqrtnp = stddev(sqrtnp)
      
    ;change this to a smaller number to test code in less time than a full run
-     ni =   200000; n_elements(xcen) 
+     ni =  n_elements(xcen) 
      print, 'ni', ni
      
      xcen = xcen[0:ni-1]
      ycen = ycen[0:ni-1]
      sqrtnp = sqrtnp[0:ni-1]
      bmjd = bmjd[0:ni-1]
+     phase = phase[0:ni-1]
      flux_m =  flux_m[0:ni-1]
                                 ;setup arrays for the corrected fluxes
      flux = dblarr(ni)          ; fltarr(n_elements(flux_m))
      flux_np = dblarr(ni)       ; fltarr(n_elements(flux_m))
      time_0 = time[0:ni - 1]
+     phase_0 = phase[0:ni-1]
      warr = dblarr(ni)
      warr_np= dblarr(ni)
      sigmax = dblarr(ni)
@@ -267,7 +276,14 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
      p4 =  plot(time[0:ni-1]/60./60., (corrflux[0:ni-1] /median( corrflux[0:ni-1])) + 0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
      p2 = plot(time_0/60./60., flux/median(flux) -0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
      p3 = plot(time_0/60./60., flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
-     
+   
+
+     p1 = plot(phase_0, flux_m[0:ni-1]/ median(flux_m[0:ni-1]), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname, name = 'raw flux', yrange =[0.93, 1.15])
+     p4 =  plot(phase_0, (corrflux[0:ni-1] /median( corrflux[0:ni-1])) + 0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
+     p2 = plot(phase_0, flux/median(flux) -0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
+     p3 = plot(phase_0, flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
+
+  
   ; l = legend(target = [p1, p4, p2,p3], position = [1.5, 1.18], /data, /auto_text_color)
      
 ;    print, 'mean and stddev of sigmax', mean(sigmax), stddev(sigmax)
@@ -280,7 +296,7 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
 ;     if ni gt 12000 then print, 'stddev of raw, pmap, position, position+np corr', stddev(flux_m[12000:ni-1],/nan),stddev(corrflux[12000:ni-1],/nan), stddev(flux[12000:*],/nan), stddev(flux_np[12000:*],/nan)
 
 
-;     save, /all, filename =strcompress(dirname + 'pixphasecorr_ch'+chname+'_'+aorname(a)+'.sav')
+     save, /all, filename =strcompress(dirname + 'pixphasecorr_ch'+chname+'_'+aorname(a)+'.sav')
 
 
   
