@@ -4,6 +4,25 @@ function create_planetinfo
   keys =['ra', 'dec','aorname','basedir','chname', 'utmjd_center', 'transit_duration', 'period', 'intended_phase', 'exptime','mask', 'maskreg','stareaor','plot_norm','plot_corrnorm']
 
 ;---
+  planetname = 'wasp38'
+  chname = '2'
+  ra_ref = 243.95985208 ; 16 15 50.3645 
+  dec_ref = 10.03259056 ; +10 01 57.326 
+  aorname = ['r45676288', 'r45676032'] ;ch2
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  utmjd_center = 55335.4205D
+  transit_duration= 279.648 ;min 0.1942 days  taken from NSTED
+  period =   6.871815  ;days 
+  exptime = 0.4
+  intended_phase = 0.5
+  stareaor = 0
+  plot_norm = 0.1039
+  plot_corrnorm = 0.1025
+
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
   planetname = 'fake_dec7'
   chname ='2';  '1'
   ra_ref = 36.712664
