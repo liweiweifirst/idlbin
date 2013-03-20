@@ -49,6 +49,7 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
      xcen = planethash[aorname(a), 'xcen']
      ycen = planethash[aorname(a), 'ycen']
      flux_m = planethash[aorname(a), 'flux']
+     fluxerr_m = Planethash[aorname(a), 'fluxerr']
      bmjd = planethash[aorname(a),'bmjdarr']
 
      time = (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0)) ; in seconds;/60./60. ; in hours from beginning of obs.
@@ -64,7 +65,8 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
      savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
      restore, savefilename
      corrflux = planethash[aorname(a), 'corrflux'] ;pmap corrected
-     
+     corrfluxerr = planethash[aorname(a), 'corrfluxerr']
+
                                 ;calculate standard deviations of entire xcen, ycen,and sqrtnp
      ;stdxcen = stddev(xcen)
      ;stdycen = stddev(ycen)
@@ -80,9 +82,13 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
      bmjd = bmjd[0:ni-1]
      phase = phase[0:ni-1]
      flux_m =  flux_m[0:ni-1]
+     fluxerr_m = fluxerr_m[0:ni-1]
+
                                 ;setup arrays for the corrected fluxes
      flux = dblarr(ni)          ; fltarr(n_elements(flux_m))
+     fluxerr = dblarr(ni)
      flux_np = dblarr(ni)       ; fltarr(n_elements(flux_m))
+     fluxerr_np = dblarr(ni)
      time_0 = time[0:ni - 1]
      phase_0 = phase[0:ni-1]
      warr = dblarr(ni)
@@ -99,6 +105,7 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
      ycen2 = ycen
      sqrtnp2 = sqrtnp
      flux_m2 = flux_m
+     fluxerr_m2 = fluxerr_m
      time_02  = time_0
 
     ;mask intervals in time where astrophysical signals exist.
@@ -131,6 +138,7 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
            nearestx = xcen2(nearest(*,j))
            nearesty = ycen2(nearest(*,j))
            nearestflux = flux_m2(nearest(*,j))
+           nearestfluxerr = fluxerr_m2(nearest(*,j))
            nearesttime = time_02(nearest(*,j))
         
          ;what is the time distribution like of the points chosen as nearest in position
@@ -144,6 +152,7 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
               nearestx = nearestx[1:*]
               nearesty = nearesty[1:*]
               nearestflux = nearestflux[1:*]
+              nearestfluxerr = nearestfluxerr[1:*]
            endif
         
            furthestx[j] = abs(xcen2(j) - nearestx(n_elements(nearestx)-1))
@@ -250,7 +259,7 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
         warr[j] = w
                                 ; print, 'testing', flux_m(j), w,  flux_m(j) / w
         flux(j) = flux_m2(j) / w
-
+        fluxerr(j) = fluxerr_m2(j) / w
 
 ;---------------------
       
@@ -262,7 +271,7 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
         w_np = weight_np(stdxcennp, stdycennp, stdsqrtnp, nearestxnp, nearestynp, nearestsqrtnp, xcen(j), ycen(j), sqrtnp(j), nearestfluxnp)
         warr_np[j] = w_np
         flux_np(j) = flux_m(j) / w_np
-        
+        fluxerr_np(j) = fluxerr_m(j) / w_np
   ;--------------------
         
      endfor
@@ -382,16 +391,16 @@ function mask_signal, bmjd, period, utmjd_center, transit_duration
                                 ;need to be careful here because subtracting half a phase will put things off, need something else
   pa = where(phase gt 0.5,pacount)
   if pacount gt 0 then phase[pa] = phase[pa] - 1.0
- ; plothist, phase, xhist, yhist, bin = 0.1,/noplot
- ; tt = plot(xhist, yhist, xtitle = 'phase')
+  ;plothist, phase, xhist, yhist, bin = 0.02,/noplot
+  ;tt = plot(xhist, yhist, xtitle = 'phase')
                                 ;turn transit duration into phase
   transit_duration = transit_duration / 60/24.       ; now in days
   transit_phase = transit_duration / period          ; what fraction of the phase is this in transit (or eclipse)
   print, 'test transit phase', transit_phase
   
-  bad_t = where(phase ge 0.D - transit_phase and phase le 0.D + transit_phase,n_bad_t)
-  bad_e1 = where(phase ge 0.5 - transit_phase, n_bad_e1)
-  bad_e2 = where(phase le -0.5 + transit_phase, n_bad_e2)
+  bad_t = where(phase ge 0.D - transit_phase/2. and phase le 0.D + transit_phase/2.,n_bad_t)
+  bad_e1 = where(phase ge 0.5 - transit_phase/2., n_bad_e1)
+  bad_e2 = where(phase le -0.5 + transit_phase/2., n_bad_e2)
   
   print, 'testing fraction of bad phases', float(n_bad_t + n_bad_e1 +n_bad_e2 )/  float(n_elements(phase))
   
