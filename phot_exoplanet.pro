@@ -27,6 +27,7 @@ planethash = hash()
      readcol,strcompress(dirname +'bcdlist.txt'),fitsname, format = 'A', /silent
      readcol,strcompress(dirname+'bunclist.txt'),buncname, format = 'A', /silent
 
+     print,'n_elements(fitsname)', n_elements(fitsname)
 ;     aparr = dblarr(n_elements(fitsname))  ;keep the aperture sizes used
 
      for i =0.D,  n_elements(fitsname) - 1 do begin ;read each cbcd file, find centroid, keep track
@@ -239,7 +240,7 @@ planethash = hash()
              values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr)
              planethash[aorname(a)] = HASH(keys, values)
           endelse
-
+print, 'n_elements(xarr)', n_elements(xarr), 'should be', 63*1310.
   endfor                        ;for each AOR
   
   ;test

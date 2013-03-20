@@ -31,7 +31,7 @@ intended_phase = planetinfo[planetname, 'intended_phase']
 ;-------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------
 
-for a = 0,  n_elements(aorname) - 1 do begin
+for a = 0, 0 do begin;  n_elements(aorname) - 1 do begin
 
 
  ;for chopping off some initial part of the light curve
@@ -52,7 +52,9 @@ for a = 0,  n_elements(aorname) - 1 do begin
   bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
   phase =( bmjd_dist / period )- fix(bmjd_dist/period)
   pa = where(phase gt 0.5,pacount)
-  if pacount gt 0 then phase[pa] = phase[pa] - 1.0
+  if intended_phase ne 0.5 then begin
+     if pacount gt 0 then phase[pa] = phase[pa] - 1.0
+  endif
 
   print, 'in the beginning', phase[0], phase[n_elements(phase) - 2]
 
