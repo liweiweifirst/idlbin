@@ -5,12 +5,26 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
   aorname = planetinfo[planetname, 'aorname']
   basedir = planetinfo[planetname, 'basedir']
   chname = planetinfo[planetname, 'chname']
-  dirname = strcompress(basedir + planetname +'/')
+  intended_phase = planetinfo[planetname, 'intended_phase']
 
+  dirname = strcompress(basedir + planetname +'/')
+  ;a = 1
   for a = 1, 1 do begin
      filename =strcompress(dirname +'pixphasecorr_ch'+chname+'_'+aorname(a) +'.sav')
-     print, a, aorname(a), 'restoring', filename
+     print, a, ' ', aorname(a), 'restoring', filename
      restore, filename
+
+;work out phases
+     print, ' before phase',  phase(0), format = '(A,F0)'    
+     if intended_phase lt 0.5 then begin  ;primary transit
+        pa = where(phase gt 0.5,pacount)
+        if pacount gt 0 then phase[pa] = phase[pa] - 1.0
+     endif else begin  ;secondary eclipse
+        print, 'secondary eclipse intended'
+        phase = phase + 0.5
+     endelse
+    print, ' after phase',  phase(0), format = '(A,F0)'
+
 
 ;binning
      numberarr = findgen(n_elements(flux_m))
@@ -92,13 +106,18 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
 
 ;if working on a secondary, then want to plot the phase around 0.5,
 ;and not split it around 0.
-     intended = planetinfo[planetname, 'intended_phase']
-     if intended eq 0.5 then begin
-        pa = where(bin_phase lt 0.0,pacount)
-        if pacount gt 0 then bin_phase[pa] = bin_phase[pa] + 1.0
-     endif
+ ;    if intended eq 0.5 then begin
+ ;       pa = where(bin_phase lt 0.0,pacount)
+ ;       if pacount gt 0 then bin_phase[pa] = bin_phase[pa] + 1.0
+ ;    endif
 
 
+;test the levels
+     print, 'mean raw black flux', mean(bin_flux_m / median(bin_flux_m))
+     print, 'mean corr gray flux', mean((bin_corrflux /median( bin_corrflux)))
+     print, 'mean position red flux', mean(bin_flux/median(bin_flux))
+     print, 'mean np blue flux', mean(bin_flux_np /median(bin_flux_np))
+     print, 'phase', bin_phase[0:10]
 
 ;plot the results
      if keyword_set(errorbars) then begin
@@ -186,13 +205,17 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
         restore, strcompress(dirname + 'selfcal.sav')    
         print, 'testing selfcal phase', phase[0:10], phase[n_elements(phase) - 1]
         print, 'test selfcal', y[0:10], 'x', x[0:10]
-        
+        if intended_phase gt 0 then bin_phasearr = bin_phasearr + 0.5
+
+
          if keyword_set(phaseplot) then begin
-            p5 = plot(bin_phasearr, y -0.007, '1s', sym_size = 0.3,   sym_filled = 1, $
-                      color = 'green',/overplot, name = 'selfcal')
+            p5 = errorplot(bin_phasearr, y -0.007, yerr, '1s', sym_size = 0.3,   sym_filled = 1, $
+                      color = 'green',/overplot, name = 'selfcal', errorbar_color = 'green', $
+                      errorbar_capsize = 0.025)
          endif else begin
-            p5 = plot(bin_timearr, y -0.007, '1s', sym_size = 0.3,   sym_filled = 1, $
-                      color = 'green',/overplot, name = 'selfcal')
+            p5 = errorplot(bin_timearr, y -0.007, yerr,  '1s', sym_size = 0.3,   sym_filled = 1, $
+                      color = 'green',/overplot, name = 'selfcal', errorbar_color = 'green', $
+                      errorbar_capsize = 0.025)
          endelse
 
 
@@ -215,7 +238,14 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
 ;resid = bin_flux - bin_flux_np
 ;pr = plot(bin_time_0, resid, '1s', sym_size = 0.3, sym_filled = 1, xtitle = 'Time (hrs)', ytitle = 'residual')
 
+ ;    print, 'END of LOOP a'
+;     print, 'a ', a
+ ;    print, 'hello'
+
   endfor                        ; n_elements(aorname)
+
+;finally save the plot
+  p9.save, dirname+'allfluxes_binned.png'
 
 end
 

@@ -163,7 +163,8 @@ function create_planetinfo
   chname = '2'
   ra_ref = 140.10268
   dec_ref = 33.882288
-  aorname = ['r45676544','r45675520']
+  aorname = ['r45676544','r45675520'] ; from my PID
+  ;aorname = ['r47047168', 'r47037952'] ;from Dessert PID this is the primary
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   utmjd_center = 56086.49239D
   transit_duration=243.4
@@ -185,7 +186,7 @@ function create_planetinfo
   aorname = ['r45675264', 'r45675776'] 
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   utmjd_center = 56184.45438D
-  transit_duration=56184.45438
+  transit_duration=222.900000 ; min from nsted
   period = 3.752066
   intended_phase = 0.5
   exptime = 2

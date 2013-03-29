@@ -31,7 +31,7 @@ intended_phase = planetinfo[planetname, 'intended_phase']
 ;-------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------
 
-for a = 0, 0 do begin;  n_elements(aorname) - 1 do begin
+for a = 1, 1 do begin;  n_elements(aorname) - 1 do begin
 
 
  ;for chopping off some initial part of the light curve
@@ -375,8 +375,8 @@ for a = 0, 0 do begin;  n_elements(aorname) - 1 do begin
      y = (bin_sub )/mean(bin_sub)
      yerr = bin_fluxerr/ mean(bin_sub)
      print, 'n x, y, yerr', n_elements(x), n_elements(y), n_elements(yerr)
-     print, 'y', y[0:10]
-     print, 'x', x[0:10]
+;     print, 'y', y[0:10]
+;     print, 'x', x[0:10]
      o = errorplot(x, y,yerr,'1o',sym_size = 0.7, sym_filled = 1, xtitle = 'Orbital Phase', ytitle = 'Normalized corrected binned flux', title = planetname)
      
   endif                         ;binning

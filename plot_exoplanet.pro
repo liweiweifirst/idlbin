@@ -42,13 +42,19 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
      bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
      ;print, 'bmjd- utmjd', bmjd_dist(0), format = '(A,F0)'
      phase =( bmjd_dist / period )- fix(bmjd_dist/period)
-                                ;ok, but now I want -0.5 to 0.5, not 0 to 1
-                                ;need to be careful here because subtracting half a phase will put things off, need something else
-    ; print, ' before phase',  phase(0), format = '(A,F0)'    
-     pa = where(phase gt 0.5,pacount)
-;    ;print, 'pa', pa
- ;;   if pacount gt 0 then phase[pa] = phase[pa] - 1.0
-;    print, ' after phase',  phase(0), format = '(A,F0)'
+
+     ;ok, but now I want -0.5 to 0.5, not 0 to 1
+     ;need to be careful here because subtracting half a phase will put things off, need something else
+     print, ' before phase',  phase(0), format = '(A,F0)'    
+     if intended_phase lt 0.5 then begin  ;primary transit
+        pa = where(phase gt 0.5,pacount)
+        if pacount gt 0 then phase[pa] = phase[pa] - 1.0
+     endif else begin  ;secondary eclipse
+        print, 'secondary eclipse intended'
+        phase = phase + 0.5
+     endelse
+
+    print, ' after phase',  phase(0), format = '(A,F0)'
 ;    print, 'nphase, corr', n_elements(phase), n_elements(bin_corrflux)
     ;changing the bmjd tag to now house the phases
     planethash[aorname(a),'bmjdarr'] = phase
@@ -61,17 +67,17 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
 
 ;this one overlays the positions on the pmap contours
 
-;  fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_121120.fits', pmapdata, pmapheader
+  fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_121120.fits', pmapdata, pmapheader
 ;  fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120409.fits', pmapdata, pmapheader
-;  c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [0,500], yrange = [0,500])
-;  for a = 0 , n_elements(aorname) - 1 do begin
+  c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [0,500], yrange = [0,500])
+  for a = 0 , n_elements(aorname) - 1 do begin
 ;     print, 'testing aors', a, colorarr[a]
 
-;     xcen500 = 500.* ((planethash[aorname(a),'xcen']) - 14.5)
-;     ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
-;     an = plot(xcen500, ycen500, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
-;endfor
-;  an.save, dirname+'position.png'
+     xcen500 = 500.* ((planethash[aorname(a),'xcen']) - 14.5)
+     ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
+     an = plot(xcen500, ycen500, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+  endfor
+  an.save, dirname+'position.png'
 ;-----
  
   ;print, 'min', min((planetob[a].timearr - planetob[0].timearr(0))/60./60.)
@@ -83,28 +89,28 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
         xmax = 15.5             ; mean(planethash[aorname(a),'xcen'])+0.25
         ;print, 'xmin.xmax', xmin, xmax
 
-;        ax = z.plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0))/60./60., planethash[aorname(a),'xcen'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], ytitle = 'X pix', title = planetname, yrange = [15.0,15.3]);, xtitle = 'Time(hrs)'
+        ax = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'xcen'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], ytitle = 'X pix', title = planetname, yrange = [15.0,15.3]);, xtitle = 'Time(hrs)'
      endif else begin
-;        am = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0))/60./60., planethash[aorname(a),'xcen'],'6r1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a],/overplot)
+        am = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'xcen'],'6r1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a],/overplot)
      endelse
 
   endfor
-    ;am.save, dirname + 'x_time.png'
+  am.save, dirname + 'x_time.png'
 
 ;------
 
-  for a = 0,0 do begin          ; 0, n_elements(aorname) - 1 do begin
+  for a = 0,n_elements(aorname) -1 do begin          ; 0, n_elements(aorname) - 1 do begin
      if a eq 0 then begin
         ymin = 14.9             ; mean(planethash[aorname(a),'ycen'])-0.25
         ymax = 16.0             ;mean(planethash[aorname(a),'ycen'])+0.25
         ;print, 'ymin.ymax', ymin, ymax
-;       ay = z.plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0))/60./60., planethash[aorname(a),'ycen'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], ytitle = 'Y pix', yrange = [15.0, 15.3]);,title = planetname, xtitle = 'Time(hrs)'
+       ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'ycen'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], ytitle = 'Y pix', yrange = [15.0, 15.3]);,title = planetname, xtitle = 'Time(hrs)'
      endif else begin
-;        am = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0))/60./60., planethash[aorname(a),'ycen'],'6r1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a],/overplot)
+        ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'ycen'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a],/overplot)
      endelse
 
   endfor
- ;am.save, dirname +'y_time.png'
+ ay.save, dirname +'y_time.png'
 
 ;------
 
@@ -444,6 +450,7 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
 
      if keyword_set(phaseplot) then begin ;make the plot as a function of phase
 
+        print, 'test phase', bin_phase(0)
 ;   setxrange = [-0.022,-0.0205]
 ;   setxrange =[-0.0127, -0.0112]
         setxrange = [0.45, 0.55]
@@ -552,6 +559,9 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
 
         endif
 
+        ps.save, dirname +'binnp_phase.png'
+        pt.save, dirname +'binbkg_phase.png'
+
         if keyword_set(selfcal) then begin
          ;  restore, strcompress(dirname + 'selfcal.sav')          
           ; print, 'test selfcal', y[0:10], 'x', x[0:10]
@@ -632,7 +642,7 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
 
   endfor                        ;binning for each AOR
 
- if keyword_set(phaseplot) then  pr.save, dirname +'binflux_phase.png' else pl.save, dirname +'binflux_time.png'
+ ;if keyword_set(phaseplot) then  pr.save, dirname +'binflux_phase.png' else pl.save, dirname +'binflux_time.png'
 
 
 
