@@ -335,7 +335,7 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
      bin_ncorr = bin_ncorr[0:c-1]
      bin_np = bin_np[0:c-1]
 ;     bin_centerpix = bin_centerpix[0:c-1]
-;     print, 'bin_phase', bin_phase
+     print, 'bin_phase', bin_phase
 ;  bin_bkgderr = bin_bkgderr[0:c-1]
      
      ;---------------------------------------------
@@ -644,7 +644,11 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
 
  ;if keyword_set(phaseplot) then  pr.save, dirname +'binflux_phase.png' else pl.save, dirname +'binflux_time.png'
 
+ ;test
 
+  savename = strcompress(dirname + planetname +'_plot_ch'+chname+'.sav')
+  save, /all, filename=savename
+  print, 'saving planethash', savename
 
 end
 
