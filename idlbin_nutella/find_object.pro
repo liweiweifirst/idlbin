@@ -57,7 +57,8 @@ best = 0; do find only the best match, 0 = find all nearest matches
 
 restore, '/Users/jkrick/idlbin/idlbin_nutella/objectnew.sav'
 
-print, "num, ra, dec, phot z, umag, umag err, gmag, gmagerr, rmag, rmagerr, imag, imagerr, acsmag, acsmagerr, zmag, zmagerr, flamingo J mag, J err, wirc J mag, J err, wirc H mag, H err, wirc K mag, K err, irac1, irac2, irac3, irac4, mips24, mips24 err, mips 70, mips70 err"
+openw, outlun, '/Users/jkrick/Desktop/foreric_mips24.txt',/get_lun
+printf, outlun, "num, ra, dec, phot z, umag, umag err, gmag, gmagerr, rmag, rmagerr, imag, imagerr, acsmag, acsmagerr, zmag, zmagerr, flamingo J mag, J err, wirc J mag, J err, wirc H mag, H err, wirc K mag, K err, irac1, irac2, irac3, irac4, mips24, mips24 err, mips 70, mips70 err"
 
 
 ; create initial arrays
@@ -79,14 +80,51 @@ for q=0,m-1 do begin
 ;   print, q, rawant[q]
    print, 'working on new obj'
    dist=sphdist( rawant[q], decwant[q], objectnew.ra, objectnew.dec, /degrees )
+   print, 'n_elements(dist)', n_elements(dist)
    sep=min(dist,ind)
 ;   print, sep
    if best eq 0 then begin
       for z = 0l, n_elements(dist) - 1 do begin
-         if dist(z) lt 0.0008 then begin
+         if dist(z) lt 0.0442 then begin; 0.0008 then begin
             mmatch[q]=ind
 
-            print,dist(z),  z, objectnew[z].ra, objectnew[z].dec, objectnew[z].zphot, objectnew[z].umag, objectnew[z].umagerr, objectnew[z].gmag, objectnew[z].gmagerr,objectnew[z].rmag, objectnew[z].rmagerr,objectnew[z].imag, objectnew[z].imagerr, objectnew[z].acsmag, objectnew[z].acsmagerr, objectnew[z].zmagbest, objectnew[z].zmagerrbest, objectnew[z].flamjmag, objectnew[z].flamjmagerr, objectnew[z].wircjmag, objectnew[z].wircjmagerr, objectnew[z].wirchmag, objectnew[z].wirchmagerr, objectnew[z].wirckmag, objectnew[z].wirckmagerr, objectnew[z].irac1mag,objectnew[z].irac2mag,objectnew[z].irac3mag,objectnew[z].irac4mag, objectnew[z].mips24flux, objectnew[z].mips24fluxerr,objectnew[z].mips70flux, objectnew[z].mips70fluxerr, format = '(F10.5,I10,F10.5,F10.6,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2)'
+        ;put all near-IR into AB mags
+         if objectnew[z].flamjmag gt 0 and objectnew[z].flamjmag ne 99 then begin
+            fab = 1594.*10^(objectnew[z].flamjmag/(-2.5))
+            jmagab = -2.5*alog10(fab) +8.926
+         endif else begin
+            jmagab = objectnew[z].flamjmag
+         endelse
+         
+         if objectnew[z].wircjmag gt 0 and objectnew[z].wircjmag ne 99 then begin
+            wircjab = 1594.*10^(objectnew[z].wircjmag/(-2.5))
+            wircjmagab = -2.5*alog10(wircjab) +8.926
+         endif else begin
+            wircjmagab = objectnew[z].wircjmag
+         endelse
+         
+         if objectnew[z].wirchmag gt 0 and objectnew[z].wirchmag ne 99 then begin
+            wirchab = 1024.*10^(objectnew[z].wirchmag/(-2.5))
+            wirchmagab = -2.5*alog10(wirchab) +8.926
+         endif else begin
+            wirchmagab = objectnew[z].wirchmag
+         endelse
+         
+         if objectnew[z].wirckmag gt 0 and objectnew[z].wirckmag ne 99 then begin
+            wirckab = 666.8*10^(objectnew[z].wirckmag/(-2.5))
+            wirckmagab = -2.5*alog10(wirckab) +8.926
+         endif else begin
+            wirckmagab = objectnew[z].wirckmag
+         endelse
+         
+
+         if objectnew[z].mips24flux gt 0 then begin
+            printf,outlun, z, objectnew[z].ra, objectnew[z].dec, objectnew[z].zphot, objectnew[z].umag, objectnew[z].umagerr, objectnew[z].gmag, objectnew[z].gmagerr,objectnew[z].rmag, objectnew[z].rmagerr,objectnew[z].imag, objectnew[z].imagerr, objectnew[z].acsmag, objectnew[z].acsmagerr, objectnew[z].zmagbest, objectnew[z].zmagerrbest, jmagab, objectnew[z].flamjmagerr, wircjmagab, objectnew[z].wircjmagerr, wirchmagab, objectnew[z].wirchmagerr, wirckmagab, objectnew[z].wirckmagerr, objectnew[z].irac1mag,objectnew[z].irac2mag,objectnew[z].irac3mag,objectnew[z].irac4mag, objectnew[z].mips24flux, objectnew[z].mips24fluxerr,objectnew[z].mips70flux, objectnew[z].mips70fluxerr, format = '(I10,F10.5,F10.6,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2)'
+         endif
+
+;
+
+;            printf,outlun, dist(z),  z, objectnew[z].ra, objectnew[z].dec, objectnew[z].zphot, objectnew[z].umag, objectnew[z].umagerr, objectnew[z].gmag, objectnew[z].gmagerr,objectnew[z].rmag, objectnew[z].rmagerr,objectnew[z].imag, objectnew[z].imagerr, objectnew[z].acsmag, objectnew[z].acsmagerr, objectnew[z].zmagbest, objectnew[z].zmagerrbest, objectnew[z].flamjmag, objectnew[z].flamjmagerr, objectnew[z].wircjmag, objectnew[z].wircjmagerr, objectnew[z].wirchmag, objectnew[z].wirchmagerr, objectnew[z].wirckmag, objectnew[z].wirckmagerr, objectnew[z].irac1mag,objectnew[z].irac2mag,objectnew[z].irac3mag,objectnew[z].irac4mag, objectnew[z].mips24flux, objectnew[z].mips24fluxerr,objectnew[z].mips70flux, objectnew[z].mips70fluxerr, format = '(F10.5,I10,F10.5,F10.6,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2)'
 ;
          endif 
       endfor
@@ -141,8 +179,8 @@ print, 'enter /Users/jkrick/nutella/zphot/zphot.target.param'
 ;plothyperz, mmatch, '/Users/jkrick/nutella/nep/junk.ps'
 ;/Users/jkrick/zphot/zphot.target.param
 
-;close, outlun
-;free_lun, outlun 
+close, outlun
+free_lun, outlun 
 
 return, mmatch
 END
