@@ -1,5 +1,5 @@
 pro eclipse_test
-restore, '/Users/jkrick/irac_warm/hd209458/hd209458_ch4_new.sav'
+restore, '/Users/jkrick/irac_warm/hd209458/hd209458_ch4.sav'
 
   parinfo = replicate({value:0.D, fixed:0, limited:[0,0], limits:[0.D,0.D]}, n_elements(pa0))
                                
