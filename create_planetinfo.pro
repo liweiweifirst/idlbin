@@ -10,7 +10,7 @@ function create_planetinfo
   dec_ref = 10.03259056 ; +10 01 57.326 
   aorname = ['r45676288', 'r45676032'] ;ch2
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
-  utmjd_center = 55335.4205D
+  utmjd_center = 56190.96147D	;55335.4205D
   transit_duration= 279.648 ;min 0.1942 days  taken from NSTED
   period =   6.871815  ;days 
   exptime = 0.4
