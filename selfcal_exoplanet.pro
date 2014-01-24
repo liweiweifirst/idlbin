@@ -23,15 +23,16 @@ intended_phase = planetinfo[planetname, 'intended_phase']
   savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
   restore, savefilename
   
-  transit_duration = transit_duration /60./24. ; in days
-  for a = 0, n_elements(aorname) - 1 do  begin
-     (planethash[aorname(a),'bmjdarr']) = (((planethash[aorname(a),'bmjdarr']) -  utmjd_center)/period) + intended_phase
-  endfor
+;  transit_duration = transit_duration /60./24. ; in days
+;  for a = 0, n_elements(aorname) - 1 do  begin
+;     (planethash[aorname(a),'bmjdarr']) = (((planethash[aorname(a),'bmjdarr']) -  utmjd_center)/period) + intended_phase
+;  endfor
   
 ;-------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------
 
-for a = 0,  n_elements(aorname) - 1 do begin
+for a = 1, 1 do begin;  n_elements(aorname) - 1 do begin
+
 
  ;for chopping off some initial part of the light curve
 
@@ -44,7 +45,21 @@ for a = 0,  n_elements(aorname) - 1 do begin
   corrflux = (planethash[aorname(a),'corrflux'])[startnum(a):*]
   corrfluxerr = (planethash[aorname(a),'corrfluxerr'])[startnum(a):*]
   bmjd = (planethash[aorname(a),'bmjdarr'])[startnum(a):*]
-  utcs = (planethash[aorname(a),'utcsarr'])[startnum(a):*]
+;  utcs = (planethash[aorname(a),'utcsarr'])[startnum(a):*]
+
+    ;now try to get them all within the same [0,1] phase  
+  ;taken from plot_exoplanet.pro
+  bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
+  phase =( bmjd_dist / period )- fix(bmjd_dist/period)
+  pa = where(phase gt 0.5,pacount)
+;  if intended_phase ne 0.5 then begin
+     if pacount gt 0 then phase[pa] = phase[pa] - 1.0
+;  endif
+
+ 
+
+  print, 'in the beginning', phase[0], phase[n_elements(phase) - 2]
+
 
 ;get rid of outliers
  print, ' fluxarr', n_elements(flux), n_elements(planethash[aorname(a),'flux'])
@@ -62,7 +77,8 @@ for a = 0,  n_elements(aorname) - 1 do begin
   corrflux =corrflux[good]
   corrfluxerr = corrfluxerr[good]
   bmjd = bmjd[good]
-  utcs = utcs[good]
+  phase = phase[good]
+;  utcs = utcs[good]
  print, 'middle flux', n_elements(flux)
 
   ;print, 'max x, y', max(xarr), min(xarr), max(yarr), min(yarr)
@@ -90,7 +106,8 @@ for a = 0,  n_elements(aorname) - 1 do begin
   corrflux = corrflux[good_ni]
   corrfluxerr = corrfluxerr[good_ni]
   bmjd = bmjd[good_ni]
-  utcs = utcs[good_ni]
+  phase = phase[good_ni]
+;  utcs = utcs[good_ni]
   print, 'nflux', n_elements(flux)
 
 
@@ -114,7 +131,9 @@ for a = 0,  n_elements(aorname) - 1 do begin
     ady = ycenarr - amy    
     ;nfits = n_elements(x) / nframes
     bmjdarr= bmjd
-    utcsarr=utcs
+    phasearr = phase
+    
+;    utcsarr=utcs
     nseg = 1
 
 ; Initial guesses	
@@ -169,7 +188,8 @@ for a = 0,  n_elements(aorname) - 1 do begin
      full_flux = y
      full_fluxerr = yerr
      full_bmjd = bmjdarr
-     full_utcs = utcsarr
+     full_phase = phasearr
+;     full_utcs = utcsarr
      full_model = model_fit
      full_model_y = model_y
      full_sub = sub
@@ -180,7 +200,8 @@ for a = 0,  n_elements(aorname) - 1 do begin
      full_flux = [full_flux,y]
      full_fluxerr = [full_fluxerr, yerr]
      full_bmjd = [full_bmjd,bmjdarr]
-     full_utcs = [full_utcs, utcsarr]
+     full_phase = [full_phase, phasearr]
+;     full_utcs = [full_utcs, utcsarr]
      full_model = [full_model,model_fit]
      full_model_y = [full_model_y, model_y]
      full_sub = [full_sub,sub]
@@ -221,11 +242,12 @@ for a = 0,  n_elements(aorname) - 1 do begin
      bin_corrfluxerr= dblarr(n_elements(h))
      bin_timearr = dblarr(n_elements(h))
      bin_bmjdarr = dblarr(n_elements(h))
+     bin_phasearr = dblarr(n_elements(h))
      bin_bkgd = dblarr(n_elements(h))
      bin_bkgderr = dblarr(n_elements(h))
      bin_xcen = dblarr(n_elements(h))
      bin_ycen = dblarr(n_elements(h))
-     bin_utcs = dblarr(n_elements(h))
+;     bin_utcs = dblarr(n_elements(h))
      bin_sub = dblarr(n_elements(h))
      bin_model = dblarr(n_elements(h))
      bin_model_y = dblarr(n_elements(h))
@@ -266,6 +288,9 @@ for a = 0,  n_elements(aorname) - 1 do begin
            bin_bmjdarr[c]= meanbmjdarr
 ;           print, 'finished first bmjd'
 
+           meanclip, full_phase[ri[ri[j]:ri[j+1]-1]], meanphasearr, sigmaphasearr
+           bin_phasearr[c]= meanphasearr
+
 
            ;xxxx fix this to divide out N
 ;           meanclip, corrfluxerr[ri[ri[j]:ri[j+1]-1]], meancorrfluxerr, sigmacorrfluxerr
@@ -281,8 +306,8 @@ for a = 0,  n_elements(aorname) - 1 do begin
  ;          bin_bkgderr[c] = meanbkgderrarr
 ;           print, 'finished last meanclips'
 
-           meanclip, full_utcs[ri[ri[j]:ri[j+1]-1]], meanutcs, sigmautcs
-           bin_utcs[c] = meanutcs
+;           meanclip, full_utcs[ri[ri[j]:ri[j+1]-1]], meanutcs, sigmautcs
+;           bin_utcs[c] = meanutcs
 
            meanclip, full_sub[ri[ri[j]:ri[j+1]-1]], meansub, sigmasub
            bin_sub[c] = meansub
@@ -305,9 +330,10 @@ for a = 0,  n_elements(aorname) - 1 do begin
 ;  bin_corrflux = bin_corrflux[0:c-1]
   bin_timearr = bin_timearr[0:c-1]
   bin_bmjdarr = bin_bmjdarr[0:c-1]
+  bin_phasearr = bin_phasearr[0:c-1]
 ;  bin_corrfluxerr = bin_corrfluxerr[0:c-1]
 ;  bin_bkgderr = bin_bkgderr[0:c-1]
-  bin_utcs = bin_utcs[0:c-1]
+;  bin_utcs = bin_utcs[0:c-1]
   bin_sub = bin_sub[0:c-1]
   bin_model = bin_model[0:c-1]
   bin_model_y = bin_model_y[0:c-1]
@@ -337,8 +363,12 @@ for a = 0,  n_elements(aorname) - 1 do begin
  ;    st2 = plot(bin_time, bin_ycen,'1o', ytitle = 'Y pix',xtitle = 'Time',  color = 'black', sym_filled = 1, sym_size = 0.4) ;
    ;-----------------
 
-     x =  bin_bmjdarr           ;/ max(timearr)        ; fix to 1 phase
-     x = bin_timearr
+
+ 
+
+;     x = bin_bmjdarr           ;/ max(timearr)        ; fix to 1 phase
+;     x = bin_timearr
+     x = bin_phasearr
 ;     y = bin_flux             ;/ fluxarr[1]          ;normalize
 ;     p1 = plot(x, y,  '1o',  xtitle = 'Orbital Phase', ytitle = ' Flux',  sym_size = 0.2, sym_filled = 1.,title = titlename, xrange = [0.32,0.62])
 ;     f1 = plot(x,bin_model,  '1ob',/overplot , sym_size = 0.2, sym_filled = 1.) ;-0.0027
@@ -347,9 +377,9 @@ for a = 0,  n_elements(aorname) - 1 do begin
      y = (bin_sub )/mean(bin_sub)
      yerr = bin_fluxerr/ mean(bin_sub)
      print, 'n x, y, yerr', n_elements(x), n_elements(y), n_elements(yerr)
-     print, 'y', y[0:10]
-     print, 'x', x[0:10]
-     o = errorplot(x, y,yerr,'1o',sym_size = 0.7, sym_filled = 1, xtitle = 'Orbital Phase', ytitle = 'Normalized corrected binned flux', title = planetname)
+;     print, 'y', y[0:10]
+;     print, 'x', x[0:10]
+;     o = errorplot(x, y,yerr,'1o',sym_size = 0.7, sym_filled = 1, xtitle = 'Orbital Phase', ytitle = 'Normalized corrected binned flux', title = planetname)
      
   endif                         ;binning
   selfcal_timearr = full_time

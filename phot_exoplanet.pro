@@ -27,6 +27,7 @@ planethash = hash()
      readcol,strcompress(dirname +'bcdlist.txt'),fitsname, format = 'A', /silent
      readcol,strcompress(dirname+'bunclist.txt'),buncname, format = 'A', /silent
 
+     print,'n_elements(fitsname)', n_elements(fitsname)
 ;     aparr = dblarr(n_elements(fitsname))  ;keep the aperture sizes used
 
      for i =0.D,  n_elements(fitsname) - 1 do begin ;read each cbcd file, find centroid, keep track
@@ -78,6 +79,14 @@ planethash = hash()
            ;print, 'applying mask for this planet'
            for j = 0, 63 do begin
               im[4:7, 13:16, j] = !Values.F_NAN ;mask region with nan set for bad regions
+             ; im[24, 6, j] = !Values.F_NAN  ;bad pixel  but [3,3-7] shouldn't get to this pixel
+           endfor
+
+        endif
+        if planetname eq 'hat22' then begin
+           ;print, 'applying mask for this planet'
+           for j = 0, 63 do begin
+              im[20:24, 11:15, j] = !Values.F_NAN ;mask region with nan set for bad regions
              ; im[24, 6, j] = !Values.F_NAN  ;bad pixel  but [3,3-7] shouldn't get to this pixel
            endfor
 
@@ -239,7 +248,7 @@ planethash = hash()
              values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr)
              planethash[aorname(a)] = HASH(keys, values)
           endelse
-
+print, 'n_elements(xarr)', n_elements(xarr), 'should be', 63*1310.
   endfor                        ;for each AOR
   
   ;test

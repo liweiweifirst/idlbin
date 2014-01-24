@@ -4,6 +4,25 @@ function create_planetinfo
   keys =['ra', 'dec','aorname','basedir','chname', 'utmjd_center', 'transit_duration', 'period', 'intended_phase', 'exptime','mask', 'maskreg','stareaor','plot_norm','plot_corrnorm']
 
 ;---
+  planetname = 'wasp38'
+  chname = '2'
+  ra_ref = 243.95985208 ; 16 15 50.3645 
+  dec_ref = 10.03259056 ; +10 01 57.326 
+  aorname = ['r45676288', 'r45676032'] ;ch2
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  utmjd_center = 56190.96147D	;55335.4205D
+  transit_duration= 279.648 ;min 0.1942 days  taken from NSTED
+  period =   6.871815  ;days 
+  exptime = 0.4
+  intended_phase = 0.5
+  stareaor = 0
+  plot_norm = 0.1039
+  plot_corrnorm = 0.1025
+
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
   planetname = 'fake_dec7'
   chname ='2';  '1'
   ra_ref = 36.712664
@@ -122,16 +141,20 @@ function create_planetinfo
   chname = '2'
   ra_ref = 20.496279
   dec_ref = 76.710305
-  aorname = ['r44605184' ] 
+  ;aorname = ['r46981632','r46981888']; 2012
+  ;aorname = ['r44605184' ] ;2011
+  aorname = ['r44605184', 'r46981632','r46981888'] ; both 2011 and 2012
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
-  utmjd_center = 54727.49 - 0.16
+  utmjd_center = 54727.49 - 0.16 ;don't know where this additional change comes from
+  utmjd_center = 55866.43 ;from Stephen
+  ;utmjd_center = 55866.28554017 ; from the Knutson Nov 2011 observation
   transit_duration=77.73 ;guess at 0.01 period
   period = 5.3978
   intended_phase = 0.0
   exptime = 0.1
   stareaor = 0
-  plot_norm = 1.
-  plot_corrnorm = 1.
+  plot_norm = 1.46
+  plot_corrnorm = 1.46
 
   values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
@@ -140,7 +163,8 @@ function create_planetinfo
   chname = '2'
   ra_ref = 140.10268
   dec_ref = 33.882288
-  aorname = ['r45676544','r45675520']
+  aorname = ['r45676544','r45675520'] ; from my PID
+  ;aorname = ['r47047168', 'r47037952'] ;from Dessert PID this is the primary
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   utmjd_center = 56086.49239D
   transit_duration=243.4
@@ -162,7 +186,7 @@ function create_planetinfo
   aorname = ['r45675264', 'r45675776'] 
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   utmjd_center = 56184.45438D
-  transit_duration=56184.45438
+  transit_duration=222.900000 ; min from nsted
   period = 3.752066
   intended_phase = 0.5
   exptime = 2
@@ -194,12 +218,12 @@ function create_planetinfo
 
 ;---
   planetname = 'hat22'
-  chname = '2'
+  chname = '1';'2'
   ra_ref = 155.68122
   dec_ref = 50.128716
-  aorname = ['r45675008','r45674752' ] 
+  aorname = ['r48704512','r48693504'];['r45675008','r45674752' ] 
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
-  utmjd_center = 56081.30088
+  utmjd_center = 56486.04060; 56081.30088
   transit_duration=172.2
   period = 3.21222
   intended_phase = 0.5
