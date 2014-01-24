@@ -83,6 +83,14 @@ planethash = hash()
            endfor
 
         endif
+        if planetname eq 'hat22' then begin
+           ;print, 'applying mask for this planet'
+           for j = 0, 63 do begin
+              im[20:24, 11:15, j] = !Values.F_NAN ;mask region with nan set for bad regions
+             ; im[24, 6, j] = !Values.F_NAN  ;bad pixel  but [3,3-7] shouldn't get to this pixel
+           endfor
+
+        endif
 
                                 ; fits_read, covname, covdata, covheader
         get_centroids_for_calstar_jk,im, h, unc, ra_ref, dec_ref,  t, dt, hjd, xft, x3, y3, $

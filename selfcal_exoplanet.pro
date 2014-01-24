@@ -52,9 +52,11 @@ for a = 1, 1 do begin;  n_elements(aorname) - 1 do begin
   bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
   phase =( bmjd_dist / period )- fix(bmjd_dist/period)
   pa = where(phase gt 0.5,pacount)
-  if intended_phase ne 0.5 then begin
+;  if intended_phase ne 0.5 then begin
      if pacount gt 0 then phase[pa] = phase[pa] - 1.0
-  endif
+;  endif
+
+ 
 
   print, 'in the beginning', phase[0], phase[n_elements(phase) - 2]
 
@@ -377,7 +379,7 @@ for a = 1, 1 do begin;  n_elements(aorname) - 1 do begin
      print, 'n x, y, yerr', n_elements(x), n_elements(y), n_elements(yerr)
 ;     print, 'y', y[0:10]
 ;     print, 'x', x[0:10]
-     o = errorplot(x, y,yerr,'1o',sym_size = 0.7, sym_filled = 1, xtitle = 'Orbital Phase', ytitle = 'Normalized corrected binned flux', title = planetname)
+;     o = errorplot(x, y,yerr,'1o',sym_size = 0.7, sym_filled = 1, xtitle = 'Orbital Phase', ytitle = 'Normalized corrected binned flux', title = planetname)
      
   endif                         ;binning
   selfcal_timearr = full_time

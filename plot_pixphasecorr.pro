@@ -250,12 +250,12 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
 
      endif
                                 ;plot flat lines to guide the eyes
-;     x = findgen(1000) / 10. - 10.
-;     p6 = plot(x, fltarr(n_elements(x)) + 1.0, color = 'black',/overplot)
+     x = [0.46, 0.50, 0.54]
+     p6 = plot(x, fltarr(n_elements(x)) + 1.0, color = 'black',/overplot)
 ;     p7 = plot(x, fltarr(n_elements(x)) + 1.006, color = 'grey',/overplot)
-;     p8 = plot(x, fltarr(n_elements(x)) +1.- delta_red, color = 'red',/overplot)
-;     p9 = plot(x, fltarr(n_elements(x))  +1.011, color = 'blue',/overplot)
-;     if keyword_set(selfcal) then p10 = plot(x, fltarr(n_elements(x)) +1. -delta_green, color = 'green',/overplot)
+     p8 = plot(x, fltarr(n_elements(x)) +.988, color = 'red',/overplot)
+     p9 = plot(x, fltarr(n_elements(x))  +1.011, color = 'blue',/overplot)
+     if keyword_set(selfcal) then p10 = plot(x, fltarr(n_elements(x)) +.993, color = 'green',/overplot)
 
      ;xaxis = axis('X', location = [1.01, 0], coord_transform = [bin_phase[0], slope_convert], target = p1)
 
@@ -291,7 +291,7 @@ function fit_eclipse, xphase, ynorm, ynormerr, t1, dt, t3, d, delta, plotcolor
   MESSAGE, /RESET
   ;remove indices with nans
   badnan = where(finite(ynormerr) lt 1 or finite(ynorm) lt 1 , badcount)
-  if badcount gt 0 then begin
+  if badcount gt 0 and badcount ne n_elements(ynorm) then begin
      remove, badnan, ynorm
      remove, badnan, ynormerr
      remove, badnan, xphase
@@ -320,7 +320,7 @@ function fit_eclipse, xphase, ynorm, ynormerr, t1, dt, t3, d, delta, plotcolor
      x1 = xphase[flat]
      y1 = fltarr(flatcount) + pa(0) + delta ;  pa(0)
     ; print, 'x,y', x1[15], y1[15]
-     f1 = plot(x1,   y1  , '2',color = plotcolor, /overplot)
+ ;;    f1 = plot(x1,   y1  , '2',color = plotcolor, /overplot)
      
      ingress = where(xphase ge pa(2) and xphase le (pa(2) + pa(4)))
      x2 = fltarr(2)
@@ -329,13 +329,13 @@ function fit_eclipse, xphase, ynorm, ynormerr, t1, dt, t3, d, delta, plotcolor
      y2 = fltarr(2)
      y2(0) = pa(0) + delta
      y2(1) = pa(0) + delta - pa[1]
-     f2 = plot(x2, y2, '2',color = plotcolor,/overplot)
+ ;;    f2 = plot(x2, y2, '2',color = plotcolor,/overplot)
      
 ; In eclipse
      eclipse = where(xphase ge (pa[2] + pa[4]) and xphase le pa[3], count)
      y3 = fltarr(count) + pa(0) + delta - pa[1] ; pa[0] - pa[1]
      x3 = xphase[eclipse]
-     f3 = plot(x3, y3, '2',color = plotcolor,/overplot)
+;;     f3 = plot(x3, y3, '2',color = plotcolor,/overplot)
      
 ; Leaving eclipse
      egress = where(xphase ge pa[3] and xphase le (pa[3] + pa[4]), count)
@@ -348,12 +348,12 @@ function fit_eclipse, xphase, ynorm, ynormerr, t1, dt, t3, d, delta, plotcolor
      y4(0) = pa(0) + delta - pa[1]
      y4(1) = pa(0) + delta
      
-     f4 = plot(x4, y4, '2',color = plotcolor,/overplot)
+;;     f4 = plot(x4, y4, '2',color = plotcolor,/overplot)
      
      flat = where(xphase ge (pa[3] + pa[4]), flatcount)
      x5 = xphase[flat]
      y5 = fltarr(flatcount) + pa(0) + delta ; pa(0)
-     f5 = plot(x5,   y5  , '2',color = plotcolor,/overplot)
+;;     f5 = plot(x5,   y5  , '2',color = plotcolor,/overplot)
 
 return, 0
 

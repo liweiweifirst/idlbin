@@ -218,12 +218,12 @@ function create_planetinfo
 
 ;---
   planetname = 'hat22'
-  chname = '2'
+  chname = '1';'2'
   ra_ref = 155.68122
   dec_ref = 50.128716
-  aorname = ['r45675008','r45674752' ] 
+  aorname = ['r48704512','r48693504'];['r45675008','r45674752' ] 
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
-  utmjd_center = 56081.30088
+  utmjd_center = 56486.04060; 56081.30088
   transit_duration=172.2
   period = 3.21222
   intended_phase = 0.5
