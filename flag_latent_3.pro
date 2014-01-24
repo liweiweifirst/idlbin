@@ -357,7 +357,9 @@ scale = pixel_scale^2 ;1.22D * 1.22D
 scale = scale * !DPI * !DPI / (3600.D * 3600.D * 180.D * 180.D) * 1.0D+06
 
 Mjypersr = jy / scale
+case of
 
+endcase
 electrons = Mjypersr * gain*exptime/flux_conv
 
 
