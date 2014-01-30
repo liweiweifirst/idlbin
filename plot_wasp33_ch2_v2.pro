@@ -1,4 +1,5 @@
 pro plot_wasp33_ch2
+planetname = 'wasp33'
   colorarr = ['deep_pink', 'magenta', 'medium_purple', 'hot_pink', 'light_pink', 'rosy_brown', 'chocolate', 'saddle_brown', 'maroon', 'orange_red', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki','black', 'light_cyan', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green']
 
 ;  fits_read, '/Users/jkrick/idlbin/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_120124.fits', pmapdata, pmapheader
@@ -21,18 +22,21 @@ pro plot_wasp33_ch2
 
 
 ;-------------------------------------------------------
-;taken from nsted planet properties calculator
-  utmjd_center = double(56029.12024)
-
-  duration = 161.568              ;transit duration in minutes
-  duration = duration /60./24.  ; in days
-  period = 1.219867 ;days
-  
-
-;set phase = 0.0 in the middle of the transit
-  for a = 0, n_elements(aorname) - 1 do  begin
-      AORwasp33[a].bmjdarr = ((AORwasp33[a].bmjdarr - utmjd_center) / period) 
-  endfor
+;run code to read in all the input planet parameters
+  planetinfo = create_planetinfo()
+  chname = planetinfo[planetname, 'chname']
+  ra_ref = planetinfo[planetname, 'ra']
+  dec_ref = planetinfo[planetname, 'dec']
+  aorname = planetinfo[planetname, 'aorname']
+  basedir = planetinfo[planetname, 'basedir']
+  utmjd_center =  planetinfo[planetname, 'utmjd_center']
+  transit_duration =  planetinfo[planetname, 'transit_duration']
+  period =  planetinfo[planetname, 'period']
+  intended_phase = planetinfo[planetname, 'intended_phase']
+  stareaor = planetinfo[planetname, 'stareaor']
+  plot_norm= planetinfo[planetname, 'plot_norm']
+  plot_corrnorm = planetinfo[planetname, 'plot_corrnorm']
+ 
 
 
 ;
@@ -82,16 +86,16 @@ pro plot_wasp33_ch2
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;try this diffferently, try putting the AORs togetether as one array; then bin
 
-timearr = [AORwasp33[0].timearr, AORwasp33[1].timearr, AORwasp33[2].timearr]
-fluxarr = [AORwasp33[0].flux, AORwasp33[1].flux, AORwasp33[2].flux]
-corrfluxarr = [AORwasp33[0].corrflux, AORwasp33[1].corrflux, AORwasp33[2].corrflux]
-corrfluxerrarr = [AORwasp33[0].corrfluxerr, AORwasp33[1].corrfluxerr, AORwasp33[2].corrfluxerr]
-xarr = [AORwasp33[0].xcen, AORwasp33[1].xcen, AORwasp33[2].xcen]
-yarr = [AORwasp33[0].ycen, AORwasp33[1].ycen, AORwasp33[2].ycen]
-bkgd = [AORwasp33[0].bkgd, AORwasp33[1].bkgd, AORwasp33[2].bkgd]
-bmjd = [AORwasp33[0].bmjdarr, AORwasp33[1].bmjdarr, AORwasp33[2].bmjdarr]
+timearr = [planethash[aorname(0),'timearr'], planethash[aorname(1),'timearr'], planethash[aorname(2),'timearr']]
+fluxarr = [planethash[aorname(0),'flux'], planethash[aorname(1),'flux'], planethash[aorname(2),'flux']]
+corrfluxarr = [planethash[aorname(0),'corrflux'], planethash[aorname(1),'corrflux'], planethash[aorname(2),'corrflux']]
+corrfluxerrarr =  [planethash[aorname(0),'corrfluxerr'], planethash[aorname(1),'corrfluxerr'], planethash[aorname(2),'corrfluxerr']]
+xarr = [planethash[aorname(0),'xcen'], planethash[aorname(1),'xcen'], planethash[aorname(2),'xcen']]
+yarr = [planethash[aorname(0),'ycen'], planethash[aorname(1),'ycen'], planethash[aorname(2),'ycen']]
+bkgd = [planethash[aorname(0),'bkgd'], planethash[aorname(1),'bkgd'], planethash[aorname(2),'bkgd']]
+bmjd = [planethash[aorname(0),'bmjdarr'] , planethash[aorname(1),'bmjdarr'] , planethash[aorname(2),'bmjdarr'] ]
 
-print, 'n', n_elements(timearr), n_elements(AORwasp33[0].timearr), n_elements(AORwasp33[1].timearr), n_elements(AORwasp33[2].timearr)
+print, 'n', n_elements(timearr), n_elements(planethash[aorname(0),'timearr']), n_elements(planethash[aorname(1),'timearr']), n_elements(planethash[aorname(2),'timearr'])
 ;now for the binning
 
       ;remove outliers
