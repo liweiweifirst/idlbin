@@ -20,7 +20,7 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
   savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
   restore, savefilename
   
-  colorarr = ['blue', 'red', 'deep_pink', 'magenta', 'medium_purple', 'orange_red', 'light_pink', 'rosy_brown', 'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki','black', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple' ]
+  colorarr = ['blue', 'red', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki','black', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki','black', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ]
 ;
 ;  z = pp_multiplot(multi_layout=[1,3], global_xtitle='Orbital Phase')
 
@@ -30,35 +30,35 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
   transit_duration = transit_duration /60./24.  ; in days
   test_med = fltarr(n_elements(aorname))
 
-  for a = 0, n_elements(aorname) - 1 do  begin
+;  for a = 0, n_elements(aorname) - 1 do  begin
 ;       planetob[a].bmjdarr = ((planetob[a].bmjdarr - utmjd_center) / period) 
 ;    phase = (((planethash[aorname(a),'bmjdarr']) -  utmjd_center)/period) + intended_phase
 
      ;print, 'testing (planethash[aorname(0),corrflux])[0:10]',(planethash[aorname(0),'corrflux'])[0:10]
 
      ;now try to get them all within the same [0,1] phase     
-     bmjd = (planethash[aorname(a),'bmjdarr'])
+;     bmjd = (planethash[aorname(a),'bmjdarr'])
      ;print, 'bmjd', bmjd(0), format = '(A,F0)'
-     bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
+;     bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
      ;print, 'bmjd- utmjd', bmjd_dist(0), format = '(A,F0)'
-     phase =( bmjd_dist / period )- fix(bmjd_dist/period)
+;     phase =( bmjd_dist / period )- fix(bmjd_dist/period)
 
      ;ok, but now I want -0.5 to 0.5, not 0 to 1
      ;need to be careful here because subtracting half a phase will put things off, need something else
-     print, ' before phase',  phase(0), format = '(A,F0)'    
-     if intended_phase lt 0.5 then begin  ;primary transit
-        pa = where(phase gt 0.5,pacount)
-        if pacount gt 0 then phase[pa] = phase[pa] - 1.0
-     endif else begin  ;secondary eclipse
-        print, 'secondary eclipse intended'
-        phase = phase + 0.5
-     endelse
+    ; print, ' before phase',  phase(0), format = '(A,F0)'    
+;     if intended_phase lt 0.5 then begin  ;primary transit
+;        pa = where(phase gt 0.5,pacount)
+;        if pacount gt 0 then phase[pa] = phase[pa] - 1.0
+;     endif else begin  ;secondary eclipse
+;        print, 'secondary eclipse intended'
+;        phase = phase + 0.5
+;     endelse
 
-    print, ' after phase',  phase(0), format = '(A,F0)'
+    ;print, ' after phase',  phase(0), format = '(A,F0)'
 ;    print, 'nphase, corr', n_elements(phase), n_elements(bin_corrflux)
     ;changing the bmjd tag to now house the phases
-    planethash[aorname(a),'bmjdarr'] = phase
- endfor
+;    planethash[aorname(a),'bmjdarr'] = phase
+; endfor
 
 
 ;-------------------------------------------------------
@@ -70,16 +70,19 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
 ;  fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_121120.fits', pmapdata, pmapheader
   fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120409.fits', pmapdata, pmapheader
   c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [0,500], yrange = [0,500])
+
   for a = 0 , n_elements(aorname) - 1 do begin
 ;     print, 'testing aors', a, colorarr[a]
 
      xcen500 = 500.* ((planethash[aorname(a),'xcen']) - 14.5)
      ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
      an = plot(xcen500, ycen500, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
-     print, 'xcen500', xcen500
-     print, 'ycen500', ycen500
+ ;    print, 'xcen500', xcen500
+ ;    print, 'ycen500', ycen500
   endfor
   an.save, dirname+'position.png'
+;GOTO, Jumpend
+
 ;-----
  
   ;print, 'min', min((planetob[a].timearr - planetob[0].timearr(0))/60./60.)
@@ -170,6 +173,8 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
      bkgd = [ planethash[aorname(a),'bkgd']]
      bmjd = [ planethash[aorname(a),'bmjdarr']]
      np = [ planethash[aorname(a),'np']]
+     phase = [ planethash[aorname(a),'phase']]
+
 ;     centerpixarr = [ planethash[aorname(a),'centerpixarr5']]
      print, 'testing corrfluxarr', corrfluxarr[0:10]
 
@@ -215,6 +220,7 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
      bkgdarrp = bkgd[goodpmap]
      phasearrp = phase[goodpmap]
      nparrp = np[goodpmap]
+     phasearrp = phase[goodpmap]
 ;     centerpixarrp = centerpixarr[goodpmap]
 
 ;     print, 'testing after outlier', flux[0:10]
@@ -291,8 +297,8 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
            meanclip, timearr[ri[ri[j]:ri[j+1]-1]], meantimearr, sigmatimearr
            bin_timearr[c]=meantimearr
            
-           meanclip, bmjdarr[ri[ri[j]:ri[j+1]-1]], meanbmjdarr, sigmabmjdarr
-           bin_phase[c]= meanbmjdarr
+           meanclip, phasearr[ri[ri[j]:ri[j+1]-1]], meanphasearr, sigmaphasearr
+           bin_phase[c]= meanphasearr
 
            ;can only compute means if there are values in there
 ;           if pmapcorr eq 1 then begin
@@ -453,6 +459,8 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
      if keyword_set(phaseplot) then begin ;make the plot as a function of phase
 
         print, 'test phase', bin_phase(0)
+        print, 'test normflux', bin_flux/plot_norm
+        
 ;   setxrange = [-0.022,-0.0205]
 ;   setxrange =[-0.0127, -0.0112]
         setxrange = [0.45, 0.55]
@@ -652,6 +660,7 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
   save, /all, filename=savename
   print, 'saving planethash', savename
 
+;jumpend: print, 'ending early for just easy plots'
 end
 
 

@@ -20,15 +20,15 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
      restore, filename
 
 ;work out phases
-     print, ' before phase',  phase(0), format = '(A,F0)'    
-     if intended_phase lt 0.5 then begin  ;primary transit
-        pa = where(phase gt 0.5,pacount)
-        if pacount gt 0 then phase[pa] = phase[pa] - 1.0
-     endif else begin  ;secondary eclipse
-        print, 'secondary eclipse intended'
-        phase = phase + 0.5
-     endelse
-    print, ' after phase',  phase(0), format = '(A,F0)'
+;     print, ' before phase',  phase(0), format = '(A,F0)'    
+;     if intended_phase lt 0.5 then begin  ;primary transit
+;        pa = where(phase gt 0.5,pacount)
+;        if pacount gt 0 then phase[pa] = phase[pa] - 1.0
+;     endif else begin  ;secondary eclipse
+;        print, 'secondary eclipse intended'
+;        phase = phase + 0.5
+;     endelse
+;    print, ' after phase',  phase(0), format = '(A,F0)'
 
 
 ;binning
@@ -130,7 +130,9 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
 
      for exofast = 0, n_elements(bin_time) - 1 do begin
         if finite(bin_corrflux(exofast)) gt 0 then begin
-           print, bin_bmjd(exofast) + 2400000.5D, ' ',bin_corrflux(exofast), ' ',bin_corrfluxerr(exofast), format = '(F0, A,F0, A, F0)'
+;           print, bin_bmjd(exofast) + 2400000.5D, ' ',bin_corrflux(exofast), ' ',bin_corrfluxerr(exofast), format = '(F0, A,F0, A, F0)'
+           print, bin_bmjd(exofast) - 56081.26 , ' ',(bin_corrflux(exofast) / median(bin_corrflux)) - 0.0005, format = '(F0, A,F0)'
+           ;a guess at mid-transit
         endif
 
      endfor
@@ -233,7 +235,7 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
      
      if keyword_set(selfcal) then begin
         restore, strcompress(dirname + 'selfcal.sav')    
-        if intended_phase gt 0 then bin_phasearr = bin_phasearr + 0.5
+       ; if intended_phase gt 0 then bin_phasearr = bin_phasearr + 0.5
 
 
          if keyword_set(phaseplot) then begin
@@ -273,7 +275,7 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
   endfor                        ; n_elements(aorname)
 
 ;finally save the plot
-;  p9.save, dirname+'allfluxes_binned.png'
+  p9.save, dirname+'allfluxes_binned.png'
 
 end
 
@@ -317,6 +319,15 @@ function fit_eclipse, xphase, ynorm, ynormerr, t1, dt, t3, d, delta, plotcolor
           
    ;plotting overlay
      flat = where(xphase le pa(2), flatcount)
+     ;catch a bug: if there is no initial flat part
+     if flatcount lt 1 then begin
+        print, 'inside if statement'
+        flatcount = 1
+        flat = 1
+     endif
+
+;     print, 'xphase', xphase
+;     print, 'flatcount', flatcount , pa(2)
      x1 = xphase[flat]
      y1 = fltarr(flatcount) + pa(0) + delta ;  pa(0)
     ; print, 'x,y', x1[15], y1[15]

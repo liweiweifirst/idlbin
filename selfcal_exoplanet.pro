@@ -46,14 +46,15 @@ for a = 1, 1 do begin;  n_elements(aorname) - 1 do begin
   corrfluxerr = (planethash[aorname(a),'corrfluxerr'])[startnum(a):*]
   bmjd = (planethash[aorname(a),'bmjdarr'])[startnum(a):*]
 ;  utcs = (planethash[aorname(a),'utcsarr'])[startnum(a):*]
+  phase = (planethash[aorname(a),'phase'])[startnum(a):*]
 
     ;now try to get them all within the same [0,1] phase  
   ;taken from plot_exoplanet.pro
-  bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
-  phase =( bmjd_dist / period )- fix(bmjd_dist/period)
-  pa = where(phase gt 0.5,pacount)
+ ; bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
+ ; phase =( bmjd_dist / period )- fix(bmjd_dist/period)
+ ; pa = where(phase gt 0.5,pacount)
 ;  if intended_phase ne 0.5 then begin
-     if pacount gt 0 then phase[pa] = phase[pa] - 1.0
+ ;    if pacount gt 0 then phase[pa] = phase[pa] - 1.0
 ;  endif
 
  

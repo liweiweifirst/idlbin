@@ -51,14 +51,15 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
      flux_m = planethash[aorname(a), 'flux']
      fluxerr_m = Planethash[aorname(a), 'fluxerr']
      bmjd = planethash[aorname(a),'bmjdarr']
+     phase = planethash[aorname(a),'phase']
 
      time = (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0)) ; in seconds;/60./60. ; in hours from beginning of obs.
 
      ;now try to get them all within the same [0,1] phase     
-     bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
-     phase =( bmjd_dist / period )- fix(bmjd_dist/period)
-     pa = where(phase gt 0.5,pacount)
-     if pacount gt 0 then phase[pa] = phase[pa] - 1.0
+ ;    bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
+ ;    phase =( bmjd_dist / period )- fix(bmjd_dist/period)
+ ;    pa = where(phase gt 0.5,pacount)
+ ;    if pacount gt 0 then phase[pa] = phase[pa] - 1.0
      
      sqrtnp = sqrt(np)
      
