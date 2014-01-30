@@ -47,7 +47,8 @@ function create_planetinfo
   dec_ref = 37.550367
     aorname = ['r45383424', 'r45384448', 'r45384704'] ;ch2
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
-  utmjd_center = 55957.14809D
+  utmjd_center = 55957.14809D    ;56029.12024D
+
   transit_duration= 170.0; min  taken from exoplanet transit database
   period =    1.219867  ;days 
   exptime = 0.4
@@ -78,6 +79,29 @@ function create_planetinfo
   values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 ;---
+
+ planetname = 'wasp62'
+  chname = '2' ;'1'
+  ra_ref = 87.139641
+  dec_ref =-63.988068
+  aorname = ['r48708608', 'r48708352', 'r48708096', 'r48707840', 'r48707584', 'r48707328', 'r48707072', 'r48706816', 'r48706560', 'r48706304', 'r48702720', 'r48702464', 'r48702208', 'r48701952', 'r48701696', 'r48701440', 'r48701184', 'r48700928', 'r48700672', 'r48700416', 'r48697600', 'r48697344', 'r48697088', 'r48696832', 'r48696576', 'r48696320', 'r48696064', 'r48690688', 'r48690432', 'r48690176', 'r48689920', 'r48689664', 'r48689408', 'r48689152', 'r48688896', 'r48688640', 'r48687360', 'r48687104', 'r48686848', 'r48686592', 'r48686336', 'r48686080', 'r48685824', 'r48685568', 'r48685312', 'r48685056', 'r49048576', 'r49048320', 'r49048064', 'r49047808', 'r49047552', 'r49047296', 'r49047040', 'r49046784', 'r49046528', 'r49046272', 'r49046016', 'r49045760', 'r49045504', 'r49045248', 'r49044992', 'r49044736', 'r49044480', 'r49044224', 'r49043968', 'r49043712', 'r49043456', 'r49043200', 'r49042944', 'r49042688', 'r49042432', 'r49042176', 'r49041920', 'r49041664', 'r49041408', 'r49041152', 'r49040896', 'r49040640', 'r49040384', 'r49040128', 'r49039872',  'r48695808',  'r48680448'] ;['r48680960','r48702976']
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  utmjd_center = 56545.36259D
+  transit_duration=228.7 ; min
+  period = 4.411953          ;days intended_phase = 0.0
+  exptime = 2.0
+  intended_phase = 0
+  stareaor = 0
+  plot_norm = 1.
+  plot_corrnorm = 1.
+
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+
+
+
+
   planetname = 'hd189733'
   chname = '1' ;!!!
   ra_ref = 300.18185
@@ -199,12 +223,12 @@ function create_planetinfo
 
 ;---
   planetname = 'wasp16'
-  chname = '2'
+  chname = '1'
   ra_ref = 214.68297
   dec_ref = -20.275605
-  aorname =['r45674240','r45674496']
+  aorname =['r48705536', 'r48692736'];['r45674240','r45674496']
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
-  utmjd_center = 56179.09319
+  utmjd_center = 56578.27412; 56179.09319
   transit_duration=115.2
   period = 3.118601
   intended_phase = 0.5
@@ -218,19 +242,42 @@ function create_planetinfo
 
 ;---
   planetname = 'hat22'
-  chname = '1';'2'
+  chname = '2';'1'
   ra_ref = 155.68122
   dec_ref = 50.128716
-  aorname = ['r48704512','r48693504'];['r45675008','r45674752' ] 
+  aorname = ['r45675008','r45674752' ] ;['r48704512','r48693504'];
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
-  utmjd_center = 56486.04060; 56081.30088
+  utmjd_center =  56081.30088 ;56486.04060;
   transit_duration=172.2
   period = 3.21222
   intended_phase = 0.5
   exptime = 0.4
   stareaor = 0
-  plot_norm = 1.
-  plot_corrnorm = 1.
+  plot_norm = 0.1146;1.
+  plot_corrnorm = 0.1146
+
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
+  planetname = 'hatp8'
+  chname = '1';'1'
+  ra_ref = 343.0414
+  dec_ref = 35.447403
+ ; aorname = ['r48695040', 'r48698112',  'r48699136',  'r48700160',  'r48704000',  'r48705280', 'r48684800',  'r48695296',  'r48698368',  'r48699392',  'r48703232',  'r48704256',  'r48705792', 'r48694528',  'r48695552',  'r48698624',  'r48699648',  'r48703488',  'r48704768',  'r48706048', 'r48694784',  'r48697856',  'r48698880',  'r48699904',  'r48703744',  'r48705024'] ;ch2 snaps
+
+  aorname = ['r36784384', 'r36787456'] ; ch1 knutson eclipse
+;  aorname = [ 'r36789504','r36785664'] ; ch2 knutson eclipse
+
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  utmjd_center =   55207.80851;55210.88489;
+  transit_duration=228.5
+  period = 3.076378
+  intended_phase = 0.5
+  exptime = 2.
+  stareaor = 0
+  plot_norm = 0.0447
+  plot_corrnorm = 0.0340
 
   values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
@@ -240,7 +287,7 @@ function create_planetinfo
   chname = '2'
   ra_ref = 218.27649
   dec_ref = 21.894575
-  aorname = [ 'r45428992', 'r45428736', 'r45428480', 'r45428224', 'r45426688', 'r45838592', 'r45840128', 'r45841408', 'r45842176', 'r45842944', 'r45844480', 'r45845248', 'r45846016', 'r45846784', 'r45839104', 'r45840896', 'r45841664', 'r45842432', 'r45843200', 'r45844736', 'r45845504', 'r45846272', 'r45847040', 'r45839616', 'r45841152', 'r45841920','r45843968','r45843712','r45843456','r45840640','r45840384','r45839872','r45839360','r45838848','r45838336', 'r45842688', 'r45844224', 'r45844992', 'r45845760', 'r45846528']  ;snapshots and last 5 are ch2 stares
+  aorname = [ 'r45428992', 'r45428736', 'r45428480', 'r45428224', 'r45426688', 'r45838592', 'r45840128', 'r45841408', 'r45842176', 'r45842944', 'r45844480', 'r45845248', 'r45846016', 'r45846784', 'r45839104', 'r45840896', 'r45841664', 'r45842432', 'r45843200', 'r45844736', 'r45845504', 'r45846272', 'r45847040', 'r45839616', 'r45841152', 'r45841920','r45843968','r45843712','r45843456','r45840640','r45840384','r45839872','r45839360','r45838848','r45838336','r48688384','r48688128','r48687872','r48687616','r48683776','r48683264', 'r48682752','r48682240','r48681472','r48681216','r48680704']  ;snapshots and these are ch2 stares = , 'r45842688', 'r45844224', 'r45844992', 'r45845760', 'r45846528'
 
 ;'r45843968','r45843712','r45843456','r45840640','r45840384','r45839872','r45839360','r45838848','r45838336'
 
@@ -250,7 +297,7 @@ function create_planetinfo
   period = 2.243752
   intended_phase = 0.0
   exptime = 2
-  stareaor =4
+  stareaor =0;4
   plot_norm = 0.0617
   plot_corrnorm = 0.0607
   mask = 'yes'
