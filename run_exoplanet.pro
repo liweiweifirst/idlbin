@@ -28,11 +28,11 @@ pro run_exoplanet
 ;  plot_pixphasecorr, 'wasp16', 200L, /errorbars, /phaseplot,/selfcal
 ;  plot_exoplanet, 'wasp16', 200L, /phaseplot
 ;---------------------------------------------------------------------
-;  phot_exoplanet, 'wasp13'
-;  selfcal_exoplanet, 'wasp13', 200L, /binning
-;  pixphasecorr_noisepix, 'wasp13', 50
-;  plot_pixphasecorr, 'wasp13', 200L, /errorbars, /phaseplot,/selfcal
-;  plot_exoplanet, 'wasp13', 200L, /phaseplot
+  phot_exoplanet, 'wasp13'
+  selfcal_exoplanet, 'wasp13', 200L, /binning
+  pixphasecorr_noisepix, 'wasp13', 50
+  plot_pixphasecorr, 'wasp13', 200L, /errorbars, /phaseplot,/selfcal
+  plot_exoplanet, 'wasp13', 200L, /phaseplot
 ;---------------------------------------------------------------------
 ;  phot_exoplanet, 'hat22'
 ;  selfcal_exoplanet, 'hat22', 200L, /binning
