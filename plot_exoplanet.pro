@@ -27,8 +27,8 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
 ;-------------------------------------------------------
 ;work out the phase
 ;-------------------------------------------------------
-  transit_duration = transit_duration /60./24.  ; in days
-  test_med = fltarr(n_elements(aorname))
+;  transit_duration = transit_duration /60./24.  ; in days
+;  test_med = fltarr(n_elements(aorname))
 
 ;  for a = 0, n_elements(aorname) - 1 do  begin
 ;       planetob[a].bmjdarr = ((planetob[a].bmjdarr - utmjd_center) / period) 
@@ -227,11 +227,11 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
 ; binning
      numberarr = findgen(n_elements(xarr))
      h = histogram(numberarr, OMIN=om, binsize = bin_level, reverse_indices = ri)
-     ;print, 'omin', om, 'nh', n_elements(h)
+     print, 'omin', om, 'nh', n_elements(h)
 
      numberarrp = findgen(n_elements(xarrp))
      hp = histogram(numberarrp, OMIN=omp, binsize = bin_level, reverse_indices = rip)
-     ;print, 'ominp', omp, 'nhp', n_elements(hp), n_elements(xarrp)
+     print, 'ominp', omp, 'nhp', n_elements(hp), n_elements(xarrp)
 
 
 ;mean together the flux values in each phase bin
@@ -387,8 +387,8 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
            meanclip, timearrp[rip[rip[j]:rip[j+1]-1]], meantimearr, sigmatimearr
            bin_timearrp[cp]=meantimearr
            
-           meanclip, bmjdarrp[rip[rip[j]:rip[j+1]-1]], meanbmjdarr, sigmabmjdarr
-           bin_phasep[cp]= meanbmjdarr
+           meanclip, phasearrp[rip[rip[j]:rip[j+1]-1]], meanphasearr, sigmabmjdarr
+           bin_phasep[cp]= meanphasearr
 
 ;            meanclip, phasearr[rip[rip[j]:rip[j+1]-1]], meanphase, sigmaphasearr
 ;            bin_phase[cp]= meanphase
@@ -463,7 +463,7 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
         
 ;   setxrange = [-0.022,-0.0205]
 ;   setxrange =[-0.0127, -0.0112]
-        setxrange = [0.45, 0.55]
+        setxrange = [0.,1.0];[0.45, 0.55]
 
         if a eq 0 then begin    ; for the first AOR
            pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.3,   sym_filled = 1, title = planetname, $

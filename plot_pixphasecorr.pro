@@ -1,4 +1,4 @@
-pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = errorbars, phaseplot = phaseplot
+pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = errorbars, phaseplot = phaseplot, fit_eclipse = fit_eclipse
 
 ;get all the necessary saved info/photometry
   planetinfo = create_planetinfo()
@@ -18,17 +18,6 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
      filename =strcompress(dirname +'pixphasecorr_ch'+chname+'_'+aorname(a) +'.sav')
      print, a, ' ', aorname(a), 'restoring', filename
      restore, filename
-
-;work out phases
-;     print, ' before phase',  phase(0), format = '(A,F0)'    
-;     if intended_phase lt 0.5 then begin  ;primary transit
-;        pa = where(phase gt 0.5,pacount)
-;        if pacount gt 0 then phase[pa] = phase[pa] - 1.0
-;     endif else begin  ;secondary eclipse
-;        print, 'secondary eclipse intended'
-;        phase = phase + 0.5
-;     endelse
-;    print, ' after phase',  phase(0), format = '(A,F0)'
 
 
 ;binning
@@ -223,7 +212,7 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
 
 ;----------------------------------------------------
    ;fit the curves to a trapezoid, and plot
-     if keyword_set(phaseplot) then begin
+     if keyword_set(phaseplot) and keyword_set(fit_eclipse) then begin
         print, 'starting all fitting'
         trap = fit_eclipse(bin_phase, bin_flux/median(bin_flux) , bin_fluxerr/median(bin_flux),0.486 , 0.005,0.515,0.001, delta_red,'red')
         trap = fit_eclipse(bin_phase,bin_flux_np /median(bin_flux_np), bin_fluxerr_np/median(bin_flux_np),0.486 , 0.005,0.515,0.001, delta_blue,'blue')
@@ -242,7 +231,10 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
             p5 = errorplot(bin_phasearr, y +delta_green, yerr, '1s', sym_size = 0.3,   sym_filled = 1, $
                       color = 'green',/overplot, name = 'selfcal', errorbar_color = 'green', $
                       errorbar_capsize = 0.025)
-            trap = fit_eclipse(bin_phasearr, y ,yerr,0.486 , 0.005,0.515,0.001, delta_green,'green')
+            if keyword_set(fit_eclipse) then begin
+               trap = fit_eclipse(bin_phasearr, y ,yerr,0.486 , 0.005,0.515,0.001, delta_green,'green')
+            endif
+
          endif else begin
             p5 = errorplot(bin_timearr, y +delta_green, yerr,  '1s', sym_size = 0.3,   sym_filled = 1, $
                       color = 'green',/overplot, name = 'selfcal', errorbar_color = 'green', $

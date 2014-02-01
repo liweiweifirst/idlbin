@@ -96,6 +96,16 @@ bkgd = [planethash[aorname(0),'bkgd'], planethash[aorname(1),'bkgd'], planethash
 bmjd = [planethash[aorname(0),'bmjdarr'] , planethash[aorname(1),'bmjdarr'] , planethash[aorname(2),'bmjdarr'] ]
 
 print, 'n', n_elements(timearr), n_elements(planethash[aorname(0),'timearr']), n_elements(planethash[aorname(1),'timearr']), n_elements(planethash[aorname(2),'timearr'])
+
+timearr = timearr[0:103005];[206010:*];[103005:206010];
+fluxarr = fluxarr[0:103005];[206010:*];[103005:206010];
+corrfluxarr = corrfluxarr[0:103005];[206010:*];[103005:206010];
+xarr = xarr[0:103005];[206010:*];[103005:206010];
+yarr = yarr[0:103005];[206010:*];[103005:206010];[
+bkgd = bkgd[0:103005];[206010:*];[103005:206010];[
+bmjd = bmjd[0:103005];[206010:*];[103005:206010];
+
+
 ;now for the binning
 
       ;remove outliers
@@ -182,6 +192,7 @@ save, bin_corrflux, filename = '/Users/jkrick/irac_warm/pcrs_planets/wasp33/bin_
 ;print, 'starting periodogram'
 ;X = (bin_timearr - bin_timearr(0))/60./60. ;in hours
 X = (bin_timearr - bin_timearr(0))/60./60./24. ;in days
+
 Y = bin_corrflux
 ;t = plot(x, y)
 ;ok, try cutting this down in phase to between eclipses
@@ -226,14 +237,18 @@ flaty2 = y2 - (fitres2(0)*x2+ fitres2(1))
 ;now put them together after flattening
 x = [x1, x2]
 flaty = [flaty1, flaty2]
+
+;convert x to minutes
+;x = x / 24. / 60.
+
 print, 'pmap units', min(x), max(x), min(flaty), max(flaty)
 ;print, y[0:100]
 ; Test the hypothesis that X and Y represent a significant periodic
 ; signal against the hypothesis that they represent random noise:
 result = LNP_TEST(X, flaty,/double, WK1 = wk1, WK2 = wk2, JMAX = jmax)
-;PRINT, 'lnp result', result
+PRINT, 'lnp result', result
 
-b = plot(wk1, wk2, xtitle = 'Frequency(1/days)', ytitle = 'Power', xrange =[0,50], yrange = [0,150],thick = 2, color = 'red',name = 'Pmap Corrected');
+b = plot(wk1, wk2, xtitle = 'Frequency(1/days)', ytitle = 'Power', xrange =[0,50], yrange = [0,150],thick = 2, color = 'red',name = 'Pmap Corrected')
 
 ;------------------------------------------------------------
 ;now try overplotting uncorrected periodogram
@@ -270,6 +285,7 @@ result = LNP_TEST(X, flatY2,/double, WK1 = wk1, WK2 = wk2, JMAX = jmax)
 PRINT, result
 
 b2 = plot(wk1, wk2, /overplot, color = 'black',thick = 2, name = 'Original')
+save, wk1, wk2, filename = '/Users/jkrick/irac_warm/pcrs_planets/wasp33/periodogram1.sav'
 ;---------------------------------------------------------------------
 ;XXX just need to do this 1000 times now.
 
@@ -365,8 +381,8 @@ print, 'selfcal units', min(x), max(x), min(flaty), max(flaty)
 result = LNP_TEST(x, flaty,/double, WK1 = wk1, WK2 = wk2, JMAX = jmax)
 PRINT, 'lnp result', result
 
-b3 = plot(wk1, wk2, thick = 2, name = 'Self-Calibrated', color = 'light_sky_blue',/overplot);
-l = legend(target = [b2, b, b3], position = [35, 140],/data)
+;b3 = plot(wk1, wk2, thick = 2, name = 'Self-Calibrated', color = 'light_sky_blue',/overplot);
+;l = legend(target = [b2, b, b3], position = [35, 140],/data)
 
 end
 
