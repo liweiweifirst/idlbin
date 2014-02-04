@@ -28,10 +28,10 @@ pro run_exoplanet
 ;  plot_pixphasecorr, 'wasp16', 200L, /errorbars, /phaseplot,/selfcal
 ;  plot_exoplanet, 'wasp16', 200L, /phaseplot
 ;---------------------------------------------------------------------
-  phot_exoplanet, 'wasp13'
-  selfcal_exoplanet, 'wasp13', 200L, /binning
-  pixphasecorr_noisepix, 'wasp13', 50
-  plot_pixphasecorr, 'wasp13', 200L, /errorbars, /phaseplot,/selfcal
+;  phot_exoplanet, 'wasp13'
+;  selfcal_exoplanet, 'wasp13', 200L, /binning
+;  pixphasecorr_noisepix, 'wasp13', 50
+;  plot_pixphasecorr, 'wasp13', 200L, /errorbars, /phaseplot,/selfcal
   plot_exoplanet, 'wasp13', 200L, /phaseplot
 ;---------------------------------------------------------------------
 ;  phot_exoplanet, 'hat22'
@@ -63,5 +63,17 @@ pro run_exoplanet
 ;  pixphasecorr_noisepix, 'wasp14', 50
 ;  plot_pixphasecorr, 'wasp14', 200L, /errorbars, /phaseplot,/selfcal
 ;  plot_exoplanet, 'wasp14', 200L, /phaseplot
+;---------------------------------------------------------------------
+  phot_exoplanet, '55cnc'  ; just running the snaps for now
+  selfcal_exoplanet, '55cnc', 200L, /binning
+  pixphasecorr_noisepix, '55cnc', 50
+  plot_pixphasecorr, '55cnc', 200L, /errorbars, /phaseplot,/selfcal
+  plot_exoplanet, '55cnc', 200L, /phaseplot
+;---------------------------------------------------------------------
+  phot_exoplanet, 'hd189733' 
+  selfcal_exoplanet, 'hd189733', 200L, /binning
+  pixphasecorr_noisepix, 'hd189733', 50
+  plot_pixphasecorr, 'hd189733', 200L, /errorbars, /phaseplot,/selfcal
+  plot_exoplanet, 'hd189733', 200L, /phaseplot
 
 end

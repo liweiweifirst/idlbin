@@ -508,7 +508,7 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
 
         endif                   ; if a = 0
 
-        test_med(a) = median(bin_corrfluxp)
+      ;  test_med(a) = median(bin_corrfluxp)
         print,'median bin_corrfluxp ',  median(bin_corrfluxp)
         if (a gt 0) and (a le stareaor) then begin
 ;           pp.window.SetCurrent
