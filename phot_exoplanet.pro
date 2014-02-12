@@ -18,7 +18,7 @@ dirname = strcompress(basedir + planetname +'/')
 planethash = hash()
 
 
-for a = 0,   n_elements(aorname) - 1 do begin
+for a = 0,  n_elements(aorname) - 1 do begin
    print, 'working on ',aorname(a)
    dir = dirname+ string(aorname(a) ) 
    CD, dir                      ; change directories to the correct AOR directory
@@ -47,23 +47,29 @@ for a = 0,   n_elements(aorname) - 1 do begin
       exptime = sxpar(header, 'EXPTIME')
       aintbeg = sxpar(header, 'AINTBEG')
       atimeend = sxpar(header, 'ATIMEEND')
-      
+      naxis = sxpar(header, 'NAXIS')
+
       if i eq 0 then sclk_0 = sxpar(header, 'SCLK_OBS')
       
-      sclkarr = dblarr(64)
-      bmjdarr = dblarr(64)
+      if naxis eq 3 then begin
+         sclkarr = dblarr(64)
+         bmjdarr = dblarr(64)
                                 ;utcsarr = dblarr(64)
-      deltatime = (atimeend - aintbeg) / 64.D ; real time for each of the 64 frames
-      for nt = 0., 64 - 1 do begin
-         sclkarr[nt] = sclk_obs  + (deltatime*nt)/60./60./24.D ; 0.5*frametime + frametime*nt
-       ; utcsarr[nt]= utcs_obs + (deltatime*nt)/60./60./24.D;+ 0.5*(frametime/60./60./24.)  + (frametime/60./60./24.) *nt
+         deltatime = (atimeend - aintbeg) / 64.D ; real time for each of the 64 frames
+         for nt = 0., 64 - 1 do begin
+            sclkarr[nt] = sclk_obs  + (deltatime*nt)/60./60./24.D ; 0.5*frametime + frametime*nt
+                                ; utcsarr[nt]= utcs_obs + (deltatime*nt)/60./60./24.D;+ 0.5*(frametime/60./60./24.)  + (frametime/60./60./24.) *nt
 ;          print, 'deltattime in seconds', (deltatime*nt)/60./60./24.D, format = '(A, F0)'
 ;          print, 'bmjdobs', bmjd_obs, format =  '(A, F0)'
 ;           print, 'addition',  bmjd_obs + (deltatime*nt)/60./60./24.D, format =  '(A, F0)'
-         bmjdarr[nt]= bmjd_obs + (deltatime*nt)/60./60./24.D ; 0.5*(frametime/60./60./24.) + (frametime/60./60./24.)*nt
+            bmjdarr[nt]= bmjd_obs + (deltatime*nt)/60./60./24.D ; 0.5*(frametime/60./60./24.) + (frametime/60./60./24.)*nt
 ;           print, 'time test', bmjdarr[nt], format = '(A, F0)'
-      endfor
-      
+         endfor
+      endif else begin  ; full array, so don't need to expand out the times
+         sclkarr = sclk_obs
+         bmjdarr = bmjd_obs
+      endelse
+
       ;read in the files
       fits_read, fitsname(i), im, h
       fits_read, buncname(i), unc, hunc
@@ -99,7 +105,7 @@ for a = 0,   n_elements(aorname) - 1 do begin
       y_center = y3
       
                                 ;calculate noise pixel
-      np = noisepix(im, x_center, y_center, ronoise, gain, exptime, fluxconv)
+      np = noisepix(im, x_center, y_center, ronoise, gain, exptime, fluxconv,naxis)
       
                                 ; if changing the apertures then use this to calculate photometry
       if keyword_set(breatheap) then begin
@@ -167,7 +173,7 @@ for a = 0,   n_elements(aorname) - 1 do begin
       
 ;---------------------------------
 
-      if i eq 0 then begin
+      if naxis eq 3 and i eq 0 then begin
          xarr = x_center[1:*]
          yarr = y_center[1:*]
          fluxarr = abcdflux[1:*]
@@ -197,7 +203,8 @@ for a = 0,   n_elements(aorname) - 1 do begin
          endif
          
          
-      endif else begin
+      endif 
+      if naxis eq 3 and i ne 0 then begin
          xarr = [xarr, x_center[1:*]]
          yarr = [yarr, y_center[1:*]]
          fluxarr = [fluxarr, abcdflux[1:*]]
@@ -225,9 +232,38 @@ for a = 0,   n_elements(aorname) - 1 do begin
             sigmapixarr6 = [sigmapixarr6, sigmapixval6[1:*]]
          endif
          
-         
-      endelse
-      
+      endif
+      if naxis eq 2 and i eq 0 then begin
+         xarr = [ x_center]
+         yarr = [ y_center]
+         fluxarr = [ abcdflux]
+         fluxerrarr = [ fs]
+         corrfluxarr = [corrflux]
+         corrfluxerrarr = [ corrfluxerr]
+         timearr = [sclkarr]
+         bmjd = [bmjdarr]
+;           utcs = [ utcsarr]
+         backarr = [ back]
+         backerrarr = [backerr]
+         nparr = [np]
+      endif
+
+      if naxis eq 2 and i ne 0 then begin
+         xarr = [xarr, x_center]
+         yarr = [yarr, y_center]
+         fluxarr = [fluxarr, abcdflux]
+         fluxerrarr = [fluxerrarr, fs]
+         corrfluxarr = [corrfluxarr, corrflux]
+         corrfluxerrarr = [corrfluxerrarr, corrfluxerr]
+         timearr = [timearr, sclkarr]
+         bmjd = [bmjd, bmjdarr]
+;           utcs = [utcs, utcsarr]
+         backarr = [backarr, back]
+         backerrarr = [backerrarr, backerr]
+         nparr = [nparr, np]
+      endif
+
+
    endfor; for each fits file in the AOR
 
 
@@ -239,11 +275,13 @@ for a = 0,   n_elements(aorname) - 1 do begin
    
    
 ;get phasing out of the way here
+;   print,'utmjd_center', utmjd_center
+;   print, 'before bmjd', bmjd
    bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
+;   print, 'before bmjd_dist', bmjd_dist
 
    phase =( bmjd_dist / period )- fix(bmjd_dist/period)
    
-
    low = where(phase lt-0.5 and phase ge -1.0)
    phase(low) = phase(low) + 1.
    
@@ -254,7 +292,7 @@ for a = 0,   n_elements(aorname) - 1 do begin
       print, 'secondary eclipse intended'
       phase = phase+0.5
    endif 
-;   print, ' after phase',  phase ;, format = '(A,F0)'
+  print, ' after phase',  phase ;, format = '(A,F0)'
    
 ;--------------------------------
 ;fill in that hash of hases
@@ -273,8 +311,7 @@ for a = 0,   n_elements(aorname) - 1 do begin
    endelse
    print, 'n_elements(xarr)', n_elements(xarr), 'should be', 63*1310.
 
-
-
+   print, 'testing phase', phase[0]
 endfor                          ;for each AOR
 
 
@@ -289,8 +326,8 @@ print, 'saving planethash', savename
 print, 'time check', systime(1) - t1
 
                                 ; print, planethash.keys()
-;  print, planethash[aorname(0)].keys()
-                                ; print, 'testing (planethash[aorname(0),flux])[0:10]',(planethash[aorname(0),'flux'])[0:10]
+ ; print, planethash[aorname(0)].keys()
+  print, 'testing (planethash[aorname(0),phase])[0:10]',(planethash[aorname(0),'phase'])[0:10]
 ;  print, 'n_elements in hash', n_elements(planethash[aorname(1),'xcen'])
 
 
@@ -306,21 +343,34 @@ end
 
 
 ;function to calcluate noise pixel
-function noisepix, im, xcen, ycen, ronoise, gain, exptime, fluxconv
+function noisepix, im, xcen, ycen, ronoise, gain, exptime, fluxconv,naxis
 
   convfac = gain*exptime/fluxconv
-   np = fltarr(64)
-  for npj = 0, 63 do begin
-     indim = im[*,*,npj]
-     indim = indim*convfac
-     
-     aper, indim, xcen[npj], ycen[npj], topflux, topfluxerr, xb, xbs, 1.0, 4,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
-     aper, indim^2, xcen[npj], ycen[npj], bottomflux, bottomfluxerr, xb, xbs, 1.0,4,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
-     
-     beta = topflux^2 / bottomflux
+
+  if naxis gt 2 then begin  ; for subarray
+     np = fltarr(64)
+     for npj = 0, 63 do begin
+        indim = im[*,*,npj]
+        indim = indim*convfac
+        
+        aper, indim, xcen[npj], ycen[npj], topflux, topfluxerr, xb, xbs, 1.0, 4,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
+        aper, indim^2, xcen[npj], ycen[npj], bottomflux, bottomfluxerr, xb, xbs, 1.0,4,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
+        
+        beta = topflux^2 / bottomflux
 ;     print, npj, beta
-     np[npj] = beta
-  endfor
+        np[npj] = beta
+     endfor
+  endif
+
+  if naxis lt 3 then begin ; for full array
+     indim = im*convfac
+        
+        aper, indim, xcen, ycen, topflux, topfluxerr, xb, xbs, 1.0, 4,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
+        aper, indim^2, xcen, ycen, bottomflux, bottomfluxerr, xb, xbs, 1.0,4,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
+        
+        beta = topflux^2 / bottomflux
+        np = beta
+  endif
 
      return, np                 ;this should be a 64 element array
 end

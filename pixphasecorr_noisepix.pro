@@ -43,7 +43,7 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
 
   restore, savefilename
 
-  for a = 1, 1 do begin; 0, n_elements(aorname) - 1 do begin  ;run through all AORs
+  for a = 0, n_elements(aorname) - 1 do begin  ;run through all AORs
      print, 'working on aor', aorname(a)
      np = planethash[aorname(a),'np']  ; np is noise pixel
      xcen = planethash[aorname(a), 'xcen']
@@ -75,7 +75,7 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
      
    ;change this to a smaller number to test code in less time than a full run
      ni =  n_elements(xcen) 
-     print, 'ni', ni
+     print, 'ni, phase', ni, n_elements(phase)
      
      xcen = xcen[0:ni-1]
      ycen = ycen[0:ni-1]

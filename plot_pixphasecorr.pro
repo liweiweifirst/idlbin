@@ -14,7 +14,7 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
 
   dirname = strcompress(basedir + planetname +'/')
   ;a = 1
-  for a = 1, 1 do begin
+  for a =0, n_elements(aorname) -1  do begin
      filename =strcompress(dirname +'pixphasecorr_ch'+chname+'_'+aorname(a) +'.sav')
      print, a, ' ', aorname(a), 'restoring', filename
      restore, filename
@@ -104,23 +104,24 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
 
 ;if working on a secondary, then want to plot the phase around 0.5,
 ;and not split it around 0.
- ;    if intended eq 0.5 then begin
- ;       pa = where(bin_phase lt 0.0,pacount)
- ;       if pacount gt 0 then bin_phase[pa] = bin_phase[pa] + 1.0
- ;    endif
+;     if intended_phase eq 0.5 then begin
+;        pa = where(bin_phase lt 0.0,pacount)
+;        if pacount gt 0 then bin_phase[pa] = bin_phase[pa] + 1.0
+;     endif
 
 
 ;test the levels
-     print, 'mean raw black flux', mean(bin_flux_m / median(bin_flux_m))
-     print, 'mean corr gray flux', mean((bin_corrflux /median( bin_corrflux)))
-     print, 'mean position red flux', mean(bin_flux/median(bin_flux))
-     print, 'mean np blue flux', mean(bin_flux_np /median(bin_flux_np))
-     print, 'phase', mean(bin_phase)
+     print, 'mean raw black flux', mean(bin_flux_m / median(bin_flux_m),/nan)
+     print, 'mean corr gray flux', mean((bin_corrflux /median( bin_corrflux)),/nan)
+     print, 'mean position red flux', mean(bin_flux/median(bin_flux),/nan)
+     print, 'mean np blue flux', mean(bin_flux_np /median(bin_flux_np),/nan)
+     print, 'phase', bin_phase
 
+;print out levels so that I can use them for TAP (or exofast I suppose)
      for exofast = 0, n_elements(bin_time) - 1 do begin
-        if finite(bin_corrflux(exofast)) gt 0 then begin
+        if finite(bin_flux(exofast)) gt 0 then begin
 ;           print, bin_bmjd(exofast) + 2400000.5D, ' ',bin_corrflux(exofast), ' ',bin_corrfluxerr(exofast), format = '(F0, A,F0, A, F0)'
-           print, bin_bmjd(exofast) - 56081.26 , ' ',(bin_corrflux(exofast) / median(bin_corrflux)) - 0.0005, format = '(F0, A,F0)'
+           print, bin_bmjd(exofast) - 56081.26 , ' ',(bin_flux_np(exofast) / median(bin_flux_np)) - 0.0005, format = '(F0, A,F0)'
            ;a guess at mid-transit
         endif
 
@@ -241,8 +242,19 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
                       errorbar_capsize = 0.025)
          endelse
 
-
-     endif
+         
+;print out levels so that I can use them for TAP (or exofast I suppose)
+         print, 'selfcal for TAP'
+         for exofast = 0, n_elements(bin_phasearr) - 1 do begin
+            if finite(y(exofast)) gt 0 then begin
+;           print, bin_bmjd(exofast) + 2400000.5D, ' ',bin_corrflux(exofast), ' ',bin_corrfluxerr(exofast), format = '(F0, A,F0, A, F0)'
+               print, bin_bmjdarr(exofast) - 56081.26 , ' ',(y(exofast) / median(y)) - 0.0005, format = '(F0, A,F0)'
+                                ;a guess at mid-transit
+            endif
+            
+         endfor
+         
+      endif
                                 ;plot flat lines to guide the eyes
      x = [0.46, 0.50, 0.54]
      p6 = plot(x, fltarr(n_elements(x)) + 1.0, color = 'black',/overplot)

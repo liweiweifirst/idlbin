@@ -31,7 +31,7 @@ intended_phase = planetinfo[planetname, 'intended_phase']
 ;-------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------
 
-for a = 1, 1 do begin;  n_elements(aorname) - 1 do begin
+for a = 0,  n_elements(aorname) - 1 do begin
 
 
  ;for chopping off some initial part of the light curve
