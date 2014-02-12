@@ -132,16 +132,17 @@ aorname = [  'r48680448'] ;['r48680960','r48702976']
   dec_ref = 28.330094
  ; aorname = ['r43981312'];,'r43981568','r43981824','r43981056'] 
  ; aorname = ['r43981568'] 
- aorname = ['r48069888','r48070144','r48070400','r48070656','r48070912','r48071168','r48071424','r48071680','r48071936','r48072192','r48072448','r48072704','r48072960','r48073216','r48073472','r48073728']
+; aorname = ['r48069888','r48070144','r48070400','r48070656','r48070912','r48071168','r48071424','r48071680','r48071936','r48072192','r48072448','r48072704','r48072960','r48073216','r48073472','r48073728']  ; ch2
+aorname = ['r48073216'];'r48072704'];'r48072960']
  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   ;utmjd_center =  [double(55944.25889), double(55947.20505),double(55949.41467), double(55957.51661)]  
-  utmjd_center =  [double(55947.20505)]  
+  utmjd_center =  55947.20505D
   transit_duration=105.7
   period = 0.73654 
   intended_phase = 0.5
-  exptime = [0.02]
+  exptime = 0.02
   stareaor = 0
-  plot_norm = 1.
+  plot_norm = 3.87
   plot_corrnorm = 1.
 
   values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
@@ -188,12 +189,12 @@ aorname = [  'r48680448'] ;['r48680960','r48702976']
   planetinfo[planetname] = HASH(keys, values)
 ;---
   planetname = 'wasp13'
-  chname = '2'
+  chname = '1'
   ra_ref = 140.10268
   dec_ref = 33.882288
   aorname = ['r45676544','r45675520','r47037952','r47047168'] ; from my PID
  ;aorname = ['r47047168', 'r47037952'] ;ch2 from Dessert PID this is the primary
-  ; aorname = ['r47036928', 'r47038208'] ch1 from Dessert PID this is the primary
+   aorname = ['r47036928', 'r47038208'] ;ch1 from Dessert PID this is the primary
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   utmjd_center = 56086.49239D
   transit_duration=243.4
@@ -207,6 +208,24 @@ aorname = [  'r48680448'] ;['r48680960','r48702976']
   values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase,exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
   
+;---
+  planetname = 'wasp12'
+  chname = '1'
+  ra_ref = 97.6366
+  dec_ref = 29.6723
+  aorname = ['r28578560'] ;ch1
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  utmjd_center = 54773.146181D
+  transit_duration=175.7
+  period = 1.091423
+  intended_phase = 0.5
+  exptime = 12.
+  stareaor = 0
+  plot_norm = 0.0228
+  plot_corrnorm = 1.0   ; not there
+
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase,exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
 ;---
   planetname = 'wasp15'
   chname = '2'
