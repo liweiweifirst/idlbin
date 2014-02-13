@@ -124,8 +124,9 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
                                 ;http://www.idlcoyote.com/code_tips/slowloops.html
                                 ;this returns a sorted list of the nn nearest neighbors
 
-     nearest = nearest_neighbors_DT(xcen2,ycen2,DISTANCES=nearest_d,NUMBER=nn)
-     nearest_np = nearest_neighbors_np_DT(xcen2,ycen2,sqrtnp2,DISTANCES=nearest_np_d,NUMBER=nn)
+     nearest = nearest_neighbors_DT(xcen2,ycen2,chname,DISTANCES=nearest_d,NUMBER=nn)
+     nearest_np = nearest_neighbors_np_DT(xcen2,ycen2,sqrtnp2,chname,DISTANCES=nearest_np_d,NUMBER=nn)
+     ndimages = fltarr(ni)
      for j = 0,   ni - 1 do begin ;for each image (centroid)
 ;        if j gt 110500 then print, 'centers', xcen(j), ycen(j), xcen2(j), ycen2(j)
  ;--------------------
@@ -159,6 +160,19 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
            furthestx[j] = abs(xcen2(j) - nearestx(n_elements(nearestx)-1))
            furthesty[j] = abs(ycen2(j) - nearesty(n_elements(nearesty)-1))
         
+
+           ;some debugging
+                                ;what is the average distance to the nearest neighbor
+                                ; will eventually want to plot that as a funciton of phase or time
+           ndarr = fltarr(n_elements(nearestx))
+           for nd = 0, n_elements(nearestx) - 1 do begin
+ ;             print, 'testing inside', xcen2(j), nearestx(nd), ycen2(j), nearesty(nd)
+              ndarr(nd) = sqrt((xcen2(j) - nearestx(nd))^2 + (ycen2(j) - nearesty(nd))^2)
+           endfor
+;           print, 'testing', ndarr[5:6], mean(ndarr,/nan)
+           ndimages(j) = mean(ndarr, /nan)
+ ;          print, 'mean dist', j, mean(ndarr,/NAN)
+
  ;          if j gt 100400 then begin
  ;             print, 'out transit'
  ;             for c = 0, nn - 1 do print, nearestx(c), nearesty(c)
@@ -201,7 +215,7 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
            goodflux[1:*] = flux_m(good)
           
            ; try the brute force way
-           dist = distance(goodx, goody, 0)
+           dist = distance(goodx, goody, 0, chname)
            sd = sort(dist)
            sortdist = dist(sd)
            sortxcen = goodx(sd)
@@ -228,7 +242,7 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
            goodsqrtnp[1:*] = sqrtnp(good)
 
            ; try the brute force way
-           dist = distance_np(goodx, goody, goodsqrtnp,0)
+           dist = distance_np(goodx, goody, goodsqrtnp,0, chname)
            sd = sort(dist)
            sortdist = dist(sd)
            sortxcen = goodx(sd)
@@ -293,7 +307,8 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
      p2 = plot(phase_0, flux/median(flux) -0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
      p3 = plot(phase_0, flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
 
-  
+     xtest = findgen(n_elements(ndimages))
+     ptest = plot(xtest, ndimages, xtitle = 'frame number', ytitle = 'average distance to nearest neighbors')
   ; l = legend(target = [p1, p4, p2,p3], position = [1.5, 1.18], /data, /auto_text_color)
      
 ;    print, 'mean and stddev of sigmax', mean(sigmax), stddev(sigmax)
@@ -364,19 +379,21 @@ function weight_np, stdxcen, stdycen, stdsqrtnp,nearestx, nearesty, nearestsqrtn
 end
 
 
-function distance_np, xcen, ycen, sqrtnp, j
+function distance_np, xcen, ycen, sqrtnp, j, chname
   ;calculate the "distance" from the working centroid to all other centroids.
-  b = 0.8                       ; for 3.6micron channel taken from paper
+  if chname eq 1 then  b = 0.8 else b = 1.0 ; from knutson et al. 2012
+                       ; for 3.6micron channel taken from paper
   dist = (xcen - xcen(j))^2 + ((ycen -ycen(j))/b)^2 + (sqrtnp - sqrtnp(j))^2
 
   return, dist
 
 end
 
-function distance, xcen, ycen,  j
+function distance, xcen, ycen,  j, chname
                                 ;calculate the "distance" from the working centroid to all other centroids.
  
-  b = 0.8                       ; for 3.6micron channel taken from paper
+  if chname eq 1 then  b = 0.8 else b = 1.0 ; from knutson et al. 2012
+                      ; for 3.6micron channel taken from paper
   dist = (xcen - xcen(j))^2 + ((ycen -ycen(j))/b)^2 
 
   return, dist
