@@ -1,8 +1,9 @@
-function nearest_neighbors_np_DT,x,y,sqrtnp, DISTANCES=nearest_d,NUMBER=k
+function nearest_neighbors_np_DT,x,y,sqrtnp, chname, DISTANCES=nearest_d,NUMBER=k
   
  ;this version of the nerest neightbors code calculates a distance that includes noise pixel
-b = 0.8  ;scaling factor to weight the higher  than x or np since most of the motion is in the y direction
-   
+;scaling factor to weight the higher  than x or np since most of the motion is in the y direction
+   if chname eq 1 then  b = 0.8 else b = 1.0   ; from knutson et al. 2012
+
   ;; Compute Delaunay triangulation
   triangulate,x,y,CONNECTIVITY=c
   n=n_elements(x) 

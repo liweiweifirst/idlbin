@@ -292,7 +292,7 @@ for a = 0,  n_elements(aorname) - 1 do begin
       print, 'secondary eclipse intended'
       phase = phase+0.5
    endif 
-  print, ' after phase',  phase ;, format = '(A,F0)'
+;  print, ' after phase',  phase ;, format = '(A,F0)'
    
 ;--------------------------------
 ;fill in that hash of hases
@@ -312,6 +312,8 @@ for a = 0,  n_elements(aorname) - 1 do begin
    print, 'n_elements(xarr)', n_elements(xarr), 'should be', 63*1310.
 
    print, 'testing phase', phase[0]
+
+
 endfor                          ;for each AOR
 
 
@@ -327,7 +329,7 @@ print, 'time check', systime(1) - t1
 
                                 ; print, planethash.keys()
  ; print, planethash[aorname(0)].keys()
-  print, 'testing (planethash[aorname(0),phase])[0:10]',(planethash[aorname(0),'phase'])[0:10]
+ ; print, 'testing (planethash[aorname(0),phase])[0:10]',(planethash[aorname(0),'phase'])[0:10]
 ;  print, 'n_elements in hash', n_elements(planethash[aorname(1),'xcen'])
 
 
@@ -336,6 +338,11 @@ print, 'time check', systime(1) - t1
 ;    plot_hist, aparr, xhist, yhist, bin = 0.05, /noplot
 ;   b = plot(xhist, yhist, title = 'aperture sizes')
 ; endif
+
+;testplot the first AOR of raw raw flux before I start analyzing.
+
+;tp = plot(planethash[aorname(0),'phase'], planethash[aorname(0),'flux'], '1rs')
+
 
 end
 

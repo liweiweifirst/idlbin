@@ -54,6 +54,8 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
      phase = planethash[aorname(a),'phase']
 
      time = (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0)) ; in seconds;/60./60. ; in hours from beginning of obs.
+     print, 'xcen', xcen[0:10]
+     print, 'ycent', ycen[0:10]
 
      ;now try to get them all within the same [0,1] phase     
  ;    bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
@@ -111,7 +113,7 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
 
     ;mask intervals in time where astrophysical signals exist.
      ;I know where the transits and eclipses are
-     s = mask_signal( bmjd, period, utmjd_center, transit_duration)
+     s = mask_signal( phase, period, utmjd_center, transit_duration)
 
        ;make sure the transit doesn't get included as a nearest neighbor
      good = where(s gt 0, ngood, complement = bad)
@@ -123,10 +125,13 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
                                 ;do the nearest neighbors run with triangulation
                                 ;http://www.idlcoyote.com/code_tips/slowloops.html
                                 ;this returns a sorted list of the nn nearest neighbors
+     print, 'xcen2', xcen2[0:10]
+     print, 'ycent2', ycen2[0:10]
+
 
      nearest = nearest_neighbors_DT(xcen2,ycen2,chname,DISTANCES=nearest_d,NUMBER=nn)
      nearest_np = nearest_neighbors_np_DT(xcen2,ycen2,sqrtnp2,chname,DISTANCES=nearest_np_d,NUMBER=nn)
-     ndimages = fltarr(ni)
+     ndimages = dblarr(ngood)
      for j = 0,   ni - 1 do begin ;for each image (centroid)
 ;        if j gt 110500 then print, 'centers', xcen(j), ycen(j), xcen2(j), ycen2(j)
  ;--------------------
@@ -308,7 +313,8 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
      p3 = plot(phase_0, flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
 
      xtest = findgen(n_elements(ndimages))
-     ptest = plot(xtest, ndimages, xtitle = 'frame number', ytitle = 'average distance to nearest neighbors')
+     ptest = plot(xtest, ndimages, yrange = [0, 0.1], xtitle = 'Some indication of time with eclipse removed', ytitle = 'average distance to nearest neighbors')
+     ptest.save, dirname+'nn_dist.png'
   ; l = legend(target = [p1, p4, p2,p3], position = [1.5, 1.18], /data, /auto_text_color)
      
 ;    print, 'mean and stddev of sigmax', mean(sigmax), stddev(sigmax)
@@ -400,15 +406,15 @@ function distance, xcen, ycen,  j, chname
 
 end
 
-function mask_signal, bmjd, period, utmjd_center, transit_duration
+function mask_signal, phase, period, utmjd_center, transit_duration
        ;turn bmjd into phase
-   bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
-  phase =( bmjd_dist / period )- fix(bmjd_dist/period)
+;   bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
+;  phase =( bmjd_dist / period )- fix(bmjd_dist/period)
 
                                 ;ok, but now I want -0.5 to 0.5, not 0 to 1
                                 ;need to be careful here because subtracting half a phase will put things off, need something else
-  pa = where(phase gt 0.5,pacount)
-  if pacount gt 0 then phase[pa] = phase[pa] - 1.0
+;  pa = where(phase gt 0.5,pacount)
+;  if pacount gt 0 then phase[pa] = phase[pa] - 1.0
   ;plothist, phase, xhist, yhist, bin = 0.02,/noplot
   ;tt = plot(xhist, yhist, xtitle = 'phase')
                                 ;turn transit duration into phase

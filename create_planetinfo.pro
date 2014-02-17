@@ -227,6 +227,25 @@ aorname = ['r48073216'];'r48072704'];'r48072960']
   values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase,exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 ;---
+  planetname = 'hat3'
+  chname = '2'
+  ra_ref = 206.0941
+  dec_ref = 48.0287
+  aorname = ['r31749376'] ;ch1
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  utmjd_center = 55301.31066D
+  transit_duration=124.6
+  period = 2.899736
+  intended_phase = 0.5
+  exptime = 2.
+  stareaor = 0
+  plot_norm = .0274
+  plot_corrnorm = .0274   ; not there
+
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase,exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
   planetname = 'wasp15'
   chname = '2'
   ra_ref = 208.92783
@@ -285,12 +304,12 @@ aorname = ['r48073216'];'r48072704'];'r48072960']
 
 ;---
   planetname = 'hatp8'
-  chname = '2'
+  chname = '1'
   ra_ref = 343.0414
   dec_ref = 35.447403
-  aorname = ['r48695040', 'r48698112',  'r48699136',  'r48700160',  'r48704000',  'r48705280', 'r48684800',  'r48695296',  'r48698368',  'r48699392',  'r48703232',  'r48704256',  'r48705792', 'r48694528',  'r48695552',  'r48698624',  'r48699648',  'r48703488',  'r48704768',  'r48706048', 'r48694784',  'r48697856',  'r48698880',  'r48699904',  'r48703744',  'r48705024','r36789504','r36785664'] ;ch2 snaps with 2 AORS on end from Knutson program
+ ; aorname = ['r48695040', 'r48698112',  'r48699136',  'r48700160',  'r48704000',  'r48705280', 'r48684800',  'r48695296',  'r48698368',  'r48699392',  'r48703232',  'r48704256',  'r48705792', 'r48694528',  'r48695552',  'r48698624',  'r48699648',  'r48703488',  'r48704768',  'r48706048', 'r48694784',  'r48697856',  'r48698880',  'r48699904',  'r48703744',  'r48705024','r36789504','r36785664'] ;ch2 snaps with 2 AORS on end from Knutson program
 
-;  aorname = ['r36784384', 'r36787456'] ; ch1 knutson eclipse
+  aorname =  ['r36787456'] ; ch1 knutson eclipse['r36784384',
 ;  aorname = [ 'r36789504','r36785664'] ; ch2 knutson eclipse
 
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
@@ -426,8 +445,104 @@ aorname = ['r48073216'];'r48072704'];'r48072960']
   
   values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'corot2'
+  chname = '1'
+  ra_ref = 291.7771
+  dec_ref = 1.3837
+  aorname = [ 'r31774976']
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  utmjd_center = 55125.09100
+  transit_duration=136.0
+  period = 1.742994
+  intended_phase =0.5
+  exptime = 2.
+  stareaor =0;4
+  plot_norm = .0224
+  plot_corrnorm = .0224
+  
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
 
+;---
+  planetname = 'hat6'
+  chname = '2'
+  ra_ref = 354.77395
+  dec_ref = 42.466135
+;  aorname = [ 'r31758592']  ; ch1
+  aorname = ['r31751680']   ; ch2
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  utmjd_center =   55458.85371D; 55451.14774D
+  transit_duration=210.4 
+  period = 3.852985
+  intended_phase = 0.5
+  exptime = 2.
+  stareaor = 0
+  plot_norm =.050
+  plot_corrnorm = .050
+
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'xo4'
+  chname = '1'
+  ra_ref = 110.38827
+  dec_ref = 58.268128
+  aorname = [ 'r31766784']
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  utmjd_center =   55180.50972D
+  transit_duration=100. ; junk
+  period = 4.125083
+  intended_phase = 0.5
+  exptime = 2.
+  stareaor = 0
+  plot_norm =0.046
+  plot_corrnorm = 0.046
+
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'wasp43'
+  chname = '2'
+  ra_ref = 154.90806
+  dec_ref = -9.8065685
+  aorname = [ 'r42615040'] ;ch2
+  ;aorname = [ 'r42614272'] ;ch1
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  utmjd_center =   55772.00350D
+  transit_duration=69.6
+  period = 0.813475
+  intended_phase = 0.5
+  exptime = 2.
+  stareaor = 0
+  plot_norm =.0342
+  plot_corrnorm = .0342
+
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'NoisePixTest2'
+  chname = '1'
+  ra_ref = 359.99931
+  dec_ref = 0.000694
+  aorname = [ 'r0000000000'] ;ch1
+  basedir = '/Users/jkrick/irac_warm/simulation_JI/' 
+  utmjd_center =   56701.677D
+  transit_duration=69.6  ; junk
+  period = 0.813475       ;junk
+  intended_phase = 0.5
+  exptime = 0.1
+  stareaor = 0
+  plot_norm =0.3852
+  plot_corrnorm = 0.3852
+
+  values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
 ;--------------------
+
+
+
+
   ;test that this is all working
 ;  print, planetinfo.keys()
 ;  print, planetinfo['wasp13'].keys()

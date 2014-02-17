@@ -137,7 +137,7 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
                    '1s', sym_size = 0.3, sym_filled = 1,$
                    color = 'black', xtitle = 'Phase', ytitle = 'Normalized Flux', title = planetname, $
                    name = 'raw flux', yrange =[0.984, 1.013], axis_style = 1,  $
-                   xstyle = 1, errorbar_capsize = 0.025)
+                   xstyle = 1, errorbar_capsize = 0.025) ;
 
            ;print, 'grey in plotting', bin_corrflux
            p4 =  errorplot(bin_phase, (bin_corrflux /Median( bin_corrflux)) + delta_grey, $
@@ -232,6 +232,7 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
             p5 = errorplot(bin_phasearr, y +delta_green, yerr, '1s', sym_size = 0.3,   sym_filled = 1, $
                       color = 'green',/overplot, name = 'selfcal', errorbar_color = 'green', $
                       errorbar_capsize = 0.025)
+            print, 'selfcal fluxes', y + delta_green
             if keyword_set(fit_eclipse) then begin
                trap = fit_eclipse(bin_phasearr, y ,yerr,0.486 , 0.005,0.515,0.001, delta_green,'green')
             endif
@@ -257,11 +258,11 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
       endif
                                 ;plot flat lines to guide the eyes
      x = [0.46, 0.50, 0.54]
-     p6 = plot(x, fltarr(n_elements(x)) + 1.0, color = 'black',/overplot)
+;     p6 = plot(x, fltarr(n_elements(x)) + 1.0, color = 'black',/overplot)
 ;     p7 = plot(x, fltarr(n_elements(x)) + 1.006, color = 'grey',/overplot)
-     p8 = plot(x, fltarr(n_elements(x)) +.988, color = 'red',/overplot)
-     p9 = plot(x, fltarr(n_elements(x))  +1.011, color = 'blue',/overplot)
-     if keyword_set(selfcal) then p10 = plot(x, fltarr(n_elements(x)) +.993, color = 'green',/overplot)
+;     p8 = plot(x, fltarr(n_elements(x)) +.988, color = 'red',/overplot)
+;     p9 = plot(x, fltarr(n_elements(x))  +1.011, color = 'blue',/overplot)
+;     if keyword_set(selfcal) then p10 = plot(x, fltarr(n_elements(x)) +.993, color = 'green',/overplot)
 
      ;xaxis = axis('X', location = [1.01, 0], coord_transform = [bin_phase[0], slope_convert], target = p1)
 
@@ -279,7 +280,7 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
   endfor                        ; n_elements(aorname)
 
 ;finally save the plot
-  p9.save, dirname+'allfluxes_binned.png'
+  p5.save, dirname+'allfluxes_binned_ch'+chname+'.png'
 
 end
 

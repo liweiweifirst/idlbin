@@ -1,13 +1,16 @@
-function nearest_neighbors_DT,x,y,DISTANCES=nearest_d,NUMBER=k
- b = 0.8
+function nearest_neighbors_DT,x,y,chname, DISTANCES=nearest_d,NUMBER=k
+
+  if chname eq 1 then  b = 0.8 else b = 1.0 ; from knutson et al. 2012
   ;help, x
  ; help, y
   ;; Compute Delaunay triangulation
   triangulate,x,y,CONNECTIVITY=c
- ; help, c
- ; print, 'n c', n_elements(c), c(n_elements(c) - 25)
+  help, c
+  print, 'n c', n_elements(c), c(n_elements(c) - 25)
   ;limit = n_elements(c)
-  
+;  print, 'x', x[0:100]
+;  print, 'y', y[0:100]
+
   n=n_elements(x) 
   nearest=lonarr(k,n,/NOZERO)
   nearest_d=fltarr(k,n,/NOZERO)
@@ -24,6 +27,8 @@ function nearest_neighbors_DT,x,y,DISTANCES=nearest_d,NUMBER=k
         ;the problem case
                                 ;make up a d that lets me know I should ignore this point
                                 ; or just keep the last d which is what doing nothing will do I think
+ ;       print, 'got to the if statement that seems to fail'
+ ;       print, point, c[point], c[point+1]
       endif  else begin
          p=c[c[point]:c[point+1]-1] ;start with this point's DT neighbors
          d=(x[p]-x[point])^2+((y[p]-y[point])/b)^2
@@ -56,5 +61,7 @@ function nearest_neighbors_DT,x,y,DISTANCES=nearest_d,NUMBER=k
      
   endfor 
   if arg_present(nearest_d) then nearest_d=sqrt(nearest_d)
-  return, nearest
+
+   return, nearest
+
 end 

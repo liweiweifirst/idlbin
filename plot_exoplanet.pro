@@ -69,18 +69,23 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
 
 ;  fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_121120.fits', pmapdata, pmapheader
   fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120409.fits', pmapdata, pmapheader
-;  c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [-500,1000], yrange = [-500,1000])
+  c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [0,500], yrange = [0,500])
 
-;  for a = 0 , n_elements(aorname) - 1 do begin
+  for a = 0 , n_elements(aorname) - 1 do begin
 ;     print, 'testing aors', a, colorarr[a]
 
-;     xcen500 = 500.* ((planethash[aorname(a),'xcen']) - 14.5)
-;     ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
-;     an = plot(xcen500, ycen500, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+     xcen500 = 500.* ((planethash[aorname(a),'xcen']) - 14.5)
+     ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
+     an = plot(xcen500, ycen500, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+
+     xcen500 = 500.* ((planethash[aorname(a),'xcen'])[0:30] - 14.5)
+     ycen500 = 500.* ((planethash[aorname(a),'ycen'])[0:30] - 14.5)
+     an = plot(xcen500, ycen500, '1s', sym_size = 0.2,   sym_filled = 1, color = 'red',/overplot)
+
 ; ;    print, 'xcen500', xcen500
 ; ;    print, 'ycen500', ycen500
-;  endfor
-;  an.save, dirname+'position.png'
+  endfor
+  an.save, dirname+'position_ch'+chname+'.png'
 ;GOTO, Jumpend
 
 ;-----
@@ -94,13 +99,13 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
         xmax = 15.5             ; mean(planethash[aorname(a),'xcen'])+0.25
         ;print, 'xmin.xmax', xmin, xmax
 
-        am = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'xcen'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], ytitle = 'X pix', title = planetname);, xtitle = 'Time(hrs)'
+        am = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'xcen'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'X pix', title = planetname);, xtitle = 'Time(hrs)'
      endif else begin
-        am = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'xcen'],'6r1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a],/overplot)
+        am = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'xcen'],'6r1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
      endelse
 
   endfor
-  am.save, dirname + 'x_time.png'
+  am.save, dirname + 'x_time_ch'+chname+'.png'
 
 ;------
 
@@ -109,50 +114,51 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
         ymin = 14.9             ; mean(planethash[aorname(a),'ycen'])-0.25
         ymax = 16.0             ;mean(planethash[aorname(a),'ycen'])+0.25
         ;print, 'ymin.ymax', ymin, ymax
-       ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'ycen'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], ytitle = 'Y pix');,title = planetname, xtitle = 'Time(hrs)'
+       ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'ycen'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'Y pix');,title = planetname, xtitle = 'Time(hrs)'
      endif else begin
-        ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'ycen'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a],/overplot)
+        ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'ycen'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
      endelse
 
   endfor
- ay.save, dirname +'y_time.png'
+ ay.save, dirname +'y_time_ch'+chname+'.png'
 
 ;------
+ for a = 0,n_elements(aorname) -1 do begin          ; 0, n_elements(aorname) - 1 do begin
+     if a eq 0 then begin
+ ;       ymin = 14.9             ; mean(planethash[aorname(a),'ycen'])-0.25
+ ;       ymax = 16.0             ;mean(planethash[aorname(a),'ycen'])+0.25
+        ;print, 'ymin.ymax', ymin, ymax
+       ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'flux'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'Flux', xtitle = 'Time(hrs)');,title = planetname, xtitle = 'Time(hrs)'
+     endif else begin
+        ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'flux'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+     endelse
 
-;  for a = 0,0 do begin          ; 0, n_elements(aorname) - 1 do begin
-;     if a eq 0 then begin
-;       an = z.plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0))/60./60., planethash[aorname(a),'np'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], ytitle = 'Noise Pixels', xrange = [2.85,3.0] , yrange = [4, 7]);,title = planetname, xtitle = 'Time(hrs)'
-;     endif else begin
-;        am = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0))/60./60., planethash[aorname(a),'np'],'6r1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a],/overplot)
-;     endelse
-
-;  endfor
-; am.save, dirname +'np_time.png'
-
-;------
-;  for a = 0, n_elements(aorname) - 1 do begin
-;     if a eq 0 then begin
-      ;  am = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'bkgd'],'6r1s', sym_size = 0.1,   sym_filled = 1, color = 'blue', xtitle = 'Time(hrs)', ytitle = 'Background', title = planetname)
-;        am = plot( planethash[aorname(a),'bmjdarr'] , planethash[aorname(a),'bkgd'],'6r1s', sym_size = 0.1,   sym_filled = 1, color = 'blue', xtitle = 'Phase', ytitle = 'Background', title = planetname, xrange = [-0.06,0.01])
-;        print, 'bkgd', n_elements(planethash[aorname(a),'bkgd'])
-;     endif else begin
-        ;am = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'bkgd'],'6r1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a],/overplot)
-;        am = plot( planethash[aorname(a),'bmjdarr'], planethash[aorname(a),'bkgd'],'6r1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a],/overplot)
-;     endelse
-
-;  endfor
+  endfor
+ ay.save, dirname +'raw_flux_time_ch'+chname+'.png'
 
 ;------
-;  for a = 0, n_elements(aorname) - 1 do begin
-;     if a eq 0 then begin
-;        am = errorplot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'flux'],planethash[aorname(a),'fluxerr'], '6r1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], xtitle = 'Time(hrs)', ytitle = 'Flux', title = planetname, xrange = [0,10], yrange = [0.03,0.045], errorbar_capsize = 0.)
-;        am = errorplot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'corrflux']-0.003,planethash[aorname(a),'corrfluxerr'],'6r1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], /overplot, errorbar_capsize = 0.)
-;     endif else begin
-;        am = errorplot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'flux'],planethash[aorname(a),'fluxerr'],'6r1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a],/overplot, errorbar_capsize = 0.)
-; am = errorplot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'corrflux']-0.003,planethash[aorname(a),'corrfluxerr'],'6r1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a],/overplot, errorbar_capsize = 0.)
-;     endelse
+ for a = 0,n_elements(aorname) -1 do begin          ; 0, n_elements(aorname) - 1 do begin
+     if a eq 0 then begin
+       ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'bkgd'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'Bkgd', xtitle = 'Time(hrs)');,title = planetname
+     endif else begin
+        ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'bkgd'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+     endelse
 
-;  endfor
+  endfor
+ ay.save, dirname +'bkgd_time_ch'+chname+'.png'
+
+;------
+ for a = 0,n_elements(aorname) -1 do begin          ; 0, n_elements(aorname) - 1 do begin
+     if a eq 0 then begin
+       ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'np'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'NP');,title = planetname, xtitle = 'Time(hrs)'
+     endif else begin
+        ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'np'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+     endelse
+
+  endfor
+ ay.save, dirname +'np_time_ch'+chname+'.png'
+
+;------
 
 ;------
 
@@ -453,6 +459,14 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
 
 ;     print, 'nflux', n_elements(bin_flux)
 ;------------------------------------------------------
+
+;some debugging looking for electronic ramp
+print, 'xcen', (planethash[aorname(0),'xcen'])[0:60]
+print, 'ycen', (planethash[aorname(0),'ycen'])[0:60]
+print, 'raw flux', (planethash[aorname(0),'flux'])[0:60]
+print, 'binned x, y, flux', bin_xcen[0:1], bin_ycen[0:1], bin_flux[0:1]
+print, 'median x, y, flux', median((planethash[aorname(0),'xcen'])[0:30]), median((planethash[aorname(0),'xcen'])[30:60]),  median((planethash[aorname(0),'ycen'])[0:30]), median((planethash[aorname(0),'ycen'])[30:60]),  median((planethash[aorname(0),'flux'])[0:30]), median((planethash[aorname(0),'flux'])[30:60])
+
 ;------------------------------------------------------
 ;now try plotting
 
@@ -463,7 +477,7 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
         
 ;   setxrange = [-0.022,-0.0205]
 ;   setxrange =[-0.0127, -0.0112]
-        setxrange = [0.,1.0];[0.45, 0.55]
+        setxrange = [0.30, 0.65]
 
         if a eq 0 then begin    ; for the first AOR
            pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.3,   sym_filled = 1, title = planetname, $
@@ -569,8 +583,8 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
 
         endif
 
-        ps.save, dirname +'binnp_phase.png'
-        pt.save, dirname +'binbkg_phase.png'
+        ps.save, dirname +'binnp_phase_ch'+chname+'.png'
+        pt.save, dirname +'binbkg_phase_ch'+chname+'.png'
 
         if keyword_set(selfcal) then begin
          ;  restore, strcompress(dirname + 'selfcal.sav')          
