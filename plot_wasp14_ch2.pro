@@ -1,8 +1,7 @@
 pro plot_wasp14_ch2
   colorarr = ['blue', 'red', 'aquamarine',  'dark_blue', 'dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki','black', 'light_cyan', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green']
 
-;  fits_read, '/Users/jkrick/idlbin/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_120124.fits', pmapdata, pmapheader
-
+  
   restore,'/Users/jkrick/irac_warm/pcrs_planets/wasp14/wasp14_phot_ch2.sav'
   aorname = ['r45426688',  'r45428224',  'r45428480',  'r45428736',  'r45428992'] ;ch2
 

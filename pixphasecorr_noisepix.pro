@@ -52,10 +52,14 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
      fluxerr_m = Planethash[aorname(a), 'fluxerr']
      bmjd = planethash[aorname(a),'bmjdarr']
      phase = planethash[aorname(a),'phase']
+     
+                                ;make sure we are not trying to correct snapshots with nearest neighbors, 
+                                ; won't work because some are in the transits and eclipses which I have excluded.
+     if n_elements(np) gt 1000 then begin
 
-     time = (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0)) ; in seconds;/60./60. ; in hours from beginning of obs.
-     print, 'xcen', xcen[0:10]
-     print, 'ycent', ycen[0:10]
+        time = (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0)) ; in seconds;/60./60. ; in hours from beginning of obs.
+        print, 'xcen', xcen[0:10]
+        print, 'ycent', ycen[0:10]
 
      ;now try to get them all within the same [0,1] phase     
  ;    bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
@@ -63,260 +67,260 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
  ;    pa = where(phase gt 0.5,pacount)
  ;    if pacount gt 0 then phase[pa] = phase[pa] - 1.0
      
-     sqrtnp = sqrt(np)
-     
-     savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
-     restore, savefilename
-     corrflux = planethash[aorname(a), 'corrflux'] ;pmap corrected
-     corrfluxerr = planethash[aorname(a), 'corrfluxerr']
-
+        sqrtnp = sqrt(np)
+        
+        savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
+        restore, savefilename
+        corrflux = planethash[aorname(a), 'corrflux'] ;pmap corrected
+        corrfluxerr = planethash[aorname(a), 'corrfluxerr']
+        
                                 ;calculate standard deviations of entire xcen, ycen,and sqrtnp
      ;stdxcen = stddev(xcen)
      ;stdycen = stddev(ycen)
      ;stdsqrtnp = stddev(sqrtnp)
      
    ;change this to a smaller number to test code in less time than a full run
-     ni =  n_elements(xcen) 
-     print, 'ni, phase', ni, n_elements(phase)
-     
-     xcen = xcen[0:ni-1]
-     ycen = ycen[0:ni-1]
-     sqrtnp = sqrtnp[0:ni-1]
-     bmjd = bmjd[0:ni-1]
-     phase = phase[0:ni-1]
-     flux_m =  flux_m[0:ni-1]
-     fluxerr_m = fluxerr_m[0:ni-1]
-
+        ni =  n_elements(xcen) 
+        print, 'ni, phase', ni, n_elements(phase)
+        
+        xcen = xcen[0:ni-1]
+        ycen = ycen[0:ni-1]
+        sqrtnp = sqrtnp[0:ni-1]
+        bmjd = bmjd[0:ni-1]
+        phase = phase[0:ni-1]
+        flux_m =  flux_m[0:ni-1]
+        fluxerr_m = fluxerr_m[0:ni-1]
+        
                                 ;setup arrays for the corrected fluxes
-     flux = dblarr(ni)          ; fltarr(n_elements(flux_m))
-     fluxerr = dblarr(ni)
-     flux_np = dblarr(ni)       ; fltarr(n_elements(flux_m))
-     fluxerr_np = dblarr(ni)
-     time_0 = time[0:ni - 1]
-     phase_0 = phase[0:ni-1]
-     warr = dblarr(ni)
-     warr_np= dblarr(ni)
-     sigmax = dblarr(ni)
-     sigmay = dblarr(ni)
-     sigma_np = dblarr(ni)
-     furthestx = dblarr(ni)
-     furthesty= dblarr(ni)
-     delta_time = dblarr(ni)
-     delta_time_np =  dblarr(ni)
-
-     xcen2 = xcen
-     ycen2 = ycen
-     sqrtnp2 = sqrtnp
-     flux_m2 = flux_m
-     fluxerr_m2 = fluxerr_m
-     time_02  = time_0
-
-    ;mask intervals in time where astrophysical signals exist.
-     ;I know where the transits and eclipses are
-     s = mask_signal( phase, period, utmjd_center, transit_duration)
-
-       ;make sure the transit doesn't get included as a nearest neighbor
-     good = where(s gt 0, ngood, complement = bad)
-     print, 'ngood', ngood, n_elements(bad)
-     xcen2(bad) = 1E5
-     ycen2(bad) = 1E5
-     sqrtnp2(bad) = 1E5
-  
+        flux = dblarr(ni)       ; fltarr(n_elements(flux_m))
+        fluxerr = dblarr(ni)
+        flux_np = dblarr(ni)    ; fltarr(n_elements(flux_m))
+        fluxerr_np = dblarr(ni)
+        time_0 = time[0:ni - 1]
+        phase_0 = phase[0:ni-1]
+        warr = dblarr(ni)
+        warr_np= dblarr(ni)
+        sigmax = dblarr(ni)
+        sigmay = dblarr(ni)
+        sigma_np = dblarr(ni)
+        furthestx = dblarr(ni)
+        furthesty= dblarr(ni)
+        delta_time = dblarr(ni)
+        delta_time_np =  dblarr(ni)
+        
+        xcen2 = xcen
+        ycen2 = ycen
+        sqrtnp2 = sqrtnp
+        flux_m2 = flux_m
+        fluxerr_m2 = fluxerr_m
+        time_02  = time_0
+        
+                                ;mask intervals in time where astrophysical signals exist.
+                                ;I know where the transits and eclipses are
+        s = mask_signal( phase, period, utmjd_center, transit_duration)
+        
+                                ;make sure the transit doesn't get included as a nearest neighbor
+        good = where(s gt 0, ngood, complement = bad)
+        print, 'ngood', ngood, n_elements(bad)
+        xcen2(bad) = 1E5
+        ycen2(bad) = 1E5
+        sqrtnp2(bad) = 1E5
+        
                                 ;do the nearest neighbors run with triangulation
                                 ;http://www.idlcoyote.com/code_tips/slowloops.html
                                 ;this returns a sorted list of the nn nearest neighbors
-     print, 'xcen2', xcen2[0:10]
-     print, 'ycent2', ycen2[0:10]
-
-
-     nearest = nearest_neighbors_DT(xcen2,ycen2,chname,DISTANCES=nearest_d,NUMBER=nn)
-     nearest_np = nearest_neighbors_np_DT(xcen2,ycen2,sqrtnp2,chname,DISTANCES=nearest_np_d,NUMBER=nn)
-     ndimages = dblarr(ngood)
-     for j = 0,   ni - 1 do begin ;for each image (centroid)
+        print, 'xcen2', xcen2[0:10]
+        print, 'ycent2', ycen2[0:10]
+        
+        
+        nearest = nearest_neighbors_DT(xcen2,ycen2,chname,DISTANCES=nearest_d,NUMBER=nn)
+        nearest_np = nearest_neighbors_np_DT(xcen2,ycen2,sqrtnp2,chname,DISTANCES=nearest_np_d,NUMBER=nn)
+        ndimages = dblarr(ngood)
+        for j = 0L,   ni - 1 do begin ;for each image (centroid)
 ;        if j gt 110500 then print, 'centers', xcen(j), ycen(j), xcen2(j), ycen2(j)
- ;--------------------
-  ;find the weighting function without using noise pixel
- ;--------------------
-
-        if s[j] gt 0 then begin ;out of transit
+                                ;--------------------
+                                ;find the weighting function without using noise pixel
+                                ;--------------------
+           
+           if s[j] gt 0 then begin ;out of transit
                                 ;not inside a transit, so do the normal nearest neighbor search for weights.
-          ; thisx = xcen2(j)
-          ; thisy = ycen2(j)
-           nearestx = xcen2(nearest(*,j))
-           nearesty = ycen2(nearest(*,j))
-           nearestflux = flux_m2(nearest(*,j))
-           nearestfluxerr = fluxerr_m2(nearest(*,j))
-           nearesttime = time_02(nearest(*,j))
-        
-         ;what is the time distribution like of the points chosen as nearest in position
-           ;track the range in time for each point
-           delta_time(j) = abs(time_0[j]- nearesttime(n_elements(nearesttime)-1))
+                                ; thisx = xcen2(j)
+                                ; thisy = ycen2(j)
+              nearestx = xcen2(nearest(*,j))
+              nearesty = ycen2(nearest(*,j))
+              nearestflux = flux_m2(nearest(*,j))
+              nearestfluxerr = fluxerr_m2(nearest(*,j))
+              nearesttime = time_02(nearest(*,j))
+              
+                                ;what is the time distribution like of the points chosen as nearest in position
+                                ;track the range in time for each point
+              delta_time(j) = abs(time_0[j]- nearesttime(n_elements(nearesttime)-1))
 ;                                         if j gt 500 and j lt 520 then print, 'time' , time_0[j], nearesttime
-
-        ;make sure that the nearest neighbor is not the point itself
-        ;if it is, then get rid of that one and just use the nearest n-1
-           if  xcen2(j) eq nearestx(0) and ycen2(j) eq nearesty(0) then begin
-              nearestx = nearestx[1:*]
-              nearesty = nearesty[1:*]
-              nearestflux = nearestflux[1:*]
-              nearestfluxerr = nearestfluxerr[1:*]
-           endif
-        
-           furthestx[j] = abs(xcen2(j) - nearestx(n_elements(nearestx)-1))
-           furthesty[j] = abs(ycen2(j) - nearesty(n_elements(nearesty)-1))
-        
-
-           ;some debugging
+              
+                                ;make sure that the nearest neighbor is not the point itself
+                                ;if it is, then get rid of that one and just use the nearest n-1
+              if  xcen2(j) eq nearestx(0) and ycen2(j) eq nearesty(0) then begin
+                 nearestx = nearestx[1:*]
+                 nearesty = nearesty[1:*]
+                 nearestflux = nearestflux[1:*]
+                 nearestfluxerr = nearestfluxerr[1:*]
+              endif
+              
+              furthestx[j] = abs(xcen2(j) - nearestx(n_elements(nearestx)-1))
+              furthesty[j] = abs(ycen2(j) - nearesty(n_elements(nearesty)-1))
+              
+              
+                                ;some debugging
                                 ;what is the average distance to the nearest neighbor
                                 ; will eventually want to plot that as a funciton of phase or time
-           ndarr = fltarr(n_elements(nearestx))
-           for nd = 0, n_elements(nearestx) - 1 do begin
- ;             print, 'testing inside', xcen2(j), nearestx(nd), ycen2(j), nearesty(nd)
-              ndarr(nd) = sqrt((xcen2(j) - nearestx(nd))^2 + (ycen2(j) - nearesty(nd))^2)
-           endfor
+              ndarr = fltarr(n_elements(nearestx))
+              for nd = 0, n_elements(nearestx) - 1 do begin
+                                ;             print, 'testing inside', xcen2(j), nearestx(nd), ycen2(j), nearesty(nd)
+                 ndarr(nd) = sqrt((xcen2(j) - nearestx(nd))^2 + (ycen2(j) - nearesty(nd))^2)
+              endfor
 ;           print, 'testing', ndarr[5:6], mean(ndarr,/nan)
-           ndimages(j) = mean(ndarr, /nan)
- ;          print, 'mean dist', j, mean(ndarr,/NAN)
-
- ;          if j gt 100400 then begin
- ;             print, 'out transit'
- ;             for c = 0, nn - 1 do print, nearestx(c), nearesty(c)
- ;          endif
-
-
+              ndimages(j) = mean(ndarr, /nan)
+                                ;          print, 'mean dist', j, mean(ndarr,/NAN)
+              
+                                ;          if j gt 100400 then begin
+                                ;             print, 'out transit'
+                                ;             for c = 0, nn - 1 do print, nearestx(c), nearesty(c)
+                                ;          endif
+              
+              
 ;--------------------
- ;find the weighting function using noise pixel
- ;--------------------
-
-           nearestxnp = xcen2(nearest_np(*,j))
-           nearestynp = ycen2(nearest_np(*,j))
-           nearestsqrtnp = sqrtnp2(nearest_np(*,j))
-           nearestfluxnp = flux_m2(nearest_np(*,j))
-           nearesttimenp = time_02(nearest_np(*,j))
+                                ;find the weighting function using noise pixel
+                                ;--------------------
+              
+              nearestxnp = xcen2(nearest_np(*,j))
+              nearestynp = ycen2(nearest_np(*,j))
+              nearestsqrtnp = sqrtnp2(nearest_np(*,j))
+              nearestfluxnp = flux_m2(nearest_np(*,j))
+              nearesttimenp = time_02(nearest_np(*,j))
+              
+              delta_time_np(j) = abs(time_02[j]- nearesttimenp(n_elements(nearesttimenp)-1))
+              
+                                ;make sure that the nearest neighbor is not the point itself
+              if  xcen2(j) eq nearestxnp(0) and ycen2(j) eq nearestynp(0) then begin
+                 nearestxnp = nearestxnp[1:*]
+                 nearestynp = nearestynp[1:*]
+                 nearestsqrtnp  = nearestsqrtnp[1:*]
+                 nearestfluxnp = nearestfluxnp[1:*]
+              endif
+              
+              
+              
+              
+           endif else begin     ;s[j] eq 0 ; in transit
+                                ;print, 'j', j
+              goodx = fltarr(ngood + 1)
+              goody = fltarr(ngood + 1)
+              goodflux = fltarr(ngood + 1)
+              goodx[0] = xcen[j]
+              goody[0] = ycen[j]
+              goodflux[0] = flux_m[j]
+              goodx[1:*] = xcen(good)
+              goody[1:*] = ycen(good)
+              goodflux[1:*] = flux_m(good)
+              
+                                ; try the brute force way
+              dist = distance(goodx, goody, 0, chname)
+              sd = sort(dist)
+              sortdist = dist(sd)
+              sortxcen = goodx(sd)
+              sortycen = goody(sd)
+              sortflux_m = goodflux(sd)
+              nearestx = sortxcen[1:nn] ;zeroth element will be the same position as the target image
+              nearesty = sortycen[1:nn]
+              nearestflux = sortflux_m[1:nn]
+              
+                                ;===========
+                                ;with weightnp
+                                ;------------
+              goodxnp = fltarr(ngood + 1)
+              goodynp = fltarr(ngood + 1)
+              goodfluxnp = fltarr(ngood + 1)
+              goodsqrtnp = fltarr(ngood+1)
+              goodxnp[0] = xcen[j]
+              goodynp[0] = ycen[j]
+              goodfluxnp[0] = flux_m[j]
+              goodsqrtnp[0] = sqrtnp[j]
+              goodxnp[1:*] = xcen(good)
+              goodynp[1:*] = ycen(good)
+              goodfluxnp[1:*] = flux_m(good)
+              goodsqrtnp[1:*] = sqrtnp(good)
+              
+                                ; try the brute force way
+              dist = distance_np(goodx, goody, goodsqrtnp,0, chname)
+              sd = sort(dist)
+              sortdist = dist(sd)
+              sortxcen = goodx(sd)
+              sortycen = goody(sd)
+              sortflux_m = goodflux(sd)
+              sortsqrtnp = goodsqrtnp(sd)
+              
+              nearestxnp = sortxcen[1:nn] ;zeroth element will be the same position as the target image
+              nearestynp = sortycen[1:nn]
+              nearestfluxnp = sortflux_m[1:nn]
+              nearestsqrtnp = sortsqrtnp[1:nn]
+              
+           endelse              ;end in transit
            
-           delta_time_np(j) = abs(time_02[j]- nearesttimenp(n_elements(nearesttimenp)-1))
-        
-       ;make sure that the nearest neighbor is not the point itself
-           if  xcen2(j) eq nearestxnp(0) and ycen2(j) eq nearestynp(0) then begin
-              nearestxnp = nearestxnp[1:*]
-              nearestynp = nearestynp[1:*]
-              nearestsqrtnp  = nearestsqrtnp[1:*]
-              nearestfluxnp = nearestfluxnp[1:*]
-           endif
-
-
-
-
-        endif else begin        ;s[j] eq 0 ; in transit
-           ;print, 'j', j
-           goodx = fltarr(ngood + 1)
-           goody = fltarr(ngood + 1)
-           goodflux = fltarr(ngood + 1)
-           goodx[0] = xcen[j]
-           goody[0] = ycen[j]
-           goodflux[0] = flux_m[j]
-           goodx[1:*] = xcen(good)
-           goody[1:*] = ycen(good)
-           goodflux[1:*] = flux_m(good)
-          
-           ; try the brute force way
-           dist = distance(goodx, goody, 0, chname)
-           sd = sort(dist)
-           sortdist = dist(sd)
-           sortxcen = goodx(sd)
-           sortycen = goody(sd)
-           sortflux_m = goodflux(sd)
-           nearestx = sortxcen[1:nn];zeroth element will be the same position as the target image
-           nearesty = sortycen[1:nn]
-           nearestflux = sortflux_m[1:nn]
-           
-           ;===========
-           ;with weightnp
-           ;------------
-           goodxnp = fltarr(ngood + 1)
-           goodynp = fltarr(ngood + 1)
-           goodfluxnp = fltarr(ngood + 1)
-           goodsqrtnp = fltarr(ngood+1)
-           goodxnp[0] = xcen[j]
-           goodynp[0] = ycen[j]
-           goodfluxnp[0] = flux_m[j]
-           goodsqrtnp[0] = sqrtnp[j]
-           goodxnp[1:*] = xcen(good)
-           goodynp[1:*] = ycen(good)
-           goodfluxnp[1:*] = flux_m(good)
-           goodsqrtnp[1:*] = sqrtnp(good)
-
-           ; try the brute force way
-           dist = distance_np(goodx, goody, goodsqrtnp,0, chname)
-           sd = sort(dist)
-           sortdist = dist(sd)
-           sortxcen = goodx(sd)
-           sortycen = goody(sd)
-           sortflux_m = goodflux(sd)
-           sortsqrtnp = goodsqrtnp(sd)
-
-           nearestxnp = sortxcen[1:nn];zeroth element will be the same position as the target image
-           nearestynp = sortycen[1:nn]
-           nearestfluxnp = sortflux_m[1:nn]
-           nearestsqrtnp = sortsqrtnp[1:nn]
-
-        endelse  ;end in transit
-        
                                 ;calculate sigmas on the nearest neighbors.
-        stdxcen = stddev(nearestx)
-        stdycen = stddev(nearesty)
-        sigmax[j] = stdxcen
-        sigmay[j] = stdycen
-        
+           stdxcen = stddev(nearestx)
+           stdycen = stddev(nearesty)
+           sigmax[j] = stdxcen
+           sigmay[j] = stdycen
+           
                                 ;fix sigmas to ballard values
-        if keyword_set(ballard_sigma) then begin
-           ;values from Ballard et al. 2010 PASP
-           stdxcen = 0.017
-           stdycen = 0.0043
-        endif
-
-        w = weight(stdxcen, stdycen, nearestx, nearesty,  xcen(j), ycen(j), nearestflux)
-        warr[j] = w
+           if keyword_set(ballard_sigma) then begin
+                                ;values from Ballard et al. 2010 PASP
+              stdxcen = 0.017
+              stdycen = 0.0043
+           endif
+           
+           w = weight(stdxcen, stdycen, nearestx, nearesty,  xcen(j), ycen(j), nearestflux)
+           warr[j] = w
                                 ; print, 'testing', flux_m(j), w,  flux_m(j) / w
-        flux(j) = flux_m2(j) / w
-        fluxerr(j) = fluxerr_m2(j) / w
-
+           flux(j) = flux_m2(j) / w
+           fluxerr(j) = fluxerr_m2(j) / w
+           
 ;---------------------
-      
-        stdxcennp = stddev(nearestxnp)
-        stdycennp = stddev(nearestynp)
-        stdsqrtnp = stddev(nearestsqrtnp)
-        sigma_np[j] = stdsqrtnp
-                
-        w_np = weight_np(stdxcennp, stdycennp, stdsqrtnp, nearestxnp, nearestynp, nearestsqrtnp, xcen(j), ycen(j), sqrtnp(j), nearestfluxnp)
-        warr_np[j] = w_np
-        flux_np(j) = flux_m(j) / w_np
-        fluxerr_np(j) = fluxerr_m(j) / w_np
-  ;--------------------
+           
+           stdxcennp = stddev(nearestxnp)
+           stdycennp = stddev(nearestynp)
+           stdsqrtnp = stddev(nearestsqrtnp)
+           sigma_np[j] = stdsqrtnp
+           
+           w_np = weight_np(stdxcennp, stdycennp, stdsqrtnp, nearestxnp, nearestynp, nearestsqrtnp, xcen(j), ycen(j), sqrtnp(j), nearestfluxnp)
+           warr_np[j] = w_np
+           flux_np(j) = flux_m(j) / w_np
+           fluxerr_np(j) = fluxerr_m(j) / w_np
+                                ;--------------------
+           
+        endfor
         
-     endfor
-     
 ;  bad = where(finite(flux) lt 1, badcount)
 ;  print, 'nan? ', badcount
-     
-     
+        
+        
 ;plot the results
-     p1 = plot(time[0:ni-1]/60./60., flux_m[0:ni-1]/ median(flux_m[0:ni-1]), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname, name = 'raw flux', yrange =[0.93, 1.15])
-     p4 =  plot(time[0:ni-1]/60./60., (corrflux[0:ni-1] /median( corrflux[0:ni-1])) + 0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
-     p2 = plot(time_0/60./60., flux/median(flux) -0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
-     p3 = plot(time_0/60./60., flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
-   
-
-     p1 = plot(phase_0, flux_m[0:ni-1]/ median(flux_m[0:ni-1]), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname, name = 'raw flux', yrange =[0.93, 1.15])
-     p4 =  plot(phase_0, (corrflux[0:ni-1] /median( corrflux[0:ni-1])) + 0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
-     p2 = plot(phase_0, flux/median(flux) -0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
-     p3 = plot(phase_0, flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
-
-     xtest = findgen(n_elements(ndimages))
-     ptest = plot(xtest, ndimages, yrange = [0, 0.1], xtitle = 'Some indication of time with eclipse removed', ytitle = 'average distance to nearest neighbors')
-     ptest.save, dirname+'nn_dist.png'
-  ; l = legend(target = [p1, p4, p2,p3], position = [1.5, 1.18], /data, /auto_text_color)
-     
+        p1 = plot(time[0:ni-1]/60./60., flux_m[0:ni-1]/ median(flux_m[0:ni-1]), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname, name = 'raw flux', yrange =[0.93, 1.15])
+        p4 =  plot(time[0:ni-1]/60./60., (corrflux[0:ni-1] /median( corrflux[0:ni-1])) + 0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
+        p2 = plot(time_0/60./60., flux/median(flux) -0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
+        p3 = plot(time_0/60./60., flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
+        
+        
+        p1 = plot(phase_0, flux_m[0:ni-1]/ median(flux_m[0:ni-1]), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname, name = 'raw flux', yrange =[0.93, 1.15])
+        p4 =  plot(phase_0, (corrflux[0:ni-1] /median( corrflux[0:ni-1])) + 0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
+        p2 = plot(phase_0, flux/median(flux) -0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
+        p3 = plot(phase_0, flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
+        
+        xtest = findgen(n_elements(ndimages))
+        ptest = plot(xtest, ndimages, yrange = [0, 0.1], xtitle = 'Some indication of time with eclipse removed', ytitle = 'average distance to nearest neighbors')
+        ptest.save, dirname+'nn_dist.png'
+                                ; l = legend(target = [p1, p4, p2,p3], position = [1.5, 1.18], /data, /auto_text_color)
+        
 ;    print, 'mean and stddev of sigmax', mean(sigmax), stddev(sigmax)
 ;     print, 'mean and stddev of sigmay', mean(sigmay), stddev(sigmay)
 ;     print, 'mean and stddev of sigmanp', mean(sigma_np), stddev(sigma_np)
@@ -325,12 +329,13 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
 ;     print, 'mean and stddev of deltatime', mean(delta_time), stddev(delta_time)
 ;     print, '------'
 ;     if ni gt 12000 then print, 'stddev of raw, pmap, position, position+np corr', stddev(flux_m[12000:ni-1],/nan),stddev(corrflux[12000:ni-1],/nan), stddev(flux[12000:*],/nan), stddev(flux_np[12000:*],/nan)
-
+        
 
      save, /all, filename =strcompress(dirname + 'pixphasecorr_ch'+chname+'_'+aorname(a)+'.sav')
 
 
-  
+  endif
+
      
 ;  plothist, warr, xhist, yhist, bin = 0.5, /noplot
 ;  plothist, warr_np, xhistnp, yhistnp,bin = 0.5, /noplot

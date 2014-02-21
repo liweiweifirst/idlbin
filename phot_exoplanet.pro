@@ -167,8 +167,8 @@ for a = 0,  n_elements(aorname) - 1 do begin
       
 ;--------------------------------
       ;correct for pixel phase effect based on pmaps from Jim
-      file_suffix = ['500x500_0043_120828.fits','0p1s_x4_500x500_0043_121120.fits'] ;121120 ['500x500_0043_120409.fits','0p1s_x4_500x500_0043_120124.fits']
-      corrflux = iracpc_pmap_corr(abcdflux,x_center,y_center,ch,/threshold_occ, threshold_val = 20, file_suffix = file_suffix)
+      ;file_suffix = ['500x500_0043_120828.fits','0p1s_x4_500x500_0043_121120.fits'] ;121120 ['500x500_0043_120409.fits','0p1s_x4_500x500_0043_120124.fits']
+      corrflux = iracpc_pmap_corr(abcdflux,x_center,y_center,ch,/threshold_occ, threshold_val = 20);, file_suffix = file_suffix)
       corrfluxerr = fs          ;leave out the pmap err for now
       
 ;---------------------------------
