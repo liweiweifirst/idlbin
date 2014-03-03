@@ -1,4 +1,4 @@
-pro selfcal_exoplanet, planetname, bin_level, binning=binning, sine=sine
+pro selfcal_exoplanet, planetname, bin_level, apradius, binning=binning, sine=sine
   
 ;example call: selfcal_exoplanet, 'wasp15', 10*63L, /binning
 
@@ -16,11 +16,12 @@ intended_phase = planetinfo[planetname, 'intended_phase']
 
 
 ;  bin_level = 10.*63L
-  startnum = intarr(n_elements(aorname))
 
 ;---------------
   dirname = strcompress(basedir + planetname +'/')
-  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
+;  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
+   savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
+
   restore, savefilename
   
 ;  transit_duration = transit_duration /60./24. ; in days
@@ -35,54 +36,44 @@ for a = 0,  n_elements(aorname) - 1 do begin
 
 
  ;for chopping off some initial part of the light curve
-
-;   print, ' fluxarr first', n_elements(AOR55cnc[a].flux)
-  xarr = (planethash[aorname(a),'xcen'])[startnum(a):*]
-  yarr = (planethash[aorname(a),'ycen'])[startnum(a):*]
-  timearr = (planethash[aorname(a),'timearr'])[startnum(a):*]
-  fluxerr = (planethash[aorname(a),'fluxerr'])[startnum(a):*]
-  flux = (planethash[aorname(a),'flux'])[startnum(a):*]
-  corrflux = (planethash[aorname(a),'corrflux'])[startnum(a):*]
-  corrfluxerr = (planethash[aorname(a),'corrfluxerr'])[startnum(a):*]
-  bmjd = (planethash[aorname(a),'bmjdarr'])[startnum(a):*]
+   startnum = intarr(n_elements(aorname))
+   
+   xarr = (planethash[aorname(a),'xcen'])[startnum(a):*]
+   yarr = (planethash[aorname(a),'ycen'])[startnum(a):*]
+   timearr = (planethash[aorname(a),'timearr'])[startnum(a):*]
+   fluxerr = (planethash[aorname(a),'fluxerr'])[startnum(a):*]
+   flux = (planethash[aorname(a),'flux'])[startnum(a):*]
+   corrflux = (planethash[aorname(a),'corrflux'])[startnum(a):*]
+   corrfluxerr = (planethash[aorname(a),'corrfluxerr'])[startnum(a):*]
+   bmjd = (planethash[aorname(a),'bmjdarr'])[startnum(a):*]
 ;  utcs = (planethash[aorname(a),'utcsarr'])[startnum(a):*]
-  phase = (planethash[aorname(a),'phase'])[startnum(a):*]
-
-    ;now try to get them all within the same [0,1] phase  
-  ;taken from plot_exoplanet.pro
- ; bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
- ; phase =( bmjd_dist / period )- fix(bmjd_dist/period)
- ; pa = where(phase gt 0.5,pacount)
-;  if intended_phase ne 0.5 then begin
- ;    if pacount gt 0 then phase[pa] = phase[pa] - 1.0
-;  endif
-
- 
-
-  print, 'in the beginning', phase[0], phase[n_elements(phase) - 2]
-
-
+   phase = (planethash[aorname(a),'phase'])[startnum(a):*]
+   
+   
+   print, 'in the beginning', phase[0], phase[n_elements(phase) - 2]
+   
+   
 ;get rid of outliers
- print, ' fluxarr', n_elements(flux), n_elements(planethash[aorname(a),'flux'])
+   print, ' fluxarr', n_elements(flux), n_elements(planethash[aorname(a),'flux'])
 
- print, 'positions', mean(xarr) + 3.0*stddev(xarr),  mean(xarr) -3.0*stddev(xarr),  mean(yarr) +3.0*stddev(yarr), mean(yarr) - 3.0*stddev(yarr)
-
-  good = where(xarr lt mean(xarr) + 3.0*stddev(xarr) and xarr gt mean(xarr) -3.0*stddev(xarr) and yarr lt mean(yarr) +3.0*stddev(yarr) and yarr gt mean(yarr) - 3.0*stddev(yarr),ngood_pmap, complement=bad) 
-  print, 'bad position',n_elements(bad), n_elements(good)
- 
-  xarr = xarr[good]
-  yarr = yarr[good]
-  timearr = timearr[good]
-  fluxerr = fluxerr[good]
-  flux = flux[good]
-  corrflux =corrflux[good]
-  corrfluxerr = corrfluxerr[good]
-  bmjd = bmjd[good]
-  phase = phase[good]
+   print, 'positions', mean(xarr) + 3.0*stddev(xarr),  mean(xarr) -3.0*stddev(xarr),  mean(yarr) +3.0*stddev(yarr), mean(yarr) - 3.0*stddev(yarr)
+   
+   good = where(xarr lt mean(xarr) + 3.0*stddev(xarr) and xarr gt mean(xarr) -3.0*stddev(xarr) and yarr lt mean(yarr) +3.0*stddev(yarr) and yarr gt mean(yarr) - 3.0*stddev(yarr),ngood_pmap, complement=bad) 
+   print, 'bad position',n_elements(bad), n_elements(good)
+   
+   xarr = xarr[good]
+   yarr = yarr[good]
+   timearr = timearr[good]
+   fluxerr = fluxerr[good]
+   flux = flux[good]
+   corrflux =corrflux[good]
+   corrfluxerr = corrfluxerr[good]
+   bmjd = bmjd[good]
+   phase = phase[good]
 ;  utcs = utcs[good]
- print, 'middle flux', n_elements(flux)
-
-  ;print, 'max x, y', max(xarr), min(xarr), max(yarr), min(yarr)
+   print, 'middle flux', n_elements(flux)
+   
+   ;print, 'max x, y', max(xarr), min(xarr), max(yarr), min(yarr)
 
   ;try getting rid of flux outliers.
   ;do some running mean with clipping
@@ -212,12 +203,12 @@ for a = 0,  n_elements(aorname) - 1 do begin
   print, 'nfull', n_elements(full_xarr)
 ;endfor  ;for nseg
 
-  f = strcompress(dirname + 'selfcal_bmjd_' + string(a) + '.sav',/remove_all)
-  save, full_bmjd, filename = f
-  f = strcompress(dirname + 'selfcal_sub_' + string(a) + '.sav',/remove_all)
-  save, full_sub, filename = f
-  f = strcompress(dirname + 'selfcal_fluxerr_' + string(a) + '.sav',/remove_all)
-  save, full_fluxerr, filename = f
+;  f = strcompress(dirname + 'selfcal_bmjd_' + string(a) + '.sav',/remove_all)
+;  save, full_bmjd, filename = f
+;  f = strcompress(dirname + 'selfcal_sub_' + string(a) + '.sav',/remove_all)
+;  save, full_sub, filename = f
+;  f = strcompress(dirname + 'selfcal_fluxerr_' + string(a) + '.sav',/remove_all)
+;  save, full_fluxerr, filename = f
 
 ;-------------------------------------------------------------------------------------
 ;-------------------------------------------------------------------------------------
@@ -386,7 +377,7 @@ for a = 0,  n_elements(aorname) - 1 do begin
   selfcal_timearr = full_time
   selfcal_flux = full_flux
   
-  save, /all, filename=strcompress(dirname + 'selfcal.sav')
+  save, /all, filename=strcompress(dirname + 'selfcal'+string(apradius)+'.sav',/remove_all)
 ;  save, selfcal_timearr, filename='/Users/jkrick/irac_warm/pcrs_planets/55cnc/selfcal_timearr.sav'
 ;  save, selfcal_flux, filename='/Users/jkrick/irac_warm/pcrs_planets/55cnc/selfcal_flux.sav'
 ;  save, bin_time, filename='/Users/jkrick/irac_warm/pcrs_planets/55cnc/bin_time.sav'

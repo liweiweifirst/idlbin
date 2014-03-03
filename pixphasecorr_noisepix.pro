@@ -26,7 +26,7 @@
 ; MODIFICATION HISTORY:
 ; Dec 2012 JK initial version
 ;-
-pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma = ballard_sigma
+pro pixphasecorr_noisepix, planetname, nn, apradius, breatheap = breatheap, ballard_sigma = ballard_sigma
 
   t1 = systime(1)
 ;get all the necessary saved info/photometry
@@ -39,7 +39,7 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
   exptime = planetinfo[planetname, 'exptime']
   transit_duration = planetinfo[planetname, 'transit_duration']
   dirname = strcompress(basedir + planetname +'/')
-  if keyword_set(breatheap) then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav') else savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
+  if keyword_set(breatheap) then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav') else savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
 
   restore, savefilename
 
@@ -60,17 +60,11 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
         time = (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0)) ; in seconds;/60./60. ; in hours from beginning of obs.
         print, 'xcen', xcen[0:10]
         print, 'ycent', ycen[0:10]
-
-     ;now try to get them all within the same [0,1] phase     
- ;    bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
- ;    phase =( bmjd_dist / period )- fix(bmjd_dist/period)
- ;    pa = where(phase gt 0.5,pacount)
- ;    if pacount gt 0 then phase[pa] = phase[pa] - 1.0
-     
+    
         sqrtnp = sqrt(np)
         
-        savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
-        restore, savefilename
+;        savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
+;        restore, savefilename
         corrflux = planethash[aorname(a), 'corrflux'] ;pmap corrected
         corrfluxerr = planethash[aorname(a), 'corrfluxerr']
         
@@ -135,7 +129,8 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
         
         nearest = nearest_neighbors_DT(xcen2,ycen2,chname,DISTANCES=nearest_d,NUMBER=nn)
         nearest_np = nearest_neighbors_np_DT(xcen2,ycen2,sqrtnp2,chname,DISTANCES=nearest_np_d,NUMBER=nn)
-        ndimages = dblarr(ngood)
+        ndimages = dblarr(ni)
+        print, 'testing', ni, n_elements(ndimages), n_elements(xcen)
         for j = 0L,   ni - 1 do begin ;for each image (centroid)
 ;        if j gt 110500 then print, 'centers', xcen(j), ycen(j), xcen2(j), ycen2(j)
                                 ;--------------------
@@ -331,7 +326,7 @@ pro pixphasecorr_noisepix, planetname, nn, breatheap = breatheap, ballard_sigma 
 ;     if ni gt 12000 then print, 'stddev of raw, pmap, position, position+np corr', stddev(flux_m[12000:ni-1],/nan),stddev(corrflux[12000:ni-1],/nan), stddev(flux[12000:*],/nan), stddev(flux_np[12000:*],/nan)
         
 
-     save, /all, filename =strcompress(dirname + 'pixphasecorr_ch'+chname+'_'+aorname(a)+'.sav')
+     save, /all, filename =strcompress(dirname + 'pixphasecorr_ch'+chname+'_'+aorname(a)+string(apradius)+'.sav',/remove_all)
 
 
   endif

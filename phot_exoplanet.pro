@@ -1,4 +1,21 @@
-pro phot_exoplanet, planetname, columntrack = columntrack, breatheap = breatheap
+pro phot_exoplanet, planetname, apradius, columntrack = columntrack, breatheap = breatheap
+
+
+
+;convert aperture radius in pixels into what get_centroids_for_calstar_jk uses 
+case apradius of
+;[ 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25]
+   1.5: apval = 0
+   1.75: apval = 1
+   2.0: apval = 2
+   2.25: apval = 3
+   2.75: apval = 5
+   3.25: apval = 7
+   3: apval = 9
+   2.5: apval = 8
+   Else: apval = 9              ; if no decision, then choose an apradius = 3 pixels
+endcase
+print, 'working on apradius', apradius, apval
 ;do photometry on any IRAC staring mode exoplanet data
 ;now with hashes of hashes!
  t1 = systime(1)
@@ -117,8 +134,8 @@ for a = 0,  n_elements(aorname) - 1 do begin
       endif else begin
          
         ;choose 3 pixel aperture, 3-7 pixel background
-         abcdflux = f[*,9]      
-         fs = fs[*,9]
+         abcdflux = f[*,apval]      
+         fs = fs[*,apval]
        ;choose [10, 12-20]
 ;        abcdflux = f[*,5]
 ;        fs = fs[*,5]
@@ -320,7 +337,7 @@ endfor                          ;for each AOR
 if keyword_set(breatheap) then begin
    savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav')
 endif else begin
-   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
+   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
 endelse
 
 save, planethash, filename=savename
