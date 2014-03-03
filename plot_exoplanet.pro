@@ -1,4 +1,4 @@
-pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfcal, centerpixplot = centerpixplot, errorbars = errorbars, unbinned_plots = unbinned_plots
+pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfcal, centerpixplot = centerpixplot, errorbars = errorbars, unbinned_xplot = unbinned_xplot, unbinned_yplot = unbinned_yplot, unbinned_fluxplot=unbinned_fluxplot, unbinned_npplot = unbinned_npplot, unbinned_bkgplot = unbinned_bkgplot
 ;example call plot_exoplanet, 'wasp15', 2*63L
 
 ;run code to read in all the input planet parameters
@@ -37,20 +37,27 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
 ;  fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120409.fits', pmapdata, pmapheader
 ;  c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [0,500], yrange = [0,500])
 
-;  for a = 0 , n_elements(aorname) - 1 do begin
+  for a = 0 ,  n_elements(aorname) - 1, 2 do begin
 ;     print, 'testing aors', a, colorarr[a]
 
 ;     xcen500 = 500.* ((planethash[aorname(a),'xcen']) - 14.5)
 ;     ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
 ;     an = plot(xcen500, ycen500, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
 
-;     xcen500 = 500.* ((planethash[aorname(a),'xcen'])[0:30] - 14.5)
-;     ycen500 = 500.* ((planethash[aorname(a),'ycen'])[0:30] - 14.5)
-;     an = plot(xcen500, ycen500, '1s', sym_size = 0.2,   sym_filled = 1, color = 'red',/overplot)
+     npmax = [4.8, 37., 4.5]
+     testnp = where((planethash[aorname(a),'np']) gt npmax(a) , complement = nospike)
+     xcen500 = ((planethash[aorname(a),'xcen'])[nospike] )
+     ycen500 = ((planethash[aorname(a),'ycen'])[nospike])
+     print, 'mean np', mean((planethash[aorname(a),'np'])[nospike])
+     an = plot(xcen500, ycen500, '1s', sym_size = 0.2,   sym_filled = 1, color = 'blue', xtitle = 'xcen', ytitle = 'ycen', xrange = [14.9, 15.2], yrange = [14.75, 15.25]) 
+     xcen500 = ((planethash[aorname(a),'xcen'])[testnp] )
+     ycen500 = ((planethash[aorname(a),'ycen'])[testnp])
+     print, 'mean np', mean((planethash[aorname(a),'np'])[testnp])
+     an = plot(xcen500, ycen500, '1s', sym_size = 0.4,   sym_filled = 1, color = 'red',/overplot)
 
 ; ;    print, 'xcen500', xcen500
 ; ;    print, 'ycen500', ycen500
-;  endfor
+  endfor
 ;  an.save, dirname+'position_ch'+chname+'.png'
 ;GOTO, Jumpend
 
@@ -58,37 +65,43 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
  
   ;print, 'min', min((planetob[a].timearr - planetob[0].timearr(0))/60./60.)
  ; z = pp_multiplot(multi_layout=[1,3], global_xtitle='Time (hrs) ')
-  if keyword_set(unbinned_plots) then begin
-     for a = 0, n_elements(aorname) - 1 do begin
+  if keyword_set(unbinned_xplot) then begin
+     for a = 12,12 do begin; 0, n_elements(aorname) - 1 do begin
         if a eq 0 then begin
            xmin = 14.0          ; mean(planethash[aorname(a),'xcen'])-0.25
            xmax = 15.5          ; mean(planethash[aorname(a),'xcen'])+0.25
                                 ;print, 'xmin.xmax', xmin, xmax
 
-           am = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'xcen'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'X pix', title = planetname) ;, xtitle = 'Time(hrs)'
+           am = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0))/60./60., planethash[aorname(a),'xcen'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'X pix', title = planetname) ;, xtitle = 'Time(hrs)'
         endif else begin
-           am = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'xcen'],'6r1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+;           am = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'xcen'],'6r1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+           am = plot( (planethash[aorname(a),'bmjdarr'] - (planethash[aorname(a),'bmjdarr'])(0)), planethash[aorname(a),'xcen'],'6r1s-', sym_size = 0.3,   sym_filled = 1, color = colorarr[a],yrange = [14.47, 14.62], xrange = [0.1501,0.15018], ytitle = 'xcen');,/overplot)
         endelse
         
      endfor
      am.save, dirname + 'x_time_ch'+chname+'.png'
+  endif
 
 ;------
-
-     for a = 0,n_elements(aorname) -1 do begin ; 0, n_elements(aorname) - 1 do begin
+  if keyword_set(unbinned_yplot) then begin
+     for a = 12,12 do begin; 0,n_elements(aorname) -1 do begin ; 0, n_elements(aorname) - 1 do begin
         if a eq 0 then begin
            ymin = 14.9          ; mean(planethash[aorname(a),'ycen'])-0.25
            ymax = 16.0          ;mean(planethash[aorname(a),'ycen'])+0.25
                                 ;print, 'ymin.ymax', ymin, ymax
-           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'ycen'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'Y pix') ;,title = planetname, xtitle = 'Time(hrs)'
+           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0))/60./60., planethash[aorname(a),'ycen'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'Y pix') ;,title = planetname, xtitle = 'Time(hrs)'
         endif else begin
-           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'ycen'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+;           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'ycen'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+           ay = plot( (planethash[aorname(a),'bmjdarr'] - (planethash[aorname(a),'bmjdarr'])(0)), planethash[aorname(a),'ycen'],'6r1s-', sym_size = 0.3,   sym_filled = 1, color = colorarr[a] , yrange = [14.3, 14.45], xrange = [0.1501,0.15018], ytitle = 'ycen');,/overplot)
         endelse
         
      endfor
      ay.save, dirname +'y_time_ch'+chname+'.png'
-     
+  endif
+ 
 ;------
+  if keyword_set(unbinned_fluxxplot) then begin
+
      for a = 0,n_elements(aorname) -1 do begin ; 0, n_elements(aorname) - 1 do begin
         if a eq 0 then begin
                                 ;       ymin = 14.9             ; mean(planethash[aorname(a),'ycen'])-0.25
@@ -101,8 +114,11 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
         
      endfor
      ay.save, dirname +'raw_flux_time_ch'+chname+'.png'
-     
+  endif
+
 ;------
+  if keyword_set(unbinned_bkgplot) then begin
+
      for a = 0,n_elements(aorname) -1 do begin ; 0, n_elements(aorname) - 1 do begin
         if a eq 0 then begin
            ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'bkgd'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'Bkgd', xtitle = 'Time(hrs)') ;,title = planetname
@@ -112,26 +128,31 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
         
      endfor
      ay.save, dirname +'bkgd_time_ch'+chname+'.png'
-     
+  endif
+
 ;------
-     for a = 0,n_elements(aorname) -1 do begin ; 0, n_elements(aorname) - 1 do begin
+  if keyword_set(unbinned_npplot) then begin
+
+     for a = 12,12 do begin; ,n_elements(aorname) -1 do begin ; 0, n_elements(aorname) - 1 do begin
         if a eq 0 then begin
-           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'np'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'NP') ;,title = planetname, xtitle = 'Time(hrs)'
+           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0))/60./60., planethash[aorname(a),'np'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'NP') ;,title = planetname, xtitle = 'Time(hrs)'
         endif else begin
-           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'np'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+;           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0))/60./60., planethash[aorname(a),'np'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], xrange = [4,4.01], yrange = [6,9]);,/overplot)
+           ay = plot( (planethash[aorname(a),'bmjdarr'] - (planethash[aorname(a),'bmjdarr'])(0)), planethash[aorname(a),'np'],'6r1s-', sym_size = 0.3,   sym_filled = 1, color = colorarr[a], xrange = [0.1501,0.15018], yrange = [7.3,8.5], ytitle = 'NP');,/overplot)
         endelse
         
      endfor
      ay.save, dirname +'np_time_ch'+chname+'.png'
-     
+  endif
+
 ;------
-  endif ; unbinned plots keyword set
+  
 ;------
      
      
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; bin within each AOR only, don't want to bin across boundaries.
-
+;goto, jumpend
   for a = 0, n_elements(aorname) - 1 do begin
      print, 'working on AOR', a, '   ', aorname(a)
 
@@ -656,7 +677,7 @@ pro plot_exoplanet, planetname, bin_level, phaseplot = phaseplot, selfcal=selfca
   save, /all, filename=savename
   print, 'saving planethash', savename
 
-;jumpend: print, 'ending early for just easy plots'
+jumpend: print, 'ending early for just easy plots'
 end
 
 

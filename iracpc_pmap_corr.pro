@@ -394,7 +394,7 @@ ENDIF ELSE BEGIN
    corrected_flux = 0.d0
    occu_interp = 0.0
 ENDELSE
-
+;print, 'testing channel', channel
 IF N_ELEMENTS(channel) EQ 1 THEN BEGIN
    chan_uniq = channel[0]
    IF N_ELEMENTS(f0) GT 1 THEN chn = FIX(MAKE_ARRAY(SIZE=size(f0),value=channel[0]) ) ELSE chn = channel[0]
