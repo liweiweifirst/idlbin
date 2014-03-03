@@ -106,13 +106,13 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 	edge = 5.
 
 ; First set of apertures	
-	aps1 = [2., 3., 4., 5., 6., 8., 10., 12.]
+  aps1 = [ 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25]
 ; First background annulus
-	back1 =  [12., 20.]
+	back1 =  [3., 7.]
 ; Second set of apertures
-	aps2 = [3.]
+	aps2 = [2.5]
 ; Second background annulus
-	back2 = [11.,15.]
+	back2 = [3.,7.]
 ; Third set of apertures
 	aps3 = [3.]
 ; Third background annulus
@@ -490,21 +490,21 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 
 ; 1st set of apertures
 ;;			aper, eim, x5[i], y5[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
-;			aper, eim, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
-;			      badpix, /FLUX, /EXACT, /SILENT, /NAN, $
-;			      READNOISE=readnoise[nch-1, findex]
-;			f[i, 0:7] = xf / sbtoe
-;			b[i, 0] = xb
-;			bs[i, 0] = xbs
-;                        bptr = where(xf ne xf, bcount)
-;			if (bcount ne 0) then xfs[bptr] = !VALUES.D_NAN
-;			rn = readnoise[nch-1, findex] * !DPI * aps1
-;			fs[i, 0:7] = sqrt(xfs * xfs + rn * rn) / sbtoe
+			aper, eim, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
+			      badpix, /FLUX, /EXACT, /SILENT, /NAN, /MEANBACK,$
+			      READNOISE=readnoise[nch-1, findex]
+			f[i, 0:7] = xf / sbtoe
+			b[i, 0] = xb
+			bs[i, 0] = xbs
+                        bptr = where(xf ne xf, bcount)
+			if (bcount ne 0) then xfs[bptr] = !VALUES.D_NAN
+			rn = readnoise[nch-1, findex] * !DPI * aps1
+			fs[i, 0:7] = sqrt(xfs * xfs + rn * rn) / sbtoe
 
 ; 2nd set of apertures
 ;			aper, eim, x5[i], y5[i], xf, xfs, xb, xbs, 1.0, aps2, back2, $
 			aper, eim, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps2, back2, $
-			      badpix, /FLUX, /EXACT, /SILENT, /NAN, $
+			      badpix, /FLUX, /EXACT, /SILENT, /NAN, /MEANBACK,$
 			      READNOISE=readnoise[nch-1, findex]
 			f[i, 8] = xf / sbtoe
 			b[i, 1] = xb
@@ -517,7 +517,7 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ; 3rd set of apertures
 ;			aper, eim, x5[i], y5[i], xf, xfs, xb, xbs, 1.0, aps3, back3, $
 			aper, eim, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps3, back3, $
-			      badpix, /FLUX, /EXACT, /SILENT, /NAN, $
+			      badpix, /FLUX, /EXACT, /SILENT, /NAN, /MEANBACK,$
 			      READNOISE=readnoise[nch-1, findex]
                         ;print, 'xf', xf
 			f[i, 9] = xf / sbtoe
@@ -531,7 +531,7 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ; 4th set of apertures
 ;			aper, eim, x5[i], y5[i], xf, xfs, xb, xbs, 1.0, aps4, back4, $
 ;			aper, eim, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps4, back4, $
-;			      badpix, /FLUX, /EXACT, /SILENT, /NAN, $
+;			      badpix, /FLUX, /EXACT, /SILENT, /NAN, /MEANBACK, $
 ;			      READNOISE=readnoise[nch-1, findex]
 ;			f[i, 10] = xf / sbtoe
 ;			b[i, 3] = xb
@@ -547,27 +547,27 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 
 ; 1st set of apertures
 ;;			aper, slice, x5[i], y5[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
-;			aper, slice, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
-;			      badpix, /FLUX, /EXACT, /SILENT, /NAN
-;			fp[i, 0:7] = xf
-;			bptr = where(xf ne xf, bcount)
-;;			aper, unc2, x5[i], y5[i], xfs, txfs, txb, txbs, 1.0, aps1, back1, $
-;			aper, unc2, x3[i], y3[i], xfs, txfs, txb, txbs, 1.0, aps1, back1, $
-;			      badpix, /FLUX, /EXACT, /SILENT, /NAN
-;			if (bcount ne 0) then xfs[bptr] = !VALUES.D_NAN
-;			nsource = !DPI * aps1 * aps1
-;			nback = !DPI * (back1[1] * back1[1] - back1[0] * back1[0])
-;			fps[i, 0:7] = xfs + xbs * nsource * nsource / nback
+			aper, slice, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
+			      badpix, /FLUX, /EXACT, /SILENT, /NAN, /MEANBACK
+			fp[i, 0:7] = xf
+			bptr = where(xf ne xf, bcount)
+;			aper, unc2, x5[i], y5[i], xfs, txfs, txb, txbs, 1.0, aps1, back1, $
+			aper, unc2, x3[i], y3[i], xfs, txfs, txb, txbs, 1.0, aps1, back1, $
+			      badpix, /FLUX, /EXACT, /SILENT, /NAN,/MEANBACK
+			if (bcount ne 0) then xfs[bptr] = !VALUES.D_NAN
+			nsource = !DPI * aps1 * aps1
+			nback = !DPI * (back1[1] * back1[1] - back1[0] * back1[0])
+			fps[i, 0:7] = xfs + xbs * nsource * nsource / nback
 
 ; 2nd set of apertures
 ;			aper, slice, x5[i], y5[i], xf, xfs, xb, xbs, 1.0, aps2, back2, $
 			aper, slice, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps2, back2, $
-			      badpix, /FLUX, /EXACT, /SILENT, /NAN
+			      badpix, /FLUX, /EXACT, /SILENT, /NAN,/MEANBACK
 			fp[i, 8] = xf
 			bptr = where(xf ne xf, bcount)
 ;			aper, unc2, x5[i], y5[i], xfs, txfs, txb, txbs, 1.0, aps2, back2, $
 			aper, unc2, x3[i], y3[i], xfs, txfs, txb, txbs, 1.0, aps2, back2, $
-			      badpix, /FLUX, /EXACT, /SILENT, /NAN
+			      badpix, /FLUX, /EXACT, /SILENT, /NAN,/MEANBACK
 			if (bcount ne 0) then xfs[bptr] = !VALUES.D_NAN
 			nsource = !DPI * aps2 * aps2
 			nback = !DPI * (back2[1] * back2[1] - back2[0] * back2[0])			
@@ -576,12 +576,12 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ; 3rd set of apertures
 ;			aper, slice, x5[i], y5[i], xf, xfs, xb, xbs, 1.0, aps3, back3, $
 			aper, slice, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps3, back3, $
-			      badpix, /FLUX, /EXACT, /SILENT, /NAN
+			      badpix, /FLUX, /EXACT, /SILENT, /NAN,/MEANBACK
 			fp[i, 9] = xf
 			bptr = where(xf ne xf, bcount)
 ;			aper, unc2, x5[i], y5[i], xfs, txfs, txb, txbs, 1.0, aps3, back3, $
 			aper, unc2, x3[i], y3[i], xfs, txfs, txb, txbs, 1.0, aps3, back3, $
-			      badpix, /FLUX, /EXACT, /SILENT, /NAN
+			      badpix, /FLUX, /EXACT, /SILENT, /NAN, /MEANBACK
 			if (bcount ne 0) then xfs[bptr] = !VALUES.D_NAN
 			nsource = !DPI * aps3 * aps3
 			nback = !DPI * (back3[1] * back3[1] - back3[0] * back3[0])					
