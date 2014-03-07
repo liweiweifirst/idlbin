@@ -1,4 +1,4 @@
-pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = errorbars, phaseplot = phaseplot, fit_eclipse = fit_eclipse
+pro plot_pixphasecorr, planetname, bin_level, apradius, selfcal=selfcal, errorbars = errorbars, phaseplot = phaseplot, fit_eclipse = fit_eclipse
 
 ;get all the necessary saved info/photometry
   planetinfo = create_planetinfo()
@@ -15,7 +15,7 @@ pro plot_pixphasecorr, planetname, bin_level, selfcal=selfcal, errorbars = error
   dirname = strcompress(basedir + planetname +'/')
   ;a = 1
   for a =0, n_elements(aorname) -1  do begin
-     filename =strcompress(dirname +'pixphasecorr_ch'+chname+'_'+aorname(a) +'.sav')
+     filename =strcompress(dirname +'pixphasecorr_ch'+chname+'_'+aorname(a) +string(apradius)+'.sav',/remove_all)
      print, a, ' ', aorname(a), 'restoring', filename
      restore, filename
 

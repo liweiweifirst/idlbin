@@ -1,6 +1,7 @@
-pro phot_exoplanet, planetname, apradius, columntrack = columntrack, breatheap = breatheap
-
-
+pro phot_exoplanet, planetname, apradius, columntrack = columntrack, breatheap = breatheap, hybrid = hybrid
+;do photometry on any IRAC staring mode exoplanet data
+;now with hashes of hashes!
+ t1 = systime(1)
 
 ;convert aperture radius in pixels into what get_centroids_for_calstar_jk uses 
 case apradius of
@@ -15,10 +16,7 @@ case apradius of
    2.5: apval = 8
    Else: apval = 9              ; if no decision, then choose an apradius = 3 pixels
 endcase
-print, 'working on apradius', apradius, apval
-;do photometry on any IRAC staring mode exoplanet data
-;now with hashes of hashes!
- t1 = systime(1)
+
 ;run code to read in all the planet parameters
 planetinfo = create_planetinfo()
 chname = planetinfo[planetname, 'chname']
@@ -50,7 +48,7 @@ for a = 0,  n_elements(aorname) - 1 do begin
    print,'n_elements(fitsname)', n_elements(fitsname)
 ;     aparr = dblarr(n_elements(fitsname))  ;keep the aperture sizes used
    
-   for i =0.D,  n_elements(fitsname) - 1 do begin ;read each cbcd file, find centroid, keep track
+   for i =0.D, n_elements(fitsname) - 1 do begin ;read each cbcd file, find centroid, keep track
        ;print, 'working on ', fitsname(i)         
       header = headfits(fitsname(i)) ;
       sclk_obs= sxpar(header, 'SCLK_OBS')
@@ -182,12 +180,22 @@ for a = 0,  n_elements(aorname) - 1 do begin
       endif
       
       
-;--------------------------------
-      ;correct for pixel phase effect based on pmaps from Jim
-      ;file_suffix = ['500x500_0043_120828.fits','0p1s_x4_500x500_0043_121120.fits'] ;121120 ['500x500_0043_120409.fits','0p1s_x4_500x500_0043_120124.fits']
-      corrflux = iracpc_pmap_corr(abcdflux,x_center,y_center,ch,/threshold_occ, threshold_val = 20);, file_suffix = file_suffix)
-      corrfluxerr = fs          ;leave out the pmap err for now
       
+;---------------------------------
+;use pmap data to find nearest neighbors in pmap dataset and find a
+;correction based on those neighbors.  
+      if keyword_set(hybrid) then begin
+         ;use hybrid technique with pmap dataset and nn techniques
+         corrflux = pmap_correct(x_center,y_center,abcdflux,ch,np, datafile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_0p1s_x4_140221.sav') ;FUNC=func,CORR_UNC=corr_unc,FULL=full,DATAFILE=datafile,NNEAREST=nnearest,Verbose=verbose
+         corrfluxerr = fs       ; looks like maybe jim;s code does calculate this XXXX
+      endif else begin
+               ;correct for pixel phase effect based on pmaps from Jim
+      ;file_suffix = ['500x500_0043_120828.fits','0p1s_x4_500x500_0043_121120.fits']
+         corrflux = iracpc_pmap_corr(abcdflux,x_center,y_center,ch,/threshold_occ, threshold_val = 20) ;, file_suffix = file_suffix)
+         corrfluxerr = fs  ;leave out the pmap err for now
+      endelse
+
+
 ;---------------------------------
 
       if naxis eq 3 and i eq 0 then begin

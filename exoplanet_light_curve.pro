@@ -67,10 +67,10 @@ PRO exoplanet_light_curve,t,rel_flux,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar
 ;TrES-1 b,Kepler-12 b,TrES-2 b,KOI-13 b,Kepler-7 b,CoRoT-2 b,HAT-P-7 b,Kepler-6 b,Kepler-17 b,
 ;Kepler-5 b,HD 189733 b,WASP-2 b,HD 209458 b,HAT-P-8 b,HAT-P-1 b,WASP-4 b,HAT-P-6 b,XO-4 b
 
-;exoplanet_data_file = '/Users/jamesingalls/work/IRAC/prf_simulations/exoplanets.csv'
+exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
 
 get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
-                       TEQ_P=teq_p,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=secondary_lambda,$
+                       TEQ_P=teq_p,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=4.5,$
                        INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
                        DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,VERBOSE=verbose
 
@@ -138,10 +138,12 @@ IF KEYWORD_SET(PLOT) OR KEYWORD_SET(PDF) THEN BEGIN
       plot_title = ''
    ENDELSE
    IF N_ELEMENTS(LABEL) EQ 0 THEN lab='' ELSE  lab = '_'+label
-   psfile = exoplan_string+lab+'_predicted_lightcurve.eps'
-   ifps,psfile,12,6,/ENCAPSULATED,NOPOST=~KEYWORD_SET(PDF),/COLOR
-      CGPLOT,torbit,rel_flux,title=plot_title,xtitle='Time (dy)',ytitle='F/F*',xstyle=1,ystyle=16,color='Sky Blue',thick=4,_extra=extra;,psym=1
-   ENDPS,psfile,PDF=pdf,NOPOST=~KEYWORD_SET(PDF)
+IF KEYWORD_SET(tphase) then xtitlename = 'Phase' else xtitlename = 'Time (dy)'
+   lc = plot(torbit,rel_flux,title=plot_title,xtitle=xtitlename,ytitle='F/F*', thick =4 ,color='Sky Blue')
+;   psfile = exoplan_string+lab+'_predicted_lightcurve.eps'
+;   ifps,psfile,12,6,/ENCAPSULATED,NOPOST=~KEYWORD_SET(PDF),/COLOR
+;      CGPLOT,torbit,rel_flux,title=plot_title,xtitle='Time (dy)',ytitle='F/F*',xstyle=1,ystyle=16,color='Sky Blue',thick=4,_extra=extra;,psym=1
+;   ENDPS,psfile,PDF=pdf,NOPOST=~KEYWORD_SET(PDF)
 ENDIF
 
 RETURN
