@@ -107,6 +107,7 @@ IF keyword_set(EXOSYSTEM) THEN BEGIN
       SECONDARY_DEPTH_HASH['4.5'] = exodata.SEDEPTH45[iuse[0]] ;; 4.5 micron
       SECONDARY_DEPTH_HASH['5.8'] = exodata.SEDEPTH58[iuse[0]] ;; 5.8 micron
       SECONDARY_DEPTH_HASH['8.0'] = exodata.SEDEPTH80[iuse[0]] ;; 8.0 micron
+      print, 'secondary lambda', SECONDARY_LAMBDA, SECONDARY_DEPTH_HASH['4.5']
       IF SECONDARY_DEPTH_HASH[SECONDARY_LAMBDA] EQ 0 THEN BEGIN
          PRINT,'No observed secondary in the '+secondary_lambda+' band.  Using the input planetary temperature.'
          IF N_ELEMENTS(teq_p) EQ 0 THEN BEGIN

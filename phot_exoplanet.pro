@@ -33,7 +33,7 @@ dirname = strcompress(basedir + planetname +'/')
 planethash = hash()
 
 
-for a = 0,  n_elements(aorname) - 1 do begin
+for a = 0, n_elements(aorname) - 1 do begin
    print, 'working on ',aorname(a)
    dir = dirname+ string(aorname(a) ) 
    CD, dir                      ; change directories to the correct AOR directory
@@ -186,8 +186,11 @@ for a = 0,  n_elements(aorname) - 1 do begin
 ;correction based on those neighbors.  
       if keyword_set(hybrid) then begin
          ;use hybrid technique with pmap dataset and nn techniques
-         corrflux = pmap_correct(x_center,y_center,abcdflux,ch,np, datafile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_0p1s_x4_140221.sav') ;FUNC=func,CORR_UNC=corr_unc,FULL=full,DATAFILE=datafile,NNEAREST=nnearest,Verbose=verbose
-         corrfluxerr = fs       ; looks like maybe jim;s code does calculate this XXXX
+ 
+         corrflux = pmap_correct(x_center,y_center,abcdflux,ch,np,corr_unc = corrfluxerr, func = fs, datafile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_0p1s_x4_140221.sav') ;FUNC=func,CORR_UNC=corr_unc,FULL=full,DATAFILE=datafile,NNEAREST=nnearest,Verbose=verbose
+         ;print, 'testing corrfluxerr return', corrfluxerr
+         ;print, 'compared to corrflux', corrflux
+         ;corrfluxerr = fs       ; looks like maybe jim;s code does calculate this XXXX
       endif else begin
                ;correct for pixel phase effect based on pmaps from Jim
       ;file_suffix = ['500x500_0043_120828.fits','0p1s_x4_500x500_0043_121120.fits']

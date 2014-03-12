@@ -32,6 +32,7 @@ END
 FUNCTION pmap_correct,x,y,f,ch,np,FUNC=func,CORR_UNC=corr_unc,FULL=full,DATAFILE=datafile,NNEAREST=nnearest,Verbose=verbose
 ;;; Common block for pmap data set:
    COMMON pmap_data,x_pmap,y_pmap,f_pmap,np_pmap,func_pmap,scale,sigscale
+
    IF KEYWORD_SET(FULL) EQ 1 THEN BEGIN
       xfov = 8.
       yfov = 216.
@@ -72,9 +73,10 @@ FUNCTION pmap_correct,x,y,f,ch,np,FUNC=func,CORR_UNC=corr_unc,FULL=full,DATAFILE
       
    ENDFOR
    
-;;; Correct the measured fluxes by dividing by the normalized interpolated pmap flux
+;;; Correct the measured fluxes by dividing by the normalized
+;;; interpolated pmap flux
    f_corr = f * scale /f_pmap_interp
    corr_unc = f_corr * SQRT( (f_pmap_interp_unc/f_pmap_interp)^2 + (func/f)^2 ) 
-   
+;   print, 'this is what corrfluxerr looks like inisde of pmap_correct', corr_unc
    RETURN,f_corr
 END

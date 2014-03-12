@@ -318,13 +318,13 @@ function create_planetinfo
   exptime = 2.
   stareaor = 1
   plot_norm = 0.0448
-  plot_corrnorm = 0.0440
+  Plot = 0.0440
 
   values=list(ra_ref, dec_ref, aorname, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
-  planetname = 'wasp14'
+  planetname = 'WASP-14b'
   chname = '2'
   ra_ref = 218.27649
   dec_ref = 21.894575
