@@ -30,8 +30,8 @@
 ;   1645 Sheely Drive
 ;   Fort Collins, CO 80526 USA
 ;   Phone: 970-221-0438
-;   E-mail: davidf@dfanning.com
-;   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+;   E-mail: david@idlcoyote.com
+;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 ;
 ; CATEGORY:
 ;
@@ -131,8 +131,8 @@
 ;
 ; RESTRICTIONS:
 ;
-;   Requires DBLTOSTR from the Coyote Library:
-;      http://www.dfanning.com/programs/dbltostr.pro
+;   Requires cgDblToStr from the Coyote Library:
+;      http://www.idlcoyote.com/programs/cgdbltostr.pro
 ;
 ; EVENT STRUCTURE:
 ;
@@ -324,6 +324,8 @@
 ;      See included EXAMPLE program for details. 10 August 2005. DWF.
 ;   Added functionality to covert double precision values to strings properly. 30 Nov 2005. DWF.
 ;   Set the default fonts to be the current widget font, rather than the default widget font. 4 Oct 2008. DWF.
+;   Fixed a problem with validating a float or double value when it was written with
+;      exponential notation. 2 April 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -375,53 +377,6 @@ FUNCTION FSC_Field_WidgetFont, DEFAULT=default
         RETURN, defaultFont ELSE $
         RETURN, currentFont
     
-END ;-----------------------------------------------------------------------------------------------------------------------------
-
-
-
-FUNCTION FSC_Field_Error_Message, theMessage, Traceback=traceback, NoName=noName, _Extra=extra
-
-On_Error, 2
-
-   ; Check for presence and type of message.
-
-IF N_Elements(theMessage) EQ 0 THEN theMessage = !Error_State.Msg
-s = Size(theMessage)
-messageType = s[s[0]+1]
-IF messageType NE 7 THEN BEGIN
-   Message, "The message parameter must be a string.", _Extra=extra
-ENDIF
-
-   ; Get the call stack and the calling routine's name.
-
-Help, Calls=callStack
-callingRoutine = (StrSplit(StrCompress(callStack[1])," ", /Extract))[0]
-
-   ; Are widgets supported? Doesn't matter in IDL 5.3 and higher.
-
-widgetsSupported = ((!D.Flags AND 65536L) NE 0) OR Float(!Version.Release) GE 5.3
-IF widgetsSupported THEN BEGIN
-   IF Keyword_Set(noName) THEN answer = Dialog_Message(theMessage, _Extra=extra) ELSE BEGIN
-      IF StrUpCase(callingRoutine) EQ "$MAIN$" THEN answer = Dialog_Message(theMessage, _Extra=extra) ELSE $
-         answer = Dialog_Message(StrUpCase(callingRoutine) + ": " + theMessage, _Extra=extra)
-   ENDELSE
-ENDIF ELSE BEGIN
-      Message, theMessage, /Continue, /NoPrint, /NoName, /NoPrefix, _Extra=extra
-      Print, '%' + callingRoutine + ': ' + theMessage
-      answer = 'OK'
-ENDELSE
-
-   ; Provide traceback information if requested.
-
-IF Keyword_Set(traceback) THEN BEGIN
-   Help, /Last_Message, Output=traceback
-   Print,''
-   Print, 'Traceback Report from ' + StrUpCase(callingRoutine) + ':'
-   Print, ''
-   FOR j=0,N_Elements(traceback)-1 DO Print, "     " + traceback[j]
-ENDIF
-
-RETURN, answer
 END ;-----------------------------------------------------------------------------------------------------------------------------
 
 
@@ -531,7 +486,7 @@ PRO FSC_Field::Set_Value, value
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_Field_Error_Message(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN
 ENDIF
 
@@ -558,7 +513,7 @@ ENDCASE
 self.dataType = dataType
 self.gentype = genType
 
-IF self.gentype EQ 'DOUBLE' THEN theText = DblToStr(value) ELSE theText = StrTrim(value,2)
+IF self.gentype EQ 'DOUBLE' THEN theText = cgDblToStr(value) ELSE theText = StrTrim(value,2)
 theText = self->Validate(theText)
 
    ; Load the value in the widget.
@@ -590,7 +545,7 @@ FUNCTION FSC_Field::Validate, value
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_Field_Error_Message(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    testValue = self->ReturnValue(value)
    IF String(testValue) NE 'NULLVALUE' THEN numCheck = Finite(testValue) ELSE numCheck = 1
    IF numCheck THEN BEGIN
@@ -839,7 +794,7 @@ FUNCTION FSC_Field::TextEvents, event
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_Field_Error_Message(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN, 0
 ENDIF
 
@@ -1080,7 +1035,7 @@ PRO FSC_Field::GetProperty, $
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_Field_Error_Message(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN
 ENDIF
 
@@ -1134,7 +1089,7 @@ PRO FSC_Field::SetProperty, $
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_Field_Error_Message(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN
 ENDIF
 
@@ -1201,7 +1156,11 @@ IF N_Elements(value) NE 0 THEN BEGIN
          Message, 'Data type ' + dataType + ' is not supported. Returning.', /NoName
          END
    ENDCASE
-   self.theText = StrTrim(value, 2)
+   CASE Size(value, /TNAME) OF
+       'FLOAT': self.theText = StrTrim(String(value, FORMAT='(F0)'),2)
+       'DOUBLE': self.theText = StrTrim(String(value, FORMAT='(D0)'),2)
+       ELSE: self.theText = StrTrim(value, 2)
+   ENDCASE
    *self.theValue = self->ReturnValue(self.theText)
    Widget_Control, self.textID, Set_Value=self.theText
    self.dataType = datatype
@@ -1223,7 +1182,7 @@ PRO FSC_Field::SetEdit, editvalue
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_Field_Error_Message(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN
 ENDIF
 
@@ -1239,7 +1198,7 @@ PRO FSC_Field::SetSensitive, value
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_Field_Error_Message(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN
 ENDIF
 
@@ -1284,7 +1243,7 @@ FUNCTION FSC_Field::INIT, $         ; The compound widget FSC_Field INIT method.
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = FSC_Field_Error_Message(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN, 0
 ENDIF
 
@@ -1365,7 +1324,7 @@ IF Keyword_Set(column) THEN row = 0 ELSE row = 1
 
    ; Validate the input value.
 
-IF self.gentype EQ 'DOUBLE' THEN value = DblToStr(value) ELSE value = StrTrim(value,2)
+IF self.gentype EQ 'DOUBLE' THEN value = cgDblToStr(value) ELSE value = StrTrim(value,2)
 value = self->Validate(value)
 self.theText = value
 

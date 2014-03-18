@@ -17,8 +17,8 @@
 ;   1645 Sheely Drive
 ;   Fort Collins, CO 80526 USA
 ;   Phone: 970-221-0438
-;   E-mail: davidf@dfanning.com
-;   Coyote's Guide to IDL Programming: http://www.dfanning.com/
+;   E-mail: david@idlcoyote.com
+;   Coyote's Guide to IDL Programming: http://www.idlcoyote.com/
 ;
 ; CATEGORY:
 ;
@@ -57,10 +57,6 @@
 ; COMMON BLOCKS:
 ;
 ;   None.
-;
-; DEPENDENCIES:
-;
-;   Requires ERROR_MESSAGE from the Coyote Library..
 ;
 ; EVENT STRUCTURE:
 ;
@@ -290,7 +286,7 @@ index = Where(StrUpCase( Strtrim(*self.value,2) ) EQ StrUpCase( StrTrim(selectio
 
 IF count EQ 0 THEN BEGIN
    uname = Widget_Info(self.droplistID,/UName)
-   ok = Error_Message('No item with name "' + uname + ':' + $
+   ok = cgErrorMsg('No item with name "' + uname + ':' + $
       StrTrim(selection,2) + '" exists. Returning...')
    RETURN
 ENDIF
@@ -424,14 +420,14 @@ FUNCTION FSC_Droplist::INIT, $
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = Error_Message(!Error_State.Msg, Traceback=Keyword_Set(debug))
+   ok = cgErrorMsg(!Error_State.Msg, Traceback=Keyword_Set(debug))
    RETURN, 0
 ENDIF
 
 ; This is the object's initialization method.
 
 IF N_Elements(parent) EQ 0 THEN BEGIN
-   ok = Error_Message('Parent parameter must be provided. Returning...')
+   ok = cgErrorMsg('Parent parameter must be provided. Returning...')
    RETURN, 0
 ENDIF
 

@@ -14,8 +14,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY: Graphics
 ;
@@ -44,10 +44,10 @@
 ;
 ; SIDE EFFECTS:   None
 ;
-; RESTRICTIONS:   Reqires XCOLORS and TVIMAGE from the Coyote Library:
+; RESTRICTIONS:   Reqires XCOLORS and cgImage from the Coyote Library:
 ;
-;                     http://www.dfanning.com/programs/xcolors.pro
-;                     http://www.dfanning.com/programs/tvimage.pro
+;                     http://www.idlcoyote.com/programs/xcolors.pro
+;                     http://www.idlcoyote.com/programs/cgImage.pro
 ;
 ; PROCEDURE:
 ;
@@ -63,6 +63,7 @@
 ;  Fixed a problem with 24-bit devices with color decomposition ON. 15 Feb 2000. DWF.
 ;  Added the NOTIFYID keyword, 15 Dec 2005. DWF.
 ;  Added BREWER keyword, 19 May 2008. DWF.
+;  Replaced TV commands with cgImage, 12 June 2013. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -108,7 +109,7 @@ CASE thisEvent OF
       IF thisDepth GT 8 THEN BEGIN
          thisID = !D.Window
          WSet, info.wid
-         TV, info.snap
+         cgImage, info.snap
          WSet, thisID
       ENDIF
 
@@ -125,19 +126,18 @@ Widget_Control, event.top, Get_UValue=info, /No_Copy
 thisID = !D.Window
 WSet, info.wid
 
-   ; Use TVIMAGE if you can. If not, use TV.
+   ; Use cgImage if you can. If not, use TV.
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   Device, Decomposed=0
-   TV, info.snap
-   GOTO, skip_tvimage
+   cgImage, info.snap
+   GOTO, skip_cgImage
 ENDIF
 
-TVImage, info.snap
+cgImage, info.snap
 
-skip_tvimage:
+skip_cgImage:
 
 WSet, thisID
 Widget_Control, event.top, Set_UValue=info, /No_Copy
@@ -149,7 +149,7 @@ PRO CIndex, NOTIFYID=notifyID, BREWER=brewer
 oldWindowID = !D.Window
 thisDevice = !D.Name
 Set_Plot, 'Z'
-Device, Set_Resolution=[496,400]
+Device, Set_Resolution=[496,400], Z_BUFFER=0
 
    ; Set the starting index for the polygons.
 
@@ -221,19 +221,19 @@ Widget_Control, tlb, /Realize
 Widget_Control, drawID, Get_Value=wid
 WSet, wid
 
-   ; Use TVIMAGE if you can. If not, use TV.
+   ; Use cgImage if you can. If not, use TV.
 
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Device, Decomposed=0
    TV, snap
-   GOTO, skip_tvimage
+   GOTO, skip_cgImage
 ENDIF
 
-TVImage, snap
+cgImage, snap
 
 Catch, /Cancel
-Skip_TVImage:
+Skip_cgImage:
 
 info = {snap:snap, wid:wid, brewer:Keyword_Set(brewer)}
 Widget_Control, tlb, Set_UValue=info, /No_Copy

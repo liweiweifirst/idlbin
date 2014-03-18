@@ -20,8 +20,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ;
@@ -65,22 +65,23 @@
 ;
 ; EXAMPLES:
 ;
-;       LoadCT, 0                                    ; Gray-scale colors.
-;       image = LoadData(22)                         ; Load image.
-;       TV, image                                    ; No contrast.
-;       TV, LogScl(image)                            ; Improved contrast.
-;       TV, LogScl(image, Exponent=10, Mean=0.65)    ; Even more contrast.
-;       TV, LogScl(image, /Negative, Exponent=5)     ; A negative image.
+;       cgLoadCT, 0                                       ; Gray-scale colors.
+;       image = cgDemoData(22)                            ; Load image.
+;       cgImage, image                                    ; No contrast.
+;       cgImage, LogScl(image)                            ; Improved contrast.
+;       cgImage, LogScl(image, Exponent=10, Mean=0.65)    ; Even more contrast.
+;       cgImage, LogScl(image, /Negative, Exponent=5)     ; A negative image.
 ;
 ; RESTRICTIONS:
 ;
-;     Requires SCALE_VECTOR from the Coyote Library:
+;     Requires cgScaleVector from the Coyote Library:
 ;
-;        http://www.dfanning.com/programs/scale_vector.pro
+;        http://www.idlcoyote.com/programs/cgScaleVector.pro
 ;
 ; MODIFICATION HISTORY:
 ;
 ;       Written by:  David W. Fanning, 20 February 2006.
+;       Fixed a problem with output scaling. 1 July 2009. DWF (with input from Bo Milvang-Jensen).
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -123,7 +124,7 @@ FUNCTION LogScl, image, $
    Catch, theError
    IF theError NE 0 THEN BEGIN
       Catch, /Cancel
-      void = Error_Message()
+      void = cgErrorMsg()
       RETURN, vector
    ENDIF
 
@@ -151,7 +152,7 @@ FUNCTION LogScl, image, $
    exponent = 1.0e-6 > exponent
 
    ; Perform initial scaling of the image into 0 to 1.
-   output = Scale_Vector(Temporary(output), 0.0D, 1.0D, MaxValue=maxValue, $
+   output = cgScaleVector(Temporary(output), 0.0D, 1.0D, MaxValue=maxValue, $
       MinValue=minValue, /NAN, Double=1)
 
    ; Too damn many floating underflow warnings, no matter WHAT I do! :-(
@@ -162,7 +163,7 @@ FUNCTION LogScl, image, $
    output = 1.0D / ((1.0D + (mean / (Temporary(output) > 1e-16))^exponent) > (1e-16))
 
    ; Scale to image coordinates.
-   output = Scale_Vector(Temporary(output), minOut, maxOut, /NAN, Double=1)
+   output = cgScaleVector(Temporary(output), minOut, maxOut, MinValue=0.0D, MaxValue=1.0D, /NAN, Double=1)
 
    ; Clear math errors.
    void = Check_Math()

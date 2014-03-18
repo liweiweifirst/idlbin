@@ -15,8 +15,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 
@@ -58,6 +58,8 @@
 ; MODIFICATION HISTORY:
 ;
 ;       Written by David W. Fanning, 8 May 2009.
+;       Algorithm significantly improved by Ronn Kling, 4 August 2009.
+;       Added line to handle an input matrix with a trailing 1 dimension correctly. DJ 8 March 2011.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2009, by Fanning Software Consulting, Inc.                                ;
@@ -98,22 +100,24 @@ FUNCTION RepMat, matrix, ncol, nrow
     IF N_Elements(nrow) EQ 0 THEN nrow = 1
     
     s = Size(matrix, /DIMENSIONS)
+    IF N_Elements(s) EQ 1 THEN s = [s,1] ; Handle the case of a vector being passed in
+    
+    ; Create array.
+    array = Make_Array(s[0]*ncol, s[1]*nrow, TYPE=Size(matrix,/TYPE))
+    array[0,0] = matrix
     
     ; Replicate rows first.
-    array = matrix
     IF nrow GT 1 THEN BEGIN
-        FOR nrow=1,nrow-1 DO BEGIN
-            array = [[array], [matrix]]
-        ENDFOR
+        FOR nrow=1,nrow-1 DO $ 
+            array[0,nrow*s[1]] = matrix
     ENDIF
     
     ; Replicate columns next.
     IF ncol GT 1 THEN BEGIN
-        rmatrix = array
-        FOR ncol=1,ncol-1 DO BEGIN
-            array = [array, rmatrix]
-        ENDFOR    
+        rmatrix = array[0:s[0]-1,*]
+        FOR ncol=1,ncol-1 DO $ 
+            array[(ncol*s[0]),0] = rmatrix
     ENDIF
-    
+
     RETURN, array
 END

@@ -18,8 +18,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ;
@@ -82,7 +82,7 @@ FUNCTION TEXTLINEFORMAT, theText, LENGTH=length
    ; Error handling.
    Catch, theError
    IF theError NE 0 THEN BEGIN
-      ok = Error_Message()
+      ok = cgErrorMsg()
       RETURN, theText
    ENDIF
 

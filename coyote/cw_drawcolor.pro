@@ -15,8 +15,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ;
@@ -36,18 +36,18 @@
 ;
 ; INPUT KEYWORDS:
 ;
-;   COLOR - The name of the color to be displayed. Color names come from PickColorName.
+;   COLOR - The name of the color to be displayed. Color names come from cgPickColorName.
 ;   COLUMN - Set this keyword to stack widgets in a column. Default is in a row.
 ;   EVENT_FUNC - The name of an event handler function for this compound widget.
 ;   EVENT_PRO -The name of an event handler procedure for this compound widget.
 ;   INDEX - An index number where the color should be loaded. !D.Table_Size-2, by default.
-;   FILENAME - An optional input to pickcolorname specifying different
-;              colors.  See pickcolorname description for the file format.
+;   FILENAME - An optional input to cgPickColorName specifying different
+;              colors.  See the cgPickColorName documenation for the file format.
 ;   LABEL_LEFT - Set this keyword to have the label text aligned on the left of the label. Default is to center.
 ;   LABEL_RIGHT - Set this keyword to have the label text aligned on the right of the label. Default is to center.
 ;   LABELSIZE - This is the X size of the label widget (containing the label) in device coordinates. Default is natural size.
 ;   LABELTEXT - This is the text on the label. Example, "Background Color", etc.
-;   TITLE - This is the title on the PickColorName program that allows the user to select another color.
+;   TITLE - This is the title on the cgPickColorName program that allows the user to select another color.
 ;   UVALUE - A user value for the widget.
 ;   XSIZE - The xsize (in pixel units) of the color patch. By default, 20.
 ;   YSIZE - The xsize (in pixel units) of the color patch. By default, 20.
@@ -66,10 +66,10 @@
 ;
 ; DEPENDENCIES:
 ;
-;       Reqires FSC_COLOR and PICKCOLORNAME from the Coyote Library:
+;       Reqires cgColor and cgPickColorName from the Coyote Library:
 ;
-;                     http://www.dfanning.com/programs/fsc_color.pro
-;                     http://www.dfanning.com/programs/pickcolorname.pro
+;                     http://www.idlcoyote.com/programs/cgColor.pro
+;                     http://www.idlcoyote.com/programs/cgPickColorName.pro
 ;
 ; MODIFICATION HISTORY:
 ;
@@ -78,7 +78,7 @@
 ;       Allow addition to already realized widget hierarchies, October 2007. L. Anderson.
 ;       Added set_value and get_value methods to the widget can be
 ;            updated after being realized. October 2007. L. Anderson.
-;       Added option to pass filename on to pickcolorname. October
+;       Added option to pass filename on to cgPickColorName. October
 ;            2007. L. Anderson
 ;-
 ;
@@ -129,55 +129,6 @@ END ;---------------------------------------------------------------------------
 
 
 
-FUNCTION CW_Drawcolor_Error_Message, theMessage, Traceback=traceback, NoName=noName, _Extra=extra
-
-;  The standard event handler function.
-
-On_Error, 2
-
-   ; Check for presence and type of message.
-
-IF N_Elements(theMessage) EQ 0 THEN theMessage = !Error_State.Msg
-s = Size(theMessage)
-messageType = s[s[0]+1]
-IF messageType NE 7 THEN BEGIN
-   Message, "The message parameter must be a string.", _Extra=extra
-ENDIF
-
-   ; Get the call stack and the calling routine's name.
-
-Help, Calls=callStack
-callingRoutine = (Str_Sep(StrCompress(callStack[1])," "))[0]
-
-   ; Are widgets supported? Doesn't matter in IDL 5.3 and higher.
-
-widgetsSupported = ((!D.Flags AND 65536L) NE 0) OR Float(!Version.Release) GE 5.3
-IF widgetsSupported THEN BEGIN
-   IF Keyword_Set(noName) THEN answer = Dialog_Message(theMessage, _Extra=extra) ELSE BEGIN
-      IF StrUpCase(callingRoutine) EQ "$MAIN$" THEN answer = Dialog_Message(theMessage, _Extra=extra) ELSE $
-         answer = Dialog_Message(StrUpCase(callingRoutine) + ": " + theMessage, _Extra=extra)
-   ENDELSE
-ENDIF ELSE BEGIN
-      Message, theMessage, /Continue, /NoPrint, /NoName, /NoPrefix, _Extra=extra
-      Print, '%' + callingRoutine + ': ' + theMessage
-      answer = 'OK'
-ENDELSE
-
-   ; Provide traceback information if requested.
-
-IF Keyword_Set(traceback) THEN BEGIN
-   Help, /Last_Message, Output=traceback
-   Print,''
-   Print, 'Traceback Report from ' + StrUpCase(callingRoutine) + ':'
-   Print, ''
-   FOR j=0,N_Elements(traceback)-1 DO Print, "     " + traceback[j]
-ENDIF
-
-RETURN, answer
-END ;-----------------------------------------------------------------------------------------------------------------------------
-
-
-
 FUNCTION CW_DrawColor::GetTLB
 
 ; This method function returns the identifier of the top-level base widget.
@@ -195,7 +146,7 @@ Widget_Control, self.drawID, Get_Value=wid
 self.wid = wid
 currentwindow = !D.Window
 WSet, wid
-PolyFill, [0, 0, 1, 1, 0], [0, 1, 1, 0, 0], /Normal, Color=FSC_Color(self.color, self.index)
+PolyFill, [0, 0, 1, 1, 0], [0, 1, 1, 0, 0], /Normal, Color=cgColor(self.color, self.index)
 IF currentwindow NE -1 THEN WSet, currentwindow
 END ;-----------------------------------------------------------------------------------------------------------------------------
 
@@ -244,9 +195,9 @@ currentColor = self.color
 
    ; Allow the user to pick another color name.
 IF self.filename NE "" THEN BEGIN
-    self.color = PickColorName(self.color, Group_Leader=self.tlb, Title=self.title, Filename = self.filename)
+    self.color = cgPickColorName(self.color, Group_Leader=self.tlb, Title=self.title, Filename = self.filename)
 ENDIF ELSE BEGIN
-    self.color = PickColorName(self.color, Group_Leader=self.tlb, Title=self.title)
+    self.color = cgPickColorName(self.color, Group_Leader=self.tlb, Title=self.title)
 ENDELSE
 IF currentColor EQ self.color THEN RETURN, 0
 
@@ -262,7 +213,7 @@ event = { CW_DRAWCOLOR_EVENT, $
    ; Load the new color in the color patch.
 
 WSet, self.wid
-PolyFill, [0,0,1,1,0], [0,1,1,0,0], /Normal, Color=FSC_Color(self.color, self.index)
+PolyFill, [0,0,1,1,0], [0,1,1,0,0], /Normal, Color=cgColor(self.color, self.index)
 
    ; If an event handler is specified, call it.
 
@@ -298,11 +249,11 @@ END ;---------------------------------------------------------------------------
 
 PRO CW_DrawColor::Set_Value, newcolor
 
-   ; Check if the color is defined in the FSC_Color program
+   ; Check if the color is defined in the cgColor program
 
 IF N_Elements(newcolor) EQ 0 THEN Message, /NoName, 'Please pass a color name.'
 newcolor = StrCompress(StrTrim(newcolor, 2))
-IF where(StrUpCase(newcolor) EQ StrUpCase(FSC_Color(/Names))) EQ -1 THEN newColor = 'White'
+IF where(StrUpCase(newcolor) EQ StrUpCase(cgColor(/Names))) EQ -1 THEN newColor = 'White'
 
    ; Store the value
 
@@ -313,7 +264,7 @@ self.color = newColor
 realized = Widget_Info(self.tlb, /Realize) ; Check if realized already
 IF realized THEN BEGIN
     WSet, self.wid
-    PolyFill, [0,0,1,1,0], [0,1,1,0,0], /Normal, Color=FSC_Color(self.color, self.index)
+    PolyFill, [0,0,1,1,0], [0,1,1,0,0], /Normal, Color=cgColor(self.color, self.index)
 ENDIF
 
 END
@@ -348,17 +299,17 @@ FUNCTION CW_DRAWCOLOR::Init, $
 ; The INIT method for the object. Builds the widget hierarchy.
 
    parent, $                   ; The parent widget identifier for this compound widget.
-   Color=color, $              ; The name of the color to be displayed. Color names come from PickColorName.
+   Color=color, $              ; The name of the color to be displayed. Color names come from cgPickColorName.
    Column=column, $            ; Set this keyword to stack widgets in a column. Default is in a row.
    Event_Func=event_func, $    ; The name of an event handler function for this compound widget.
    Event_Pro=event_pro, $      ; The name of an event handler procedure for this compound widget.
-   Filename=filename, $        ; An optional input to pickcolorname specifying different colors.
+   Filename=filename, $        ; An optional input to cgPickColorName specifying different colors.
    Index=index, $              ; An index number where the color should be loaded. !D.Table_Size-2, by default.
    Label_Left=label_left, $    ; Set this keyword to have the label text aligned on the left of the label. Default is to center.
    Label_Right=label_right, $  ; Set this keyword to have the label text aligned on the right of the label. Default is to center.
    LabelSize=labelsize, $      ; This is the X size of the label widget (containing the label) in device coordinates. Default is natural size.
    LabelText=label, $          ; This is the text on the label. Example, "Background Color", etc.
-   Title=title, $              ; This is the title on the PickColorName program that allows the user to select another color.
+   Title=title, $              ; This is the title on the cgPickColorName program that allows the user to select another color.
    UValue=uvalue, $            ; A user value for the widget.
    XSize=xsize, $              ; The xsize (in pixel units) of the color patch. By default, 20.
    YSize=ysize                 ; The xsize (in pixel units) of the color patch. By default, 20.
@@ -366,7 +317,7 @@ FUNCTION CW_DRAWCOLOR::Init, $
    ; Error handling.
 Catch, theError
 IF theError NE 0 THEN BEGIN
-   ok = CW_Drawcolor_Error_Message(/Traceback)
+   ok = cgErrorMsg(/Traceback)
    RETURN, 0
 ENDIF
 
@@ -453,13 +404,13 @@ PRO CW_DRAWCOLOR__DEFINE
               parent: 0L, $      ; The identifier of the parent widget.
               event_pro:"", $    ; The name of an event handler procedure.
               event_func: "", $  ; The name of an event handler function.
-              filename: "", $    ; The filename for colors to use in pickcolorname
+              filename: "", $    ; The filename for colors to use in cgPickColorName
               tlb: 0L, $         ; The top-level base widget of this compound widget.
               labelID: 0L, $     ; The identifier of the label widget.
               drawID: 0L, $      ; The identifier of the draw widget.
               wid: 0L, $         ; The window index number of the draw widget.
               index: 0L, $       ; The color table index number where color is loaded.
-              title: "", $       ; The title of the PickColorName program.
+              title: "", $       ; The title of the cgPickColorName program.
               color: "" }        ; The name of the color displayed in the color patch.
 
 END ;-------------------------------------------------------------------------------------
@@ -471,35 +422,35 @@ FUNCTION CW_DRAWCOLOR, $
 ; A wrapper function for the CW_DRAWCOLOR object.
 
    parent, $                   ; The parent widget identifier for this compound widget.
-   Color=color, $              ; The name of the color to be displayed. Color names come from PickColorName.
+   Color=color, $              ; The name of the color to be displayed. Color names come from cgPickColorName.
    Column=column, $            ; Set this keyword to stack widgets in a column. Default is in a row.
    Event_Func=event_func, $    ; The name of an event handler function for this compound widget.
    Event_Pro=event_pro, $      ; The name of an event handler procedure for this compound widget.
    Index=index, $              ; An index number where the color should be loaded. !D.Table_Size-2, by default.
-   Filename=filename, $        ; An optional input to pickcolorname specifying different colors.
+   Filename=filename, $        ; An optional input to cgPickColorName specifying different colors.
    Label_Left=label_left, $    ; Set this keyword to have the label text aligned on the left of the label. Default is to center.
    Label_Right=label_right, $  ; Set this keyword to have the label text aligned on the right of the label. Default is to center.
    LabelSize=labelsize, $      ; This is the X size of the label widget (containing the label) in device coordinates. Default is natural size.
    LabelText=label, $          ; This is the text on the label. Example, "Background Color", etc.
    Object=object, $            ; The object reference for the CW_DRAWCOLOR object. (Output keyword.)
-   Title=title, $              ; This is the title on the PickColorName program that allows the user to select another color.
+   Title=title, $              ; This is the title on the cgPickColorName program that allows the user to select another color.
    UValue=uvalue, $            ; A user value for the widget.
    XSize=xsize, $              ; The xsize (in pixel units) of the color patch. By default, 20.
    YSize=ysize                 ; The xsize (in pixel units) of the color patch. By default, 20.
 
 object = Obj_New("CW_DRAWCOLOR", $
    parent, $                   ; The parent widget identifier for this compound widget.
-   Color=color, $              ; The name of the color to be displayed. Color names come from PickColorName.
+   Color=color, $              ; The name of the color to be displayed. Color names come from cgPickColorName.
    Column=column, $            ; Set this keyword to stack widgets in a column. Default is in a row.
    Event_Func=event_func, $    ; The name of an event handler function for this compound widget.
    Event_Pro=event_pro, $      ; The name of an event handler procedure for this compound widget.
    Index=index, $              ; An index number where the color should be loaded. !D.Table_Size-2, by default.
-   Filename=filename, $        ; An optional input to pickcolorname specifying different colors.
+   Filename=filename, $        ; An optional input to cgPickColorName specifying different colors.
    Label_Left=label_left, $    ; Set this keyword to have the label text aligned on the left of the label. Default is to center.
    Label_Right=label_right, $  ; Set this keyword to have the label text aligned on the right of the label. Default is to center.
    LabelSize=labelsize, $      ; This is the X size of the label widget (containing the label) in device coordinates. Default is natural size.
    LabelText=label, $          ; This is the text on the label. Example, "Background Color", etc.
-   Title=title, $              ; This is the title on the PickColorName program that allows the user to select another color.
+   Title=title, $              ; This is the title on the cgPickColorName program that allows the user to select another color.
    UValue=uvalue, $            ; A user value for the widget.
    XSize=xsize, $              ; The xsize (in pixel units) of the color patch. By default, 20.
    YSize=ysize)                ; The xsize (in pixel units) of the color patch. By default, 20.

@@ -15,8 +15,8 @@
 ;       1645 Sheely Drive
 ;       Fort Collins, CO 80526 USA
 ;       Phone: 970-221-0438
-;       E-mail: davidf@dfanning.com
-;       Coyote's Guide to IDL Programming: http://www.dfanning.com
+;       E-mail: david@idlcoyote.com
+;       Coyote's Guide to IDL Programming: http://www.idlcoyote.com
 ;
 ; CATEGORY:
 ;
@@ -77,15 +77,9 @@
 ;       Window, XSize=400, YSize=300
 ;       TV, image
 ;       PLOTS, Find_Boundary(indices, XSize=400, YSize=300, Perimeter=length), $
-;           /Device, Color=FSC_Color('red')
+;           /Device, Color=cgColor('red')
 ;       Print, length
 ;           230.0
-;
-; DEPENDENCIES:
-;
-;       Requires ERROR_MESSAGE from the Coyote Library.
-;
-;           http://www.dfanning.com/programs/error_message.pro
 ;
 ; MODIFICATION HISTORY:
 ;
@@ -101,9 +95,10 @@
 ;       Fixed a problem with POLYFILLV under-reporting the area by removing
 ;           POLYFILLV and using a pixel counting method. 10 Dec 2002. DWF.
 ;       Added the PERIM_AREA and CENTER keywords. 15 December 2002. DWF.
-;       Replaced the ERROR_MESSAGE routine with the latest version. 15 December 2002. DWF.
+;       Replaced the cgErrorMsg routine with the latest version. 15 December 2002. DWF.
 ;       Fixed a problem in which XSIZE and YSIZE have to be specified as integers to work. 6 March 2006. DWF.
 ;       Fixed a small problem with very small ROIs that caused the program to crash. 1 October 2008. DWF.
+;       Modified the algorithm that determines the number of boundary points for small ROIs. 28 Sept 2010. DWF.
 ;-
 ;******************************************************************************************;
 ;  Copyright (c) 2008, by Fanning Software Consulting, Inc.                                ;
@@ -183,7 +178,7 @@ FUNCTION Find_Boundary, indices, $
 Catch, theError
 IF theError NE 0 THEN BEGIN
    Catch, /Cancel
-   ok = Error_Message()
+   ok = cgErrorMsg()
    RETURN, -1
 ENDIF
 
@@ -216,9 +211,13 @@ i = Where(mask GT 0)
 firstPt = [i[0] MOD xsize, i[0] / xsize]
 from_direction = 4
 
-   ; Set up output points array.
-
-boundaryPts = IntArr(2, (Long(xsize) * ysize / 4L) + 1)
+   ; Set up output points array. For narrow ROIs, we need to construct
+   ; a different sort of algoritm for the number of boundary points.
+IF (xsize LT 4) OR (ysize LT 4) THEN BEGIN
+    boundaryPts = LonArr(2, (2*Max([xsize,ysize]) + 2*Min([xsize,ysize])))
+ENDIF ELSE BEGIN
+    boundaryPts = LonArr(2, (Long(xsize) * ysize / 4L) + 1)
+ENDELSE
 boundaryPts[0] = firstPt
 ptIndex = 0L
 
