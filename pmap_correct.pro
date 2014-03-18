@@ -1,13 +1,14 @@
-PRO pmap_correct_interpolate_single,x,y,f,ch,np,func,f_interp,f_interp_unc,NNEAREST=nnearest
-   COMMON pmap_data,x_pmap,y_pmap,f_pmap,np_pmap,func_pmap,scale,sigscale
-   ;;; Find the nearest neighbors in the pmap dataset
+PRO pmap_correct_interpolate_single,x,y,f,ch,np,func,f_interp,f_interp_unc,NNEAREST=nnearest, USE_NP = use_np
+  COMMON pmap_data,x_pmap,y_pmap,f_pmap,np_pmap,func_pmap,scale,sigscale
+   ;print, 'testing use_np', use_np
+  ;;; Find the nearest neighbors in the pmap dataset
    IF N_ELEMENTS(nnearest) EQ 0 THEN nnearest = 50
    np1d = SQRT(np)
    np_pmap_1d = SQRT(np_pmap)
    
    ;;; (Squared) Distance of pmap dataset points to current point
    b = FIX(ch) EQ 1 ? 0.8 : 1.0
-   d2 = (x_pmap-x)^2 + ((y_pmap-y)/b)^2 + (np_pmap_1d-np1d)^2
+   d2 = (x_pmap-x)^2 + ((y_pmap-y)/b)^2 + keyword_set(use_np)*(np_pmap_1d-np1d)^2  ; only add the np to distance if called
    ;;; Sort by distance
    d_increasing = SORT(d2)
    ;;; Pick the NNEAREST entries
@@ -20,7 +21,7 @@ PRO pmap_correct_interpolate_single,x,y,f,ch,np,func,f_interp,f_interp_unc,NNEAR
    ;;; Compute the weighted occupation vector at point (X,Y,NP) (for the nearest neighbor points)
    occ_vec = ( EXP(-(x-x_pmap[use_index])^2/(2*sig_x^2)) + $
               EXP(-(y-y_pmap[use_index])^2/(2*sig_y^2)) + $
-              EXP(-(np1d-np_pmap_1d[use_index])^2/(2*sig_np_1d^2)) $
+              keyword_set(use_np)*EXP(-(np1d-np_pmap_1d[use_index])^2/(2*sig_np_1d^2)) $
               ) 
    kernel = occ_vec / func_pmap[use_index]^2
    ;;; Compute the weighted average (interpolated) pmap flux at point (X,Y,NP)  
@@ -29,7 +30,8 @@ PRO pmap_correct_interpolate_single,x,y,f,ch,np,func,f_interp,f_interp_unc,NNEAR
                
 RETURN
 END
-FUNCTION pmap_correct,x,y,f,ch,np,FUNC=func,CORR_UNC=corr_unc,FULL=full,DATAFILE=datafile,NNEAREST=nnearest,Verbose=verbose
+
+FUNCTION pmap_correct,x,y,f,ch,np,FUNC=func,CORR_UNC=corr_unc,FULL=full,DATAFILE=datafile,NNEAREST=nnearest,Verbose=verbose, Use_np = use_np
 ;;; Common block for pmap data set:
    COMMON pmap_data,x_pmap,y_pmap,f_pmap,np_pmap,func_pmap,scale,sigscale
 
@@ -67,7 +69,7 @@ FUNCTION pmap_correct,x,y,f,ch,np,FUNC=func,CORR_UNC=corr_unc,FULL=full,DATAFILE
    IF keyword_set(verbose) THEN Print,'Correcting '+STRN(ndata)+' data points'
    FOR i = 0,ndata-1 DO BEGIN
       IF KEYWORD_SET(verbose) THEN Iterwait,i,10,100,Text='Completed '
-      pmap_correct_interpolate_single,x[i]-xfov,y[i]-yfov,f[i],channel[i],np[i],func[i],fi,fiu,NNEAREST=nnearest
+      pmap_correct_interpolate_single,x[i]-xfov,y[i]-yfov,f[i],channel[i],np[i],func[i],fi,fiu,NNEAREST=nnearest, USE_NP = use_np
       f_pmap_interp[i] = fi
       f_pmap_interp_unc[i]  = fiu
       
