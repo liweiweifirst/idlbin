@@ -76,13 +76,13 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 	name = 'GET_CENTROIDS_FOR_CALSTAR:'
 
 ; GOO Syntax is out of date
-	str = 'Syntax - get_centroids_for_calstar, file, t, dt, hjd, x0, y0, [f, xs, ys, $'
-	str1 = '                   fs,b,bs,c,cb,cube], $'
-	str2 = '                   SIGFILE=sigfile, $'
-	str3 = '                   SUPSIGMA=supsigma, /WARM, $'
-	str4 = '                   /APER, /SILENT, /ONLY_POS, RA=ra, DEC=dec, $'
-	str5 = '                   NOISE_PIXELS=np, COVERAGE=cfile, /BIG'
-	str6 = 'Syntax is out of date'
+;	str = 'Syntax - get_centroids_for_calstar, file, t, dt, hjd, x0, y0, [f, xs, ys, $';
+;	str1 = '                   fs,b,bs,c,cb,cube], $'
+;	str2 = '                   SIGFILE=sigfile, $'
+;	str3 = '                   SUPSIGMA=supsigma, /WARM, $'
+;	str4 = '                   /APER, /SILENT, /ONLY_POS, RA=ra, DEC=dec, $'
+;	str5 = '                   NOISE_PIXELS=np, COVERAGE=cfile, /BIG'
+;	str6 = 'Syntax is out of date'
 ;	if (N_params() lt 6 or N_params() gt 15) then begin
 ;		print, str
 ;		print, str1
@@ -99,9 +99,9 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 	badpix = [-9., 9.] * 1.D8
 	
 ; Number of apertures
-	napers = 11
+	napers = 4;11
 ; Number of background annuli
-	nbacks = 4
+	nbacks = 2;4
 ; Edge limit
 	edge = 5.
 
@@ -180,65 +180,53 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ; Sigma level for outlier rejection
 	sigma = 3.0
 
-; Set image dimensions
-	nx = 256
-	ny = 256
 
 ; Get channel number of image
 	nch = sxpar(h, 'CHNLNUM')
 
+; Set image dimensions
+        nx = sxpar(h, 'NAXIS1')
+        ny = sxpar(h, 'NAXIS2')
 	naxis = sxpar(h, 'NAXIS')
-	if (naxis eq 3) then begin
-; Set image dimensions
-		nx = sxpar(h, 'NAXIS1')
-		ny = sxpar(h, 'NAXIS2')
-; Number of subarray images in stack
-		ns = sxpar(h, 'NAXIS3')
-	endif else begin
-; Set image dimensions
-		nx = sxpar(h, 'NAXIS1')
-		ny = sxpar(h, 'NAXIS2')
-; Number of full array images in stack
-		ns = 1
-	endelse
+	if (naxis eq 3) then ns = sxpar(h, 'NAXIS3') else ns = 1
+	
 
 ; Check to see if BCD or not! (1: BCD, 0: Raw, -1: pbcd?)
 	areadmod = sxpar(h, 'AREADMOD', COUNT=acount)
 	aortime = sxpar(h, 'AORTIME', COUNT=xcount)
 	if (xcount gt 0) then bcdflag = 1 else bcdflag = 0
 	if (acount eq 0) then bcdflag = -bcdflag
- ;;;XXX
-;bcdflag = 1
+
 ; Get times
-	if (bcdflag eq 0) then begin
-		areadmod = sxpar(h, 'A0617D00')
+;	if (bcdflag eq 0) then begin
+;		areadmod = sxpar(h, 'A0617D00')
 
 ; The sclk of the observation is
-		a649 = double(sxpar(h, 'A0649D00'))
-		a650 = double(sxpar(h, 'A0650D00'))
-		a612 = double(sxpar(h, 'A0612D00'))
-		a652 = double(sxpar(h, 'A0652D00'))
-		sclk = a649 + a650 / 65536.D + 0.01D * (a612 - a652)
+;		a649 = double(sxpar(h, 'A0649D00'))
+;		a650 = double(sxpar(h, 'A0650D00'))
+;		a612 = double(sxpar(h, 'A0612D00'))
+;		a652 = double(sxpar(h, 'A0652D00'))
+;		sclk = a649 + a650 / 65536.D + 0.01D * (a612 - a652)
 ; The calculation below gives the time that the DCE was received by the S/C
 ; C+DH
-;		sclk = double(sxpar(h,'H0122D00')) + $
-;		         double(sxpar(h,'H0123D00')) / 256.0
-		arrmode = sxpar(h, 'A0617D00')
-		if (arrmode eq 1) then clock = 0.01 else clock = 0.2
-		ft = clock * (2.0 * sxpar(h, 'A0614D00') + sxpar(h, 'A0615D00'))
-		dt = findgen(ns) * ft
-		t = dt + sclk
-		hjd = t * 0.
-	endif else begin
-		sclk = sxpar(h, 'SCLK_OBS')
+;;		sclk = double(sxpar(h,'H0122D00')) + $
+;;		         double(sxpar(h,'H0123D00')) / 256.0
+;		arrmode = sxpar(h, 'A0617D00')
+;		if (arrmode eq 1) then clock = 0.01 else clock = 0.2
+;		ft = clock * (2.0 * sxpar(h, 'A0614D00') + sxpar(h, 'A0615D00'))
+;		dt = findgen(ns) * ft
+;		t = dt + sclk
+;		hjd = t * 0.
+;	endif else begin
+;		sclk = sxpar(h, 'SCLK_OBS')
 		ft = sxpar(h, 'FRAMTIME')
-		dt = (findgen(ns) + 0.5) * ft
-		xft = dblarr(ns) + ft
-		if (areadmod eq 1) then xft = -xft
-		t = dt + sclk
-		hjd0 = sxpar(h, 'HMJD_OBS')
-		hjd = hjd0 + dt / (24.D * 3600.D)
-	endelse
+;		dt = (findgen(ns) + 0.5) * ft
+;		xft = dblarr(ns) + ft
+;		if (areadmod eq 1) then xft = -xft
+;		t = dt + sclk
+;		hjd0 = sxpar(h, 'HMJD_OBS')
+;		hjd = hjd0 + dt / (24.D * 3600.D)
+;	endelse
 
 ; If raw image need to convert to cube
 	if (bcdflag eq 0 and areadmod eq 1) then begin
@@ -293,59 +281,62 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 	endelse
 
 ; Create arrays to hold centroids
-	x3 = dblarr(ns)
-	y3 = dblarr(ns)
-	x5 = dblarr(ns)
-	y5 = dblarr(ns)
-	x7 = dblarr(ns)
-	y7 = dblarr(ns)
-	xc = dblarr(ns)
-	yc = dblarr(ns)
-	xg = dblarr(ns)
-	yg = dblarr(ns)
-	xh = dblarr(ns)
-	yh = dblarr(ns)
+;XX channging doubles to floats; check that this is ok
+;	x3 = fltarr(ns)* !VALUES.D_NAN
+;	y3 = fltarr(ns)* !VALUES.D_NAN
+        x3 = replicate(!VALUES.D_NAN, ns)
+        y3 = x3
+;	x5 = fltarr(ns) * !VALUES.D_NAN
+;	y5 = fltarr(ns)* !VALUES.D_NAN
+;	x7 = fltarr(ns)* !VALUES.D_NAN
+;	y7 = fltarr(ns)* !VALUES.D_NAN
+;	xc = fltarr(ns)* !VALUES.D_NAN
+;	yc = fltarr(ns)* !VALUES.D_NAN
+;	xg = fltarr(ns)* !VALUES.D_NAN
+;	yg = fltarr(ns)* !VALUES.D_NAN
+;	xh = fltarr(ns)* !VALUES.D_NAN
+;	yh = fltarr(ns)* !VALUES.D_NAN
 
 ; Centroids using alternate uncertainty estimate
-	xp3 = dblarr(ns)
-	yp3 = dblarr(ns)
-	xp5 = dblarr(ns)
-	yp5 = dblarr(ns)
-	xp7 = dblarr(ns)
-	yp7 = dblarr(ns)
+	xp3 = x3
+	yp3 = x3
+	xp5 = x3
+	yp5 = x3
+	xp7 =x3
+	yp7 = x3
 
 ; Flux and background arrays, 4 choices of background annulus
-	f = dblarr(ns, napers)
-	b = dblarr(ns, nbacks)
-	fp = dblarr(ns, napers)
-	bp = dblarr(ns, nbacks)
-	bb = dblarr(ns,nbacks) ; from box_centroider directly
+	f = fltarr(ns, napers)* !VALUES.D_NAN
+	b = f; fltarr(ns, nbacks)* !VALUES.D_NAN
+	fp =  f;fltarr(ns, napers)* !VALUES.D_NAN
+	bp =  f;fltarr(ns, nbacks)* !VALUES.D_NAN
+	bb =  f;fltarr(ns,nbacks) * !VALUES.D_NAN; from box_centroider directly
 ;  count arrays
-	c = dblarr(ns, napers)
-	cb = dblarr(ns, nbacks)
+	c =  f;fltarr(ns, napers)* !VALUES.D_NAN
+	cb =  f;fltarr(ns, nbacks)* !VALUES.D_NAN
 
 ; Sigma arrays
-	x3s = dblarr(ns)
-	y3s = dblarr(ns)
-	x5s = dblarr(ns)
-	y5s = dblarr(ns)
-	x7s = dblarr(ns)
-	y7s = dblarr(ns)
+	x3s = x3; fltarr(ns)* !VALUES.D_NAN
+	y3s = x3;fltarr(ns)* !VALUES.D_NAN
+	x5s = x3;fltarr(ns)* !VALUES.D_NAN
+	y5s = x3;fltarr(ns)* !VALUES.D_NAN
+	x7s = x3;fltarr(ns)* !VALUES.D_NAN
+	y7s = x3;fltarr(ns)* !VALUES.D_NAN
 
-	xp3s = dblarr(ns)
-	yp3s = dblarr(ns)
-	xp5s = dblarr(ns)
-	yp5s = dblarr(ns)
-	xp7s = dblarr(ns)
-	yp7s = dblarr(ns)
+	xp3s = x3;fltarr(ns)* !VALUES.D_NAN
+	yp3s = x3;fltarr(ns)* !VALUES.D_NAN
+	xp5s = x3;fltarr(ns)* !VALUES.D_NAN
+	yp5s = x3;fltarr(ns)* !VALUES.D_NAN
+	xp7s = x3;fltarr(ns)* !VALUES.D_NAN
+	yp7s = x3;fltarr(ns)* !VALUES.D_NAN
 
-	fs = dblarr(ns, napers)
-	bs = dblarr(ns, nbacks)
-	fps = dblarr(ns, napers)
-	bps = dblarr(ns, nbacks)
+	fs = f;fltarr(ns, napers)* !VALUES.D_NAN
+	bs = f;fltarr(ns, nbacks)* !VALUES.D_NAN
+	fps = f;fltarr(ns, napers)* !VALUES.D_NAN
+	bps = f;fltarr(ns, nbacks)* !VALUES.D_NAN
 
 ; Noise pixel array
-	np = dblarr(ns)
+	np = fltarr(ns,/nozero)
 	
 ; Subframe array
 	sf = lindgen(ns)
@@ -354,84 +345,42 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 	flag = intarr(ns)
 	
 ; Full width at half max arrays
-	xfwhmarr = dblarr(ns)
-	yfwhmarr = dblarr(ns)
+	xfwhmarr = fltarr(ns,/nozero)
+	yfwhmarr = fltarr(ns,/nozero)
 
+;
 ; Find centroid for each image plane
 	for i = 0, ns-1 do begin
            slice = cube[*, *, i]
 ; Uncertainty image calculated from Poisson plus readnoise
-		sigma2 = sig[*, *, i] * sig[*, *, i]
+           sigma2 = sig[*, *, i] * sig[*, *, i]
 ; SSC provided uncertainty image		
-		unc2 = unc[*, *, i] * unc[*, *, i]
+           unc2 = unc[*, *, i] * unc[*, *, i]
 
 ; Find position of brightest pixel or if coordinate is passed find brightest
 ; pixel in small search window (5 pixel) around coordinate
-		skip_src = 0
-		adxy, h, ra, dec, xmax, ymax
-;                xmax = 15.0
-;                ymax = 15.0
+           skip_src = 0
+           adxy, h, ra, dec, xmax, ymax
+
 ; Only continue with images that have a source that not 5 pixels from edge
-		xedge = nx - edge - 1.
-		if (xmax lt edge or xmax gt xedge or ymax lt edge or ymax gt xedge)  then begin;   or eflux[nch-1] gt sat_levels[nch-1, findex])
+           xedge = nx - edge - 1.
+           if (xmax lt edge or xmax gt xedge or ymax lt edge or ymax gt xedge)  then begin ;   or eflux[nch-1] gt sat_levels[nch-1, findex])
 		    
 		    ;if (eflux[nch-1] gt sat_levels[nch-1, findex]) then begin
 		    ;	print, 'Source ' + strn(eflux[nch-1]) + 'brighter than ' + $
 		    ;	       strn(sat_levels[nch-1, findex]) + ' for ' + sxpar(h, 'RAWFILE')
 		    ;	flag[0:ns-1] = -1
 		  ;	endif
-		    if (xmax lt edge or xmax gt xedge or ymax lt edge or ymax gt xedge) then begin 
-		    	print, 'Source outside array for ' + sxpar(h, 'RAWFILE')
-		    	flag[0:ns-1] = -2
-		    endif 
+              if (xmax lt edge or xmax gt xedge or ymax lt edge or ymax gt xedge) then begin 
+                 print, 'Source outside array for ' + sxpar(h, 'RAWFILE')
+                 flag[0:ns-1] = -2
+              endif 
 
-			x3[i] = !VALUES.D_NAN
-			y3[i] = !VALUES.D_NAN
-			x5[i] = !VALUES.D_NAN
-			y5[i] = !VALUES.D_NAN
-			x7[i] = !VALUES.D_NAN
-			y7[i] = !VALUES.D_NAN
-			xg[i] = !VALUES.D_NAN
-			yg[i] = !VALUES.D_NAN
-			xh[i] = !VALUES.D_NAN
-			yh[i] = !VALUES.D_NAN
-
-			xp3[i] = !VALUES.D_NAN
-			yp3[i] = !VALUES.D_NAN
-			xp5[i] = !VALUES.D_NAN
-			yp5[i] = !VALUES.D_NAN
-			xp7[i] = !VALUES.D_NAN
-			yp7[i] = !VALUES.D_NAN
-
-			f[i, *] = !VALUES.D_NAN
-			b[i, *] = !VALUES.D_NAN
-			fp[i, *] = !VALUES.D_NAN
-			bp[i, *] = !VALUES.D_NAN
-                        bb[i,*] = !VALUES.D_NAN
-
-                        c[i, *] = !VALUES.D_NAN
-			cb[i, *] = !VALUES.D_NAN
-			x3s[i] = !VALUES.D_NAN
-			y3s[i] = !VALUES.D_NAN
-			x5s[i] = !VALUES.D_NAN
-			y5s[i] = !VALUES.D_NAN
-			x7s[i] = !VALUES.D_NAN
-			y7s[i] = !VALUES.D_NAN
-			xp3s[i] = !VALUES.D_NAN
-			yp3s[i] = !VALUES.D_NAN
-			xp5s[i] = !VALUES.D_NAN
-			yp5s[i] = !VALUES.D_NAN
-			xp7s[i] = !VALUES.D_NAN
-			yp7s[i] = !VALUES.D_NAN
-			fs[i, *] = !VALUES.D_NAN
-			bs[i, *] = !VALUES.D_NAN
-			xfwhmarr[i] = !VALUES.D_NAN
-			yfwhmarr[i] = !VALUES.D_NAN
-			skip_src = 1
-		endif
+              skip_src = 1
+           endif
 		
 ; If source position is in image, then try to find centroid and perform photometry
-		if (skip_src eq 0) then begin
+           if (skip_src eq 0) then begin
 ; Calculate size of pixels in arcseconds
 ; Code that used header information so full and subarray frames used different plate scales
 ; which is wrong as all corrections applied assume a uniform plate scale to account for
@@ -449,13 +398,13 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ; if keyword APER set, then use it for the aperture photometry
 ; 3 pixel half-width, use smallest aperture for FWHM
                         
-			box_centroider, slice, sigma2, xmax, ymax, 3, 6, 3, tx, ty, tf, tb, $
-			                txs, tys, tfs, tbs, tc, tcb, tnp, xfwhm, yfwhm
-			x3[i] = tx & y3[i] = ty & x3s[i] = txs & y3s[i] = tys
-                        bb[i] = tb
+                box_centroider, slice, sigma2, xmax, ymax, 3, 6, 3, tx, ty, tf, tb, $
+                                txs, tys, tfs, tbs, tc, tcb, tnp, xfwhm, yfwhm
+                x3[i] = tx & y3[i] = ty & x3s[i] = txs & y3s[i] = tys
+                bb[i] = tb
 
 ; Store FWHM			
-                        xfwhmarr[i] = xfwhm & yfwhmarr[i] = yfwhm
+                xfwhmarr[i] = xfwhm & yfwhmarr[i] = yfwhm
 ; 5 pixel half-width
 ;			box_centroider, slice, sigma2, xmax, ymax, 5, 6, 3, tx, ty, tf, tb, $
 ;			                txs, tys, tfs, tbs, tc, tcb, tnp
@@ -467,9 +416,9 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 
 ; Do same calculation with BCD uncertainty images
 ; 3 pixel half-width
-			box_centroider, slice, unc2, xmax, ymax, 3, 6, 3, tx, ty, tf, tb, $
-			                txs, tys, tfs, tbs, tc, tcb, tnp
-			xp3[i] = tx & yp3[i] = ty & xp3s[i] = txs & yp3s[i] = tys
+                box_centroider, slice, unc2, xmax, ymax, 3, 6, 3, tx, ty, tf, tb, $
+                                txs, tys, tfs, tbs, tc, tcb, tnp
+                xp3[i] = tx & yp3[i] = ty & xp3s[i] = txs & yp3s[i] = tys
 ; 5 pixel half-width
 ;			box_centroider, slice, unc2, xmax, ymax, 5, 6, 3, tx, ty, tf, tb, $
 ;			                txs, tys, tfs, tbs, tc, tcb, tnp
@@ -488,20 +437,20 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ;			xh[i] = tx & yh[i] = ty
 		
 ; Convert image to electrons
-			if (bcdflag ne 0) then eim = slice * sbtoe else eim = slice
+                if (bcdflag ne 0) then eim = slice * sbtoe else eim = slice
 
 ; 1st set of apertures
 ;;			aper, eim, x5[i], y5[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
-			aper, eim, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
-			      badpix, /FLUX, /EXACT, /SILENT, /NAN, /MEANBACK,$
-			      READNOISE=readnoise[nch-1, findex]
-			f[i, 0:(naps1-1)] = xf / sbtoe
-			b[i, 0] = xb
-			bs[i, 0] = xbs
-                        bptr = where(xf ne xf, bcount)
-			if (bcount ne 0) then xfs[bptr] = !VALUES.D_NAN
-			rn = readnoise[nch-1, findex] * !DPI * aps1
-			fs[i, 0:(naps1-1)] = sqrt(xfs * xfs + rn * rn) / sbtoe
+                aper, eim, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
+                      badpix, /FLUX, /EXACT, /SILENT, /NAN, /MEANBACK,$
+                      READNOISE=readnoise[nch-1, findex]
+                f[i, 0:(naps1-1)] = xf / sbtoe
+                b[i, 0] = xb
+                bs[i, 0] = xbs
+                bptr = where(xf ne xf, bcount)
+                if (bcount ne 0) then xfs[bptr] = !VALUES.D_NAN
+                rn = readnoise[nch-1, findex] * !DPI * aps1
+                fs[i, 0:(naps1-1)] = sqrt(xfs * xfs + rn * rn) / sbtoe
 
 ; 2nd set of apertures
 ;			aper, eim, x5[i], y5[i], xf, xfs, xb, xbs, 1.0, aps2, back2, $
@@ -549,18 +498,18 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 
 ; 1st set of apertures
 ;;			aper, slice, x5[i], y5[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
-			aper, slice, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
-			      badpix, /FLUX, /EXACT, /SILENT, /NAN, /MEANBACK
-			fp[i, 0:(naps1 - 1)] = xf
-			bptr = where(xf ne xf, bcount)
+                aper, slice, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
+                      badpix, /FLUX, /EXACT, /SILENT, /NAN, /MEANBACK
+                fp[i, 0:(naps1 - 1)] = xf
+                bptr = where(xf ne xf, bcount)
 ;			aper, unc2, x5[i], y5[i], xfs, txfs, txb, txbs, 1.0, aps1, back1, $
-			aper, unc2, x3[i], y3[i], xfs, txfs, txb, txbs, 1.0, aps1, back1, $
-			      badpix, /FLUX, /EXACT, /SILENT, /NAN,/MEANBACK
-			if (bcount ne 0) then xfs[bptr] = !VALUES.D_NAN
-			nsource = !DPI * aps1 * aps1
-			nback = !DPI * (back1[1] * back1[1] - back1[0] * back1[0])
-			fps[i, 0:(naps1-1)] = xfs + xbs * nsource * nsource / nback
-
+                aper, unc2, x3[i], y3[i], xfs, txfs, txb, txbs, 1.0, aps1, back1, $
+                      badpix, /FLUX, /EXACT, /SILENT, /NAN,/MEANBACK
+                if (bcount ne 0) then xfs[bptr] = !VALUES.D_NAN
+                nsource = !DPI * aps1 * aps1
+                nback = !DPI * (back1[1] * back1[1] - back1[0] * back1[0])
+                fps[i, 0:(naps1-1)] = xfs + xbs * nsource * nsource / nback
+                
 ; 2nd set of apertures
 ;;			aper, slice, x5[i], y5[i], xf, xfs, xb, xbs, 1.0, aps2, back2, $
 ;			aper, slice, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps2, back2, $

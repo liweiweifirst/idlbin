@@ -9,13 +9,22 @@ case apradius of
    1.5: apval = 0
    1.75: apval = 1
    2.0: apval = 2
-   2.25: apval = 3
+   2.25: begin
+      apval = 1
+      pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140314.sav'
+   end
+   2.5: begin
+      apval = 2
+      pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p50_s3_7_0p1s_x4_140314.sav'
+   end
    2.75: apval = 5
    3.25: apval = 7
-   3: apval = 9
-   2.5: apval = 8
-   Else: apval = 9              ; if no decision, then choose an apradius = 3 pixels
+   3: apval = 6
+
+   Else: apval = 2              ; if no decision, then choose an apradius = 3 pixels
 endcase
+
+print, 'apval', apval
 
 ;run code to read in all the planet parameters
 planetinfo = create_planetinfo()
@@ -64,83 +73,56 @@ for a = 0, n_elements(aorname) - 1 do begin
       atimeend = sxpar(header, 'ATIMEEND')
       naxis = sxpar(header, 'NAXIS')
 
-      if i eq 0 then sclk_0 = sxpar(header, 'SCLK_OBS')
+      if i eq 0 then sclk_0 = sclk_obs
       
       if naxis eq 3 then begin
-         sclkarr = dblarr(64)
-         bmjdarr = dblarr(64)
-                                ;utcsarr = dblarr(64)
          deltatime = (atimeend - aintbeg) / 64.D ; real time for each of the 64 frames
-         for nt = 0., 64 - 1 do begin
-            sclkarr[nt] = sclk_obs  + (deltatime*nt)/60./60./24.D ; 0.5*frametime + frametime*nt
-                                ; utcsarr[nt]= utcs_obs + (deltatime*nt)/60./60./24.D;+ 0.5*(frametime/60./60./24.)  + (frametime/60./60./24.) *nt
-;          print, 'deltattime in seconds', (deltatime*nt)/60./60./24.D, format = '(A, F0)'
-;          print, 'bmjdobs', bmjd_obs, format =  '(A, F0)'
-;           print, 'addition',  bmjd_obs + (deltatime*nt)/60./60./24.D, format =  '(A, F0)'
-            bmjdarr[nt]= bmjd_obs + (deltatime*nt)/60./60./24.D ; 0.5*(frametime/60./60./24.) + (frametime/60./60./24.)*nt
-;           print, 'time test', bmjdarr[nt], format = '(A, F0)'
-         endfor
-      endif else begin  ; full array, so don't need to expand out the times
+         nt = dindgen(64)
+         sclkarr = sclk_obs  + (deltatime*nt)/60./60./24.D ; 0.5*frametime + frametime*nt
+         bmjdarr= bmjd_obs + (deltatime*nt)/60./60./24.D   ; 0.5*(frametime/60./60./24.) + (frametime/60./60./24.)*nt
+      endif else begin          ; full array, so don't need to expand out the times
          sclkarr = sclk_obs
          bmjdarr = bmjd_obs
       endelse
-
+      
       ;read in the files
       fits_read, fitsname(i), im, h
       fits_read, buncname(i), unc, hunc
     ; fits_read, covname, covdata, covheader
 
       ;apply mask file if necessary
-      if planetname eq 'hd189733' then begin
-         for j = 0, 63 do begin
-            im[13:16, 4:7, j] = !Values.F_NAN ;mask region with nan set for bad regions
-          ; im[24, 6, j] = !Values.F_NAN  ;bad pixel  but [3,3-7] shouldn't get to this pixel
-         endfor
-      endif
-      if planetname eq 'wasp14' then begin
-         for j = 0, 63 do begin
-            im[4:7, 13:16, j] = !Values.F_NAN ;mask region with nan set for bad regions
-                                ; im[24, 6, j] = !Values.F_NAN  ;bad pixel  but [3,3-7] shouldn't get to this pixel
-         endfor         
-      endif
-      if planetname eq 'hat22' then begin
-         for j = 0, 63 do begin
-            im[20:24, 11:15, j] = !Values.F_NAN ;mask region with nan set for bad regions
-                                ; im[24, 6, j] = !Values.F_NAN  ;bad pixel  but [3,3-7] shouldn't get to this pixel
-         endfor         
-      endif
-      
+      if planetname eq 'hd189733' then  im[13:16, 4:7, *] = !Values.F_NAN ;mask region with nan set for bad regions
+      if planetname eq 'wasp14' then  im[4:7, 13:16, *] = !Values.F_NAN ;mask region with nan set for bad regions                              
+      if planetname eq 'hat22' then im[20:24, 11:15, *] = !Values.F_NAN ;mask region with nan set for bad regions
+                              
+      ;run the centroiding and photometry
       get_centroids_for_calstar_jk,im, h, unc, ra_ref, dec_ref,  t, dt, hjd, xft, x3, y3, $
                                    x5, y5, x7, y7, xg, yg, xh, yh, f, b, x3s, y3s, x5s, y5s, $
                                    x7s, y7s, fs, bs, xp3, yp3, xp5, yp5, xp7, yp7, xp3s, yp3s, $
                                    xp5s, yp5s, xp7s, yp7s, fp, fps, np, flag, ns, sf, $
                                    xfwhm, yfwhm, /WARM
       
-      x_center = x3
-      y_center = y3
+      x_center = temporary(x3)
+      y_center = temporary(y3)
+     ;choose the requested pixel aperture
+      abcdflux = f[*,apval]      
+      fs = fs[*,apval]
+     ; 3-7 pixel background
+      back = b[*,0]
+      backerr = bs[*,0]
       
-                                ;calculate noise pixel
+      ;calculate noise pixel
       np = noisepix(im, x_center, y_center, ronoise, gain, exptime, fluxconv,naxis)
       
-                                ; if changing the apertures then use this to calculate photometry
+
+      ; if changing the apertures then use this to calculate photometry
       if keyword_set(breatheap) then begin
          abcdflux = betap(im, x_center, y_center, ronoise, gain, exptime, fluxconv,np, chname)
          ;XXXfake these for now
          fs = abcdflux
          back = abcdflux
          backerr = abcdflux
-      endif else begin
-         
-        ;choose 3 pixel aperture, 3-7 pixel background
-         abcdflux = f[*,apval]      
-         fs = fs[*,apval]
-       ;choose [10, 12-20]
-;        abcdflux = f[*,5]
-;        fs = fs[*,5]
-         
-         back = b[*,2]
-         backerr = bs[*,2]
-      endelse
+      endif 
       
       
 ;track the value of a column
@@ -186,8 +168,7 @@ for a = 0, n_elements(aorname) - 1 do begin
 ;correction based on those neighbors.  
       if keyword_set(hybrid) then begin
          ;use hybrid technique with pmap dataset and nn techniques
- 
-         corrflux = pmap_correct(x_center,y_center,abcdflux,ch,np,corr_unc = corrfluxerr, func = fs, datafile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_0p1s_x4_140221.sav') ;FUNC=func,CORR_UNC=corr_unc,FULL=full,DATAFILE=datafile,NNEAREST=nnearest,Verbose=verbose
+         corrflux = pmap_correct(x_center,y_center,abcdflux,ch,np,corr_unc = corrfluxerr, func = fs, datafile =pmapfile);,/use_np) ;FUNC=func,CORR_UNC=corr_unc,FULL=full,DATAFILE=datafile,NNEAREST=nnearest,Verbose=verbose
          ;print, 'testing corrfluxerr return', corrfluxerr
          ;print, 'compared to corrflux', corrflux
          ;corrfluxerr = fs       ; looks like maybe jim;s code does calculate this XXXX
@@ -303,24 +284,21 @@ for a = 0, n_elements(aorname) - 1 do begin
    
    
 ;get phasing out of the way here
-;   print,'utmjd_center', utmjd_center
-;   print, 'before bmjd', bmjd
    bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
-;   print, 'before bmjd_dist', bmjd_dist
-
    phase =( bmjd_dist / period )- fix(bmjd_dist/period)
    
-   low = where(phase lt-0.5 and phase ge -1.0)
-   phase(low) = phase(low) + 1.
+;   low = where(phase lt-0.5 and phase ge -1.0)
+;   phase(low) = phase(low) + 1.
+   phase = temporary(phase) + (phase lt -0.5 and phase ge -1.0)
    
-   high = where(phase gt 0.5 and phase le 1.0)
-   phase(high) = phase(high) - 1.0
-   
+;   high = where(phase gt 0.5 and phase le 1.0)
+;   phase(high) = phase(high) - 1.0
+   phase = temporary(phase) - (phase gt 0.5 and phase le 1.0)
+  
    if intended_phase gt 0.4 and intended_phase lt 0.6 then begin ;secondary eclipse
-      print, 'secondary eclipse intended'
-      phase = phase+0.5
+ ;     print, 'secondary eclipse intended'
+      phase = temporary(phase)+0.5
    endif 
-;  print, ' after phase',  phase ;, format = '(A,F0)'
    
 ;--------------------------------
 ;fill in that hash of hases
@@ -383,17 +361,15 @@ function noisepix, im, xcen, ycen, ronoise, gain, exptime, fluxconv,naxis
   convfac = gain*exptime/fluxconv
 
   if naxis gt 2 then begin  ; for subarray
-     np = fltarr(64)
+     np = fltarr(64,/NOZERO)
      for npj = 0, 63 do begin
         indim = im[*,*,npj]
         indim = indim*convfac
-        
+        ; aper requires a 2d array
         aper, indim, xcen[npj], ycen[npj], topflux, topfluxerr, xb, xbs, 1.0, 4,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
         aper, indim^2, xcen[npj], ycen[npj], bottomflux, bottomfluxerr, xb, xbs, 1.0,4,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
         
-        beta = topflux^2 / bottomflux
-;     print, npj, beta
-        np[npj] = beta
+        np[npj] = topflux^2 / bottomflux
      endfor
   endif
 
@@ -403,8 +379,7 @@ function noisepix, im, xcen, ycen, ronoise, gain, exptime, fluxconv,naxis
         aper, indim, xcen, ycen, topflux, topfluxerr, xb, xbs, 1.0, 4,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
         aper, indim^2, xcen, ycen, bottomflux, bottomfluxerr, xb, xbs, 1.0,4,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
         
-        beta = topflux^2 / bottomflux
-        np = beta
+        np = topflux^2 / bottomflux
   endif
 
      return, np                 ;this should be a 64 element array
@@ -426,7 +401,7 @@ function betap, im, xcen, ycen, ronoise, gain, exptime, fluxconv, np, chname
   ;XXX add some way of keeping track of varap
   ;don't know how to return that
 
-  abcdflux = fltarr(64)
+  abcdflux = fltarr(64,/NOZERO)
   badpix = [-9., 9.] * 1.D8
   pxscal1 = [-1.22334117768332D, -1.21641835430637D, -1.22673962032422D, -1.2244968325831D]
   pxscal1 = abs(pxscal1)
