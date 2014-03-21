@@ -1,20 +1,21 @@
-pro plot_pixphasecorr, planetname, bin_level, apradius, selfcal=selfcal, errorbars = errorbars, phaseplot = phaseplot, fit_eclipse = fit_eclipse
+pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal, errorbars = errorbars, phaseplot = phaseplot, fit_eclipse = fit_eclipse
 
 ;get all the necessary saved info/photometry
   planetinfo = create_planetinfo()
-  aorname = planetinfo[planetname, 'aorname']
+  if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
   basedir = planetinfo[planetname, 'basedir']
-  chname = planetinfo[planetname, 'chname']
   intended_phase = planetinfo[planetname, 'intended_phase']
-
+  stareaor = planetinfo[planetname, 'stareaor']
   delta_red = -0.012
   delta_grey =  0.006
   delta_blue = 0.011
   delta_green =- 0.007
-
+  planetname_final = planetname
   dirname = strcompress(basedir + planetname +'/')
+  print, 'dirname', dirname
   ;a = 1
-  for a =0, n_elements(aorname) -1  do begin
+
+  for a =0, stareaor - 1 do begin; n_elements(aorname) -1  do begin
      filename =strcompress(dirname +'pixphasecorr_ch'+chname+'_'+aorname(a) +string(apradius)+'.sav',/remove_all)
      print, a, ' ', aorname(a), 'restoring', filename
      restore, filename
@@ -115,17 +116,16 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, selfcal=selfcal, errorba
      print, 'mean corr gray flux', mean((bin_corrflux /median( bin_corrflux)),/nan)
      print, 'mean position red flux', mean(bin_flux/median(bin_flux),/nan)
      print, 'mean np blue flux', mean(bin_flux_np /median(bin_flux_np),/nan)
-     print, 'phase', bin_phase
+;     print, 'phase', bin_phase
 
 ;print out levels so that I can use them for TAP (or exofast I suppose)
-     for exofast = 0, n_elements(bin_time) - 1 do begin
-        if finite(bin_flux(exofast)) gt 0 then begin
+ ;    for exofast = 0, n_elements(bin_time) - 1 do begin
+;        if finite(bin_flux(exofast)) gt 0 then begin
 ;           print, bin_bmjd(exofast) + 2400000.5D, ' ',bin_corrflux(exofast), ' ',bin_corrfluxerr(exofast), format = '(F0, A,F0, A, F0)'
-           print, bin_bmjd(exofast) - 56081.26 , ' ',(bin_flux_np(exofast) / median(bin_flux_np)) - 0.0005, format = '(F0, A,F0)'
+;           print, bin_bmjd(exofast) - 56081.26 , ' ',(bin_flux_np(exofast) / median(bin_flux_np)) - 0.0005, format = '(F0, A,F0)'
            ;a guess at mid-transit
-        endif
-
-     endfor
+;        endif
+  ;endfor
 
 ;plot the results
      if keyword_set(errorbars) then begin
@@ -222,7 +222,7 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, selfcal=selfcal, errorba
      endif
      
 ;;----------------------------------------------------
-     
+;     print, 'aor before selfcal', aorname
      if keyword_set(selfcal) then begin
         restore, strcompress(dirname + 'selfcal.sav')    
        ; if intended_phase gt 0 then bin_phasearr = bin_phasearr + 0.5
@@ -232,7 +232,7 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, selfcal=selfcal, errorba
             p5 = errorplot(bin_phasearr, y +delta_green, yerr, '1s', sym_size = 0.3,   sym_filled = 1, $
                       color = 'green',/overplot, name = 'selfcal', errorbar_color = 'green', $
                       errorbar_capsize = 0.025)
-            print, 'selfcal fluxes', y + delta_green
+           ; print, 'selfcal fluxes', y + delta_green
             if keyword_set(fit_eclipse) then begin
                trap = fit_eclipse(bin_phasearr, y ,yerr,0.486 , 0.005,0.515,0.001, delta_green,'green')
             endif
@@ -245,19 +245,18 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, selfcal=selfcal, errorba
 
          
 ;print out levels so that I can use them for TAP (or exofast I suppose)
-         print, 'selfcal for TAP'
-         for exofast = 0, n_elements(bin_phasearr) - 1 do begin
-            if finite(y(exofast)) gt 0 then begin
+;         print, 'selfcal for TAP'
+;         for exofast = 0, n_elements(bin_phasearr) - 1 do begin
+;            if finite(y(exofast)) gt 0 then begin
 ;           print, bin_bmjd(exofast) + 2400000.5D, ' ',bin_corrflux(exofast), ' ',bin_corrfluxerr(exofast), format = '(F0, A,F0, A, F0)'
-               print, bin_bmjdarr(exofast) - 56081.26 , ' ',(y(exofast) / median(y)) - 0.0005, format = '(F0, A,F0)'
+;               print, bin_bmjdarr(exofast) - 56081.26 , ' ',(y(exofast) / median(y)) - 0.0005, format = '(F0, A,F0)'
                                 ;a guess at mid-transit
-            endif
-            
-         endfor
+;            endif
+;      endfor
          
       endif
                                 ;plot flat lines to guide the eyes
-     x = [0.46, 0.50, 0.54]
+;     x = [0.46, 0.50, 0.54]
 ;     p6 = plot(x, fltarr(n_elements(x)) + 1.0, color = 'black',/overplot)
 ;     p7 = plot(x, fltarr(n_elements(x)) + 1.006, color = 'grey',/overplot)
 ;     p8 = plot(x, fltarr(n_elements(x)) +.988, color = 'red',/overplot)
@@ -276,10 +275,14 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, selfcal=selfcal, errorba
  ;    print, 'END of LOOP a'
 ;     print, 'a ', a
  ;    print, 'hello'
-
+;     print, 'aorname at end', aorname
   endfor                        ; n_elements(aorname)
 
 ;finally save the plot
+;  print, 'planetname_fin', planetname_final
+  dirname = strcompress(basedir + planetname_final +'/')
+;  print, 'dirname', dirname
+
   p5.save, dirname+'allfluxes_binned_ch'+chname+'.png'
 
 end

@@ -1,13 +1,13 @@
-pro selfcal_exoplanet, planetname, bin_level, apradius, binning=binning, sine=sine
+pro selfcal_exoplanet, planetname, bin_level, apradius, chname, binning=binning, sine=sine
   
 ;example call: selfcal_exoplanet, 'wasp15', 10*63L, /binning
 
 ;run code to read in all the input planet parameters
 planetinfo = create_planetinfo()
-chname = planetinfo[planetname, 'chname']
+;chname = planetinfo[planetname, 'chname']
 ra_ref = planetinfo[planetname, 'ra']
 dec_ref = planetinfo[planetname, 'dec']
-aorname = planetinfo[planetname, 'aorname']
+if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
 basedir = planetinfo[planetname, 'basedir']
 utmjd_center =  planetinfo[planetname, 'utmjd_center']
 transit_duration =  planetinfo[planetname, 'transit_duration']

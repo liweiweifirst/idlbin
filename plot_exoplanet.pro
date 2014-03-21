@@ -1,14 +1,16 @@
-pro plot_exoplanet, planetname, bin_level, apradius, phaseplot = phaseplot, selfcal=selfcal, centerpixplot = centerpixplot, errorbars = errorbars, unbinned_xplot = unbinned_xplot, unbinned_yplot = unbinned_yplot, unbinned_fluxplot=unbinned_fluxplot, unbinned_npplot = unbinned_npplot, unbinned_bkgplot = unbinned_bkgplot
+pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phaseplot, selfcal=selfcal, centerpixplot = centerpixplot, errorbars = errorbars, unbinned_xplot = unbinned_xplot, unbinned_yplot = unbinned_yplot, unbinned_fluxplot=unbinned_fluxplot, unbinned_npplot = unbinned_npplot, unbinned_bkgplot = unbinned_bkgplot
 ;example call plot_exoplanet, 'wasp15', 2*63L
 
 COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp
 
+
+
+
 ;run code to read in all the input planet parameters
   planetinfo = create_planetinfo()
-  chname = planetinfo[planetname, 'chname']
   ra_ref = planetinfo[planetname, 'ra']
   dec_ref = planetinfo[planetname, 'dec']
-  aorname = planetinfo[planetname, 'aorname']
+  if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
   basedir = planetinfo[planetname, 'basedir']
   utmjd_center =  planetinfo[planetname, 'utmjd_center']
   transit_duration =  planetinfo[planetname, 'transit_duration']
@@ -19,15 +21,17 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
   plot_norm= planetinfo[planetname, 'plot_norm']
   plot_corrnorm = planetinfo[planetname, 'plot_corrnorm']
   
-  dirname = strcompress(basedir + planetname +'/hybrid_pmap_nn/')
+  dirname = strcompress(basedir + planetname +'/');+'/hybrid_pmap_nn/')
   savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
+  print, 'restoring ', savefilename
   restore, savefilename
   
   colorarr = ['blue', 'red', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ]
 ;
-;  z = pp_multiplot(multi_layout=[1,3], global_xtitle='Orbital Phase')
 
-
+;for debugging: skip some AORs
+startaor = 0;5
+stopaor =  n_elements(aorname) - 1
 
 ;-------------------------------------------------------
 ;make a bunch of plots before binning
@@ -38,7 +42,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
 ;  fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_121120.fits', pmapdata, pmapheader
 ;  fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120409.fits', pmapdata, pmapheader
 ;  c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [0,500], yrange = [0,500])
-  print, 'naor', n_elements(aorname)
+;  print, 'naor', n_elements(aorname)
 ;  for a = 0 ,  n_elements(aorname) - 1, 2 do begin
 ;     print, 'testing aors', a, colorarr[a]
 
@@ -104,22 +108,22 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
 ;------
   if keyword_set(unbinned_fluxplot) then begin
 
-     for a = stareaor + 1,n_elements(aorname) -1 do begin ; 0, n_elements(aorname) - 1 do begin
-        if a eq stareaor + 1 then begin
+     for a =0, n_elements(aorname) - 1 do begin
+        if a eq 0 then begin
                                 ;       ymin = 14.9             ; mean(planethash[aorname(a),'ycen'])-0.25
                                 ;       ymax = 16.0             ;mean(planethash[aorname(a),'ycen'])+0.25
                                 ;print, 'ymin.ymax', ymin, ymax
-           ;ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'flux'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'Flux', xtitle = 'Time(hrs)') ;,title = planetname, xtitle = 'Time(hrs)'
-           ay = plot( (planethash[aorname(a),'phase']), (planethash[aorname(a),'flux'])/plot_corrnorm - 0.001,'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'Raw Flux', xtitle = 'Phase', yrange = [0.985, 1.015], xrange = [-0.5, 0.5]) ;,title = planetname, xtitle = 'Time(hrs)'
+           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'corrflux'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'Flux', xtitle = 'Time(hrs)') ;,title = planetname, xtitle = 'Time(hrs)'
+           ;ay = plot( (planethash[aorname(a),'phase']), (planethash[aorname(a),'flux'])/plot_corrnorm - 0.001,'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'Raw Flux', xtitle = 'Phase', yrange = [0.985, 1.015], xrange = [-0.5, 0.5]) ;,title = planetname, xtitle = 'Time(hrs)'
         endif else begin
-          ; ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'flux'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
-           ay = plot( (planethash[aorname(a),'phase']), (planethash[aorname(a),'flux'])/plot_corrnorm - 0.001,'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'corrflux'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+          ; ay = plot( (planethash[aorname(a),'phase']), (planethash[aorname(a),'flux'])/plot_corrnorm - 0.001,'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
         endelse
         
      endfor
 ;     ay.xrange = [-0.5, 0.5]
 ;     ay.yrange = [0.985, 1.005]
-     ay.save, dirname +'raw_flux_time_ch'+chname+'.png'
+;     ay.save, dirname +'raw_flux_time_ch'+chname+'.png'
   endif
 
 ;------
@@ -163,7 +167,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
   bin_corrfluxfinal = fltarr(n_elements(aorname))
   bin_phasefinal = fltarr(n_elements(aorname))
   bin_corrfluxerrfinal = fltarr(n_elements(aorname))
-  for a = 0,n_elements(aorname) - 1 do begin
+  for a = startaor,stopaor do begin
      print, '------------------------------------------------------'
      print, 'working on AOR', a, '   ', aorname(a)
 
@@ -180,39 +184,34 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
 ;now try plotting
 
      if keyword_set(phaseplot) then begin ;make the plot as a function of phase
-
-;        print, 'test phase', bin_phase(0)
-;        print, 'test normflux', bin_flux/plot_norm
         
-;   setxrange = [-0.022,-0.0205]
-;   setxrange =[-0.0127, -0.0112]
         setxrange = [-0.5, 0.5]
-        corrnormoffset = 0.02
+        corrnormoffset = 0;0.02
         corroffset = 0.001
-        setynormfluxrange = [0.97, 1.005]
-        if a eq 0 then begin    ; for the first AOR
+        setynormfluxrange = [0.990, 1.01];[0.97, 1.005]
+        if a eq startaor then begin    ; for the first AOR
                                 ;set the normalization values from the
                                 ;medians of the first AOR...is close enough
 ;           plot_norm = median(bin_flux)
 ;           plot_corrnorm = mean(bin_corrfluxp)
            print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
            pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.1,   sym_filled = 1, title = planetname, $
-                     color = 'black', xtitle = 'Orbital Phase', ytitle = 'X position', $
+                     color = colorarr[a], xtitle = 'Orbital Phase', ytitle = 'X position', $
                      xrange = setxrange)
 
-           pq = plot(bin_phase, bin_ycen, '1s', sym_size = 0.1,   sym_filled = 1, color = 'black', $
+           pq = plot(bin_phase, bin_ycen, '1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], $
                      xtitle = 'Orbital Phase', ytitle = 'Y position', title = planetname, $
                      xrange = setxrange)
 
            if keyword_set(errorbars) then begin
               pr = errorplot(bin_phase, bin_flux/plot_norm,bin_fluxerr/plot_norm,  '1s', sym_size = 0.1,   $
-                             sym_filled = 1,  color ='black',  xtitle = 'Orbital Phase', $
+                             sym_filled = 1,  color =colorarr[a],  xtitle = 'Orbital Phase', $
                              ytitle = 'Normalized Flux', title = planetname, yrange = setynormfluxrange, $
-                             xrange = setxrange) 
+                             xrange = setxrange )
            endif else begin
               pr = plot(bin_phase, bin_flux/plot_norm, '1s', sym_size = 0.1,   sym_filled = 1,  $
-                        color = 'black',  xtitle = 'Orbital Phase', ytitle = 'Normalized Flux', $
-                        title = planetname, yrange = setynormfluxrange, xrange = setxrange) 
+                        color = colorarr[a],  xtitle = 'Orbital Phase', ytitle = 'Normalized Flux', $
+                        title = planetname, yrange = setynormfluxrange, xrange = setxrange,/nodata) 
            endelse  ;/errorbars
 
            if pmapcorr eq 1 then begin
@@ -220,26 +219,26 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
               if keyword_set(errorbars) then begin
                  pr = errorplot(bin_phasep, (bin_corrfluxp/plot_corrnorm) -corrnormoffset,  $
                         bin_corrfluxerrp/plot_corrnorm ,/overplot, '1s', sym_size = 0.1, $
-                        sym_filled = 1, color = 'black')
+                        sym_filled = 1, color = colorarr[a])
               endif else begin
                  pr = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm) -corrnormoffset ,/overplot, '1s', $
-                           sym_size = 0.1,   sym_filled = 1, color = 'black')
+                           sym_size = 0.1,   sym_filled = 1, color = colorarr[a])
               endelse           ;/errorbars
 
            endif  ;enough pmap corrections
 
-           ps= plot(bin_phase, bin_np, '1s', sym_size = 0.1,   sym_filled = 1,  color = 'black', $
+           ps= plot(bin_phase, bin_np, '1s', sym_size = 0.1,   sym_filled = 1,  color = colorarr[a], $
                     xtitle = 'Orbital Phase', ytitle = 'Noise Pixel', title = planetname,$
                     xrange = setxrange)
 
-           pt = plot(bin_phase, bin_bkgd, '1s', sym_size = 0.1,   sym_filled = 1,  color = 'black', $
+           pt = plot(bin_phase, bin_bkgd, '1s', sym_size = 0.1,   sym_filled = 1,  color = colorarr[a], $
                      xtitle = 'Orbital Phase', ytitle = 'Background', title = planetname, $
                      xrange =setxrange)
 
            ;setup a plot for just the snaps
            if n_elements(aorname) gt 10 then begin
               pu = plot(bin_phase, (bin_corrfluxp/plot_corrnorm) + corroffset, xtitle = 'Orbital Phase', $
-                        ytitle = 'Normalized Flux',  yrange = [0.989, 1.005], xrange = setxrange, /nodata) ;title = planetname,
+                        title = planetname, ytitle = 'Normalized Flux',  yrange = [0.989, 1.005], xrange = setxrange, /nodata) ;
            endif
 
         endif                   ; if a = 0
@@ -249,17 +248,17 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
         if (a gt 0) and (a le stareaor) then begin
            print, 'inside a gt 0 a le stareaor', a
            pp.window.SetCurrent
-           pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.1,   sym_filled = 1,color = 'black',  /overplot,/current)
+           pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.1,   sym_filled = 1,color = colorarr[a],  /overplot,/current)
            pq.window.SetCurrent
-           pq = plot(bin_phase, bin_ycen, '1s', sym_size = 0.1,   sym_filled = 1, color = 'black', /overplot,/current)
+           pq = plot(bin_phase, bin_ycen, '1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], /overplot,/current)
            pr.window.SetCurrent
-           pr = plot(bin_phase, bin_flux/plot_norm , '1s', sym_size = 0.1,   sym_filled = 1,  color = 'black', /overplot,/current) 
+           pr = plot(bin_phase, bin_flux/plot_norm , '1s', sym_size = 0.1,   sym_filled = 1,  color = colorarr[a], /overplot,/current,/nodata)
            if pmapcorr eq 1 then begin
-              pr = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm)-corrnormoffset, /overplot, 's1', sym_size = 0.1,   sym_filled = 1, color = 'black',/current)
+              pr = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm)-corrnormoffset, /overplot, 's1', sym_size = 0.1,   sym_filled = 1, color = colorarr[a],/current)
            endif
 
            ps.window.SetCurrent
-           ps = plot(bin_phase, bin_np, '1s', sym_size = 0.1,   sym_filled = 1,  color = 'black', /overplot,/current) ;, xtitle = 'Orbital Phase', ytitle = 'Normalized Flux',) 
+           ps = plot(bin_phase, bin_np, '1s', sym_size = 0.1,   sym_filled = 1,  color = colorarr[a], /overplot,/current) ;, xtitle = 'Orbital Phase', ytitle = 'Normalized Flux',) 
         endif
 
 
@@ -280,12 +279,12 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
                         sym_size = 0.4,   sym_filled = 1,  color = colorarr[a], /overplot,/current) 
            endif else begin
               pr = plot(bin_phase, bin_flux/(plot_norm) , '1s', sym_size = 0.4,   sym_filled = 1,  $
-                        color = colorarr[a], /overplot,/current) 
+                        color = colorarr[a], /overplot,/current,/nodata)
            endelse
 
 
            if pmapcorr eq 1 then begin
-              print, 'inside pmapcorr eq 1', median( (bin_corrfluxp/plot_corrnorm) - 0.01)
+              print, 'inside pmapcorr eq 1', median( (bin_corrfluxp/plot_corrnorm) +corroffset)
 
                if keyword_set(errorbars) then begin
                   pr = errorplot(bin_phasep, (bin_corrfluxp/plot_corrnorm)- corrnormoffset,$
@@ -360,7 +359,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
            bin_corr_flux = bin_corr_flux[0:c-1]
 
            pr.window.SetCurrent
-           pk = plot(bin_time, bin_corr_flux - 0.017, '1s', sym_size =  0.3, sym_filled = 1, color = 'black', /overplot, /current)
+           pk = plot(bin_time, bin_corr_flux - 0.017, '1s', sym_size =  0.3, sym_filled = 1, color = colorarr[a], /overplot, /current)
         endif
         
 
@@ -370,19 +369,34 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
           ; pl = plot((bin_timearr - bin_timearr(0))/60./60., bin_flux/median(bin_flux), '6r1s', sym_size = 0.2,   sym_filled = 1,   xtitle = 'Time (hrs)', ytitle = 'Normalized Flux', title = planetname) 
           ; pl = plot((bin_timearr - bin_timearr(0))/60./60., bin_corrflux/median(bin_corrflux)-0.004, '1s', sym_size = 0.2,   sym_filled = 1, color = 'black',/overplot)
 
-            pl = errorplot((bin_timearr - bin_timearr(0))/60./60., bin_flux/median(bin_flux), bin_fluxerr/median(bin_flux), '1', errorbar_color = 'black',sym_size = 0.2,   sym_filled = 1,   xtitle = 'Time (hrs)', ytitle = 'Normalized Flux', title = planetname) 
+            pl = errorplot((bin_timearr - bin_timearr(0))/60./60., bin_flux/median(bin_flux), bin_fluxerr/median(bin_flux), '1', errorbar_color = colorarr[a],sym_size = 0.2,   sym_filled = 1,   xtitle = 'Time (hrs)', ytitle = 'Normalized Flux', title = planetname) 
             pl = errorplot((bin_timearrp - bin_timearrp(0))/60./60., bin_corrfluxp/median(bin_corrfluxp)-0.01,bin_corrfluxerrp/ median(bin_corrfluxp),'1s', sym_size = 0.2,   sym_filled = 1, color = 'grey',/overplot)
-        endif else begin        ;for the subsequent AORs, use /overplot
+         ;tracking down some high points
+           hp = where ( ((bin_timearr - bin_timearr(0))/60./60. gt 25) $
+              and ((bin_timearr - bin_timearr(0))/60./60. lt 40 )$
+              and (bin_corrfluxp/median(bin_corrfluxp)-0.01 gt .988) ,nhp, complement = lp)
+          for counthp = 0, nhp - 1 do begin
+              print, 'high point-------------------'
+              print, (bin_timearr[hp] - bin_timearr(0))/60./60.
+              print, bin_corrfluxp[hp]/median(bin_corrfluxp)-0.01
+              print, bin_flux[hp]/median(bin_flux)
+           endfor
+           plothist, bin_ycen[hp], xhist1, yhist1, /autobin,/noplot
+           plothist, bin_ycen[lp], xhist2, yhist2, /autobin,/noplot
+           test = plot(xhist1, yhist1)
+           test = plot(xhist2, yhist2, /overplot, color = 'red')
+
+       endif else begin        ;for the subsequent AORs, use /overplot
            pl = plot((bin_timearr - bin_timearr(0))/60./60., bin_flux/median(bin_flux), '6r1s', sym_size = 0.2,   sym_filled = 1,  /overplot) 
-           pl = plot((bin_timearr - bin_timearr(0))/60./60., bin_corrflux/median(bin_corrflux)-0.005, '1s', sym_size = 0.2,   sym_filled = 1, color = 'black',/overplot)
-           
+           pl = plot((bin_timearr - bin_timearr(0))/60./60., bin_corrfluxp/median(bin_corrfluxp)-0.01, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+   
         endelse
 
 
         if keyword_set(selfcal) then begin
            restore, strcompress(dirname + 'selfcal.sav')
            print, 'test selfcal', y[0:10], 'x', x[0:10]
-           ps = errorplot(x, y-0.01,yerr,'1bo',sym_size = 0.2, sym_filled = 1, errorbar_color = 'black',color = 'black',/overplot)
+           ps = errorplot(x, y-0.01,yerr,'1bo',sym_size = 0.2, sym_filled = 1, errorbar_color = colorarr[a],color = colorarr[a],/overplot)
         endif
 
      endelse
@@ -409,15 +423,15 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
 ;;;;;;;-----------------------------------------------------------------
 ;overplot predicted light curve
 ;XXX change this to fitting next
-  exosystemname = "WASP-14 b"
+;  exosystemname = "WASP-14 b"
 ;;  exoplanet_light_curve, t, rel_flux, exosystem = exosystemname,/verbose, /tphase
 ;  fit_exoplanet_light_curve, exosystemname, apradius
-  strput, savefilename, 'model',69
-  print, 'savefilename', savefilename
-  restore, savefilename
-  pu.window.SetCurrent
-  pu = plot(phase, rel_flux,'4', color = 'Sky Blue', /overplot,/current)
-  pu.save,dirname + 'snap_bin_corrflux_fit.png'
+;  strput, savefilename, 'model',69
+;  print, 'savefilename', savefilename
+;  restore, savefilename
+;  pu.window.SetCurrent
+;  pu = plot(phase, rel_flux,'4', color = 'Sky Blue', /overplot,/current)
+;  pu.save,dirname + 'snap_bin_corrflux_fit.png'
 ;;;;;;;-----------------------------------------------------------------
 
 

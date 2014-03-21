@@ -282,9 +282,9 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 
 ; Create arrays to hold centroids
 ;XX channging doubles to floats; check that this is ok
-;	x3 = fltarr(ns)* !VALUES.D_NAN
+	x3 = dblarr(ns)* !VALUES.D_NAN
 ;	y3 = fltarr(ns)* !VALUES.D_NAN
-        x3 = replicate(!VALUES.D_NAN, ns)
+;        x3 = replicate(!VALUES.D_NAN, ns)
         y3 = x3
 ;	x5 = fltarr(ns) * !VALUES.D_NAN
 ;	y5 = fltarr(ns)* !VALUES.D_NAN
@@ -306,7 +306,7 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 	yp7 = x3
 
 ; Flux and background arrays, 4 choices of background annulus
-	f = fltarr(ns, napers)* !VALUES.D_NAN
+	f = dblarr(ns, napers)* !VALUES.D_NAN
 	b = f; fltarr(ns, nbacks)* !VALUES.D_NAN
 	fp =  f;fltarr(ns, napers)* !VALUES.D_NAN
 	bp =  f;fltarr(ns, nbacks)* !VALUES.D_NAN
@@ -336,7 +336,7 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 	bps = f;fltarr(ns, nbacks)* !VALUES.D_NAN
 
 ; Noise pixel array
-	np = fltarr(ns,/nozero)
+	np = dblarr(ns,/nozero)
 	
 ; Subframe array
 	sf = lindgen(ns)
@@ -345,8 +345,8 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 	flag = intarr(ns)
 	
 ; Full width at half max arrays
-	xfwhmarr = fltarr(ns,/nozero)
-	yfwhmarr = fltarr(ns,/nozero)
+	xfwhmarr = dblarr(ns,/nozero)
+	yfwhmarr = dblarr(ns,/nozero)
 
 ;
 ; Find centroid for each image plane

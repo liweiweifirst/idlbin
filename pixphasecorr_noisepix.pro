@@ -26,14 +26,14 @@
 ; MODIFICATION HISTORY:
 ; Dec 2012 JK initial version
 ;-
-pro pixphasecorr_noisepix, planetname, nn, apradius, breatheap = breatheap, ballard_sigma = ballard_sigma
+pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breatheap, ballard_sigma = ballard_sigma
 
   t1 = systime(1)
 ;get all the necessary saved info/photometry
   planetinfo = create_planetinfo()
-  aorname = planetinfo[planetname, 'aorname']
+  if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
   basedir = planetinfo[planetname, 'basedir']
-  chname = planetinfo[planetname, 'chname']
+;  chname = planetinfo[planetname, 'chname']
   period = planetinfo[planetname, 'period']
   utmjd_center = planetinfo[planetname, 'utmjd_center']
   exptime = planetinfo[planetname, 'exptime']

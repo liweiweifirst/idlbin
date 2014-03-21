@@ -13,6 +13,9 @@ PRO pmap_correct_interpolate_single,x,y,f,ch,np,func,f_interp,f_interp_unc,NNEAR
    d_increasing = SORT(d2)
    ;;; Pick the NNEAREST entries
    use_index = d_increasing[0:nnearest-1]
+   ;;;What is the distribution of those neighbors
+;   plothist, d2(use_index), xhist, yhist, /noplot,/autobin
+;   dist = plot(xhist, yhist, xtitle = 'X, Y, NP distance', /overplot )
    ;;; Compute the spread in the pmap data for the nearest neighbor points 
    sig_x = STDDEV(x_pmap[use_index],/NAN,/DOUBLE)
    sig_y = STDDEV(y_pmap[use_index],/NAN,/DOUBLE)
@@ -31,9 +34,12 @@ PRO pmap_correct_interpolate_single,x,y,f,ch,np,func,f_interp,f_interp_unc,NNEAR
 RETURN
 END
 
-FUNCTION pmap_correct,x,y,f,ch,np,FUNC=func,CORR_UNC=corr_unc,FULL=full,DATAFILE=datafile,NNEAREST=nnearest,Verbose=verbose, Use_np = use_np
+FUNCTION pmap_correct,x,y,f,ch,np,occdata,FUNC=func,CORR_UNC=corr_unc,FULL=full,DATAFILE=datafile,NNEAREST=nnearest,Verbose=verbose, Use_np = use_np, THRESHOLD_OCC = threshold_occ, THRESHOLD_VAL = threshold_val
+
 ;;; Common block for pmap data set:
    COMMON pmap_data,x_pmap,y_pmap,f_pmap,np_pmap,func_pmap,scale,sigscale
+
+   if n_elements(threshold_val) eq 0 then threshold_val = 20
 
    IF KEYWORD_SET(FULL) EQ 1 THEN BEGIN
       xfov = 8.
@@ -73,12 +79,20 @@ FUNCTION pmap_correct,x,y,f,ch,np,FUNC=func,CORR_UNC=corr_unc,FULL=full,DATAFILE
       f_pmap_interp[i] = fi
       f_pmap_interp_unc[i]  = fiu
       
+;now check to see if we are in a region of the pmap with sufficient data
+      IF KEYWORD_SET(THRESHOLD_OCC) THEN BEGIN
+         IF occdata[x[i]-xfov, y[i]-yfov] EQ !VALUES.F_NAN THEN f_pmap_interp[i] = !VALUES.F_NAN
+      endif
+
    ENDFOR
    
 ;;; Correct the measured fluxes by dividing by the normalized
 ;;; interpolated pmap flux
    f_corr = f * scale /f_pmap_interp
    corr_unc = f_corr * SQRT( (f_pmap_interp_unc/f_pmap_interp)^2 + (func/f)^2 ) 
-;   print, 'this is what corrfluxerr looks like inisde of pmap_correct', corr_unc
+   
+
+
+
    RETURN,f_corr
 END

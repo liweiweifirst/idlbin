@@ -1,4 +1,4 @@
-pro phot_exoplanet, planetname, apradius, columntrack = columntrack, breatheap = breatheap, hybrid = hybrid
+pro phot_exoplanet, planetname, apradius,chname, columntrack = columntrack, breatheap = breatheap, hybrid = hybrid
 ;do photometry on any IRAC staring mode exoplanet data
 ;now with hashes of hashes!
  t1 = systime(1)
@@ -11,27 +11,28 @@ case apradius of
    2.0: apval = 2
    2.25: begin
       apval = 1
-      pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140314.sav'
+      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140314.sav'
+      if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p25_s3_7_0p4s_140314.sav'
    end
    2.5: begin
       apval = 2
-      pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p50_s3_7_0p1s_x4_140314.sav'
+      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p50_s3_7_0p1s_x4_140314.sav'
+      if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p50_s3_7_0p4s_140314.sav'
    end
    2.75: apval = 5
    3.25: apval = 7
    3: apval = 6
 
-   Else: apval = 2              ; if no decision, then choose an apradius = 3 pixels
+   Else: apval = 2              ; if no decision, then choose an apradius = 2.5 pixels
 endcase
 
 print, 'apval', apval
 
 ;run code to read in all the planet parameters
 planetinfo = create_planetinfo()
-chname = planetinfo[planetname, 'chname']
 ra_ref = planetinfo[planetname, 'ra']
 dec_ref = planetinfo[planetname, 'dec']
-aorname = planetinfo[planetname, 'aorname']
+if chname eq '2'  then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
 basedir = planetinfo[planetname, 'basedir']
 utmjd_center = planetinfo[planetname, 'utmjd_center']
 period = planetinfo[planetname, 'period']
@@ -41,6 +42,10 @@ intended_phase = planetinfo[planetname, 'intended_phase']
 dirname = strcompress(basedir + planetname +'/')
 planethash = hash()
 
+
+if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_120827_occthresh.fits'$
+                                      else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
+fits_read,occ_filename, occdata, occheader
 
 for a = 0, n_elements(aorname) - 1 do begin
    print, 'working on ',aorname(a)
@@ -57,6 +62,9 @@ for a = 0, n_elements(aorname) - 1 do begin
    print,'n_elements(fitsname)', n_elements(fitsname)
 ;     aparr = dblarr(n_elements(fitsname))  ;keep the aperture sizes used
    
+
+
+
    for i =0.D, n_elements(fitsname) - 1 do begin ;read each cbcd file, find centroid, keep track
        ;print, 'working on ', fitsname(i)         
       header = headfits(fitsname(i)) ;
@@ -74,7 +82,35 @@ for a = 0, n_elements(aorname) - 1 do begin
       naxis = sxpar(header, 'NAXIS')
 
       if i eq 0 then sclk_0 = sclk_obs
-      
+
+      if i eq 0 and naxis eq 3 then begin
+         xarr = fltarr(63*(n_elements(fitsname)))
+         yarr = xarr
+         fluxarr = xarr
+         fluxerrarr = xarr
+         corrfluxarr = xarr
+         corrfluxerrarr = xarr
+         timearr = xarr
+         bmjd = xarr
+         backarr = xarr
+         backerrarr = xarr
+         nparr = xarr
+      endif
+      if i eq 0 and naxis ne 3 then begin
+         xarr = fltarr(n_elements(fitsname))
+         yarr = xarr
+         fluxarr = xarr
+         fluxerrarr = xarr
+         corrfluxarr = xarr
+         corrfluxerrarr = xarr
+         timearr = xarr
+         bmjd = xarr
+         backarr = xarr
+         backerrarr = xarr
+         nparr = xarr
+      endif
+
+
       if naxis eq 3 then begin
          deltatime = (atimeend - aintbeg) / 64.D ; real time for each of the 64 frames
          nt = dindgen(64)
@@ -92,7 +128,10 @@ for a = 0, n_elements(aorname) - 1 do begin
 
       ;apply mask file if necessary
       if planetname eq 'hd189733' then  im[13:16, 4:7, *] = !Values.F_NAN ;mask region with nan set for bad regions
-      if planetname eq 'wasp14' then  im[4:7, 13:16, *] = !Values.F_NAN ;mask region with nan set for bad regions                              
+      if planetname eq 'WASP-14b' then  begin
+         im[4:7, 13:16, *] = !Values.F_NAN ;mask region with nan set for bad regions      
+      endif
+
       if planetname eq 'hat22' then im[20:24, 11:15, *] = !Values.F_NAN ;mask region with nan set for bad regions
                               
       ;run the centroiding and photometry
@@ -168,7 +207,7 @@ for a = 0, n_elements(aorname) - 1 do begin
 ;correction based on those neighbors.  
       if keyword_set(hybrid) then begin
          ;use hybrid technique with pmap dataset and nn techniques
-         corrflux = pmap_correct(x_center,y_center,abcdflux,ch,np,corr_unc = corrfluxerr, func = fs, datafile =pmapfile);,/use_np) ;FUNC=func,CORR_UNC=corr_unc,FULL=full,DATAFILE=datafile,NNEAREST=nnearest,Verbose=verbose
+         corrflux = pmap_correct(x_center,y_center,abcdflux,ch,np,occdata, corr_unc = corrfluxerr, func = fs, datafile =pmapfile,/threshold_occ,/use_np) ;FUNC=func,CORR_UNC=corr_unc,FULL=full,DATAFILE=datafile,NNEAREST=nnearest,Verbose=verbose
          ;print, 'testing corrfluxerr return', corrfluxerr
          ;print, 'compared to corrflux', corrflux
          ;corrfluxerr = fs       ; looks like maybe jim;s code does calculate this XXXX
@@ -182,21 +221,21 @@ for a = 0, n_elements(aorname) - 1 do begin
 
 ;---------------------------------
 
-      if naxis eq 3 and i eq 0 then begin
-         xarr = x_center[1:*]
-         yarr = y_center[1:*]
-         fluxarr = abcdflux[1:*]
-         fluxerrarr = fs[1:*]
-         corrfluxarr = corrflux[1:*]
-         corrfluxerrarr = corrfluxerr[1:*]
-         timearr = sclkarr[1:*]        
-         bmjd = bmjdarr[1:*]
-;           utcs = utcsarr[1:*]
-         backarr = back[1:*]
-         backerrarr = backerr[1:*]
-         nparr = np[1:*]
-         
+      if naxis eq 3 then begin  ; and i eq 0 then begin
+         xarr[i*63] = x_center[1:*]
+         yarr[i*63] = y_center[1:*]
+         fluxarr[i*63] = abcdflux[1:*]
+         fluxerrarr[i*63] = fs[1:*]
+         corrfluxarr[i*63] = corrflux[1:*]
+         corrfluxerrarr[i*63] = corrfluxerr[1:*]
+         timearr[i*63] = sclkarr[1:*]        
+         bmjd[i*63] = bmjdarr[1:*]
+         backarr[i*63] = back[1:*]
+         backerrarr[i*63] = backerr[1:*]
+         nparr[i*63] = np[1:*]
+
          if keyword_set(columntrack) then begin 
+                                ; I think I deleted more parts of this than I may have intended, so if it is not working, that may be why
             centerpixarr1 = centerpixval1[1:*]
             centerpixarr2 = centerpixval2[1:*]
             centerpixarr3 = centerpixval3[1:*]
@@ -210,68 +249,20 @@ for a = 0, n_elements(aorname) - 1 do begin
             sigmapixarr5 = sigmapixval5[1:*]
             sigmapixarr6 = sigmapixval6[1:*]
          endif
-         
-         
       endif 
-      if naxis eq 3 and i ne 0 then begin
-         xarr = [xarr, x_center[1:*]]
-         yarr = [yarr, y_center[1:*]]
-         fluxarr = [fluxarr, abcdflux[1:*]]
-         fluxerrarr = [fluxerrarr, fs[1:*]]
-         corrfluxarr = [corrfluxarr, corrflux[1:*]]
-         corrfluxerrarr = [corrfluxerrarr, corrfluxerr[1:*]]
-         timearr = [timearr, sclkarr[1:*]]
-         bmjd = [bmjd, bmjdarr[1:*]]
-;           utcs = [utcs, utcsarr[1:*]]
-         backarr = [backarr, back[1:*]]
-         backerrarr = [backerrarr, backerr[1:*]]
-         nparr = [nparr, np[1:*]]
-         if keyword_set(columntrack) then begin 
-            centerpixarr1 = [centerpixarr1, centerpixval1[1:*]]
-            centerpixarr2 = [centerpixarr2, centerpixval2[1:*]]
-            centerpixarr3 = [centerpixarr3, centerpixval3[1:*]]
-            centerpixarr4 = [centerpixarr4, centerpixval4[1:*]]
-            centerpixarr5 = [centerpixarr5, centerpixval5[1:*]]
-            centerpixarr6 = [centerpixarr6, centerpixval6[1:*]]
-            sigmapixarr1 = [sigmapixarr1, sigmapixval1[1:*]]
-            sigmapixarr2 = [sigmapixarr2, sigmapixval2[1:*]]
-            sigmapixarr3 = [sigmapixarr3, sigmapixval3[1:*]]
-            sigmapixarr4 = [sigmapixarr4, sigmapixval4[1:*]]
-            sigmapixarr5 = [sigmapixarr5, sigmapixval5[1:*]]
-            sigmapixarr6 = [sigmapixarr6, sigmapixval6[1:*]]
-         endif
-         
+      if naxis eq 2 then begin; and i eq 0 then begin
+         xarr[i] = x_center
+         yarr[i]  =  y_center
+         fluxarr[i]  =  abcdflux
+         fluxerrarr[i]  =  fs
+         corrfluxarr[i]  = corrflux
+         corrfluxerrarr[i]  =  corrfluxerr
+         timearr[i]  = sclkarr
+         bmjd[i]  = bmjdarr
+         backarr[i]  =  back
+         backerrarr[i]  = backerr
+         nparr[i]  = np
       endif
-      if naxis eq 2 and i eq 0 then begin
-         xarr = [ x_center]
-         yarr = [ y_center]
-         fluxarr = [ abcdflux]
-         fluxerrarr = [ fs]
-         corrfluxarr = [corrflux]
-         corrfluxerrarr = [ corrfluxerr]
-         timearr = [sclkarr]
-         bmjd = [bmjdarr]
-;           utcs = [ utcsarr]
-         backarr = [ back]
-         backerrarr = [backerr]
-         nparr = [np]
-      endif
-
-      if naxis eq 2 and i ne 0 then begin
-         xarr = [xarr, x_center]
-         yarr = [yarr, y_center]
-         fluxarr = [fluxarr, abcdflux]
-         fluxerrarr = [fluxerrarr, fs]
-         corrfluxarr = [corrfluxarr, corrflux]
-         corrfluxerrarr = [corrfluxerrarr, corrfluxerr]
-         timearr = [timearr, sclkarr]
-         bmjd = [bmjd, bmjdarr]
-;           utcs = [utcs, utcsarr]
-         backarr = [backarr, back]
-         backerrarr = [backerrarr, backerr]
-         nparr = [nparr, np]
-      endif
-
 
    endfor; for each fits file in the AOR
 
@@ -289,11 +280,11 @@ for a = 0, n_elements(aorname) - 1 do begin
    
 ;   low = where(phase lt-0.5 and phase ge -1.0)
 ;   phase(low) = phase(low) + 1.
-   phase = temporary(phase) + (phase lt -0.5 and phase ge -1.0)
+   phase = phase + (phase lt -0.5 and phase ge -1.0)
    
 ;   high = where(phase gt 0.5 and phase le 1.0)
 ;   phase(high) = phase(high) - 1.0
-   phase = temporary(phase) - (phase gt 0.5 and phase le 1.0)
+   phase = phase- (phase gt 0.5 and phase le 1.0)
   
    if intended_phase gt 0.4 and intended_phase lt 0.6 then begin ;secondary eclipse
  ;     print, 'secondary eclipse intended'
@@ -315,9 +306,6 @@ for a = 0, n_elements(aorname) - 1 do begin
       values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase)
       planethash[aorname(a)] = HASH(keys, values)
    endelse
-   print, 'n_elements(xarr)', n_elements(xarr), 'should be', 63*1310.
-
-   print, 'testing phase', phase[0]
 
 
 endfor                          ;for each AOR
