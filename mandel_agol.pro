@@ -69,6 +69,7 @@ endif
 
 ;change 'phot' to 'model'
 strput, savefilename, 'model',69 
+print, 'inside mandel', savefilename
 save, phase, rel_flux, filename = savefilename
 return, model
 end

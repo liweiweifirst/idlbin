@@ -25,20 +25,23 @@ pro fit_exoplanet_light_curve, exosystem, apradius
   chname = planetinfo[planetname, 'chname']
   snapaor = stareaor + 1        ; the first AOR in the list which is snapshots
   basedir = planetinfo[planetname, 'basedir']
-  dirname = strcompress(basedir + planetname +'/hybrid_pmap_nn/')
+  dirname = strcompress(basedir + planetname+ '/'); +'/hybrid_pmap_nn/')
   savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
 ;  filename = '/Users/jkrick/irac_warm/pcrs_planets/wasp-14b/hybrid_pmap_nn/wasp14_phot_ch2_2.50000.sav'
+  print, 'inside fit+exopl', savefilename
   restore, savefilename
 
  for a = snapaor, n_elements(aorname) -1 do begin
-;    plothist, planethash[aorname(a),'corrflux'], xhist, yhist, bin = 0.0005, /noplot,/nan
-;    ap = plot(xhist, yhist)
+   ; plothist, planethash[aorname(a),'corrflux'], xhist, yhist, bin = 0.0005, /noplot,/nan
+   ; ap = plot(xhist, yhist)
     meanclip, planethash[aorname(a),'corrflux'], meancorr, sigmacorr, clipsig = 2.5;,/verbose
     meanclip, planethash[aorname(a),'corrfluxerr'], meancorrerr, sigmacorrerr, clipsig = 2.5
-    meancorrerr = meancorrerr / 3.0 ; XXXXX need real error bars
+   ; meanerr, planethash[aorname(a),'corrflux'], planethash[aorname(a),'corrfluxerr'], meancorr2, sigmam, sigmad
+    ;meancorrerr = meancorrerr / 3.0 ; XXXXX need real error bars
+    ;print, 'compare mean & error', meancorr, meancorrerr, meancorr2, sigmam, sigmad
     if a eq snapaor then phasearr = [median(planethash[aorname(a),'phase'])] else phasearr = [phasearr, median(planethash[aorname(a),'phase'])]
     if a eq snapaor then fluxarr = [meancorr] else fluxarr = [fluxarr, meancorr]
-    if a eq snapaor then errarr = [meancorrerr] else errarr = [errarr, meancorrerr]
+    if a eq snapaor then errarr = [sigmacorr] else errarr = [errarr, sigmacorr]
  endfor
 
  ;now sort the arrays since they are taken at random phase
