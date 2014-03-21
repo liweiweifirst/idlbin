@@ -94,8 +94,7 @@ function HEADFITS, filename, EXTEN = exten, Compress = compress, $
 
   unitsupplied = size(filename,/TNAME) NE 'STRING'
   if unitsupplied then unit = filename else begin 
-     unit = FXPOSIT( filename, exten, $
-                   /READONLY,compress = compress, SILENT=silent)
+     unit = FXPOSIT( filename, exten, /READONLY,compress = compress, SILENT=silent)
      if unit EQ -1 then begin 
          message = 'Unable to open file ' + filename 
          if N_elements(errmsg) GT 0 then errmsg = message else $
