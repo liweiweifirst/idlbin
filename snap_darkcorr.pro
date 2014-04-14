@@ -5,24 +5,24 @@ pro snap_darkcorr, chname
 ;assumes subarray - aka naxis = 3
   
 
-  basedir = '/Users/jkrick/irac_warm/pcrs_planets/wasp-14b/'
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/HD158460/'
   caldir = basedir + 'calibration/'
   fluxconv = .1469              ;MJY/sr / DN/s
-  fits_read, strcompress(caldir + 'irac_b2_sa_superskyflat_100426.fits',/remove_all), flatdata, flatheader
+  fits_read, '/Users/jkrick/irac_warm/pcrs_planets/HD158460/r45184768/ch2/cal/irac_b2_sa_superskyflat_100426.fits', flatdata, flatheader
   ;need to make this [32,32,64]
   flat64 = fltarr(32,32,64)
   flatsingle = flatdata[*,*,0]
   for f = 0, 63 do flat64[*,*,f] = flatsingle
 
-  ra_ref = 218.27649
-  dec_ref = 21.894575
+  ra_ref = 261.42213
+  dec_ref = 60.048479
 
-  fits_read,  strcompress(caldir + 'SPITZER_I2_45966336_0000_1_C9501418_sdark.fits',/remove_all), dark45966336,header45966336
-  fits_read,  strcompress(caldir + 'SPITZER_I2_45860608_0000_1_C9491430_sdark.fits',/remove_all), dark45860608,header45860608
-  fits_read,  strcompress(caldir + 'SPITZER_I2_45863936_0000_1_C9497379_sdark.fits',/remove_all), dark45863936,header45863936
-  fits_read,  strcompress(caldir + 'SPITZER_I2_48987392_0000_1_C9735186_sdark.fits',/remove_all), dark48987392,header48987392
-  fits_read,  strcompress(caldir + 'SPITZER_I2_48998144_0000_1_C9737980_sdark.fits',/remove_all), dark48998144,header48998144
-  fits_read,  strcompress(caldir + 'SPITZER_I2_49015808_0000_1_C9756026_sdark.fits',/remove_all), dark49015808,header49015808
+;  fits_read,  strcompress(caldir + 'SPITZER_I2_45966336_0000_1_C9501418_sdark.fits',/remove_all), dark45966336,header45966336
+;  fits_read,  strcompress(caldir + 'SPITZER_I2_45860608_0000_1_C9491430_sdark.fits',/remove_all), dark45860608,header45860608
+;  fits_read,  strcompress(caldir + 'SPITZER_I2_45863936_0000_1_C9497379_sdark.fits',/remove_all), dark45863936,header45863936
+;  fits_read,  strcompress(caldir + 'SPITZER_I2_48987392_0000_1_C9735186_sdark.fits',/remove_all), dark48987392,header48987392
+;  fits_read,  strcompress(caldir + 'SPITZER_I2_48998144_0000_1_C9737980_sdark.fits',/remove_all), dark48998144,header48998144
+;  fits_read,  strcompress(caldir + 'SPITZER_I2_49015808_0000_1_C9756026_sdark.fits',/remove_all), dark49015808,header49015808
 
 ;choose one dark for them all
 ;  thedark = dark45966336
@@ -31,13 +31,11 @@ pro snap_darkcorr, chname
 ;choose the superdark
  fits_read, '/Users/jkrick/irac_warm/darks/superdarks/superdark_s2s.fits', thedark, theheader
 
-                               ;all the wasp-14b snaps
-  aorname = [ 'r45838592', 'r45840128', 'r45841408', 'r45842176', 'r45842944', 'r45844480', 'r45845248', 'r45846016', 'r45846784', 'r45839104', 'r45840896', 'r45841664', 'r45842432', 'r45843200', 'r45844736', 'r45845504', 'r45846272', 'r45847040', 'r45839616', 'r45841152', 'r45841920','r45843968','r45843712','r45843456','r45840640','r45840384','r45839872','r45839360','r45838848','r45838336','r48688384','r48688128','r48687872','r48687616','r48683776','r48683264', 'r48682752','r48682240','r48681472','r48681216','r48680704'] ; ch2
-  
-
-  prefluxarr = fltarr(n_elements(aorname) * 14* 63)
-  superfluxarr = fltarr(n_elements(aorname) * 14* 63)
-  c = 0
+               ;HD158460              
+   aorname = [ 'r45184256','r45184512','r45184768','r45185024','r45185280','r45185536','r45185792','r45186048','r45186304','r45186560','r45186816','r45187072','r45187328','r45187584','r45187840','r45188096','r45188352','r45188608'] 
+  prefluxarr = fltarr(n_elements(aorname) * 500* 64)
+  superfluxarr = fltarr(n_elements(aorname) * 500* 64)
+  c = 0L
 
   for a = 0,   n_elements(aorname) - 1 do begin
      print, 'working on ',aorname(a)
@@ -76,15 +74,20 @@ pro snap_darkcorr, chname
         data = data * flat64
         
                                 ;remove the dark that was already used in the image
-        darkname = sxpar(header, 'SKDKRKEY')
-        case darkname of 
-           '45966336': dark = dark45966336
-           '45860608': dark =dark45860608
-           '45863936': dark =dark45863936
-           '48987392': dark = dark48987392
-           '48998144': dark = dark48998144
-           '49015808': dark = dark49015808
-        endcase
+        command  = strcompress( 'find ch'+chname+"/cal -name '*_sdark.fits' > "+dir+'dark.txt')
+        spawn, command
+        readcol,strcompress(dir +'dark.txt'),darkname, format = 'A', /silent
+        fits_read, darkname, dark, darkheader
+        
+        ;darkname = sxpar(header, 'SKDKRKEY')
+        ;case darkname of 
+        ;   '45966336': dark = dark45966336
+        ;   '45860608': dark =dark45860608
+        ;   '45863936': dark =dark45863936
+        ;   '48987392': dark = dark48987392
+        ;   '48998144': dark = dark48998144
+        ;   '49015808': dark = dark49015808
+       ; endcase
         data = data + dark
        
                                 ;--------------------------
