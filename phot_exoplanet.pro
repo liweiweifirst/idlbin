@@ -1,6 +1,9 @@
 pro phot_exoplanet, planetname, apradius,chname, columntrack = columntrack, breatheap = breatheap, hybrid = hybrid
 ;do photometry on any IRAC staring mode exoplanet data
 ;now with hashes of hashes!
+;print, 'waiting'
+;wait, 3600  ; waiting for another code to finish
+;print, 'done waiting'
  t1 = systime(1)
 
 ;convert aperture radius in pixels into what get_centroids_for_calstar_jk uses 
@@ -51,7 +54,8 @@ for a = 0, n_elements(aorname) - 1 do begin
    print, 'working on ',aorname(a)
    dir = dirname+ string(aorname(a) ) 
    CD, dir                      ; change directories to the correct AOR directory
-   command  = strcompress( 'find ch'+chname+"/bcd -name '*_bcd.fits' > "+dirname+'bcdlist.txt')
+   command  = strcompress( 'find ch'+chname+"/bcd -name 'SPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
+   print, 'command', command
    spawn, command
    command2 =  strcompress('find ch'+chname+"/bcd -name '*bunc.fits' > "+dirname + 'bunclist.txt')
    spawn, command2
@@ -66,7 +70,7 @@ for a = 0, n_elements(aorname) - 1 do begin
 
 
    for i =0.D, n_elements(fitsname) - 1 do begin ;read each cbcd file, find centroid, keep track
-       ;print, 'working on ', fitsname(i)         
+ ;      print, 'working on ', fitsname(i)         
       header = headfits(fitsname(i)) ;
       sclk_obs= sxpar(header, 'SCLK_OBS')
       frametime = sxpar(header, 'FRAMTIME')
@@ -133,7 +137,7 @@ for a = 0, n_elements(aorname) - 1 do begin
       endif
 
       if planetname eq 'hat22' then im[20:24, 11:15, *] = !Values.F_NAN ;mask region with nan set for bad regions
-                              
+      if planetname eq 'HD93385' then im[17:21, 21:27, *] = !Values.F_NAN ;mask region with nan set for bad regions                         
       ;run the centroiding and photometry
       get_centroids_for_calstar_jk,im, h, unc, ra_ref, dec_ref,  t, dt, hjd, xft, x3, y3, $
                                    x5, y5, x7, y7, xg, yg, xh, yh, f, b, x3s, y3s, x5s, y5s, $
@@ -206,11 +210,8 @@ for a = 0, n_elements(aorname) - 1 do begin
 ;use pmap data to find nearest neighbors in pmap dataset and find a
 ;correction based on those neighbors.  
       if keyword_set(hybrid) then begin
-         ;use hybrid technique with pmap dataset and nn techniques
-         corrflux = pmap_correct(x_center,y_center,abcdflux,ch,np,occdata, corr_unc = corrfluxerr, func = fs, datafile =pmapfile,/threshold_occ,/use_np) ;FUNC=func,CORR_UNC=corr_unc,FULL=full,DATAFILE=datafile,NNEAREST=nnearest,Verbose=verbose
-         ;print, 'testing corrfluxerr return', corrfluxerr
-         ;print, 'compared to corrflux', corrflux
-         ;corrfluxerr = fs       ; looks like maybe jim;s code does calculate this XXXX
+                                ;use hybrid technique with pmap dataset and nn techniques
+        corrflux = pmap_correct(x_center,y_center,abcdflux,ch,np,occdata, corr_unc = corrfluxerr, func = fs, datafile =pmapfile,/threshold_occ,/use_np) 
       endif else begin
                ;correct for pixel phase effect based on pmaps from Jim
       ;file_suffix = ['500x500_0043_120828.fits','0p1s_x4_500x500_0043_121120.fits']
@@ -273,7 +274,7 @@ for a = 0, n_elements(aorname) - 1 do begin
 ; print, 'fluxarr', fluxarr[0:10]
    
    
-   
+   print, 'testing bmjd, utmjd', bmjd[0:10] , utmjd_center, period
 ;get phasing out of the way here
    bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
    phase =( bmjd_dist / period )- fix(bmjd_dist/period)
@@ -291,6 +292,7 @@ for a = 0, n_elements(aorname) - 1 do begin
       phase = temporary(phase)+0.5
    endif 
    
+print, 'testing phase', phase[0:10]
 ;--------------------------------
 ;fill in that hash of hases
 ;--------------------------------
@@ -345,7 +347,9 @@ end
 
 ;function to calcluate noise pixel
 function noisepix, im, xcen, ycen, ronoise, gain, exptime, fluxconv,naxis
-
+  apradnp = 3;4
+  skyradin = 3;10
+  skyradout = 6;12
   convfac = gain*exptime/fluxconv
 
   if naxis gt 2 then begin  ; for subarray
@@ -354,8 +358,8 @@ function noisepix, im, xcen, ycen, ronoise, gain, exptime, fluxconv,naxis
         indim = im[*,*,npj]
         indim = indim*convfac
         ; aper requires a 2d array
-        aper, indim, xcen[npj], ycen[npj], topflux, topfluxerr, xb, xbs, 1.0, 4,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
-        aper, indim^2, xcen[npj], ycen[npj], bottomflux, bottomfluxerr, xb, xbs, 1.0,4,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
+        aper, indim, xcen[npj], ycen[npj], topflux, topfluxerr, xb, xbs, 1.0, apradnp,[skyradin,skyradout],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
+        aper, indim^2, xcen[npj], ycen[npj], bottomflux, bottomfluxerr, xb, xbs, 1.0,apradnp,[skyradin,skyradout],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
         
         np[npj] = topflux^2 / bottomflux
      endfor
@@ -364,13 +368,13 @@ function noisepix, im, xcen, ycen, ronoise, gain, exptime, fluxconv,naxis
   if naxis lt 3 then begin ; for full array
      indim = im*convfac
         
-        aper, indim, xcen, ycen, topflux, topfluxerr, xb, xbs, 1.0, 4,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
-        aper, indim^2, xcen, ycen, bottomflux, bottomfluxerr, xb, xbs, 1.0,4,[10,12],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
+        aper, indim, xcen, ycen, topflux, topfluxerr, xb, xbs, 1.0, apradnp,[skyradin,skyradout],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
+        aper, indim^2, xcen, ycen, bottomflux, bottomfluxerr, xb, xbs, 1.0,apradnp,[skyradin,skyradout],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
         
         np = topflux^2 / bottomflux
   endif
 
-     return, np                 ;this should be a 64 element array
+     return, np               
 end
 
 

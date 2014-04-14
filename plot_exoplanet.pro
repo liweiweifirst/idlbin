@@ -32,7 +32,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
 ;
 
 ;for debugging: skip some AORs
-startaor = 20;5
+startaor = 0;5
 stopaor =  n_elements(aorname) - 1
 
 
@@ -198,32 +198,57 @@ endif
      print, 'testing phase', (planethash[aorname(a),'phase'] )[0:10], (planethash[aorname(a),'phase'] )[600:610]
      print, 'testing x', bin_xcen[0:10]
      print, 'testing y', bin_ycen[0:10]
+
+;------------------------------------------------------
+     ;possible comparison statistic
+     ;what is the distribution of standard deviations among the corrfluxes?
+
+     meanclip, planethash[aorname(a),'corrflux'] , mean_corrflux, stddev_corrflux
+     stddev_corrfluxarr[a] = stddev_corrflux
 ;------------------------------------------------------
 ;now try plotting
 
      if keyword_set(dsweet) then begin
         ;measure mean distance from the sweet spot
- 
-        dsweet = sqrt((planethash[aorname(a),'xcen'] - xsweet)^2 + (planethash[aorname(a),'ycen'] - ysweet)^2)
+        xdist = (planethash[aorname(a),'xcen'] - xsweet)
+        ydist = (planethash[aorname(a),'ycen'] - ysweet)
+        meanclip, ydist, meany, stddevy
+        meanclip, xdist, meanx, stddevx
+
+        dsweet = sqrt(xdist^2 + ydist^2)
         meanclip, dsweet, mean_dsweet, stddev_dsweet
         
         meanclip, planethash[aorname(a),'corrflux'] , mean_corrflux, stddev_corrflux
+
+        theta = 180./!Pi*ATAN(ydist, xdist) ; in degrees
         
+        ;ahhh quadrants
+;        if xdist gt 0 and ydist gt 0 then theta = theta
+;        if mean(xdist) ge 0 and mean(ydist) lt 0 then theta = theta + 360
+;        if mean(xdist) lt 0 then theta = theta +180
+
+       meanclip, theta, mean_theta, stddev_theta
 
         if a eq startaor then begin 
            normfactor = mean_corrflux
-           sweetplot = errorplot([mean_dsweet],[mean_corrflux/normfactor],  [stddev_dsweet], [stddev_corrflux/normfactor],$
-                                 '1s', sym_size = 0.4,   sym_filled = 1,  xtitle = 'Dsweet', ytitle = 'Corrflux', title = planetname,$
-                                color = colorarr[a], xrange = [0, 0.4], yrange = [0.99, 1.01]) 
-           stddevplot = plot([mean_dsweet],[stddev_corrflux/normfactor], '1s', sym_size = 2.0, color = colorarr[a],  $
-                             sym_filled = 1,  xtitle = 'Dsweet', ytitle = 'Stddev Corrflux', title = planetname) 
+;           sweetplot = errorplot([mean_theta],[mean_corrflux/normfactor],  [stddev_theta], [stddev_corrflux/normfactor],$
+;                                 '1s', sym_size = 0.4,   sym_filled = 1,  xtitle = 'Theta', ytitle = 'Corrflux', title = planetname,$
+;                                color = colorarr[a],  yrange = [0.99, 1.01]) 
+;           stddevplot = plot([mean_theta],[stddev_corrflux/normfactor], '1s', sym_size = 2.0, color = colorarr[a],  $
+;                             sym_filled = 1,  xtitle = 'Theta', ytitle = 'Stddev Corrflux', title = planetname) 
+           dtheta = plot([mean_theta], [stddevx],$
+                                 '1s', sym_size = 1.0,   sym_filled = 1,  xtitle = 'Theta', ytitle = 'Stddev X centroids', title = planetname,$
+                                color = colorarr[a]) 
         endif else begin
-           sweetplot.window.SetCurrent
-           sweetplot = errorplot([mean_dsweet],[mean_corrflux/normfactor],  [stddev_dsweet], [stddev_corrflux/normfactor],$
-                                 '1s', sym_size = 0.4,  sym_filled = 1, color = colorarr[a],/overplot) 
-           stddevplot.window.SetCurrent
-           stddevplot = plot([mean_dsweet],[stddev_corrflux/normfactor], '1s', sym_size = 2.0, color = colorarr[a],  $
-                             sym_filled = 1,/overplot) 
+;           sweetplot.window.SetCurrent
+;           sweetplot = errorplot([mean_theta],[mean_corrflux/normfactor],  [stddev_theta], [stddev_corrflux/normfactor],$
+;                                 '1s', sym_size = 0.4,  sym_filled = 1, color = colorarr[a],/overplot) 
+;           stddevplot.window.SetCurrent
+;           stddevplot = plot([mean_theta],[stddev_corrflux/normfactor], '1s', sym_size = 2.0, color = colorarr[a],  $
+;                             sym_filled = 1,/overplot) 
+;           dtheta.window.SetCurrent
+           dtheta = plot([mean_theta], [stddevx],$
+                                 '1s', sym_size = 1.0,   sym_filled = 1, color = colorarr[a],/overplot) 
         endelse
 
 
@@ -245,9 +270,12 @@ endif
         print, 'testing sclk', bin_sclk[0:10], bin_sclk(n_elements(bin_sclk)-1)
         print, 'showing bmjd', bin_bmjdarr[0:10], bin_bmjdarr(n_elements(bin_bmjdarr)-1)
 
-        ps= plot(bin_sclk, bin_np, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
-                    xtitle = 'Sclk_time', ytitle = 'Noise Pixel', title = planetname)
-        
+        ;psn= plot(bin_sclk, bin_np, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
+        ;            xtitle = 'Sclk_time', ytitle = 'Noise Pixel', title = planetname)
+        psx = plot(bin_sclk, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
+                    xtitle = 'Sclk_time', ytitle = 'Xcen', title = planetname)
+        psy= plot(bin_sclk, bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
+                    xtitle = 'Sclk_time', ytitle = 'Ycenl', title = planetname)
      endif
 
 ;------------------------------------------------------
@@ -255,7 +283,7 @@ endif
 
      if keyword_set(phaseplot) then begin ;make the plot as a function of phase
         
-        setxrange = [0.475, 0.525]
+        setxrange = [-0.5, 0.5]
         corrnormoffset = 0;0.02
         corroffset = 0.001
         setynormfluxrange = [0.98, 1.01];[0.97, 1.005]
@@ -590,6 +618,10 @@ endif
 ;    bin_corrfluxerrfinal(a) = bin_corrfluxerrp / plot_corrnorm
 
   endfor                        ;binning for each AOR
+
+;what is the distrubition of standard deviations in the corrfluxes?
+plothist, stddev_corrfluxarr, xhist, yhist, /autobin, /noplot,/nan
+di = plot(xhist, yhist, thick = 2, xtitle = 'standard deviation of corrflux', ytitle = 'Number', title = planetname, yrange = [0,20], xrange = [2.1E-4, 2.6E-4])
 
  ;if keyword_set(phaseplot) then  pr.save, dirname +'binflux_phase.png' else pl.save, dirname +'binflux_time.png'
 

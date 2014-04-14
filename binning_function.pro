@@ -132,10 +132,15 @@ function binning_function, a,bin_level, pmapcorr
            meanclip, timearr[ri[ri[j]:ri[j+1]-1]], meantimearr, sigmatimearr
            bin_timearr[c]=meantimearr
            
-           meanclip, phasearr[ri[ri[j]:ri[j+1]-1]], meanphasearr, sigmaphasearr
+          ; meanclip, phasearr[ri[ri[j]:ri[j+1]-1]], meanphasearr, sigmaphasearr
+           meanphasearr = mean( phasearr[ri[ri[j]:ri[j+1]-1]],/nan)
            bin_phase[c]= meanphasearr
 
-           ;can only compute means if there are values in there
+  
+           meanbmjdarr = mean( bmjdarr[ri[ri[j]:ri[j+1]-1]],/nan)
+           bin_bmjdarr[c]= meanbmjdarr
+
+         ;can only compute means if there are values in there
 ;           if pmapcorr eq 1 then begin
 ;              meanclip, corrflux[ri[ri[j]:ri[j+1]-1]], meancorrflux, sigmacorrflux
 ;              meancorrflux = mean(corrflux[ri[ri[j]:ri[j+1]-1]],/nan)
@@ -172,7 +177,7 @@ function binning_function, a,bin_level, pmapcorr
      bin_fluxerr = bin_fluxerr[0:c-1]
 ;     bin_corrflux = bin_corrflux[0:c-1]
      bin_timearr = bin_timearr[0:c-1]
-;     bin_bmjdarr = bin_bmjdarr[0:c-1]
+     bin_bmjdarr = bin_bmjdarr[0:c-1]
 ;     bin_corrfluxerr = bin_corrfluxerr[0:c-1]
      bin_phase = bin_phase[0:c-1]
      bin_ncorr = bin_ncorr[0:c-1]
@@ -222,11 +227,12 @@ function binning_function, a,bin_level, pmapcorr
            meanclip, timearrp[rip[rip[j]:rip[j+1]-1]], meantimearr, sigmatimearr
            bin_timearrp[cp]=meantimearr
            
-           meanclip, phasearrp[rip[rip[j]:rip[j+1]-1]], meanphasearr, sigmabmjdarr
+;           meanclip, phasearrp[rip[rip[j]:rip[j+1]-1]], meanphasearr, sigmabmjdarr
+           meanphasearr = mean(phasearrp[rip[rip[j]:rip[j+1]-1]],/nan)
            bin_phasep[cp]= meanphasearr
 
-;            meanclip, phasearr[rip[rip[j]:rip[j+1]-1]], meanphase, sigmaphasearr
-;            bin_phase[cp]= meanphase
+           meanbmjdarr = mean( bmjdarrp[rip[rip[j]:rip[j+1]-1]],/nan)
+           bin_bmjdarrp[cp]= meanbmjdarr
 
            ;xxxx this could change
            ;ripght now it is just the scatter in the bins
@@ -255,7 +261,7 @@ function binning_function, a,bin_level, pmapcorr
      bin_fluxerrp = bin_fluxerrp[0:cp-1]
      bin_corrfluxp = bin_corrfluxp[0:cp-1]
      bin_timearrp = bin_timearrp[0:cp-1]
-;     bin_bmjdarrp = bin_bmjdarr[0:cp-1]
+     bin_bmjdarrp = bin_bmjdarrp[0:cp-1]
      bin_corrfluxerrp = bin_corrfluxerrp[0:cp-1]
      bin_phasep = bin_phasep[0:cp-1]
      bin_ncorrp = bin_ncorrp[0:cp-1]

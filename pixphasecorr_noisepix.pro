@@ -57,14 +57,9 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
                                 ; won't work because some are in the transits and eclipses which I have excluded.
      if n_elements(np) gt 1000 then begin
 
-        time = (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0)) ; in seconds;/60./60. ; in hours from beginning of obs.
-        print, 'xcen', xcen[0:10]
-        print, 'ycent', ycen[0:10]
-    
+        time = (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0)) ; in seconds;/60./60. ; in hours from beginning of obs.    
         sqrtnp = sqrt(np)
         
-;        savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'.sav')
-;        restore, savefilename
         corrflux = planethash[aorname(a), 'corrflux'] ;pmap corrected
         corrfluxerr = planethash[aorname(a), 'corrfluxerr']
         
@@ -87,21 +82,22 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
         
                                 ;setup arrays for the corrected fluxes
         flux = dblarr(ni)       ; fltarr(n_elements(flux_m))
-        fluxerr = dblarr(ni)
-        flux_np = dblarr(ni)    ; fltarr(n_elements(flux_m))
-        fluxerr_np = dblarr(ni)
+        fluxerr = flux
+        flux_np = flux    ; fltarr(n_elements(flux_m))
+        fluxerr_np = flux
         time_0 = time[0:ni - 1]
         phase_0 = phase[0:ni-1]
-        warr = dblarr(ni)
-        warr_np= dblarr(ni)
-        sigmax = dblarr(ni)
-        sigmay = dblarr(ni)
-        sigma_np = dblarr(ni)
-        furthestx = dblarr(ni)
-        furthesty= dblarr(ni)
-        delta_time = dblarr(ni)
-        delta_time_np =  dblarr(ni)
-        
+        warr = flux
+        warr_np= flux
+        sigmax = flux
+        sigmay = flux
+        sigma_np = flux
+        furthestx = flux
+        furthesty= flux
+        delta_time = flux
+        delta_time_np =  flux
+        ndimages = flux
+
         xcen2 = xcen
         ycen2 = ycen
         sqrtnp2 = sqrtnp
@@ -123,37 +119,29 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
                                 ;do the nearest neighbors run with triangulation
                                 ;http://www.idlcoyote.com/code_tips/slowloops.html
                                 ;this returns a sorted list of the nn nearest neighbors
-        print, 'xcen2', xcen2[0:10]
-        print, 'ycent2', ycen2[0:10]
-        
         
         nearest = nearest_neighbors_DT(xcen2,ycen2,chname,DISTANCES=nearest_d,NUMBER=nn)
         nearest_np = nearest_neighbors_np_DT(xcen2,ycen2,sqrtnp2,chname,DISTANCES=nearest_np_d,NUMBER=nn)
-        ndimages = dblarr(ni)
-        print, 'testing', ni, n_elements(ndimages), n_elements(xcen)
+
         for j = 0L,   ni - 1 do begin ;for each image (centroid)
-;        if j gt 110500 then print, 'centers', xcen(j), ycen(j), xcen2(j), ycen2(j)
-                                ;--------------------
-                                ;find the weighting function without using noise pixel
-                                ;--------------------
+          ;--------------------
+          ;find the weighting function without using noise pixel
+           ;--------------------
            
            if s[j] gt 0 then begin ;out of transit
-                                ;not inside a transit, so do the normal nearest neighbor search for weights.
-                                ; thisx = xcen2(j)
-                                ; thisy = ycen2(j)
+              ;not inside a transit, so do the normal nearest neighbor search for weights.
               nearestx = xcen2(nearest(*,j))
               nearesty = ycen2(nearest(*,j))
               nearestflux = flux_m2(nearest(*,j))
               nearestfluxerr = fluxerr_m2(nearest(*,j))
               nearesttime = time_02(nearest(*,j))
               
-                                ;what is the time distribution like of the points chosen as nearest in position
-                                ;track the range in time for each point
+               ;what is the time distribution like of the points chosen as nearest in position
+               ;track the range in time for each point
               delta_time(j) = abs(time_0[j]- nearesttime(n_elements(nearesttime)-1))
-;                                         if j gt 500 and j lt 520 then print, 'time' , time_0[j], nearesttime
-              
-                                ;make sure that the nearest neighbor is not the point itself
-                                ;if it is, then get rid of that one and just use the nearest n-1
+;                                       
+              ;make sure that the nearest neighbor is not the point itself
+              ;if it is, then get rid of that one and just use the nearest n-1
               if  xcen2(j) eq nearestx(0) and ycen2(j) eq nearesty(0) then begin
                  nearestx = nearestx[1:*]
                  nearesty = nearesty[1:*]

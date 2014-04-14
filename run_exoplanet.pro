@@ -1,4 +1,5 @@
 pro run_exoplanet, planetname, binning, nnearest, apradius, chname
+
 ;example calling sequence run_exoplanet, 'wasp14', 63L, 50, 3.0, '2'
 
 ;.run nearest_neighbors_DT.pro
@@ -15,14 +16,19 @@ pro run_exoplanet, planetname, binning, nnearest, apradius, chname
   if n_elements(binning) lt n_elements(planetname) then binning = intarr(n_elements(planetname)) + binning
   if n_elements(nnearest) lt n_elements(planetname) then nnearest = intarr(n_elements(planetname)) + nnearest
   if n_elements(apradius) lt n_elements(planetname) then apradius = intarr(n_elements(planetname)) + apradius
+  if n_elements(chname) lt n_elements(chname) then chname = intarr(n_elements(planetname)) + chname
 
 ;---------------------------------------------------------------------
   for n = 0, n_elements(planetname) - 1 do begin
-     phot_exoplanet, planetname(n), apradius(n),chname, /hybrid
-     selfcal_exoplanet, planetname(n), binning(n), apradius(n), chname, /binning
-     pixphasecorr_noisepix, planetname(n), nnearest(n), apradius(n), chname
-     plot_pixphasecorr, planetname(n), binning(n), apradius(n), chname, /errorbars, /phaseplot,/selfcal
-     plot_exoplanet, planetname(n), binning(n), apradius(n),chname, /phaseplot
+;   help, chname(n)
+     snap_darkcorr,chname(n)
+     phot_exoplanet, planetname(n), apradius(n),chname(n), /hybrid
+     phot_exoplanet_sdcorr, planetname(n), apradius(n),chname(n), /hybrid
+
+;     selfcal_exoplanet, planetname(n), binning(n), apradius(n), chname(n), /binning
+;     pixphasecorr_noisepix, planetname(n), nnearest(n), apradius(n), chname(n)
+;     plot_pixphasecorr, planetname(n), binning(n), apradius(n), chname(n), /errorbars, /phaseplot,/selfcal
+;     plot_exoplanet, planetname(n), binning(n), apradius(n),chname(n), /phaseplot
   endfor
 
 ;---------------------------------------------------------------------

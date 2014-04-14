@@ -61,10 +61,11 @@ chname = 0
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
-  planetname = 'hd209458'
+  planetname = 'HD209458'
   ra_ref = 330.79488
   dec_ref = 18.8843175
-  aorname_ch2 = ['r38703872','r38704128','r38704384','r38701312','r38703360','r38703616','r45188864','r45189120','r45189376','r45189632','r45189888','r45190144','r45190400','r45190656','r45190912','r45191168','r45191424','r45191680','r45191936','r45192192','r45192704','r45195264','r45192960','r45193216','r45193472','r45193984','r45193728','r45195520','r45194240','r45194496','r45194752','r45195008','r45196288','r45195776','r45197312','r45196032','r45196544','r45196800','r45197056','r45197568','r45197824','r45198080','r45192448']
+  aorname_ch2 = ['r38703872','r38704128','r38704384','r38701312','r38703360','r38703616']
+;  aorname_ch2 = ['r38703872','r38704128','r38704384','r38701312','r38703360','r38703616','r45188864','r45189120','r45189376','r45189632','r45189888','r45190144','r45190400','r45190656','r45190912','r45191168','r45191424','r45191680','r45191936','r45192192','r45192704','r45195264','r45192960','r45193216','r45193472','r45193984','r45193728','r45195520','r45194240','r45194496','r45194752','r45195008','r45196288','r45195776','r45197312','r45196032','r45196544','r45196800','r45197056','r45197568','r45197824','r45198080','r45192448']
   aorname_ch1 = ['r0000000000']
   basedir = '/Users/jkrick/irac_warm/' 
   utmjd_center = 51818.05045D; 55938.54133D; 55942.06608D
@@ -100,14 +101,11 @@ chname = 0
   planetinfo[planetname] = HASH(keys, values)
 ;---
 
-
-
-
-  planetname = 'hd189733'
+  planetname = 'HD189733'
   ra_ref = 300.18185
   dec_ref = 22.709912
   aorname_ch1 = ['r41592320' ,'r41592832', 'r41591808','r41592576' ,'r41591552','r41592064', 'r41591296']  ;ch1
-  aorname_ch2 = ['r31756800','r36787968','r38390016','r38390272','r38390528','r38390784','r38406656']  ;ch2
+  aorname_ch2 = ['r38390016','r38390272','r38390528','r38390784','r38406656']  ;ch2 ;'r31756800','r36787968'
   basedir = '/Users/jkrick/irac_warm/' 
   utmjd_center =  55556.83649D; 55557.94753D 
   transit_duration=.07574*24.*60.
@@ -123,13 +121,130 @@ chname = 0
 
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
+;---
+
+  planetname = 'HD158460'   ; !!!This is a standard star, ie should have a flat light curve
+  ra_ref = 261.42213
+  dec_ref = 60.048479
+  aorname_ch1 = ['r42051584', 'r42506496']  ;ch1
+  aorname_ch2 = [ 'r45184256','r45184512','r45184768','r45185024','r45185280','r45185536','r45185792','r45186048','r45186304','r45186560','r45186816','r45187072','r45187328','r45187584','r45187840','r45188096','r45188352','r45188608'] ;'r42051584', 'r42506496', stares
+;aorname_ch2 = ['r44499968','r44499712','r44497408','r44501504','r44501248','r44500992','r44500736', 'r44500480', 'r44500224','r44499456', 'r44499200','r44498944','r44498688','r44498432','r44498176','r44497920','r44497664','r44497152']  ; think these are saturated but not sure.
+
+ basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  utmjd_center =  55556.83649D; junk
+  transit_duration=.07574*24.*60.  ; junk
+  period = 2.21857312  ; junk
+  intended_phase = 0  ; junk
+  exptime = 0.1
+  stareaor = 2
+  plot_norm = 1.
+  plot_corrnorm = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'HD20003'
+  ra_ref = 46.908914
+  dec_ref = -72.321879
+  aorname_ch1 = ['r0']  ;ch1
+  aorname_ch2 = ['r48408064','r48408320']  ;ch2 ;'r31756800','r36787968'
+   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  ;utmjd_center =  [double(55944.25889), double(55947.20505),double(55949.41467), double(55957.51661)]  
+  utmjd_center =  56537.696D
+  transit_duration=0
+  period = 11.85
+  intended_phase = 0.5
+  exptime = 0.4
+  stareaor = 1
+  plot_norm = .34708
+  plot_corrnorm = .34497
+
+  values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'HD1461'
+  ra_ref = 4.6758985
+  dec_ref = -8.0535363
+  aorname_ch1 = ['r0']  ;ch1
+  aorname_ch2 = ['r48815872']  ;ch2 
+   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  utmjd_center =  56537.696D ; junk
+  transit_duration=0 ;junk
+  period = 2.5 ;junk
+  intended_phase = 0.5
+  exptime = 0.1
+  stareaor = 1
+  plot_norm = 1.
+  plot_corrnorm = 1.
+
+  values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
+  planetname = 'hatp2'
+  ra_ref = 245.1515
+  dec_ref = 41.04789
+  aorname_ch1 = ['r0']  ;ch1
+  aorname_ch2 = ['r46477312']  ;ch2 ;'r31756800','r36787968'
+   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  ;utmjd_center =  [double(55944.25889), double(55947.20505),double(55949.41467), double(55957.51661)]  
+  utmjd_center =  0D
+  transit_duration=0
+  period = 0.
+  intended_phase = 0.5
+  exptime = 0.4
+  stareaor = 1
+  plot_norm = 1.
+  plot_corrnorm = 1.
+
+  values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
+  planetname = 'HD45184'
+  ra_ref = 96.18233
+  dec_ref = -28.780888
+  aorname_ch1 = ['r0']  ;ch1
+  aorname_ch2 = ['r46917120']  ;ch2 ;'r31756800','r36787968'
+   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  ;utmjd_center =  [double(55944.25889), double(55947.20505),double(55949.41467), double(55957.51661)]  
+  utmjd_center =  55944.25889D  ; junk
+  transit_duration=0
+  period = 3.2 ;junk
+  intended_phase = 0.
+  exptime = 0.1
+  stareaor = 1
+  plot_norm = 1.
+  plot_corrnorm = 1.
+
+  values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
+  planetname = 'HD93385'
+  ra_ref = 161.56298
+  dec_ref = -41.464344
+  aorname_ch1 = ['r0']  ;ch1
+  aorname_ch2 = ['r48407296']  ;ch2 ;'r31756800','r36787968'
+   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  ;utmjd_center =  [double(55944.25889), double(55947.20505),double(55949.41467), double(55957.51661)]  
+  utmjd_center =  55944.2D  ; junk
+  transit_duration=0.5 ; junk
+  period =3.2 ; junk
+  intended_phase = 0.
+  exptime = 0.1
+  stareaor = 1
+  plot_norm = 1.
+  plot_corrnorm = 1.
+
+  values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
 
 ;---
   planetname = '55cnc'
   ra_ref = 133.14756
   dec_ref = 28.330094
 ;aorname = [ 'r39524608', 'r42000384', 'r43981056', 'r43981312', 'r43981568', 'r43981824', 'r48069888', 'r48070144', 'r48070400', 'r48070656', 'r48070912', 'r48071168', 'r48071424', 'r48071680', 'r48071936', 'r48072192', 'r48072448', 'r48072704', 'r48072960', 'r48073216', 'r48073472', 'r48073728'] ; all ch3
-
  aorname_ch2 = ['r48069888','r48070144','r48070400','r48070656','r48070912','r48071168','r48071424','r48071680','r48071936','r48072192','r48072448','r48072704','r48072960','r48073216','r48073472','r48073728']  ; ch2
  aorname_ch1 = ['r0000000000']
  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
@@ -165,12 +280,12 @@ chname = 0
   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 ;---
-  planetname = 'hd7924'
+  planetname = 'HD7924'
   ra_ref = 20.496279
   dec_ref = 76.710305
-  ;aorname = ['r46981632','r46981888']; 2012
+  aorname_ch2= ['r44605184','r46981888']; 2012
   ;aorname = ['r44605184' ] ;2011
-  aorname_ch2 = ['r44605184', 'r46981632','r46981888'] ; both 2011 and 2012
+;  aorname_ch2 = ['r44605184', 'r46981632','r46981888'] ; both 2011 and 2012
    aorname_ch1 = ['r0000000000']
    basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   utmjd_center = 54727.49 - 0.16 ;don't know where this additional change comes from
@@ -180,7 +295,7 @@ chname = 0
   period = 5.3978
   intended_phase = 0.0
   exptime = 0.1
-  stareaor = 0
+  stareaor = 2
   plot_norm = 1.46
   plot_corrnorm = 1.46
 
@@ -326,11 +441,13 @@ chname = 0
   planetname = 'WASP-14b'
   ra_ref = 218.27649
   dec_ref = 21.894575
-  aorname_ch2 = ['allstares' , 'r45838592', 'r45840128', 'r45841408', 'r45842176', 'r45842944', 'r45844480', 'r45845248', 'r45846016', 'r45846784', 'r45839104', 'r45840896', 'r45841664', 'r45842432', 'r45843200', 'r45844736', 'r45845504', 'r45846272', 'r45847040', 'r45839616', 'r45841152', 'r45841920','r45843968','r45843712','r45843456','r45840640','r45840384','r45839872','r45839360','r45838848','r45838336','r48688384','r48688128','r48687872','r48687616','r48683776','r48683264', 'r48682752','r48682240','r48681472','r48681216','r48680704']  ; ch2
+  aorname_ch2 = [ 'r45838592', 'r45840128', 'r45841408', 'r45842176', 'r45842944', 'r45844480', 'r45845248', 'r45846016', 'r45846784', 'r45839104', 'r45840896', 'r45841664', 'r45842432', 'r45843200', 'r45844736', 'r45845504', 'r45846272', 'r45847040', 'r45839616', 'r45841152', 'r45841920','r45843968','r45843712','r45843456','r45840640','r45840384','r45839872','r45839360','r45838848','r45838336','r48688384','r48688128','r48687872','r48687616','r48683776','r48683264', 'r48682752','r48682240','r48681472','r48681216','r48680704']  ; ch2
+;  aorname_ch2 = ['allstares_ch2' , 'r45838592', 'r45840128', 'r45841408', 'r45842176', 'r45842944', 'r45844480', 'r45845248', 'r45846016', 'r45846784', 'r45839104', 'r45840896', 'r45841664', 'r45842432', 'r45843200', 'r45844736', 'r45845504', 'r45846272', 'r45847040', 'r45839616', 'r45841152', 'r45841920','r45843968','r45843712','r45843456','r45840640','r45840384','r45839872','r45839360','r45838848','r45838336','r48688384','r48688128','r48687872','r48687616','r48683776','r48683264', 'r48682752','r48682240','r48681472','r48681216','r48680704']  ; ch2
 ;ch2 stares = ['r45428992', 'r45428736', 'r45428480', 'r45428224', 'r45426688']
 ;'r45843968','r45843712','r45843456','r45840640','r45840384','r45839872','r45839360','r45838848','r45838336'
 
-  aorname_ch1 = ['r31760384', 'r45426944', 'r45427200', 'r45427456','r45427712','r45427968']  ;ch1
+  aorname_ch1 = [ 'allstares_ch1'];'r45426944', 'r45427200', 'r45427456','r45427712','r45427968']  ;ch1
+;  aorname_ch1 = ['r31760384', 'allstares_ch1'];'r45426944', 'r45427200', 'r45427456','r45427712','r45427968']  ;ch1
 
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   utmjd_center = 56020.23972; 56172.81485; transit ;56187.39924  ;one of the secondary times
@@ -410,10 +527,10 @@ chname = 0
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
-  planetname = 'hd97658'
+  planetname = 'HD97658'
   ra_ref = 168.63792
   dec_ref = 25.710523
-  aorname_ch2 = [ 'r42608128']
+  aorname_ch2 = [ 'r42608128','r48823552']
   aorname_ch1 = ['r0000000000']
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   utmjd_center = 55981.5450
@@ -500,6 +617,24 @@ chname = 0
   stareaor = 0
   plot_norm =0.046
   plot_corrnorm = 0.046
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---------
+  planetname = 'XO3'
+  ra_ref = 65.469554
+  dec_ref = 57.817067
+  aorname_ch1 = [ 'r0']
+  aorname_ch2 = ['r46486016', 'r46468352']
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  utmjd_center =   55180.50972D ; junk
+  transit_duration=100. ; junk
+  period = 4.125083 ; junk
+  intended_phase = 0.5
+  exptime = 2.
+  stareaor = 0
+  plot_norm =1.
+  plot_corrnorm = 1.
 
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
