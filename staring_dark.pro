@@ -1,4 +1,4 @@
-pro staring_dark
+pro read_staring_dark
   
 ;what is the mean level as a function of frame number and amplifier and frame delay
 
@@ -16,9 +16,8 @@ pro staring_dark
   amp3 = where(b eq 3)
   
                                 ;for each aor I need to carry around
- ; fitsname, framenumber(0: n_elements(fitsname)), imagenum[0:63], mean & stddev in each amplifier[0:63], framedelay[0:n_elements(fitsname)]
- ; biashash = hash()
- ; keys =['fitsname', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase']
+ ; fitsname, framenumber(0: n_elements(fitsname)), imagenum[0:63,0:63,...)], mean & stddev in each amplifier[0:63], framedelay[0:n_elements(fitsname)]
+  biashash = hash()
  
   for a = 0, 0 do begin         ; n_elements(aorname) - 1 do begin
      print, 'working on aor', aorname(a)
@@ -30,18 +29,27 @@ pro staring_dark
      flatsingle = flatdata[*,*,0]
      for f = 0, 63 do flat64[*,*,f] = flatsingle
      
-     
-     
+    
      CD, aorname(a)             ; change directories to the correct AOR directory
      command  = strcompress( 'find ch'+chname(a)+"/bcd -name 'SPITZER*_bcd.fits' > "+aorname(a)+'bcdlist.txt')
      spawn, command
      readcol,strcompress(aorname(a) +'bcdlist.txt'),fitsname, format = 'A', /silent
      
-     ;arrays over all frames in the AOR
+     ;arrays over all subframes in the AOR
      meanarr_0 = fltarr(n_elements(fitsname)*64)
      meanarr_1 = meanarr_0
      meanarr_2 = meanarr_0
      meanarr_3 = meanarr_0
+     stddevarr_0 = meanarr_0
+     stddevarr_1 = meanarr_1
+     stddevarr_2 = meanarr_2
+     stddevarr_3 = meanarr_3
+
+     subimagenum = meanarr_0
+     ;want this to run from 0 to 63 for n_elements(fitsname)
+     for si = 0, n_elements(fitsname)*64, 64 do subimagenum(si) = findgen(64)
+     print, 'testing subimagenum', subimagenum[0:500]
+
      c = 0L
 
      ;arrays over each bcd in the AOR
@@ -69,12 +77,16 @@ pro staring_dark
         for j = 0, 63 do begin
            meanclip, data[amp0,*,j], m0, sm0
            meanarr_0(c) = m0
+           stddevarr_0(c) = sm0
            meanclip, data[amp1,*,j], m1, sm1
            meanarr_1(c) = m1
+           stddevarr_1(c) = sm1
            meanclip, data[amp2,*,j], m2, sm2
            meanarr_2(c) = m2
+           stddevarr_2(c) = sm2
            meanclip, data[amp3,*,j], m3, sm3
            meanarr_3(c) = m3
+           stddevarr_3(c) = sm3
            c = c + 1
         endfor
                                 ;keep track of  delaytime for later use
@@ -102,16 +114,10 @@ pro staring_dark
      p3= plot(framnumber, meanarr_3 ,'1s', sym_size = 0.1,   sym_filled = 1, color = 'light cyan',/overplot)
      
 
-     ;sort by frame delay
-     h = histogram(framedelayarr, OMIN=om, binsize = 0.01, reverse_indices = ri)
-     bin__amp0 = fltarr(n_elements(h))
-     bin_amp1 = bin_amp0
-     bin_amp2 = bin_amp0
-     bin_amp3 = bin_amp0
-
-    
-;     values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase)
-;     biashash[aorname(a)] = HASH(keys, values)
+  
+     keys =['fitsname', 'framenumber', 'subimagenum', 'mean_0', 'stddev_0','mean_1', 'stddev_1','mean_2', 'stddev_2','mean_3', 'stddev_3','framedelay']
+     values=list(fitsname, findgen(n_elements(fitsname), subimagenum, meanarr_0, stddevarr_0, meanarr_1, stddevarr_1,meanarr_2, stddevarr_2,meanarr_3, stddevarr_3,framedelayarr)
+     biashash[aorname(a)] = HASH(keys, values)
 
 
   endfor                        ; for each aorname
