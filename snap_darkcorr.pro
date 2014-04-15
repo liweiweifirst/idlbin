@@ -1,40 +1,25 @@
-pro snap_darkcorr, chname
+pro snap_darkcorr, planetname, frametime, chname
 ;this code backs the dark correction out of the snapshot observations,
 ;and then puts back the same dark for all snaps.
 
 ;assumes subarray - aka naxis = 3
   
 
-  basedir = '/Users/jkrick/irac_warm/pcrs_planets/HD158460/'
-  caldir = basedir + 'calibration/'
-  fluxconv = .1469              ;MJY/sr / DN/s
-  fits_read, '/Users/jkrick/irac_warm/pcrs_planets/HD158460/r45184768/ch2/cal/irac_b2_sa_superskyflat_100426.fits', flatdata, flatheader
-  ;need to make this [32,32,64]
-  flat64 = fltarr(32,32,64)
-  flatsingle = flatdata[*,*,0]
-  for f = 0, 63 do flat64[*,*,f] = flatsingle
-
-  ra_ref = 261.42213
-  dec_ref = 60.048479
-
-;  fits_read,  strcompress(caldir + 'SPITZER_I2_45966336_0000_1_C9501418_sdark.fits',/remove_all), dark45966336,header45966336
-;  fits_read,  strcompress(caldir + 'SPITZER_I2_45860608_0000_1_C9491430_sdark.fits',/remove_all), dark45860608,header45860608
-;  fits_read,  strcompress(caldir + 'SPITZER_I2_45863936_0000_1_C9497379_sdark.fits',/remove_all), dark45863936,header45863936
-;  fits_read,  strcompress(caldir + 'SPITZER_I2_48987392_0000_1_C9735186_sdark.fits',/remove_all), dark48987392,header48987392
-;  fits_read,  strcompress(caldir + 'SPITZER_I2_48998144_0000_1_C9737980_sdark.fits',/remove_all), dark48998144,header48998144
-;  fits_read,  strcompress(caldir + 'SPITZER_I2_49015808_0000_1_C9756026_sdark.fits',/remove_all), dark49015808,header49015808
-
-;choose one dark for them all
-;  thedark = dark45966336
-;  theheader = header45966336
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/'+planetname + '/'
+  
  
-;choose the superdark
- fits_read, '/Users/jkrick/irac_warm/darks/superdarks/superdark_s2s.fits', thedark, theheader
+; the superdark
+  if frametime eq 2 then frametimename = 's2s'
+  if frametime eq 0.1 then frametimename = 's0p1s'
+  fits_read,strcompress( '/Users/jkrick/irac_warm/darks/superdarks/superdark_'+frametimename +'.fits',/remove_all), superdark, superheader
 
                ;HD158460              
-   aorname = [ 'r45184256','r45184512','r45184768','r45185024','r45185280','r45185536','r45185792','r45186048','r45186304','r45186560','r45186816','r45187072','r45187328','r45187584','r45187840','r45188096','r45188352','r45188608'] 
-  prefluxarr = fltarr(n_elements(aorname) * 500* 64)
-  superfluxarr = fltarr(n_elements(aorname) * 500* 64)
+  if planetname eq 'HD158460' then   aorname = [ 'r45184256','r45184512','r45184768','r45185024','r45185280','r45185536','r45185792','r45186048','r45186304','r45186560','r45186816','r45187072','r45187328','r45187584','r45187840','r45188096','r45188352','r45188608'] 
+
+  if planetname eq 'WASP-14b' then   aorname = [ 'r45838592', 'r45840128', 'r45841408', 'r45842176', 'r45842944', 'r45844480', 'r45845248', 'r45846016', 'r45846784', 'r45839104', 'r45840896', 'r45841664', 'r45842432', 'r45843200', 'r45844736', 'r45845504', 'r45846272', 'r45847040', 'r45839616', 'r45841152', 'r45841920','r45843968','r45843712','r45843456','r45840640','r45840384','r45839872','r45839360','r45838848','r45838336','r48688384','r48688128','r48687872','r48687616','r48683776','r48683264', 'r48682752','r48682240','r48681472','r48681216','r48680704'] 
+
+  prefluxarr = fltarr(n_elements(aorname) * 500* 64)  ;just guesses at size for now
+  superfluxarr = prefluxarr
   c = 0L
 
   for a = 0,   n_elements(aorname) - 1 do begin
@@ -50,11 +35,22 @@ pro snap_darkcorr, chname
      readcol,strcompress(dir +'bunclist.txt'),buncname, format = 'A', /silent
      print,'n_elements(fitsname)', n_elements(fitsname)
      
+       ;need to read in the flat and make this [32,32,64]
+     skyflatname = strcompress( 'ch' + chname + '/cal/*superskyflat*.fits',/remove_all)
+     fits_read, skyflatname, flatdata, flatheader
+     flat64 = fltarr(32,32,64)
+     flatsingle = flatdata[*,*,0]
+     for f = 0, 63 do flat64[*,*,f] = flatsingle
+ 
+
      for i = 0,  n_elements(fitsname) - 1 do begin ; for each image
 
                                 ;read in the data
         fits_read, fitsname(i), data, header
         fits_read, buncname(i), unc, uncheader
+
+        ra_ref = sxpar(header, 'RA_RQST')
+        dec_ref = sxpar(header, 'DEC_RQST')
 
         ; do some baseline aperture photometry
         get_centroids_for_calstar_jk,data, header, unc, ra_ref, dec_ref,  t, dt, hjd, xft, x3, y3, $
@@ -65,7 +61,10 @@ pro snap_darkcorr, chname
         prefluxarr(c) = f[*,1]      
         
                                 ;back out the flux conversion
-        data = data / fluxconv
+        fluxconv = sxpar(header, 'FLUXCONV')
+        exptime = sxpar(header, 'EXPTIME')
+        data = data / fluxconv  ; now in DN/s
+        data = data* exptime    ; now in DN
         
                                 ; flip the image
         data = reverse(data, 2)
@@ -79,21 +78,12 @@ pro snap_darkcorr, chname
         readcol,strcompress(dir +'dark.txt'),darkname, format = 'A', /silent
         fits_read, darkname, dark, darkheader
         
-        ;darkname = sxpar(header, 'SKDKRKEY')
-        ;case darkname of 
-        ;   '45966336': dark = dark45966336
-        ;   '45860608': dark =dark45860608
-        ;   '45863936': dark =dark45863936
-        ;   '48987392': dark = dark48987392
-        ;   '48998144': dark = dark48998144
-        ;   '49015808': dark = dark49015808
-       ; endcase
         data = data + dark
        
                                 ;--------------------------
         
                                 ;put the same dark back into every frame
-        data = data - thedark
+        data = data - superdark
         
                                 ;divde back out the flat
         data = data / flat64
@@ -102,7 +92,8 @@ pro snap_darkcorr, chname
         data = reverse(data, 2)
         
                                 ;put the fluxconv back in
-        data = data * fluxconv
+        data = data / exptime   ; DN/s
+        data = data * fluxconv  ;MJy/sr
         
                                 ;write out the new fits file
         outfilename =strmid(fitsname(i),0, 8) + 'sdcorr' + strmid(fitsname(i), 8)
