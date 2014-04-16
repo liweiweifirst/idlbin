@@ -106,7 +106,7 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 	edge = 5.
 
 ; First set of apertures	
-  aps1 = [  2.0, 2.25, 2.5, 2.75]
+  aps1 = [  2.0, 2.25];, 2.5];, 2.75]
   naps1 = n_elements(aps1) 
 ;  aps1 = [ 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25]
 ; First background annulus
@@ -402,7 +402,7 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
                                 txs, tys, tfs, tbs, tc, tcb, tnp, xfwhm, yfwhm
                 x3[i] = tx & y3[i] = ty & x3s[i] = txs & y3s[i] = tys
                 bb[i] = tb
-
+                np[i] = tnp
 ; Store FWHM			
                 xfwhmarr[i] = xfwhm & yfwhmarr[i] = yfwhm
 ; 5 pixel half-width
@@ -675,7 +675,7 @@ pro box_centroider, image, sigma2, xmax, ymax, boxwidth, backboxwidth, boxborder
 	xb = xmax+boxwidth < (nx-1)
 	ya = ymax-boxwidth > 0
 	yb = ymax+boxwidth < (ny-1)
-
+ 
 ; Set background regions
 	xamin = xa - backboxwidth - boxborder > 0 < xa
 	xamax = xa - boxborder > 0 < xa
@@ -752,7 +752,9 @@ pro box_centroider, image, sigma2, xmax, ymax, boxwidth, backboxwidth, boxborder
 		yfwhm = sigscale * sqrt(yfwhm)
 		
 ; Use summed flux as measure of total flux and calculate noise pixels		
-		np = flux2sum / fluxsum
+	;	np = flux2sum / fluxsum   !!!not correct
+                np = fluxsum^2/flux2sum
+ 
 ; Number of pixels in source and background regions
 		c = float(gcount)
 		cb = float(bcount)

@@ -12,6 +12,7 @@ function binning_function, a,bin_level, pmapcorr
      bkgd = [planethash[aorname(a),'bkgd']]
      bmjd = [planethash[aorname(a),'bmjdarr']]
      np = [planethash[aorname(a),'np']]
+     npcentroids = [planethash[aorname(a),'npcentroids']]
      phase = [planethash[aorname(a),'phase']]
 
 ;     centerpixarr = [ planethash[aorname(a),'centerpixarr5']]
@@ -38,6 +39,8 @@ function binning_function, a,bin_level, pmapcorr
      bkgdarr = bkgd[good]
      phasearr = phase[good]
      nparr = np[good]
+     npcentarr = npcentroids[good]
+
 ;     centerpixarr = centerpixarr[good]
 
 ;and a second set for those that are in the sweet spot
@@ -52,7 +55,8 @@ function binning_function, a,bin_level, pmapcorr
      bkgdarrp = bkgd[goodpmap]
      phasearrp = phase[goodpmap]
      nparrp = np[goodpmap]
-     phasearrp = phase[goodpmap]
+     npcentarrp = npcentroids[goodpmap]
+    phasearrp = phase[goodpmap]
 ;     centerpixarrp = centerpixarr[goodpmap]
 
 ;     print, 'testing after outlier', n_elements(xarr), flux[0:10], xarr[0:10], corrfluxp[0:10]
@@ -82,6 +86,7 @@ function binning_function, a,bin_level, pmapcorr
      bin_phase = bin_flux
      bin_centerpix = bin_flux
      bin_np = bin_flux
+     bin_npcent = bin_flux
 
      bin_fluxp = dblarr(n_elements(hp))
      bin_fluxerrp = bin_fluxp
@@ -97,6 +102,7 @@ function binning_function, a,bin_level, pmapcorr
      bin_phasep = bin_fluxp
      bin_centerpixp = bin_fluxp
      bin_nparrp = bin_fluxp
+     bin_npcentarrp = bin_fluxp
 
      c = 0
      for j = 0L, n_elements(h) - 1 do begin
@@ -125,6 +131,9 @@ function binning_function, a,bin_level, pmapcorr
 
            meanclip, nparr[ri[ri[j]:ri[j+1]-1]], meannp, sigmanp
            bin_np[c] = meannp ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+
+;           meanclip, npcentarr[ri[ri[j]:ri[j+1]-1]], meannpcent, sigmanpcent
+           bin_npcent[c] = 27; meannpcent ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
 
            junk = where(finite(corrflux[ri[ri[j]:ri[j+1]-1]]) gt 0,ngood)
            bin_ncorr[c] = ngood
@@ -182,6 +191,7 @@ function binning_function, a,bin_level, pmapcorr
      bin_phase = bin_phase[0:c-1]
      bin_ncorr = bin_ncorr[0:c-1]
      bin_np = bin_np[0:c-1]
+     bin_npcent = bin_npcent[0:c-1]
 ;     bin_centerpix = bin_centerpix[0:c-1]
 ;     print, 'bin_xcen', bin_xcen
 ;  bin_bkgderr = bin_bkgderr[0:c-1]
@@ -214,6 +224,9 @@ function binning_function, a,bin_level, pmapcorr
 
            meanclip, nparrp[rip[rip[j]:rip[j+1]-1]], meannp, sigmanp
            bin_nparrp[cp] = meannp ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
+
+;           meanclip, npcentarrp[rip[rip[j]:rip[j+1]-1]], meannpcent, sigmanpcent
+           bin_npcentarrp[cp] = 27;meannpcent ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
 
            junk = where(finite(corrfluxp[rip[rip[j]:rip[j+1]-1]]) gt 0,ngood)
            bin_ncorrp[cp] = ngood
@@ -266,6 +279,7 @@ function binning_function, a,bin_level, pmapcorr
      bin_phasep = bin_phasep[0:cp-1]
      bin_ncorrp = bin_ncorrp[0:cp-1]
      bin_nparrp = bin_nparrp[0:cp-1]
+     bin_npcentarrp = bin_npcentarrp[0:cp-1]
 ;     bin_centerpixp = bin_centerpixp[0:cp-1]
 ;  bin_bkgderrp = bin_bkgderrp[0:cp-1]
 

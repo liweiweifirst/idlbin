@@ -33,14 +33,30 @@ print, 'apval', apval
 
 ;run code to read in all the planet parameters
 planetinfo = create_planetinfo()
-ra_ref = planetinfo[planetname, 'ra']
-dec_ref = planetinfo[planetname, 'dec']
+;ra_ref = planetinfo[planetname, 'ra']
+;dec_ref = planetinfo[planetname, 'dec']
 if chname eq '2'  then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
 basedir = planetinfo[planetname, 'basedir']
 utmjd_center = planetinfo[planetname, 'utmjd_center']
 period = planetinfo[planetname, 'period']
 intended_phase = planetinfo[planetname, 'intended_phase']
+ra_ref = planetinfo[planetname, 'ra']
+dec_ref = planetinfo[planetname, 'dec']
 
+exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
+exosystem = strmid(planetname, 0, 7) + ' b'
+if planetname eq 'WASP-52b' then teq_p = 1315
+if chname eq '2' then lambdaname  = '4.5'
+if chname eq '1' then lambdaname  = '3.6'
+print, lambdaname
+get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
+                       TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
+                       INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
+                       DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,VERBOSE=verbose
+;ra_ref = ra
+;dec_ref = dec
+utmjd_center = mjd_transit
+period = p_orbit
 ;---------------
 dirname = strcompress(basedir + planetname +'/')
 planethash = hash()
@@ -99,6 +115,7 @@ for a = 0, n_elements(aorname) - 1 do begin
          backarr = xarr
          backerrarr = xarr
          nparr = xarr
+         npcentroidsarr = xarr
       endif
       if i eq 0 and naxis ne 3 then begin
          xarr = fltarr(n_elements(fitsname))
@@ -112,6 +129,7 @@ for a = 0, n_elements(aorname) - 1 do begin
          backarr = xarr
          backerrarr = xarr
          nparr = xarr
+         npcentroidsarr = xarr
       endif
 
 
@@ -144,7 +162,6 @@ for a = 0, n_elements(aorname) - 1 do begin
                                    x7s, y7s, fs, bs, xp3, yp3, xp5, yp5, xp7, yp7, xp3s, yp3s, $
                                    xp5s, yp5s, xp7s, yp7s, fp, fps, np, flag, ns, sf, $
                                    xfwhm, yfwhm, /WARM
-      
       x_center = temporary(x3)
       y_center = temporary(y3)
      ;choose the requested pixel aperture
@@ -153,10 +170,10 @@ for a = 0, n_elements(aorname) - 1 do begin
      ; 3-7 pixel background
       back = b[*,0]
       backerr = bs[*,0]
-      
+      npcentroids = np   ;keep track of np from get_centroids
+
       ;calculate noise pixel
       np = noisepix(im, x_center, y_center, ronoise, gain, exptime, fluxconv,naxis)
-      
 
       ; if changing the apertures then use this to calculate photometry
       if keyword_set(breatheap) then begin
@@ -234,7 +251,7 @@ for a = 0, n_elements(aorname) - 1 do begin
          backarr[i*63] = back[1:*]
          backerrarr[i*63] = backerr[1:*]
          nparr[i*63] = np[1:*]
-
+         npcentroidsarr[i*63] = npcentroids[1:*]
          if keyword_set(columntrack) then begin 
                                 ; I think I deleted more parts of this than I may have intended, so if it is not working, that may be why
             centerpixarr1 = centerpixval1[1:*]
@@ -263,6 +280,7 @@ for a = 0, n_elements(aorname) - 1 do begin
          backarr[i]  =  back
          backerrarr[i]  = backerr
          nparr[i]  = np
+         npcentroidsarr[i] = npcentroids
       endif
 
    endfor; for each fits file in the AOR
@@ -304,8 +322,8 @@ print, 'testing phase', phase[0:10]
       values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, centerpixarr1, centerpixarr2, centerpixarr3, centerpixarr4, centerpixarr5, centerpixarr6, sigmapixarr1, sigmapixarr2, sigmapixarr3, sigmapixarr4, sigmapixarr5, sigmapixarr6, phase)
       planethash[aorname(a)] = HASH(keys, values)
    endif else begin
-      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase']
-      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase)
+      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase', 'npcentroids']
+      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr)
       planethash[aorname(a)] = HASH(keys, values)
    endelse
 
