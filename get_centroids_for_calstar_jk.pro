@@ -609,7 +609,7 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 
 return
 end
-
+;now using box_centroider updated 2013 by Jim and Sean
 
 pro box_centroider, image, sigma2, xmax, ymax, boxwidth, backboxwidth, boxborder, $
                     x0, y0, f0, b, xs, ys, fs, bs, c, cb, np, xfwhm, yfwhm, MMM=mmm
