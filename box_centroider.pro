@@ -112,7 +112,6 @@ pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
 ;    Recoding from get_centroids_nf procedure 26 May 2010 SJC
 ;    
 ;-
-
 ; Copy input image to working image
 	image = input_image
 ; Set sigma clipping threshold
