@@ -12,7 +12,7 @@ function binning_function, a,bin_level, pmapcorr
      bkgd = [planethash[aorname(a),'bkgd']]
      bmjd = [planethash[aorname(a),'bmjdarr']]
      np = [planethash[aorname(a),'np']]
-     npcentroids = [planethash[aorname(a),'npcentroids']]
+     npcentroids = planethash[aorname(a),'npcentroids']
      phase = [planethash[aorname(a),'phase']]
 
 ;     centerpixarr = [ planethash[aorname(a),'centerpixarr5']]
@@ -132,8 +132,8 @@ function binning_function, a,bin_level, pmapcorr
            meanclip, nparr[ri[ri[j]:ri[j+1]-1]], meannp, sigmanp
            bin_np[c] = meannp ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
 
-;           meanclip, npcentarr[ri[ri[j]:ri[j+1]-1]], meannpcent, sigmanpcent
-           bin_npcent[c] = 27; meannpcent ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+           meanclip, npcentarr[ri[ri[j]:ri[j+1]-1]], meannpcent, sigmanpcent
+           bin_npcent[c] =  meannpcent ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
 
            junk = where(finite(corrflux[ri[ri[j]:ri[j+1]-1]]) gt 0,ngood)
            bin_ncorr[c] = ngood
@@ -225,8 +225,8 @@ function binning_function, a,bin_level, pmapcorr
            meanclip, nparrp[rip[rip[j]:rip[j+1]-1]], meannp, sigmanp
            bin_nparrp[cp] = meannp ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
 
-;           meanclip, npcentarrp[rip[rip[j]:rip[j+1]-1]], meannpcent, sigmanpcent
-           bin_npcentarrp[cp] = 27;meannpcent ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
+           meanclip, npcentarrp[rip[rip[j]:rip[j+1]-1]], meannpcent, sigmanpcent
+           bin_npcentarrp[cp] = meannpcent ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
 
            junk = where(finite(corrfluxp[rip[rip[j]:rip[j+1]-1]]) gt 0,ngood)
            bin_ncorrp[cp] = ngood

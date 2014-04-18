@@ -29,7 +29,6 @@ case apradius of
    Else: apval = 2              ; if no decision, then choose an apradius = 2.5 pixels
 endcase
 
-print, 'apval', apval
 
 ;run code to read in all the planet parameters
 planetinfo = create_planetinfo()
@@ -48,16 +47,17 @@ exosystem = strmid(planetname, 0, 7) + ' b'
 if planetname eq 'WASP-52b' then teq_p = 1315
 if chname eq '2' then lambdaname  = '4.5'
 if chname eq '1' then lambdaname  = '3.6'
-print, lambdaname
 get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
                        TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
                        INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
                        DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,VERBOSE=verbose
-;ra_ref = ra
-;dec_ref = dec
+ra_ref = ra*15.   ; comes in hours!
+dec_ref = dec
 utmjd_center = mjd_transit
 period = p_orbit
 ;---------------
+
+print, 'ra, dec', ra_ref, dec_ref
 dirname = strcompress(basedir + planetname +'/')
 planethash = hash()
 
@@ -66,7 +66,7 @@ if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pm
                                       else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
 fits_read,occ_filename, occdata, occheader
 
-for a = 0, n_elements(aorname) - 1 do begin
+for a =0, n_elements(aorname) - 1 do begin
    print, 'working on ',aorname(a)
    dir = dirname+ string(aorname(a) ) 
    CD, dir                      ; change directories to the correct AOR directory
@@ -85,7 +85,7 @@ for a = 0, n_elements(aorname) - 1 do begin
 
 
 
-   for i =0.D, n_elements(fitsname) - 1 do begin ;read each cbcd file, find centroid, keep track
+   for i =0.D,  n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
  ;      print, 'working on ', fitsname(i)         
       header = headfits(fitsname(i)) ;
       sclk_obs= sxpar(header, 'SCLK_OBS')
@@ -340,6 +340,9 @@ endelse
 save, planethash, filename=savename
 print, 'saving planethash', savename
 print, 'time check', systime(1) - t1
+
+
+testplot = plot(timearr, yarr, '1s', sym_size = 0.1, sym_filled = 1, xtitle = 'time', ytitle = 'ycen')
 
                                 ; print, planethash.keys()
  ; print, planethash[aorname(0)].keys()

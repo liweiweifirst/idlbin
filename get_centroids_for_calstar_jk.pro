@@ -362,6 +362,9 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
            skip_src = 0
            adxy, h, ra, dec, xmax, ymax
 
+;cheating for now
+;           xmax = 15.0
+;           ymax = 15.0
 ; Only continue with images that have a source that not 5 pixels from edge
            xedge = nx - edge - 1.
            if (xmax lt edge or xmax gt xedge or ymax lt edge or ymax gt xedge)  then begin ;   or eflux[nch-1] gt sat_levels[nch-1, findex])
@@ -397,9 +400,11 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 
 ; if keyword APER set, then use it for the aperture photometry
 ; 3 pixel half-width, use smallest aperture for FWHM
-                        
+;                print, 'starting box_centroider ', xmax, ymax
+
                 box_centroider, slice, sigma2, xmax, ymax, 3, 6, 3, tx, ty, tf, tb, $
                                 txs, tys, tfs, tbs, tc, tcb, tnp, xfwhm, yfwhm
+;                print, 'finished box_centroider', tx, ty
                 x3[i] = tx & y3[i] = ty & x3s[i] = txs & y3s[i] = tys
                 bb[i] = tb
                 np[i] = tnp
@@ -416,9 +421,9 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 
 ; Do same calculation with BCD uncertainty images
 ; 3 pixel half-width
-                box_centroider, slice, unc2, xmax, ymax, 3, 6, 3, tx, ty, tf, tb, $
-                                txs, tys, tfs, tbs, tc, tcb, tnp
-                xp3[i] = tx & yp3[i] = ty & xp3s[i] = txs & yp3s[i] = tys
+;                box_centroider, slice, unc2, xmax, ymax, 3, 6, 3, tx, ty, tf, tb, $
+;                                txs, tys, tfs, tbs, tc, tcb, tnp
+;                xp3[i] = tx & yp3[i] = ty & xp3s[i] = txs & yp3s[i] = tys
 ; 5 pixel half-width
 ;			box_centroider, slice, unc2, xmax, ymax, 5, 6, 3, tx, ty, tf, tb, $
 ;			                txs, tys, tfs, tbs, tc, tcb, tnp
@@ -498,17 +503,17 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 
 ; 1st set of apertures
 ;;			aper, slice, x5[i], y5[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
-                aper, slice, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
-                      badpix, /FLUX, /EXACT, /SILENT, /NAN, /MEANBACK
-                fp[i, 0:(naps1 - 1)] = xf
-                bptr = where(xf ne xf, bcount)
-;			aper, unc2, x5[i], y5[i], xfs, txfs, txb, txbs, 1.0, aps1, back1, $
-                aper, unc2, x3[i], y3[i], xfs, txfs, txb, txbs, 1.0, aps1, back1, $
-                      badpix, /FLUX, /EXACT, /SILENT, /NAN,/MEANBACK
-                if (bcount ne 0) then xfs[bptr] = !VALUES.D_NAN
-                nsource = !DPI * aps1 * aps1
-                nback = !DPI * (back1[1] * back1[1] - back1[0] * back1[0])
-                fps[i, 0:(naps1-1)] = xfs + xbs * nsource * nsource / nback
+;                aper, slice, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
+;                      badpix, /FLUX, /EXACT, /SILENT, /NAN, /MEANBACK
+;                fp[i, 0:(naps1 - 1)] = xf
+;                bptr = where(xf ne xf, bcount)
+;;			aper, unc2, x5[i], y5[i], xfs, txfs, txb, txbs, 1.0, aps1, back1, $
+;                aper, unc2, x3[i], y3[i], xfs, txfs, txb, txbs, 1.0, aps1, back1, $
+;                      badpix, /FLUX, /EXACT, /SILENT, /NAN,/MEANBACK
+;                if (bcount ne 0) then xfs[bptr] = !VALUES.D_NAN
+;                nsource = !DPI * aps1 * aps1
+;                nback = !DPI * (back1[1] * back1[1] - back1[0] * back1[0])
+;                fps[i, 0:(naps1-1)] = xfs + xbs * nsource * nsource / nback
                 
 ; 2nd set of apertures
 ;;			aper, slice, x5[i], y5[i], xf, xfs, xb, xbs, 1.0, aps2, back2, $

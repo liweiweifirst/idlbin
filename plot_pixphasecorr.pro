@@ -1,6 +1,6 @@
 pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal, errorbars = errorbars, phaseplot = phaseplot, fit_eclipse = fit_eclipse
 
-COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr
+;COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr
 
 ;get all the necessary saved info/photometry
   planetinfo = create_planetinfo()
@@ -9,15 +9,17 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
   intended_phase = planetinfo[planetname, 'intended_phase']
   stareaor = planetinfo[planetname, 'stareaor']
   delta_red = -0.012
-  delta_grey =  0.006
-  delta_blue = 0.011
+  delta_grey =  0.01
+  delta_blue = 0.017
   delta_green =- 0.007
   planetname_final = planetname
   dirname = strcompress(basedir + planetname +'/')
   print, 'dirname', dirname
   ;a = 1
   print, 'stareaor', stareaor
-  for a =0, stareaor - 1 do begin; n_elements(aorname) -1  do begin
+  startaor = 1
+  stopaor = stareaor - 1
+  for a =startaor, stopaor do begin; n_elements(aorname) -1  do begin
      
                                 ;if this was a snapshot, need to not include it, aka I don't run pixphasecorr on snaps.
      dir = dirname+ string(aorname(a) ) 
@@ -34,7 +36,12 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
         
         
 ;binning
-        numberarr = findgen(n_elements(flux_m))
+        ncorr = where(finite([ planethash[aorname(a),'corrflux']]) gt 0, corrcount,/L64)
+                                ;if 20% of the values are correctable than go with the pmap corr 
+        if corrcount gt 0.2*n_elements([planethash[aorname(a),'flux']]) then pmapcorr = 1 else pmapcorr = 0
+;        junkpar = binning_function(a, bin_level, pmapcorr)
+
+       numberarr = findgen(n_elements(flux_m))
         h = histogram(numberarr, OMIN=om, binsize = bin_level, reverse_indices = ri)
         print, 'omin', om, 'nh', n_elements(h)
         
@@ -55,7 +62,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
         c = 0
         for j = 0L, n_elements(h) - 1 do begin
            
-;get rid of the bins with no values and low numbers, meaning low overlap
+;;get rid of the bins with no values and low numbers, meaning low overlap
            if (ri[j+1] gt ri[j] + 2)  then begin ;require 3 elements in the bin
               
               if finite(corrflux[ri[ri[j]]]) gt 0 and finite(corrflux[ri[ri[j+1]-1]]) gt 0 then begin
@@ -63,11 +70,11 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
                  bin_corrflux[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
               endif else begin
                  bin_corrflux[c] = alog10(-1)
-              endelse
-              
-              icorrdataerr = corrfluxerr[ri[ri[j]:ri[j+1]-1]]
-              bin_corrfluxerr[c] =   sqrt(total(icorrdataerr^2))/ (n_elements(icorrdataerr))
-              
+             endelse
+             
+             icorrdataerr = corrfluxerr[ri[ri[j]:ri[j+1]-1]]
+;;             bin_corrfluxerr[c] =   sqrt(total(icorrdataerr^2))/ (n_elements(icorrdataerr))
+             
               meanclip, flux_m[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
               bin_flux_m[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
               
@@ -126,8 +133,8 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
 ;test the levels
         print, 'mean raw black flux', mean(bin_flux_m / median(bin_flux_m),/nan)
         print, 'mean corr gray flux', mean((bin_corrflux /median( bin_corrflux)),/nan)
-        print, 'mean position red flux', mean(bin_flux/median(bin_flux),/nan)
-        print, 'mean np blue flux', mean(bin_flux_np /median(bin_flux_np),/nan)
+;        print, 'mean position red flux', mean(bin_flux/median(bin_flux),/nan)
+;        print, 'mean np blue flux', mean(bin_flux_np /median(bin_flux_np),/nan)
 ;     print, 'phase', bin_phase
         
 ;print out levels so that I can use them for TAP (or exofast I suppose)
@@ -145,12 +152,18 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
            if keyword_set(phaseplot) then begin
                                 ;print, 'inside plotting phase', bin_phase[0:10]
               
-              p1 = errorplot(bin_phase, bin_flux_m/ median(bin_flux_m),bin_fluxerr_m/median(bin_flux_m),$
-                             '1s', sym_size = 0.3, sym_filled = 1,$
-                             color = 'black', xtitle = 'Phase', ytitle = 'Normalized Flux', title = planetname, $
-                             name = 'raw flux', yrange =[0.984, 1.013], axis_style = 1,  $
-                             xstyle = 1, errorbar_capsize = 0.025) ;
-              
+              if a eq startaor then begin
+                 p1 = errorplot(bin_phase, bin_flux_m/ median(bin_flux_m),bin_fluxerr_m/median(bin_flux_m),$
+                                '1s', sym_size = 0.3, sym_filled = 1,$
+                                color = 'black', xtitle = 'Phase', ytitle = 'Normalized Flux', title = planetname, $
+                                name = 'raw flux', yrange =[0.97, 1.026], axis_style = 1,  $
+                                xstyle = 1, errorbar_capsize = 0.025) ;
+              endif else begin
+                 p1 = errorplot(bin_phase, bin_flux_m/ median(bin_flux_m),bin_fluxerr_m/median(bin_flux_m),$
+                                '1s', sym_size = 0.3, sym_filled = 1,$
+                                color = 'black', errorbar_capsize = 0.025,/overplot) ;
+              endelse
+
                                 ;print, 'grey in plotting', bin_corrflux
               p4 =  errorplot(bin_phase, (bin_corrflux /Median( bin_corrflux)) + delta_grey, $
                               bin_corrfluxerr / median(bin_corrflux), '1s', sym_size = 0.3,   $
@@ -168,11 +181,18 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
                              errorbar_capsize = 0.025)
               
            endif else begin     ;plot as a function of time
-              p1 = errorplot(bin_time/60./60., bin_flux_m/ median(bin_flux_m),bin_fluxerr_m/median(bin_flux_m),$
+              if a eq startaor then begin
+                 p1 = errorplot(bin_time/60./60., bin_flux_m/ median(bin_flux_m),bin_fluxerr_m/median(bin_flux_m),$
                              '1s', sym_size = 0.3,sym_filled = 1,$
                              color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname,$
                              name = 'raw flux', yrange =[0.984, 1.013], xrange = [0,7.5], axis_style = 1, $
                              xstyle = 1, errorbar_capsize = 0.025)
+              endif else begin
+                 
+                 p1 = errorplot(bin_time/60./60., bin_flux_m/ median(bin_flux_m),bin_fluxerr_m/median(bin_flux_m),$
+                                '1s', sym_size = 0.3,sym_filled = 1,$
+                                color = 'black', errorbar_capsize = 0.025,/overplot)
+              endelse
               
               p4 =  errorplot(bin_time/60./60., (bin_corrflux /median( bin_corrflux)) + delta_grey, $
                               bin_corrfluxerr / median(bin_corrflux), '1s', sym_size = 0.3, $
@@ -193,11 +213,16 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
         endif else begin        ;now without errorbars
            if keyword_set(phaseplot) then begin
               
-              p1 = plot(bin_phase, bin_flux_m/ median(bin_flux_m), '1s', sym_size = 0.3, sym_filled = 1,$
-                        color = 'black', xtitle = 'Phase', ytitle = 'Normalized Flux', title = planetname, $
-                        name = 'raw flux', yrange =[0.984, 1.013], xrange = [0.47, 0.53], axis_style = 1,  $
-                        xstyle = 1)
-              
+              if a eq startaor then begin
+                 p1 = plot(bin_phase, bin_flux_m/ median(bin_flux_m), '1s', sym_size = 0.3, sym_filled = 1,$
+                           color = 'black', xtitle = 'Phase', ytitle = 'Normalized Flux', title = planetname, $
+                           name = 'raw flux', yrange =[0.984, 1.013], xrange = [0.47, 0.53], axis_style = 1,  $
+                           xstyle = 1)
+              endif else begin
+                 p1 = plot(bin_phase, bin_flux_m/ median(bin_flux_m), '1s', sym_size = 0.3, sym_filled = 1,$
+                           color = 'black', /overplot)
+              endelse
+
               p4 =  plot(bin_phase, (bin_corrflux /median( bin_corrflux)) + delta_grey, '1s', sym_size = 0.3,   $
                          sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
               
@@ -208,10 +233,15 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
                         sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
               
            endif else begin     ;plot as a function of time
-              p1 = plot(bin_time/60./60., bin_flux_m/ median(bin_flux_m), '1s', sym_size = 0.3,sym_filled = 1,$
-                        color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname,$
-                        name = 'raw flux', yrange =[0.984, 1.013], xrange = [0,7.5], axis_style = 1,  xstyle = 1)
-              
+              if a eq startaor then begin
+                 p1 = plot(bin_time/60./60., bin_flux_m/ median(bin_flux_m), '1s', sym_size = 0.3,sym_filled = 1,$
+                           color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname,$
+                           name = 'raw flux', yrange =[0.984, 1.013], xrange = [0,7.5], axis_style = 1,  xstyle = 1)
+              endif else begin
+                 p1 = plot(bin_time/60./60., bin_flux_m/ median(bin_flux_m), '1s', sym_size = 0.3,sym_filled = 1,$
+                           color = 'black', /overplot)
+              endelse
+
               p4 =  plot(bin_time/60./60., (bin_corrflux /median( bin_corrflux)) + delta_grey, '1s', sym_size = 0.3, $
                          sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
               
@@ -265,7 +295,11 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
                                 ;a guess at mid-transit
 ;            endif
 ;      endfor
-           
+               dirname = strcompress(basedir + planetname_final +'/')
+  print, 'dirname', dirname
+     
+     p5.save, dirname+'allfluxes_binned_ch'+chname+'.png'
+
         endif   ; if selfcal
 
                                 ;plot flat lines to guide the eyes
@@ -296,11 +330,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
      
 ;finally save the plot
 ;  print, 'planetname_fin', planetname_final
-     dirname = strcompress(basedir + planetname_final +'/')
-;  print, 'dirname', dirname
-     
-     p5.save, dirname+'allfluxes_binned_ch'+chname+'.png'
-     
+      
   end
   
 function fit_eclipse, xphase, ynorm, ynormerr, t1, dt, t3, d, delta, plotcolor
