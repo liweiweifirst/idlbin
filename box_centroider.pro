@@ -100,6 +100,7 @@ pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
 ;    only provided for reference and sanity checking.
 ;
 ; HISTORY:
+;    Use ROUND() to set the box limits 17 Apr 2014 JGI
 ;    Set f0 = fluxsum for return  13 Aug 2013 JGI 
 ;    Added additional header documentation. 09 Aug 2013 SJC
 ;    Added minimum number of pixels check to calculate 
@@ -112,6 +113,7 @@ pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
 ;    Recoding from get_centroids_nf procedure 26 May 2010 SJC
 ;    
 ;-
+
 ; Copy input image to working image
 	image = input_image
 ; Set sigma clipping threshold
@@ -128,10 +130,10 @@ pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
 	yy = replicate(1.0, nx) # findgen(ny)
 	
 ; Set box limits for aperture
-	xa = xmax-halfboxwidth > 0 < (nx-1)
-	xb = xmax+halfboxwidth < (nx-1) > 0
-	ya = ymax-halfboxwidth > 0 < (ny-1)
-	yb = ymax+halfboxwidth < (ny-1) > 0
+	xa = ROUND(xmax-halfboxwidth) > 0 < (nx-1)
+	xb = ROUND(xmax+halfboxwidth) < (nx-1) > 0
+	ya = ROUND(ymax-halfboxwidth) > 0 < (ny-1)
+	yb = ROUND(ymax+halfboxwidth) < (ny-1) > 0
 	npixels_in_box = (2*halfboxwidth+1) * (2*halfboxwidth+1)	
 
 ; Set background regions
