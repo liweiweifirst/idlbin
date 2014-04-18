@@ -46,6 +46,10 @@ pro read_staring_dark
      stddevarr_3 = meanarr_3
      framedelayarr = meanarr_0
      subimagenum = meanarr_0
+     medarr_0 = meanarr_0
+     medarr_1  = meanarr_0
+     medarr_2 = meanarr_0
+     medarr_3 = meanarr_0
      ;want this to run from 0 to 63 for n_elements(fitsname)
      for si = 0, n_elements(fitsname)*63, 64 do subimagenum(si) = findgen(64)
     
@@ -56,8 +60,9 @@ pro read_staring_dark
         
                                 ;back out the flux conversion
         fluxconv = sxpar(header, 'FLUXCONV')
-        data = data / fluxconv
-        
+        exptime = sxpar(header, 'EXPTIME')
+        data = data / fluxconv  ; now in DN/s
+        data = data* exptime  ; now in DN
                                 ; flip the image
         data = reverse(data, 2)
         
@@ -77,15 +82,19 @@ pro read_staring_dark
            meanclip, data[amp0,*,j], m0, sm0
            meanarr_0(c) = m0
            stddevarr_0(c) = sm0
+           medarr_0(c) = median(data[amp0,*,j])
            meanclip, data[amp1,*,j], m1, sm1
            meanarr_1(c) = m1
            stddevarr_1(c) = sm1
+           medarr_1(c) = median(data[amp1,*,j])
            meanclip, data[amp2,*,j], m2, sm2
            meanarr_2(c) = m2
            stddevarr_2(c) = sm2
+           medarr_2(c) = median(data[amp2,*,j])
            meanclip, data[amp3,*,j], m3, sm3
            meanarr_3(c) = m3
            stddevarr_3(c) = sm3
+           medarr_3(c) = median(data[amp3,*,j])
            
            framedelayarr(c) = framedelay;keep track of  delaytime for later use
            c = c + 1
@@ -116,8 +125,8 @@ pro read_staring_dark
      plotsavename = strcompress('/Users/jkrick/irac_warm/darks/staring/r'+string(aorkey)+ '_ch'+chname(a) +'_'+string(framtime)+'.png',/remove_all)
      p.save, plotsavename
   
-     keys =['aorname','aorlabel','aorkey', 'framtime', 'chname', 'fitsname', 'framenumber', 'subimagenum', 'mean_0', 'stddev_0','mean_1', 'stddev_1','mean_2', 'stddev_2','mean_3', 'stddev_3','framedelay']
-     values=list(aorname(a),aorlabel, aorkey, framtime,chname(a), fitsname, findgen(n_elements(fitsname)), subimagenum, meanarr_0, stddevarr_0, meanarr_1, stddevarr_1,meanarr_2, stddevarr_2,meanarr_3, stddevarr_3,framedelayarr)
+     keys =['aorname','aorlabel','aorkey', 'framtime', 'chname', 'fitsname', 'framenumber', 'subimagenum', 'mean_0', 'stddev_0','mean_1', 'stddev_1','mean_2', 'stddev_2','mean_3', 'stddev_3','framedelay','med_0', 'med_1', 'med_2', 'med_3']
+     values=list(aorname(a),aorlabel, aorkey, framtime,chname(a), fitsname, findgen(n_elements(fitsname)), subimagenum, meanarr_0, stddevarr_0, meanarr_1, stddevarr_1,meanarr_2, stddevarr_2,meanarr_3, stddevarr_3,framedelayarr, medarr_0, medarr_1, medarr_2, medarr_3)
      biashash[aorname(a)] = HASH(keys, values)
 
      
