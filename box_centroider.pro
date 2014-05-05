@@ -1,6 +1,6 @@
 pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
                     backboxwidth, boxborder, x0, y0, f0, b, xs, ys, fs, bs, $
-                    c, cb, np, xfwhm, yfwhm, xys, xycov, MMM=mmm
+                    c, cb, np, xfwhm, yfwhm, expid, xys, xycov, MMM=mmm
 ;+
 ; NAME:
 ;    BOX_CENTROIDER
@@ -26,6 +26,7 @@ pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
 ;    BACKBOXWIDTH: integer scalar, for size of rectangular background box
 ;    BOXBORDER: integer scalar, offset of background annulus in pixels from 
 ;               box aperture
+;    EXPID: which exposure number being worked on to track the mask images
 ;
 ; CONTROL KEYWORD:
 ;    MMM: if set, then backround estimate will be calculated using mmm.pro
@@ -58,7 +59,9 @@ pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
 ;    where the sum is conducted over all pixels i in the source aperture, 
 ;    a square box of size 2*HALFBOXWIDTH+1 pixels centered on pixel (XMAX,YMAX).
 ;
-;    Before calculating the moments, an estimate of the background is determined ;    from a rectangular background region which is a specified width 
+;    Before calculating the moments, an estimate of the background is
+;    determined 
+;    from a rectangular background region which is a specified width 
 ;    (BACKBOXWIDTH) and offset (BOXBORDER) from the source aperture used to 
 ;    calculate the moments.  By default, a sigma-clipped median is used for the
 ;    background value.
@@ -130,12 +133,15 @@ pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
 	yy = replicate(1.0, nx) # findgen(ny)
 	
 ; Set box limits for aperture
+;	xa = (xmax-halfboxwidth) > 0 < (nx-1)
+;	xb = (xmax+halfboxwidth) < (nx-1) > 0
+;	ya = (ymax-halfboxwidth) > 0 < (ny-1)
+ ;      yb = (ymax+halfboxwidth) < (ny-1) > 0
 	xa = ROUND(xmax-halfboxwidth) > 0 < (nx-1)
 	xb = ROUND(xmax+halfboxwidth) < (nx-1) > 0
 	ya = ROUND(ymax-halfboxwidth) > 0 < (ny-1)
 	yb = ROUND(ymax+halfboxwidth) < (ny-1) > 0
 	npixels_in_box = (2*halfboxwidth+1) * (2*halfboxwidth+1)	
-
 ; Set background regions
 	xamin = xa - backboxwidth - boxborder > 0 < xa
 	xamax = xa - boxborder > 0 < xa
@@ -145,20 +151,21 @@ pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
 	yamax = ya - boxborder > 0 < ya
 	ybmax = yb + backboxwidth + boxborder > yb < (ny-1)
 	ybmin = yb + boxborder > yb < (ny-1)
+;        print, 'xamin...', xa, backboxwidth, boxborder, xamin, xamax
+;        print, 'xbmin...', xb, backboxwidth, boxborder, xbmin, xbmax
 
 ; Segment image into box (mask = 1), background (mask=-1) and 
 ; everything else (mask = 0)
 	mask = image * 0
 	mask[xa:xb, ya:yb] = 1
-	bptr = where(xx le xamax and xx ge xamin, bcount)
+	bptr = where(xx le xamax and xx ge xamin and yy le ybmax and yy ge yamin, bcount)
 	if (bcount gt 0) then mask[bptr] = -1
-	bptr = where(xx le xbmax and xx ge xbmin, bcount)
+	bptr = where(xx le xbmax and xx ge xbmin and yy le ybmax and yy ge yamin, bcount)
 	if (bcount gt 0) then mask[bptr] = -1
-	bptr = where(yy le yamax and yy ge yamin, bcount)
+	bptr = where(yy le yamax and yy ge yamin and xx le xbmax and xx ge xamin, bcount)
 	if (bcount gt 0) then mask[bptr] = -1
-	bptr = where(yy le ybmax and yy ge ybmin, bcount)
+	bptr = where(yy le ybmax and yy ge ybmin and xx le xbmax and xx ge xamin, bcount)
 	if (bcount gt 0) then mask[bptr] = -1
-
 ; remove background - median of background region, unless MMM is used
 	bptr = where(mask eq -1 and image eq image, bcount)
 	min_good_background_pixels = 0.5 * npixels_in_box
@@ -195,14 +202,22 @@ pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
 	min_good_pixels_in_aperture = 0.5 * npixels_in_box
 ; Perform centroid in 2*boxwidth+1 pixel box centered on peak pixel
 	gptr = where(mask eq 1 and image eq image, gcount)
+;write out the masked, background subtracted image to check what it is doing
+        fits_write, strcompress('/Users/jkrick/irac_warm/pcrs_planets/WASP-52b/testmask'+string(expid)+'.fits',/remove_all),image[gptr]
+;        print, 'xx',xx[gptr]
+;        print, 'top', (xx[gptr])*(image[gptr])
 ; Only calculate centroid if more than 50% of pixels in source aperture are good	
 	if (gcount gt min_good_pixels_in_aperture) then begin
+           if gcount ne npixels_in_box then print, 'some pixels in box are not being used ', gcount / npixels_in_box
 		fluxsum = total(image[gptr])
 		flux2sum = total(image[gptr] * image[gptr])
 		fluxsum2 = fluxsum * fluxsum
-		x0 = total(xx[gptr] * float(image[gptr])) / fluxsum
+		x0 = total(xx[gptr] * float(image[gptr])) / fluxsum;
 		y0 = total(yy[gptr] * float(image[gptr])) / fluxsum
 		f0 = fluxsum   ;; Added 13 Aug 2013 JGI
+;                help, xx, image, fluxsum, x0, y0
+;                print, 'total', total(xx[gptr] * (image[gptr])), 'fluxsum',fluxsum, 'x0', x0
+
 ; Now calculate the variance 
 ; note for normal distributions, fwhm = 2*sqrt(2 * ln 2) sigma ~ 2.35482 sigma
 		dx = xx[gptr] - x0

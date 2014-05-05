@@ -363,8 +363,8 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
            adxy, h, ra, dec, xmax, ymax
 
 ;cheating for now
-;           xmax = 15.0
-;           ymax = 15.0
+;           xmax = xmax
+;           ymax = ymax 
 ; Only continue with images that have a source that not 5 pixels from edge
            xedge = nx - edge - 1.
            if (xmax lt edge or xmax gt xedge or ymax lt edge or ymax gt xedge)  then begin ;   or eflux[nch-1] gt sat_levels[nch-1, findex])
@@ -375,7 +375,8 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 		    ;	flag[0:ns-1] = -1
 		  ;	endif
               if (xmax lt edge or xmax gt xedge or ymax lt edge or ymax gt xedge) then begin 
-                 print, 'Source outside array for ' + sxpar(h, 'RAWFILE')
+                 expid =  sxpar(h, 'EXPID')
+                 print, 'Source outside array for image number ', expid
                  flag[0:ns-1] = -2
               endif 
 
@@ -401,9 +402,18 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ; if keyword APER set, then use it for the aperture photometry
 ; 3 pixel half-width, use smallest aperture for FWHM
 ;                print, 'starting box_centroider ', xmax, ymax
+                expid = sxpar(h, 'EXPID')
 
-                box_centroider, slice, sigma2, xmax, ymax, 3, 6, 3, tx, ty, tf, tb, $
-                                txs, tys, tfs, tbs, tc, tcb, tnp, xfwhm, yfwhm
+                box_centroider, slice, sigma2, xmax, ymax, 3, 6,3, tx, ty, tf, tb, $
+                                txs, tys, tfs, tbs, tc, tcb, tnp, xfwhm, yfwhm, expid
+
+
+;pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
+;                    backboxwidth, boxborder, x0, y0, f0, b, xs, ys, fs, bs, $
+;                    c, cb, np, xfwhm, yfwhm, xys, xycov, expid, MMM=mmm
+
+
+
 ;                print, 'finished box_centroider', tx, ty
                 x3[i] = tx & y3[i] = ty & x3s[i] = txs & y3s[i] = tys
                 bb[i] = tb
