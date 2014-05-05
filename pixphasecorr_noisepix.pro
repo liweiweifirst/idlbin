@@ -34,18 +34,42 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
   if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
   basedir = planetinfo[planetname, 'basedir']
 ;  chname = planetinfo[planetname, 'chname']
-  period = planetinfo[planetname, 'period']
-  utmjd_center = planetinfo[planetname, 'utmjd_center']
+;  period = planetinfo[planetname, 'period']
+;  utmjd_center = planetinfo[planetname, 'utmjd_center']
   exptime = planetinfo[planetname, 'exptime']
-  transit_duration = planetinfo[planetname, 'transit_duration']
+;  transit_duration = planetinfo[planetname, 'transit_duration']
   dirname = strcompress(basedir + planetname +'/')
   if keyword_set(breatheap) then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav') else savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
 
   restore, savefilename
+;==========================================
+exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
+exosystem = strmid(planetname, 0, 7) + ' b' ;'HD 209458 b' ;
+if planetname eq 'WASP-52b' then teq_p = 1315
+if chname eq '2' then lambdaname  = '4.5'
+if chname eq '1' then lambdaname  = '3.6'
+get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,RSTAR = rstar, TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,$
+                   AR_SEMIMAJ=ar_semimaj,$
+                   TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
+                   INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
+                   DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,VERBOSE=verbose
+ra_ref = ra*15.                 ; comes in hours!
+dec_ref = dec
+utmjd_center = mjd_transit
+period = p_orbit
+semimaj = ar_semimaj
+dstar = 2.*rstar
+m_star = mstar
+transit_duration = 13.*dstar*sqrt(semimaj/m_star)
+print,'transit duration', transit_duration
+;==========================================
+
+
+
 
   for a = 0, n_elements(aorname) - 1 do begin  ;run through all AORs
      print, 'working on aor', aorname(a)
-     np = planethash[aorname(a),'np']  ; np is noise pixel
+     np = planethash[aorname(a),'npcentroids']  ; np is noise pixel, using value from box_centroider, not noisepix
      xcen = planethash[aorname(a), 'xcen']
      ycen = planethash[aorname(a), 'ycen']
      flux_m = planethash[aorname(a), 'flux']
@@ -299,9 +323,9 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
         p2 = plot(phase_0, flux/median(flux) -0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
         p3 = plot(phase_0, flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
         
-        xtest = findgen(n_elements(ndimages))
-        ptest = plot(xtest, ndimages, yrange = [0, 0.1], xtitle = 'Some indication of time with eclipse removed', ytitle = 'average distance to nearest neighbors')
-        ptest.save, dirname+'nn_dist.png'
+;        xtest = findgen(n_elements(ndimages))
+;        ptest = plot(xtest, ndimages, yrange = [0, 0.1], xtitle = 'Some indication of time with eclipse removed', ytitle = 'average distance to nearest neighbors')
+;        ptest.save, dirname+'nn_dist.png'
                                 ; l = legend(target = [p1, p4, p2,p3], position = [1.5, 1.18], /data, /auto_text_color)
         
 ;    print, 'mean and stddev of sigmax', mean(sigmax), stddev(sigmax)
@@ -406,8 +430,8 @@ function mask_signal, phase, period, utmjd_center, transit_duration
   ;plothist, phase, xhist, yhist, bin = 0.02,/noplot
   ;tt = plot(xhist, yhist, xtitle = 'phase')
                                 ;turn transit duration into phase
-  transit_duration = transit_duration / 60/24.       ; now in days
-  transit_phase = transit_duration / period          ; what fraction of the phase is this in transit (or eclipse)
+  transit_dur = transit_duration / 60/24.       ; now in days
+  transit_phase = transit_dur / period          ; what fraction of the phase is this in transit (or eclipse)
   print, 'test transit phase', transit_phase
   
   bad_t = where(phase ge 0.D - transit_phase/2. and phase le 0.D + transit_phase/2.,n_bad_t)

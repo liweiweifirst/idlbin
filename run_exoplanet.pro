@@ -20,7 +20,7 @@ pro run_exoplanet, planetname, binning, nnearest, apradius, chname
   if n_elements(chname) lt n_elements(planetname) then chname = intarr(n_elements(planetname)) + chname
 
 
-phot_exoplanet_sdcorr, 'HD158460', 2.25,'2', /hybrid
+;phot_exoplanet_sdcorr, 'HD158460', 2.25,'2', /hybrid
 
 ;---------------------------------------------------------------------
   for n = 0, n_elements(planetname) - 1 do begin

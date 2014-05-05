@@ -146,6 +146,20 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
 ;        endif
                                 ;endfor
         
+;-----------------
+;compare two methods of measuring np
+gp1 = where(bin_phase gt -0.45 and bin_phase lt -0.1)
+gp2 = where(bin_phase gt 0.05 and bin_phase lt 0.45)
+
+;what is the standard deviation of bin_flux_np away from eclipse and transit
+if a eq startaor then begin
+   test_flux = [bin_flux_np(gp1), bin_flux_np(gp2)] 
+endif else begin
+   test_flux = [test_flux, bin_flux_np(gp1), bin_flux_np(gp2)] 
+endelse
+print, n_elements(gp1), n_elements(gp2), n_elements(test_flux)
+print, 'standard deviation test flux', stddev(test_flux)
+;-----------------
 ;plot the results
         if keyword_set(errorbars) then begin
            

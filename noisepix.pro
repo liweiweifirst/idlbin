@@ -1,8 +1,9 @@
 ;function to calcluate noise pixel
-function noisepix, im, xcen, ycen, ronoise, gain, exptime, fluxconv,naxis
-  apradnp = 3;4
-  skyradin = 3;10
-  skyradout = 6;12
+function noisepix, im, xcen, ycen, ronoise, gain, exptime, fluxconv,naxis, apradnp, skyradin, skyradout
+;  apradnp = 3;4
+;  skyradin = 3;10
+;  skyradout = 6;12
+  print, 'starting noisepix ';, ronoise, mean(xcen), mean(ycen)
   convfac = gain*exptime/fluxconv
 
   if naxis gt 2 then begin  ; for subarray
@@ -11,8 +12,8 @@ function noisepix, im, xcen, ycen, ronoise, gain, exptime, fluxconv,naxis
         indim = im[*,*,npj]
         indim = indim*convfac
         ; aper requires a 2d array
-        aper, indim, xcen[npj], ycen[npj], topflux, topfluxerr, xb, xbs, 1.0, apradnp,[skyradin,skyradout],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
-        aper, indim^2, xcen[npj], ycen[npj], bottomflux, bottomfluxerr, xb, xbs, 1.0,apradnp,[skyradin,skyradout],/flux,/exact, /silent, /nan, readnoise = ronoise, setskyval = 0
+        aper, indim, xcen[npj], ycen[npj], topflux, topfluxerr, xb, xbs, 1.0, apradnp,[skyradin,skyradout],/flux, /silent, /nan, readnoise = ronoise;,/exact;, setskyval = 0
+        aper, indim^2, xcen[npj], ycen[npj], bottomflux, bottomfluxerr, xb, xbs, 1.0,apradnp,[skyradin,skyradout],/flux, /silent, /nan, readnoise = ronoise;,/exact;, setskyval = 0
         
         np[npj] = topflux^2 / bottomflux
      endfor

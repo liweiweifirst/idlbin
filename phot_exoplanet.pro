@@ -43,7 +43,7 @@ ra_ref = planetinfo[planetname, 'ra']
 dec_ref = planetinfo[planetname, 'dec']
 
 exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
-exosystem = strmid(planetname, 0, 7) + ' b'
+exosystem = strmid(planetname, 0, 7) + ' b' ;'HD 209458 b' ;
 if planetname eq 'WASP-52b' then teq_p = 1315
 if chname eq '2' then lambdaname  = '4.5'
 if chname eq '1' then lambdaname  = '3.6'
@@ -65,12 +65,13 @@ planethash = hash()
 if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_120827_occthresh.fits'$
                                       else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
 fits_read,occ_filename, occdata, occheader
-
-for a =0, n_elements(aorname) - 1 do begin
+startaor =0
+stopaor = n_elements(aorname) - 1
+for a =startaor, stopaor do begin
    print, 'working on ',aorname(a)
    dir = dirname+ string(aorname(a) ) 
    CD, dir                      ; change directories to the correct AOR directory
-   command  = strcompress( 'find ch'+chname+"/bcd -name 'SPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
+   command  = strcompress( 'find ch'+chname+"/bcd -name '*bcd.fits' > "+dirname+'bcdlist.txt')
    print, 'command', command
    spawn, command
    command2 =  strcompress('find ch'+chname+"/bcd -name '*bunc.fits' > "+dirname + 'bunclist.txt')
@@ -85,7 +86,7 @@ for a =0, n_elements(aorname) - 1 do begin
 
 
 
-   for i =0.D,  n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
+   for i =0.D, n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
  ;      print, 'working on ', fitsname(i)         
       header = headfits(fitsname(i)) ;
       sclk_obs= sxpar(header, 'SCLK_OBS')
@@ -93,14 +94,15 @@ for a =0, n_elements(aorname) - 1 do begin
       bmjd_obs = sxpar(header, 'BMJD_OBS')
        ;utcs_obs = sxpar(header, 'UTCS_OBS')
       ch = sxpar(header, 'CHNLNUM')
-      ronoise = sxpar(header, 'RONOISE')
+      ronoise = sxpar(header, 'RONOISE') ; these are zeros
       gain = sxpar(header, 'GAIN')
       fluxconv = sxpar(header, 'FLUXCONV')
       exptime = sxpar(header, 'EXPTIME')
       aintbeg = sxpar(header, 'AINTBEG')
       atimeend = sxpar(header, 'ATIMEEND')
       naxis = sxpar(header, 'NAXIS')
-
+      if ch eq '2' and frametime eq 2 then ronoise = 12.1
+      if i eq 0 then print, 'ronoise', ronoise, gain, fluxconv, exptime
       if i eq 0 then sclk_0 = sclk_obs
 
       if i eq 0 and naxis eq 3 then begin
@@ -146,6 +148,8 @@ for a =0, n_elements(aorname) - 1 do begin
       ;read in the files
       fits_read, fitsname(i), im, h
       fits_read, buncname(i), unc, hunc
+      test = sxpar(h, 'RAWFILE')
+      
     ; fits_read, covname, covdata, covheader
 
       ;apply mask file if necessary
@@ -173,8 +177,9 @@ for a =0, n_elements(aorname) - 1 do begin
       npcentroids = np   ;keep track of np from get_centroids
 
       ;calculate noise pixel
-      np = noisepix(im, x_center, y_center, ronoise, gain, exptime, fluxconv,naxis)
-
+;      print, mean(x_center), mean(y_center), naxis
+;      np = noisepix(im, x_center, y_center, ronoise, gain, exptime, fluxconv, naxis, 3.5, 6.5, 12.5)
+      np = findgen(64)
       ; if changing the apertures then use this to calculate photometry
       if keyword_set(breatheap) then begin
          abcdflux = betap(im, x_center, y_center, ronoise, gain, exptime, fluxconv,np, chname)
@@ -228,7 +233,7 @@ for a =0, n_elements(aorname) - 1 do begin
 ;correction based on those neighbors.  
       if keyword_set(hybrid) then begin
                                 ;use hybrid technique with pmap dataset and nn techniques
-        corrflux = pmap_correct(x_center,y_center,abcdflux,ch,np,occdata, corr_unc = corrfluxerr, func = fs, datafile =pmapfile,/threshold_occ,/use_np) 
+        corrflux = pmap_correct(x_center,y_center,abcdflux,ch,npcentroids,occdata, corr_unc = corrfluxerr, func = fs, datafile =pmapfile,/threshold_occ,/use_np) 
       endif else begin
                ;correct for pixel phase effect based on pmaps from Jim
       ;file_suffix = ['500x500_0043_120828.fits','0p1s_x4_500x500_0043_121120.fits']
@@ -334,7 +339,7 @@ endfor                          ;for each AOR
 if keyword_set(breatheap) then begin
    savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav')
 endif else begin
-   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
+   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'test.sav',/remove_all)
 endelse
 
 save, planethash, filename=savename
@@ -342,7 +347,9 @@ print, 'saving planethash', savename
 print, 'time check', systime(1) - t1
 
 
-testplot = plot(timearr, yarr, '1s', sym_size = 0.1, sym_filled = 1, xtitle = 'time', ytitle = 'ycen')
+;testplot = plot(timearr, xarr, '1s', sym_size = 0.1, sym_filled = 1, xtitle = 'time', ytitle = 'xcen')
+plothist, xarr, xhist, yhist, /noplot, bin = 0.01
+testplot = plot(xhist, yhist,  xtitle = 'X centroid', ytitle = 'Number', thick =3, color = 'blue',/overplot)
 
                                 ; print, planethash.keys()
  ; print, planethash[aorname(0)].keys()
