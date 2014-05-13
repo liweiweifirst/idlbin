@@ -21,9 +21,17 @@ function polynomial_3, x,y, P
           
 end
 
-function polynomial_2, x,y, P
+function poly_3, x,P
   ;third order 
-  return, P(0) + P(1)*x^2 + P(2)*y^2 ;+ P(3)*x*y 
+  return, P(0) + P(1)*x^2 + P(2)*x^3          
+end
+function poly_4, x,P
+  ;third order 
+  return, P(0) + P(1)*x^2 + P(2)*x^3  + P(3)*x^4    
+end
+function polynomial_2, x, P
+  ;third order 
+  return, P(0) + P(1)*x^2 ;+ P(2)*y^2 ;+ P(3)*x*y 
           
 end
 
