@@ -1,10 +1,10 @@
-pro fit_exoplanet_light_curve, exosystem, apradius
+pro fit_exoplanet_light_curve, planetname, bin_level, apradius, chname, snapshots = snapshots
 
 
-  planetname = strcompress(exosystem, /remove_all)  ; just cause my directories don't have spaces in their names
  ;first pull the info we know from the internet
   exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
- 
+  exosystem = strmid(planetname, 0, 7) + ' b' ;'HD 209458 b' ;
+
   get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
                        TEQ_P=teq_p,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA='4.5',$
                        INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
@@ -22,7 +22,6 @@ pro fit_exoplanet_light_curve, exosystem, apradius
   planetinfo = create_planetinfo()
   aorname = planetinfo[planetname, 'aorname']
   stareaor = planetinfo[planetname, 'stareaor']
-  chname = planetinfo[planetname, 'chname']
   snapaor = stareaor + 1        ; the first AOR in the list which is snapshots
   basedir = planetinfo[planetname, 'basedir']
   dirname = strcompress(basedir + planetname+ '/'); +'/hybrid_pmap_nn/')
@@ -31,24 +30,39 @@ pro fit_exoplanet_light_curve, exosystem, apradius
   print, 'inside fit+exopl', savefilename
   restore, savefilename
 
- for a = snapaor, n_elements(aorname) -1 do begin
-   ; plothist, planethash[aorname(a),'corrflux'], xhist, yhist, bin = 0.0005, /noplot,/nan
-   ; ap = plot(xhist, yhist)
-    meanclip, planethash[aorname(a),'corrflux'], meancorr, sigmacorr, clipsig = 2.5;,/verbose
-    meanclip, planethash[aorname(a),'corrfluxerr'], meancorrerr, sigmacorrerr, clipsig = 2.5
-   ; meanerr, planethash[aorname(a),'corrflux'], planethash[aorname(a),'corrfluxerr'], meancorr2, sigmam, sigmad
-    ;meancorrerr = meancorrerr / 3.0 ; XXXXX need real error bars
-    ;print, 'compare mean & error', meancorr, meancorrerr, meancorr2, sigmam, sigmad
-    if a eq snapaor then phasearr = [median(planethash[aorname(a),'phase'])] else phasearr = [phasearr, median(planethash[aorname(a),'phase'])]
-    if a eq snapaor then fluxarr = [meancorr] else fluxarr = [fluxarr, meancorr]
-    if a eq snapaor then errarr = [sigmacorr] else errarr = [errarr, sigmacorr]
- endfor
+  if keyword_set(snapshots) then begin
+     for a = snapaor, n_elements(aorname) -1 do begin
+                                ; plothist, planethash[aorname(a),'corrflux'], xhist, yhist, bin = 0.0005, /noplot,/nan
+                                ; ap = plot(xhist, yhist)
+        meanclip, planethash[aorname(a),'corrflux'], meancorr, sigmacorr, clipsig = 2.5 ;,/verbose
+        meanclip, planethash[aorname(a),'corrfluxerr'], meancorrerr, sigmacorrerr, clipsig = 2.5
+                                ; meanerr, planethash[aorname(a),'corrflux'], planethash[aorname(a),'corrfluxerr'], meancorr2, sigmam, sigmad
+                                ;meancorrerr = meancorrerr / 3.0 ; XXXXX need real error bars
+                                ;print, 'compare mean & error', meancorr, meancorrerr, meancorr2, sigmam, sigmad
+        if a eq snapaor then phasearr = [median(planethash[aorname(a),'phase'])] else phasearr = [phasearr, median(planethash[aorname(a),'phase'])]
+        if a eq snapaor then fluxarr = [meancorr] else fluxarr = [fluxarr, meancorr]
+        if a eq snapaor then errarr = [sigmacorr] else errarr = [errarr, sigmacorr]
+     endfor
+  endif else begin   
+; working with staring mode, not snapshots
+     startaor = 1  ; 0th aor is a peakup aor
+     for a = startaor, n_elements(aorname) -1 do begin
+        ;pull together the whole light curve
+        if a eq startaor then phasearr = (planethash[aorname(a),'phase']) else phasearr = [phasearr, planethash[aorname(a),'phase']]
+        if a eq startaor then fluxarr = x  ; want this to be the nearest_neighbor with np light curve
+        if a eq startaor then errarr = [sigmacorr] else errarr = [errarr, sigmacorr]  ; and error bars on above
+     endfor
 
+  endelse
+  
  ;now sort the arrays since they are taken at random phase
  sp = sort(phasearr)
  phasearr = phasearr[sp]
  fluxarr = fluxarr[sp]
  errarr = errarr[sp]
+
+; if not snapshots, need to do some binning XXX
+
 
  ;and normalize for more understandable plots
  normcorr = mean(fluxarr)
