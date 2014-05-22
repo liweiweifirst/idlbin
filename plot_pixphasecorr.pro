@@ -8,10 +8,10 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
   basedir = planetinfo[planetname, 'basedir']
   intended_phase = planetinfo[planetname, 'intended_phase']
   stareaor = planetinfo[planetname, 'stareaor']
-  delta_red = -0.012
+  delta_red = -0.02
   delta_grey =  0.01
-  delta_blue = 0.017
-  delta_green =- 0.007
+  delta_blue = 0.02
+  delta_green =- 0.01
   planetname_final = planetname
   dirname = strcompress(basedir + planetname +'/')
   print, 'dirname', dirname
@@ -280,11 +280,14 @@ print, 'standard deviation test flux', stddev(test_flux)
 ;;----------------------------------------------------
 ;     print, 'aor before selfcal', aorname
         if keyword_set(selfcal) then begin
-           restore, strcompress(dirname + 'selfcal' + string(apradius) + '.sav',/remove_all)    
+           restore, strcompress(dirname + 'selfcal' +aorname(a) + string(apradius) + '.sav',/remove_all)    
                                 ; if intended_phase gt 0 then bin_phasearr = bin_phasearr + 0.5
            
            
            if keyword_set(phaseplot) then begin
+              help, bin_phasearr
+              help, y
+              help, yerr
               p5 = errorplot(bin_phasearr, y +delta_green, yerr, '1s', sym_size = 0.3,   sym_filled = 1, $
                              color = 'green',/overplot, name = 'selfcal', errorbar_color = 'green', $
                              errorbar_capsize = 0.025)
@@ -309,10 +312,8 @@ print, 'standard deviation test flux', stddev(test_flux)
                                 ;a guess at mid-transit
 ;            endif
 ;      endfor
-               dirname = strcompress(basedir + planetname_final +'/')
-  print, 'dirname', dirname
-     
-     p5.save, dirname+'allfluxes_binned_ch'+chname+'.png'
+
+      t = text(0.3, 0.004+1.0+ delta_green, 'selfcal', color = 'green',/overplot,/data)
 
         endif   ; if selfcal
 
@@ -342,9 +343,16 @@ print, 'standard deviation test flux', stddev(test_flux)
      endif   ; if not a snapshot (n_elements fitsname gt 15) 
   endfor                        ; n_elements(aorname)
      
-;finally save the plot
-;  print, 'planetname_fin', planetname_final
-      
+      t = text(0.3, 0.004+ 1.0, 'Raw', color = 'black',/overplot,/data)
+      t = text(0.3, 0.004+1.0 + delta_grey, 'pmap', color = 'grey',/overplot,/data)
+      t = text(0.3, 0.004+1.0+ delta_red, 'nn', color = 'red',/overplot,/data)
+      t = text(0.3, 0.004+1.0 + delta_blue, 'nn_np', color = 'blue',/overplot,/data)
+
+               dirname = strcompress(basedir + planetname_final +'/')
+  print, 'dirname', dirname
+     
+     p5.save, dirname+'allfluxes_binned_ch'+chname+'.png'
+
   end
   
 function fit_eclipse, xphase, ynorm, ynormerr, t1, dt, t3, d, delta, plotcolor

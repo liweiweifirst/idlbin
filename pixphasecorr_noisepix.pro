@@ -60,8 +60,12 @@ period = p_orbit
 semimaj = ar_semimaj
 dstar = 2.*rstar
 m_star = mstar
-transit_duration = 13.*dstar*sqrt(semimaj/m_star)
-print,'transit duration', transit_duration
+;t_dur = 13.*dstar*sqrt(semimaj/m_star)
+;b = semimaj* cos(inclination*!Pi/180.)
+;print, period, rstar, rp_rstar*rstar, b, semimaj, inclination
+t_dur =  t14  ; in days
+;t_dur = transit_duration( period, rstar, rp_rstar * rstar, b, semimaj)
+print,'transit duration in days', t_dur
 ;==========================================
 
 
@@ -131,7 +135,7 @@ print,'transit duration', transit_duration
         
                                 ;mask intervals in time where astrophysical signals exist.
                                 ;I know where the transits and eclipses are
-        s = mask_signal( phase, period, utmjd_center, transit_duration)
+        s = mask_signal( phase, period, utmjd_center, t_dur)
         
                                 ;make sure the transit doesn't get included as a nearest neighbor
         good = where(s gt 0, ngood, complement = bad)
@@ -318,7 +322,7 @@ print,'transit duration', transit_duration
         p3 = plot(time_0/60./60., flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
         
         
-        p1 = plot(phase_0, flux_m[0:ni-1]/ median(flux_m[0:ni-1]), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname, name = 'raw flux', yrange =[0.93, 1.15])
+        p1 = plot(phase_0, flux_m[0:ni-1]/ median(flux_m[0:ni-1]), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Phase', ytitle = 'Flux', title = planetname, name = 'raw flux', yrange =[0.93, 1.15])
         p4 =  plot(phase_0, (corrflux[0:ni-1] /median( corrflux[0:ni-1])) + 0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
         p2 = plot(phase_0, flux/median(flux) -0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
         p3 = plot(phase_0, flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
@@ -418,19 +422,9 @@ function distance, xcen, ycen,  j, chname
 
 end
 
-function mask_signal, phase, period, utmjd_center, transit_duration
-       ;turn bmjd into phase
-;   bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
-;  phase =( bmjd_dist / period )- fix(bmjd_dist/period)
-
-                                ;ok, but now I want -0.5 to 0.5, not 0 to 1
-                                ;need to be careful here because subtracting half a phase will put things off, need something else
-;  pa = where(phase gt 0.5,pacount)
-;  if pacount gt 0 then phase[pa] = phase[pa] - 1.0
-  ;plothist, phase, xhist, yhist, bin = 0.02,/noplot
-  ;tt = plot(xhist, yhist, xtitle = 'phase')
-                                ;turn transit duration into phase
-  transit_dur = transit_duration / 60/24.       ; now in days
+function mask_signal, phase, period, utmjd_center, t_dur
+                                 ;turn transit duration into phase
+  transit_dur = t_dur       ; now in days  / 60/24. 
   transit_phase = transit_dur / period          ; what fraction of the phase is this in transit (or eclipse)
   print, 'test transit phase', transit_phase
   
