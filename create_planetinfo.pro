@@ -361,7 +361,7 @@ chname = 0
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
-  planetname = 'wasp15'
+  planetname = 'WASP-15b'
   ra_ref = 208.92783
   dec_ref = -32.159837
 ;  aorname = ['r45675264', 'r45675776'] 

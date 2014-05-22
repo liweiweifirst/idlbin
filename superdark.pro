@@ -32,7 +32,7 @@ pro superdark
      bigim = fltarr(32, 32, 128, n_elements(fitsname))
      count = 0
      
-     for i =0, n_elements(fitsname) - 1 do begin ;read each cbcd file, find centroid, keep track
+     for i =0, n_elements(fitsname) - 1 do begin ;
         header = headfits(fitsname(i))           ;
         ch = sxpar(header, 'CHNLNUM')
         framtime = sxpar(header, 'FRAMTIME')

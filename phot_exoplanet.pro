@@ -339,7 +339,7 @@ endfor                          ;for each AOR
 if keyword_set(breatheap) then begin
    savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav')
 endif else begin
-   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'test.sav',/remove_all)
+   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
 endelse
 
 save, planethash, filename=savename
