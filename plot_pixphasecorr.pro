@@ -148,17 +148,27 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
         
 ;-----------------
 ;compare two methods of measuring np
-gp1 = where(bin_phase gt -0.45 and bin_phase lt -0.1)
-gp2 = where(bin_phase gt 0.05 and bin_phase lt 0.45)
+        gp1 = where(bin_phase gt -0.45 and bin_phase lt -0.1)
+        gp2 = where(bin_phase gt 0.05 and bin_phase lt 0.45)
 
 ;what is the standard deviation of bin_flux_np away from eclipse and transit
-if a eq startaor then begin
-   test_flux = [bin_flux_np(gp1), bin_flux_np(gp2)] 
-endif else begin
-   test_flux = [test_flux, bin_flux_np(gp1), bin_flux_np(gp2)] 
-endelse
-print, n_elements(gp1), n_elements(gp2), n_elements(test_flux)
-print, 'standard deviation test flux', stddev(test_flux)
+        if a eq startaor then begin
+           test_flux = [bin_flux_np(gp1), bin_flux_np(gp2)] 
+        endif else begin
+           test_flux = [test_flux, bin_flux_np(gp1), bin_flux_np(gp2)] 
+        endelse
+        print, n_elements(gp1), n_elements(gp2), n_elements(test_flux)
+        print, 'standard deviation test flux', stddev(test_flux)
+
+
+;-----------------
+;put all the aor's together into one big array for input to
+;fitting the light curve
+        if a eq startaor then phasearr = bin_phase else phasearr = [phasearr, bin_phase]
+;XXX add the other fluxes as well.
+        if a eq startaor then fluxarr_np = bin_flux_np else fluxarr_np = [fluxarr_np, bin_flux_np] 
+        if a eq startaor then errarr_np =  bin_fluxerr_np else errarr_np = [errarr_np,  bin_fluxerr_np]  ; and error bars on above
+
 ;-----------------
 ;plot the results
         if keyword_set(errorbars) then begin
@@ -269,15 +279,22 @@ print, 'standard deviation test flux', stddev(test_flux)
         
 ;----------------------------------------------------
                                 ;fit the curves to a trapezoid, and plot
-        if keyword_set(phaseplot) and keyword_set(fit_eclipse) then begin
-           print, 'starting all fitting'
-           trap = fit_eclipse(bin_phase, bin_flux/median(bin_flux) , bin_fluxerr/median(bin_flux),0.486 , 0.005,0.515,0.001, delta_red,'red')
-           trap = fit_eclipse(bin_phase,bin_flux_np /median(bin_flux_np), bin_fluxerr_np/median(bin_flux_np),0.486 , 0.005,0.515,0.001, delta_blue,'blue')
-           trap = fit_eclipse(bin_phase, (bin_corrflux /median( bin_corrflux)),bin_corrfluxerr / median(bin_corrflux),0.486 , 0.005,0.515,0.001, delta_grey,'grey')
+;        if keyword_set(phaseplot) and keyword_set(fit_eclipse) then begin
+;           print, 'starting all fitting'
+;           trap = fit_eclipse(bin_phase, bin_flux/median(bin_flux) , bin_fluxerr/median(bin_flux),0.486 , 0.005,0.515,0.001, delta_red,'red')
+;           trap = fit_eclipse(bin_phase,bin_flux_np /median(bin_flux_np), bin_fluxerr_np/median(bin_flux_np),0.486 , 0.005,0.515,0.001, delta_blue,'blue')
+;           trap = fit_eclipse(bin_phase, (bin_corrflux /median( bin_corrflux)),bin_corrfluxerr / median(bin_corrflux),0.486 , 0.005,0.515,0.001, delta_grey,'grey')
            
-        endif
+;        endif
         
 ;;----------------------------------------------------
+;fit the curves with a mandel & agol function
+        if keyword_set(phaseplot) and keyword_set(fit_eclipse) then begin
+           print, 'starting function fitting'
+           fit = function_fit_lightcurve( planetname, phasearr, fluxarr_np, errarr_np)
+
+        endif
+;----------------------------------------------------
 ;     print, 'aor before selfcal', aorname
         if keyword_set(selfcal) then begin
            restore, strcompress(dirname + 'selfcal' +aorname(a) + string(apradius) + '.sav',/remove_all)    
@@ -293,7 +310,7 @@ print, 'standard deviation test flux', stddev(test_flux)
                              errorbar_capsize = 0.025)
                                 ; print, 'selfcal fluxes', y + delta_green
               if keyword_set(fit_eclipse) then begin
-                 trap = fit_eclipse(bin_phasearr, y ,yerr,0.486 , 0.005,0.515,0.001, delta_green,'green')
+                 ;trap = fit_eclipse(bin_phasearr, y ,yerr,0.486 , 0.005,0.515,0.001, delta_green,'green')
               endif
               
            endif else begin
