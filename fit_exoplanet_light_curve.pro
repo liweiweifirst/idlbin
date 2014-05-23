@@ -25,12 +25,14 @@ pro fit_exoplanet_light_curve, planetname, bin_level, apradius, chname, snapshot
   snapaor = stareaor + 1        ; the first AOR in the list which is snapshots
   basedir = planetinfo[planetname, 'basedir']
   dirname = strcompress(basedir + planetname+ '/'); +'/hybrid_pmap_nn/')
-  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
-;  filename = '/Users/jkrick/irac_warm/pcrs_planets/wasp-14b/hybrid_pmap_nn/wasp14_phot_ch2_2.50000.sav'
-  print, 'inside fit+exopl', savefilename
-  restore, savefilename
+
 
   if keyword_set(snapshots) then begin
+     savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
+;  filename = '/Users/jkrick/irac_warm/pcrs_planets/wasp-14b/hybrid_pmap_nn/wasp14_phot_ch2_2.50000.sav'
+     print, 'inside fit+exopl', savefilename
+     restore, savefilename
+     
      for a = snapaor, n_elements(aorname) -1 do begin
                                 ; plothist, planethash[aorname(a),'corrflux'], xhist, yhist, bin = 0.0005, /noplot,/nan
                                 ; ap = plot(xhist, yhist)
@@ -43,28 +45,33 @@ pro fit_exoplanet_light_curve, planetname, bin_level, apradius, chname, snapshot
         if a eq snapaor then fluxarr = [meancorr] else fluxarr = [fluxarr, meancorr]
         if a eq snapaor then errarr = [sigmacorr] else errarr = [errarr, sigmacorr]
      endfor
+;now sort the arrays since they are taken at random phase
+     sp = sort(phasearr)
+     phasearr = phasearr[sp]
+     fluxarr = fluxarr[sp]
+     errarr = errarr[sp]
   endif else begin   
 ; working with staring mode, not snapshots
-     startaor = 1  ; 0th aor is a peakup aor
+     startaor = 1               ; 0th aor is a peakup aor
      for a = startaor, n_elements(aorname) -1 do begin
+        ;restore the pixphasecorr_np save file
+        filename =strcompress(dirname +'pixphasecorr_ch'+chname+'_'+aorname(a) +string(apradius)+'.sav',/remove_all)
+        print, a, ' ', aorname(a), 'restoring', filename
+        restore, filename
+
         ;pull together the whole light curve
-        if a eq startaor then phasearr = (planethash[aorname(a),'phase']) else phasearr = [phasearr, planethash[aorname(a),'phase']]
-        if a eq startaor then fluxarr = x  ; want this to be the nearest_neighbor with np light curve
-        if a eq startaor then errarr = [sigmacorr] else errarr = [errarr, sigmacorr]  ; and error bars on above
+        if a eq startaor then phasearr = phase else phasearr = [phasearr, phase]
+        if a eq startaor then fluxarr = flux_np else fluxarr = [fluxarr, flux_np] ; want this to be the nearest_neighbor with np light curve
+        if a eq startaor then errarr = fluxerr_np else errarr = [errarr, fluxerr_np]  ; and error bars on above
      endfor
+; if not snapshots, need to do some binning XXX
 
   endelse
   
- ;now sort the arrays since they are taken at random phase
- sp = sort(phasearr)
- phasearr = phasearr[sp]
- fluxarr = fluxarr[sp]
- errarr = errarr[sp]
-
-; if not snapshots, need to do some binning XXX
+ 
 
 
- ;and normalize for more understandable plots
+ ;normalize for more understandable plots
  normcorr = mean(fluxarr)
  fluxarr = fluxarr / normcorr
  errarr = errarr / normcorr
