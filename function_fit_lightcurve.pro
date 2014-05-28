@@ -1,9 +1,9 @@
-function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr
-
+function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefilename
 
  ;first pull the info we know from the internet
   exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
   exosystem = strmid(planetname, 0, 7) + ' b' ;'HD 209458 b' ;
+  if planetname eq 'WASP-52b' then teq_p = 1315
 
   get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
                        TEQ_P=teq_p,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA='4.5',$
@@ -19,31 +19,57 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr
  normcorr = mean(fluxarr)
  fluxarr = fluxarr / normcorr
  errarr = errarr / normcorr
- testplot = errorplot(phasearr, fluxarr, errarr, '1s', yrange = [0.985, 1.005])
+
+ ;actually want the bottom of eclipse to be at 1.0
+ ;fake this for now  XXX
+ fluxarr = fluxarr + 0.0015
+
+;and sort them into phase-order
+ sp = sort(phasearr)
+ phasearr = phasearr[sp]
+ fluxarr = fluxarr[sp]
+ errarr = errarr[sp]
+
+;remove nan's in error array
+ print, 'n before nan', n_elements(phasearr)
+ bad = where(finite(errarr) lt 1, badcount, complement = good)
+ phasearr = phasearr(good)
+ fluxarr = fluxarr(good)
+ errarr = errarr(good)
+ print, 'n after nan', n_elements(phasearr)
+
+
+;delete this if I want to overplot on the plot_pixphasecorr plot
+ ;XXX will need to add the color offsets.
+ testplot = errorplot(phasearr, fluxarr, errarr, '1s', yrange = [0.995, 1.005])
+
 ;Initial guess, start with those from the literature
-  params0 = [fp_fstar0, rp_rstar, ar_semimaj, inclination]
-  parinfo = replicate({value:0.D, fixed:0, limited:[0,0], limits:[0.D,0.D]}, n_elements(params0))
+ amplitude = 1.0              ; messing around with amplitude of the phase curve.
+ phase_offset = 0.
+ params0 = [fp_fstar0, rp_rstar, ar_semimaj, inclination, amplitude, phase_offset]
+ parinfo = replicate({value:0.D, fixed:0, limited:[0,0], limits:[0.D,0.D]}, n_elements(params0))
 ; ;limit fp_f_star0 to be positive and less than 1.
-  parinfo[0].limited[0] = 1
-  parinfo[0].limits[0] = 0.0 ;;
-  parinfo[0].limited[1] = 1
-  parinfo[0].limits[1] = 1.0
+ parinfo[0].limited[0] = 1
+ parinfo[0].limits[0] = 0.0 ;;
+ parinfo[0].limited[1] = 1
+ parinfo[0].limits[1] = 1.0
 ;  parinfo[0].fixed = 1
 ; ;limit rp/rf_star to be positive and less than 1.
-  parinfo[1].limited[0] = 1
-  parinfo[1].limits[0] = 0.0 ;;
-  parinfo[1].limited[1] = 1
-  parinfo[1].limits[1] = 1.0
+ parinfo[1].limited[0] = 1
+ parinfo[1].limits[0] = 0.0 ;;
+ parinfo[1].limited[1] = 1
+ parinfo[1].limits[1] = 1.0
 ; ;limit ar_semimaj to be positive 
-  parinfo[2].limited[0] = 1
-  parinfo[2].limits[0] = 0.0 ;;
+ parinfo[2].limited[0] = 1
+ parinfo[2].limits[0] = 0.0 ;;
 ; limit inclination to be positive 
-  parinfo[3].limited[0] = 1
-  parinfo[3].limits[0] = 0.0 ;;
+ parinfo[3].limited[0] = 1
+ parinfo[3].limits[0] = 0.0 ;;
 
 ;do the fitting
-  afargs = {t:phasearr, flux:fluxarr, err:errarr, p_orbit:p_orbit, mjd_start:mjd_start, mjd_transit:mjd_transit, savefilename:savefilename};, rp_rstar:rp_rstar ar_semimaj:ar_semimaj,,inclination:inclination}
-  pa = mpfit('mandel_agol', params0, FUNCTARGS=afargs, PERROR=spa, BESTNORM=achi, DOF=adof, COVAR = COV, status = status, errmsg = errmsg, parinfo = parinfo);, savefilename = savefilename)
+ afargs = {t:phasearr, flux:fluxarr, err:errarr, p_orbit:p_orbit, mjd_start:mjd_start, mjd_transit:mjd_transit, savefilename:savefilename} ;, rp_rstar:rp_rstar ar_semimaj:ar_semimaj,,inclination:inclination}
+ print, 'calling mandel_agol'
+ pa = mpfit('mandel_agol', params0, FUNCTARGS=afargs, PERROR=spa, BESTNORM=achi, DOF=adof, COVAR = COV, status = status, errmsg = errmsg, parinfo = parinfo) ;, savefilename = savefilename)
 
   print, 'status', status
   print, errmsg
