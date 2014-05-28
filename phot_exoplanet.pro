@@ -19,7 +19,7 @@ case apradius of
    end
    2.5: begin
       apval = 2
-      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p50_s3_7_0p1s_x4_140314.sav'
+      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x16_sdark_140523.sav'
       if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p50_s3_7_0p4s_140314.sav'
    end
    2.75: apval = 5
@@ -175,7 +175,7 @@ for a =startaor, stopaor do begin
       back = b[*,0]
       backerr = bs[*,0]
       npcentroids = np   ;keep track of np from get_centroids
-
+;      print, 'testing noise pixel', npcentroids
       ;calculate noise pixel
 ;      print, mean(x_center), mean(y_center), naxis
 ;      np = noisepix(im, x_center, y_center, ronoise, gain, exptime, fluxconv, naxis, 3.5, 6.5, 12.5)
@@ -327,8 +327,8 @@ print, 'testing phase', phase[0:10]
       values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, centerpixarr1, centerpixarr2, centerpixarr3, centerpixarr4, centerpixarr5, centerpixarr6, sigmapixarr1, sigmapixarr2, sigmapixarr3, sigmapixarr4, sigmapixarr5, sigmapixarr6, phase)
       planethash[aorname(a)] = HASH(keys, values)
    endif else begin
-      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase', 'npcentroids']
-      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr)
+      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase', 'npcentroids','exptime']
+      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr, exptime)
       planethash[aorname(a)] = HASH(keys, values)
    endelse
 
@@ -339,7 +339,7 @@ endfor                          ;for each AOR
 if keyword_set(breatheap) then begin
    savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav')
 endif else begin
-   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
+   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'superdark.sav',/remove_all)
 endelse
 
 save, planethash, filename=savename
@@ -348,8 +348,8 @@ print, 'time check', systime(1) - t1
 
 
 ;testplot = plot(timearr, xarr, '1s', sym_size = 0.1, sym_filled = 1, xtitle = 'time', ytitle = 'xcen')
-plothist, xarr, xhist, yhist, /noplot, bin = 0.01
-testplot = plot(xhist, yhist,  xtitle = 'X centroid', ytitle = 'Number', thick =3, color = 'blue',/overplot)
+plothist, npcentroidsarr, xhist, yhist, /noplot, bin = 0.01
+testplot = plot(xhist, yhist,  xtitle = 'NP', ytitle = 'Number', thick =3, color = 'blue')
 
                                 ; print, planethash.keys()
  ; print, planethash[aorname(0)].keys()

@@ -54,10 +54,18 @@ IF n1 NE 0 THEN lambda_planet[i1] = 0.0
 IF n2 NE 0 THEN lambda_planet[i2] = lambda_2[i2]/P^2
 IF n3 NE 0 THEN lambda_planet[i3] = 1.0
 
+;now add in a phase curve
 alpha = ABS(phi_orbit-!dpi)
-phase_curve = (sin(alpha) + (!dpi-alpha)*cos(alpha))/!dpi  ;; Phase curve for a Lambert sphere
-rel_flux = (1-lambda_star) + params0[0] * (1-lambda_planet) * phase_curve
+;phase_curve = (sin(alpha) + (!dpi-alpha)*cos(alpha))/!dpi  ;; Phase curve for a Lambert sphere from Seager book 
+
+;testing
+phase_curve = params0[4]*sin(alpha + params0[5])
+
+rel_flux = (1-lambda_star) + params0[0] * (1-lambda_planet) ;* phase_curve
 ;rel_flux = (1-lambda_star) + fp_fstar0 * (1-lambda_planet) * phase_curve
+
+
+
 
 model = rel_flux
 model = (flux - model) / err
@@ -68,8 +76,7 @@ if keyword_set(overplot) then begin
 endif
 
 ;change 'phot' to 'model'
-strput, savefilename, 'model',69 
-print, 'inside mandel', savefilename
+;print, 'at end of  mandel', savefilename
 save, phase, rel_flux, filename = savefilename
 return, model
 end

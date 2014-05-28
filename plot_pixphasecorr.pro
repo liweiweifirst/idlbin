@@ -287,13 +287,6 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
            
 ;        endif
         
-;;----------------------------------------------------
-;fit the curves with a mandel & agol function
-        if keyword_set(phaseplot) and keyword_set(fit_eclipse) then begin
-           print, 'starting function fitting'
-           fit = function_fit_lightcurve( planetname, phasearr, fluxarr_np, errarr_np)
-
-        endif
 ;----------------------------------------------------
 ;     print, 'aor before selfcal', aorname
         if keyword_set(selfcal) then begin
@@ -360,18 +353,31 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
      endif   ; if not a snapshot (n_elements fitsname gt 15) 
   endfor                        ; n_elements(aorname)
      
-      t = text(0.3, 0.004+ 1.0, 'Raw', color = 'black',/overplot,/data)
-      t = text(0.3, 0.004+1.0 + delta_grey, 'pmap', color = 'grey',/overplot,/data)
-      t = text(0.3, 0.004+1.0+ delta_red, 'nn', color = 'red',/overplot,/data)
-      t = text(0.3, 0.004+1.0 + delta_blue, 'nn_np', color = 'blue',/overplot,/data)
 
-               dirname = strcompress(basedir + planetname_final +'/')
-  print, 'dirname', dirname
-     
-     p5.save, dirname+'allfluxes_binned_ch'+chname+'.png'
-
-  end
+;;----------------------------------------------------
+  ;make a legend
+  t = text(0.3, 0.004+ 1.0, 'Raw', color = 'black',/overplot,/data)
+  t = text(0.3, 0.004+1.0 + delta_grey, 'pmap', color = 'grey',/overplot,/data)
+  t = text(0.3, 0.004+1.0+ delta_red, 'nn', color = 'red',/overplot,/data)
+  t = text(0.3, 0.004+1.0 + delta_blue, 'nn_np', color = 'blue',/overplot,/data)
   
+
+;;----------------------------------------------------
+;fit the curves with a mandel & agol function
+  if keyword_set(phaseplot) and keyword_set(fit_eclipse) then begin
+     print, 'starting function fitting'
+     modelfilename = strcompress(dirname + planetname +'_model_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
+     
+     fit = function_fit_lightcurve( planetname, phasearr, fluxarr_np, errarr_np, modelfilename)
+     
+  endif
+  
+;;----------------------------------------------------
+  dirname = strcompress(basedir + planetname_final +'/')
+  p5.save, dirname+'allfluxes_binned_ch'+chname+'.png'
+  
+end
+
 function fit_eclipse, xphase, ynorm, ynormerr, t1, dt, t3, d, delta, plotcolor
      print, 'inside fit_eclipse, working on ', plotcolor
 

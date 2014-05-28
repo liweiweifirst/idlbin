@@ -1,4 +1,4 @@
-pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phaseplot, sclkplot = sclkplot, timeplot = timeplot, Dsweet = dsweet, selfcal=selfcal, centerpixplot = centerpixplot, errorbars = errorbars, unbinned_xplot = unbinned_xplot, unbinned_yplot = unbinned_yplot, unbinned_fluxplot=unbinned_fluxplot, unbinned_npplot = unbinned_npplot, unbinned_bkgplot = unbinned_bkgplot, Position_plot = position_plot
+pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phaseplot, sclkplot = sclkplot, timeplot = timeplot, Dsweet = dsweet, selfcal=selfcal, centerpixplot = centerpixplot, errorbars = errorbars, unbinned_xplot = unbinned_xplot, unbinned_yplot = unbinned_yplot, unbinned_fluxplot=unbinned_fluxplot, unbinned_npplot = unbinned_npplot, unbinned_bkgplot = unbinned_bkgplot, Position_plot = position_plot, DN_plot = DN_plot
 ;example call plot_exoplanet, 'wasp15', 2*63L
 
 COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr
@@ -21,6 +21,10 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)
+
+  plothist, planethash[aorname(0),'npcentroids'], xhist, yhist, /noplot, bin = 0.01
+  testplot = plot(xhist, yhist,  xtitle = 'NP', ytitle = 'Number', thick =3, color = 'blue')
+
   ;print, 'testing phase', (planethash[aorname(0),'phase'] )[0:10], (planethash[aorname(0),'phase'] )[600:610]
 
   colorarr = ['blue', 'red','black','green','grey','purple', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ]
@@ -171,6 +175,36 @@ endif
         
      endfor
   endif
+;------
+  if keyword_set(DN_plot) then begin
+     fluxconv = 0.1469 ;MJy/sr / DN/s;
+;     exptime = planethash[aorname(a),'exptime']
+     exptime = 1.92 ;XXX
+     gain = 3.71
+     nch = 2 ; XXX
+     pxscal1 = [-1.22334117768332D, -1.21641835430637D, -1.22673962032422D, -1.2244968325831D]
+     pxscal1 = abs(pxscal1)
+     pxscal2 = [1.22328355209902D, 1.21585676679388D, 1.22298117494211D, 1.21904995758086D]
+     pscale2 = pxscal1[nch-1] * pxscal2[nch-1]
+     scale = pscale2 * !DPI * !DPI / (3600.D * 3600.D * 180.D * 180.D) * 1.0D+06
+
+   for a = 0,n_elements(aorname) -1 do begin ; 0, n_elements(aorname) - 1 do begin
+
+      mjy = planethash[aorname(a),'flux']
+      mjypersr = mjy/ scale
+      DNpers = mjypersr / fluxconv
+      DN = DNpers *exptime
+      e = DN * gain
+        if a eq 0 then begin
+           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., e,'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'Electrons', xtitle = 'Time(hrs)') ;,title = planetname
+        endif else begin
+           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., e,'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+        endelse
+        
+     endfor
+    ay.save, dirname +'e_time_ch'+chname+'.png'
+
+  endif
 
 ;------
   
@@ -205,7 +239,7 @@ endif
      print, 'testing phase', (planethash[aorname(a),'phase'] )[0:10], (planethash[aorname(a),'phase'] )[600:610]
      print, 'testing x', bin_xcen[0:10]
      print, 'testing y', bin_ycen[0:10]
-
+     print, 'testing npcent', bin_npcent[0:10]
 ;------------------------------------------------------
      ;possible comparison statistic
      ;what is the distribution of standard deviations among the corrfluxes?
@@ -293,7 +327,7 @@ endif
         setxrange = [-0.5, 0.5]
         corrnormoffset = 0; 0.02
         corroffset = 0;0.001
-        setynormfluxrange = [0.97, 1.01];[0.97, 1.005]
+        setynormfluxrange = [0.989, 1.005];[0.97, 1.005]
         if a eq startaor then begin    ; for the first AOR
                                 ;set the normalization values from the
                                 ;medians of the first AOR...is close enough
@@ -331,7 +365,7 @@ endif
 
            endif  ;enough pmap corrections
 
-           ps= plot(bin_phase, bin_np, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
+           ps= plot(bin_phase, bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
                     xtitle = 'Orbital Phase', ytitle = 'Noise Pixel', title = planetname,$
                     xrange = setxrange)
 
@@ -366,7 +400,7 @@ endif
            endif
 
            ps.window.SetCurrent
-           ps = plot(bin_phase, bin_np, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], /overplot,/current) ;, xtitle = 'Orbital Phase', ytitle = 'Normalized Flux',) 
+           ps = plot(bin_phase, bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], /overplot,/current) ;, xtitle = 'Orbital Phase', ytitle = 'Normalized Flux',) 
 
            pt.window.SetCurrent
            pt = plot(bin_phase, bin_bkgd, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a],/overplot,/current) 
@@ -412,7 +446,7 @@ endif
             endif
 
            ps.window.SetCurrent
-           ps = plot(bin_phase, bin_np, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a],$
+           ps = plot(bin_phase, bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a],$
                      /overplot,/current) 
 
            pt.window.SetCurrent

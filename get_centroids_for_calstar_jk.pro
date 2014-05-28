@@ -405,7 +405,7 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
                 expid = sxpar(h, 'EXPID')
 
                 box_centroider, slice, sigma2, xmax, ymax, 3, 6,3, tx, ty, tf, tb, $
-                                txs, tys, tfs, tbs, tc, tcb, tnp, xfwhm, yfwhm, expid
+                                txs, tys, tfs, tbs, tc, tcb, tnp, xfwhm, yfwhm, expid,/twopass
 
 
 ;pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
