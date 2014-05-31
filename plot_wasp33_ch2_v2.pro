@@ -1,11 +1,12 @@
 pro plot_wasp33_ch2
-planetname = 'wasp33'
+planetname = 'WASP-33b'
   colorarr = ['deep_pink', 'magenta', 'medium_purple', 'hot_pink', 'light_pink', 'rosy_brown', 'chocolate', 'saddle_brown', 'maroon', 'orange_red', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki','black', 'light_cyan', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green']
 
 ;  fits_read, '/Users/jkrick/idlbin/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_120124.fits', pmapdata, pmapheader
 
-  restore, '/Users/jkrick/irac_warm/pcrs_planets/wasp33/wasp33_phot_ch2.sav'
+  restore, '/Users/jkrick/irac_warm/pcrs_planets/wasp-33b/WASP-33b_phot_ch2_2.25000superdark.sav'
   aorname = ['r45383424', 'r45384448', 'r45384704'] ;ch2
+  chname = '2'
 
 ;-------------------------------------------------------
 ;need to re-correct with the new pmap
@@ -24,18 +25,18 @@ planetname = 'wasp33'
 ;-------------------------------------------------------
 ;run code to read in all the input planet parameters
   planetinfo = create_planetinfo()
-  chname = planetinfo[planetname, 'chname']
-  ra_ref = planetinfo[planetname, 'ra']
-  dec_ref = planetinfo[planetname, 'dec']
+;  chname = planetinfo[planetname, 'chname']
+;  ra_ref = planetinfo[planetname, 'ra']
+;  dec_ref = planetinfo[planetname, 'dec']
   aorname = planetinfo[planetname, 'aorname']
   basedir = planetinfo[planetname, 'basedir']
-  utmjd_center =  planetinfo[planetname, 'utmjd_center']
-  transit_duration =  planetinfo[planetname, 'transit_duration']
-  period =  planetinfo[planetname, 'period']
-  intended_phase = planetinfo[planetname, 'intended_phase']
-  stareaor = planetinfo[planetname, 'stareaor']
-  plot_norm= planetinfo[planetname, 'plot_norm']
-  plot_corrnorm = planetinfo[planetname, 'plot_corrnorm']
+;  utmjd_center =  planetinfo[planetname, 'utmjd_center']
+;  transit_duration =  planetinfo[planetname, 'transit_duration']
+;  period =  planetinfo[planetname, 'period']
+;  intended_phase = planetinfo[planetname, 'intended_phase']
+;  stareaor = planetinfo[planetname, 'stareaor']
+;  plot_norm= planetinfo[planetname, 'plot_norm']
+;  plot_corrnorm = planetinfo[planetname, 'plot_corrnorm']
  
 
 
@@ -178,8 +179,8 @@ save, bin_timearr, filename = '/Users/jkrick/irac_warm/pcrs_planets/wasp33/bin_t
 save, bin_flux, filename = '/Users/jkrick/irac_warm/pcrs_planets/wasp33/bin_flux.sav'
 save, bin_corrflux, filename = '/Users/jkrick/irac_warm/pcrs_planets/wasp33/bin_corrflux.sav'
 
-;     pl = plot((bin_timearr - bin_timearr(0))/60./60., bin_flux, '6r1s', sym_size = 0.1,   sym_filled = 1, xrange = [0,40], yrange = [0.165, 0.180], xtitle = 'Time (hrs)', ytitle = 'Flux (Jy)')
-;     pl = plot((bin_timearr - bin_timearr(0))/60./60., bin_corrflux-0.002, '6r1s', sym_size = 0.1,   sym_filled = 1, color = 'black',/overplot)
+     pl = plot((bin_timearr - bin_timearr(0))/60./60., bin_flux, '6r1s', sym_size = 0.1,   sym_filled = 1, xrange = [0,40], yrange = [0.165, 0.180], xtitle = 'Time (hrs)', ytitle = 'Flux (Jy)')
+     pl = plot((bin_timearr - bin_timearr(0))/60./60., bin_corrflux-0.002, '6r1s', sym_size = 0.1,   sym_filled = 1, color = 'black',/overplot)
 
 ;     pl = plot(bin_bmjdarr, bin_flux/median(bin_flux) + 0.03, '6r1s', sym_size = 0.1,   sym_filled = 1,  yrange = [0.97,1.05], xrange = [-0.7,0.7],xtitle = 'Phase', ytitle = 'Normalized Flux')
 ;     pl = plot(bin_bmjdarr, (bin_corrflux/median(bin_corrflux))-0.003, '6r1s', sym_size = 0.1,   sym_filled = 1, color = 'black',/overplot)
