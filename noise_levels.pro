@@ -50,9 +50,9 @@ pro noise_levels
   sigma_poisson = sqrt(avgelectrons)
   print, 'poisson noise', sigma_poisson
 
-  p = plot( bin_scale, sigma_poisson / root_n, thick = 3, xtitle = 'Binning Scale (N frames)', ytitle = 'Noise (Electrons)', axis_style = 1,/xlog,/ylog, xrange = [1, 1000], margin = 0.2, yrange = [10.0, 20000.])
+  p = plot( bin_scale, sigma_poisson / root_n, thick = 3, xtitle = 'Binning Scale (N frames)', ytitle = 'Noise (Electrons)', axis_style = 1,/xlog,/ylog, xrange = [1, 1000], margin = 0.2, yrange = [1.0, 20000.])
   t = text(3., 200., 'Source Poisson', color = 'black', /current,/data)
-  xaxis = axis('x', location = [0, 4.25], coord_transform = [0, 2/60.],target = p, textpos = 1)
+  xaxis = axis('x', location = [0, 4.25], coord_transform = [0, 2/60.],target = p, textpos = 1, title = 'Binning Scale (Min.)')
   xaxis = axis('y', location = [2.9699,0], coord_transform = [0, 1.],target = p, tickdir = 0, textpos = 0, showtext = 0)
 
 ;-----------------
@@ -165,13 +165,20 @@ pro noise_levels
 ; stellar variability  and noise on the stellar variation
 ;there is a huge range here
 ;maybe I want to make this a big greyscale bar in the plot?
-s_vary = .0001 ; assume 0.1%
-svary_signal = s_vary*avgelectrons
-print, 'stellar variation', svary_signal
+  s_vary = 25                   ; assume 0.1%
+  svary_signal = s_vary*avgelectrons
+  print, 'stellar variation', svary_signal
 
 ;-----------------
 ;do we have a prediction of an earth-like planet transitting in a habitable zone?
-
+;Gillon et al 2014 for GJ1214 claim 70ppm
+;I think that is 0.00007 or 
+  superearth_depth = 0.00007          
+  superearth_signal = superearth_depth*avgelectrons
+  print, 'superearth signa', superearth_signal
+  superearth_signal= fltarr(n_elements(bin_scale)) + superearth_signal
+  p = plot(bin_scale, superearth_signal, thick = 3, color = 'maroon',/overplot, axis_style = 1)
+  t = text(50., 9., '70 ppm Superearth', color = 'maroon', /current,/data)
 
 
 ;save
