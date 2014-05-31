@@ -69,9 +69,10 @@ print,'transit duration in days', t_dur
 ;==========================================
 
 
+startaor = 1
+stopaor =   n_elements(aorname) - 1
 
-
-  for a = 0, n_elements(aorname) - 1 do begin  ;run through all AORs
+  for a = startaor, stopaor do begin  ;run through all AORs
      print, 'working on aor', aorname(a)
      np = planethash[aorname(a),'npcentroids']  ; np is noise pixel, using value from box_centroider, not noisepix
      xcen = planethash[aorname(a), 'xcen']
@@ -80,7 +81,8 @@ print,'transit duration in days', t_dur
      fluxerr_m = Planethash[aorname(a), 'fluxerr']
      bmjd = planethash[aorname(a),'bmjdarr']
      phase = planethash[aorname(a),'phase']
-     
+             print, 'testing phase at beginning ',phase[0:200]
+
                                 ;make sure we are not trying to correct snapshots with nearest neighbors, 
                                 ; won't work because some are in the transits and eclipses which I have excluded.
      if n_elements(np) gt 1000 then begin
@@ -135,6 +137,7 @@ print,'transit duration in days', t_dur
         
                                 ;mask intervals in time where astrophysical signals exist.
                                 ;I know where the transits and eclipses are
+        print, 'testing phase before mask_signal',phase[0:200]
         s = mask_signal( phase, period, utmjd_center, t_dur)
         
                                 ;make sure the transit doesn't get included as a nearest neighbor
@@ -168,9 +171,14 @@ print,'transit duration in days', t_dur
                ;track the range in time for each point
               delta_time(j) = abs(time_0[j]- nearesttime(n_elements(nearesttime)-1))
 ;                                       
-              ;make sure that the nearest neighbor is not the point itself
-              ;if it is, then get rid of that one and just use the nearest n-1
+                                ;make sure that the nearest neighbor is not the point itself
+                                ;if it is, then get rid of that one and just use the nearest n-1
+                                ;this should never really happen because I find the nearest 
+                                ;neighbor by finding the distance from the target to all other points.  
+                                ;So there is never the case of finding the distance to itself.
+              ;the few cases it finds probably are duplicate positions.
               if  xcen2(j) eq nearestx(0) and ycen2(j) eq nearesty(0) then begin
+;                 print, 'got a nearest neighbor as the target', j
                  nearestx = nearestx[1:*]
                  nearesty = nearesty[1:*]
                  nearestflux = nearestflux[1:*]
@@ -433,7 +441,10 @@ function mask_signal, phase, period, utmjd_center, t_dur
   bad_e2 = where(phase le -0.5 + transit_phase/2., n_bad_e2)
   
   print, 'testing fraction of bad phases', float(n_bad_t + n_bad_e1 +n_bad_e2 )/  float(n_elements(phase))
-  
+;  if n_bad_t gt 0 then print, 'testing masked transit phases', phase(bad_t)
+;  if n_bad_e1 gt 0 then print, 'testing e1 phases', phase(bad_e1)
+;  if n_bad_e2 gt 0 then print, 'testing e2 phases', phase(bad_e2)
+
   s = dblarr(n_elements(phase)) + 1.D
   s(bad_t) = 0.
   s(bad_e1) = 0.
