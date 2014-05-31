@@ -65,8 +65,8 @@ planethash = hash()
 if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_120827_occthresh.fits'$
                                       else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
 fits_read,occ_filename, occdata, occheader
-startaor =0
-stopaor = n_elements(aorname) - 1
+startaor =1;0
+stopaor = 1;n_elements(aorname) - 1
 for a =startaor, stopaor do begin
    print, 'working on ',aorname(a)
    dir = dirname+ string(aorname(a) ) 
@@ -86,7 +86,7 @@ for a =startaor, stopaor do begin
 
 
 
-   for i =0.D, n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
+   for i =0.D, 10 do begin; n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
  ;      print, 'working on ', fitsname(i)         
       header = headfits(fitsname(i)) ;
       sclk_obs= sxpar(header, 'SCLK_OBS')
@@ -113,7 +113,7 @@ for a =startaor, stopaor do begin
          corrfluxarr = xarr
          corrfluxerrarr = xarr
          timearr = xarr
-         bmjd = xarr
+         bmjd = dblarr(63*(n_elements(fitsname)))
          backarr = xarr
          backerrarr = xarr
          nparr = xarr
@@ -127,7 +127,7 @@ for a =startaor, stopaor do begin
          corrfluxarr = xarr
          corrfluxerrarr = xarr
          timearr = xarr
-         bmjd = xarr
+         bmjd = dblarr(n_elements(fitsname))
          backarr = xarr
          backerrarr = xarr
          nparr = xarr
@@ -144,7 +144,8 @@ for a =startaor, stopaor do begin
          sclkarr = sclk_obs
          bmjdarr = bmjd_obs
       endelse
-      
+;         print, 'bmjdarr split up', bmjdarr(0), ' ' ,bmjdarr(20), ' ' ,bmjdarr(60),  format = '(A, D0, A, D0, A, D0)'
+
       ;read in the files
       fits_read, fitsname(i), im, h
       fits_read, buncname(i), unc, hunc
@@ -237,8 +238,9 @@ for a =startaor, stopaor do begin
       endif else begin
                ;correct for pixel phase effect based on pmaps from Jim
       ;file_suffix = ['500x500_0043_120828.fits','0p1s_x4_500x500_0043_121120.fits']
-         corrflux = iracpc_pmap_corr(abcdflux,x_center,y_center,ch,/threshold_occ, threshold_val = 20) ;, file_suffix = file_suffix)
-         corrfluxerr = fs  ;leave out the pmap err for now
+;;;         corrflux = iracpc_pmap_corr(abcdflux,x_center,y_center,ch,/threshold_occ, threshold_val = 20) ;, file_suffix = file_suffix)
+         corrflux = abcdflux
+         corrfluxerr = fs       ;leave out the pmap err for now
       endelse
 
 
@@ -257,6 +259,7 @@ for a =startaor, stopaor do begin
          backerrarr[i*63] = backerr[1:*]
          nparr[i*63] = np[1:*]
          npcentroidsarr[i*63] = npcentroids[1:*]
+ ;        help, bmjd
          if keyword_set(columntrack) then begin 
                                 ; I think I deleted more parts of this than I may have intended, so if it is not working, that may be why
             centerpixarr1 = centerpixval1[1:*]
@@ -297,7 +300,7 @@ for a =startaor, stopaor do begin
 ; print, 'fluxarr', fluxarr[0:10]
    
    
-   print, 'testing bmjd, utmjd', bmjd[0:10] , utmjd_center, period
+;   print, 'testing bmjd, utmjd', bmjd(0), ' ' ,bmjd(20), ' ' ,bmjd(60), ' ' ,bmjd(100) , format = '(A, D0, A, D0, A, D0, A, D0)'
 ;get phasing out of the way here
    bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
    phase =( bmjd_dist / period )- fix(bmjd_dist/period)
@@ -315,7 +318,7 @@ for a =startaor, stopaor do begin
       phase = temporary(phase)+0.5
    endif 
    
-print, 'testing phase', phase[0:10]
+;print, 'testing phase', phase[0:200]
 ;--------------------------------
 ;fill in that hash of hases
 ;--------------------------------
@@ -342,7 +345,7 @@ endif else begin
    savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'superdark.sav',/remove_all)
 endelse
 
-save, planethash, filename=savename
+;save, planethash, filename=savename
 print, 'saving planethash', savename
 print, 'time check', systime(1) - t1
 
