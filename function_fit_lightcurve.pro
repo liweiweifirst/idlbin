@@ -41,7 +41,7 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
 
 ;delete this if I want to overplot on the plot_pixphasecorr plot
  ;XXX will need to add the color offsets.
- testplot = errorplot(phasearr, fluxarr, errarr, '1s', yrange = [0.995, 1.005])
+ testplot = errorplot(phasearr, fluxarr, errarr, '1s', yrange = [0.97, 1.005])
 
 ;Initial guess, start with those from the literature
  amplitude = 1.0              ; messing around with amplitude of the phase curve.
@@ -74,8 +74,10 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
   print, 'status', status
   print, errmsg
   print, 'reduced chi squared',  achi / adof
-  
+  print, 'perror', spa
 
+  print, 'primary depth', pa(1)^2, spa(1)^2
+  print, 'secondary depth', pa(0), spa(0)
 ;want to overplot the fitted curve
   params0 = pa  ; just give it the answer, and run with overplot
   ph = findgen(100) / 100. - 0.5   ; give it a nice set of phases for a nice plot

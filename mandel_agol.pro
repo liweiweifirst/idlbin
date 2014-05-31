@@ -73,6 +73,9 @@ model = (flux - model) / err
 
 if keyword_set(overplot) then begin
    test = plot(phase, rel_flux, color = 'Sky Blue', thick = 4, /overplot)
+   openw, outlun, '/Users/jkrick/irac_warm/pcrs_planets/WASP-52b/jk_model.txt',/GET_LUN
+   for nm = 0, n_elements(phase) - 1 do printf, outlun, phase(nm), rel_flux(nm)
+   close, outlun
 endif
 
 ;change 'phot' to 'model'

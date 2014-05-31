@@ -20,6 +20,7 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
   startaor = 1
   stopaor = stareaor - 1
   for a =startaor, stopaor do begin; n_elements(aorname) -1  do begin
+     print, 'a, startaor' , a, startaor
      
                                 ;if this was a snapshot, need to not include it, aka I don't run pixphasecorr on snaps.
      dir = dirname+ string(aorname(a) ) 
@@ -150,9 +151,11 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
 ;compare two methods of measuring np
         gp1 = where(bin_phase gt -0.45 and bin_phase lt -0.1)
         gp2 = where(bin_phase gt 0.05 and bin_phase lt 0.45)
-
+        
 ;what is the standard deviation of bin_flux_np away from eclipse and transit
+        print, a, startaor, 'a, startaor'
         if a eq startaor then begin
+           print, 'a eq startaor'
            test_flux = [bin_flux_np(gp1), bin_flux_np(gp2)] 
         endif else begin
            test_flux = [test_flux, bin_flux_np(gp1), bin_flux_np(gp2)] 
@@ -370,6 +373,11 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
      
      fit = function_fit_lightcurve( planetname, phasearr, fluxarr_np, errarr_np, modelfilename)
      
+     ;print output for data challenge
+   openw, outlun, '/Users/jkrick/irac_warm/pcrs_planets/WASP-52b/jk_corrected.txt',/GET_LUN
+   for nm = 0, n_elements(phasearr) - 1 do printf, outlun, phasearr(nm), fluxarr_np(nm), errarr_np(nm)
+   close, outlun
+
   endif
   
 ;;----------------------------------------------------

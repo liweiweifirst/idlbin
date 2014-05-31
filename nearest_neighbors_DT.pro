@@ -27,7 +27,7 @@ function nearest_neighbors_DT,x,y,chname, DISTANCES=nearest_d,NUMBER=k
         ;the problem case
                                 ;make up a d that lets me know I should ignore this point
                                 ; or just keep the last d which is what doing nothing will do I think
- ;       print, 'got to the if statement that seems to fail'
+        print, 'got to the if statement that seems to fail'
  ;       print, point, c[point], c[point+1]
       endif  else begin
          p=c[c[point]:c[point+1]-1] ;start with this point's DT neighbors
