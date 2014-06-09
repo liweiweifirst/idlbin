@@ -72,6 +72,8 @@ print,'transit duration in days', t_dur
 startaor = 1
 stopaor =   n_elements(aorname) - 1
 
+
+
   for a = startaor, stopaor do begin  ;run through all AORs
      print, 'working on aor', aorname(a)
      np = planethash[aorname(a),'npcentroids']  ; np is noise pixel, using value from box_centroider, not noisepix
@@ -81,7 +83,6 @@ stopaor =   n_elements(aorname) - 1
      fluxerr_m = Planethash[aorname(a), 'fluxerr']
      bmjd = planethash[aorname(a),'bmjdarr']
      phase = planethash[aorname(a),'phase']
-             print, 'testing phase at beginning ',phase[0:200]
 
                                 ;make sure we are not trying to correct snapshots with nearest neighbors, 
                                 ; won't work because some are in the transits and eclipses which I have excluded.
@@ -93,30 +94,56 @@ stopaor =   n_elements(aorname) - 1
         corrflux = planethash[aorname(a), 'corrflux'] ;pmap corrected
         corrfluxerr = planethash[aorname(a), 'corrfluxerr']
         
+;need to put all aor's togehter, otherwise the normalization of
+;the weighting process is flattening the light curves.
+;and need to do this dynamically which is slow
+                                ;could do this faster by keeping track
+                                ;of the total number of images in photexoplanet
+
+        if a eq startaor then begin
+           xcenarr = xcen 
+           ycenarr = ycen
+           nparr = np
+           sqrtnparr = sqrtnp
+           flux_marr = flux_m
+           fluxerr_marr = fluxerr_m 
+           bmjdarr = bmjd
+           phasearr = phase
+           corrfluxarr = corrflux
+           corrfluxerrarr = corrfluxerr
+           timearr = (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0)) ; XXXXX careful, I used aorname(0)
+        endif else begin
+           xcenarr = [xcenarr, xcen]
+           ycenarr = [ycenarr, ycen]
+           nparr = [nparr, np]
+           sqrtnparr = [sqrtnparr, sqrtnp]
+           flux_marr = [flux_marr, flux_m]
+           fluxerr_marr = [fluxerr_marr,fluxerr_m]
+           phasearr = [phasearr, phase]
+           corrfluxarr = [corrfluxarr, corrflux]
+           corrfluxerrarr = [corrfluxerrarr,corrfluxerr]
+           timearr = [timearr, (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))]
+        endelse
+     endif   ;not a snapshot
+
+  endfor                        ; for each AOR
+;====================================================================================
                                 ;calculate standard deviations of entire xcen, ycen,and sqrtnp
      ;stdxcen = stddev(xcen)
      ;stdycen = stddev(ycen)
      ;stdsqrtnp = stddev(sqrtnp)
      
    ;change this to a smaller number to test code in less time than a full run
-        ni =  n_elements(xcen) 
-        print, 'ni, phase', ni, n_elements(phase)
-        
-        xcen = xcen[0:ni-1]
-        ycen = ycen[0:ni-1]
-        sqrtnp = sqrtnp[0:ni-1]
-        bmjd = bmjd[0:ni-1]
-        phase = phase[0:ni-1]
-        flux_m =  flux_m[0:ni-1]
-        fluxerr_m = fluxerr_m[0:ni-1]
-        
+        ni =  n_elements(xcenarr) 
+        print, 'ni, phase', ni, n_elements(phasearr)
+                
                                 ;setup arrays for the corrected fluxes
         flux = dblarr(ni)       ; fltarr(n_elements(flux_m))
         fluxerr = flux
         flux_np = flux    ; fltarr(n_elements(flux_m))
         fluxerr_np = flux
-        time_0 = time[0:ni - 1]
-        phase_0 = phase[0:ni-1]
+        time_0 = timearr[0:ni - 1]
+        phase_0 = phasearr[0:ni-1]
         warr = flux
         warr_np= flux
         sigmax = flux
@@ -128,17 +155,16 @@ stopaor =   n_elements(aorname) - 1
         delta_time_np =  flux
         ndimages = flux
 
-        xcen2 = xcen
-        ycen2 = ycen
-        sqrtnp2 = sqrtnp
-        flux_m2 = flux_m
-        fluxerr_m2 = fluxerr_m
+        xcen2 = xcenarr
+        ycen2 = ycenarr
+        sqrtnp2 = sqrtnparr
+        flux_m2 = flux_marr
+        fluxerr_m2 = fluxerr_marr
         time_02  = time_0
         
                                 ;mask intervals in time where astrophysical signals exist.
                                 ;I know where the transits and eclipses are
-        print, 'testing phase before mask_signal',phase[0:200]
-        s = mask_signal( phase, period, utmjd_center, t_dur)
+        s = mask_signal( phasearr, period, utmjd_center, t_dur)
         
                                 ;make sure the transit doesn't get included as a nearest neighbor
         good = where(s gt 0, ngood, complement = bad)
@@ -235,12 +261,12 @@ stopaor =   n_elements(aorname) - 1
               goodx = fltarr(ngood + 1)
               goody = fltarr(ngood + 1)
               goodflux = fltarr(ngood + 1)
-              goodx[0] = xcen[j]
-              goody[0] = ycen[j]
-              goodflux[0] = flux_m[j]
-              goodx[1:*] = xcen(good)
-              goody[1:*] = ycen(good)
-              goodflux[1:*] = flux_m(good)
+              goodx[0] = xcenarr[j]
+              goody[0] = ycenarr[j]
+              goodflux[0] = flux_marr[j]
+              goodx[1:*] = xcenarr(good)
+              goody[1:*] = ycenarr(good)
+              goodflux[1:*] = flux_marr(good)
               
                                 ; try the brute force way
               dist = distance(goodx, goody, 0, chname)
@@ -260,14 +286,14 @@ stopaor =   n_elements(aorname) - 1
               goodynp = fltarr(ngood + 1)
               goodfluxnp = fltarr(ngood + 1)
               goodsqrtnp = fltarr(ngood+1)
-              goodxnp[0] = xcen[j]
-              goodynp[0] = ycen[j]
-              goodfluxnp[0] = flux_m[j]
-              goodsqrtnp[0] = sqrtnp[j]
-              goodxnp[1:*] = xcen(good)
-              goodynp[1:*] = ycen(good)
-              goodfluxnp[1:*] = flux_m(good)
-              goodsqrtnp[1:*] = sqrtnp(good)
+              goodxnp[0] = xcenarr[j]
+              goodynp[0] = ycenarr[j]
+              goodfluxnp[0] = flux_marr[j]
+              goodsqrtnp[0] = sqrtnparr[j]
+              goodxnp[1:*] = xcenarr(good)
+              goodynp[1:*] = ycenarr(good)
+              goodfluxnp[1:*] = flux_marr(good)
+              goodsqrtnp[1:*] = sqrtnparr(good)
               
                                 ; try the brute force way
               dist = distance_np(goodx, goody, goodsqrtnp,0, chname)
@@ -298,7 +324,7 @@ stopaor =   n_elements(aorname) - 1
               stdycen = 0.0043
            endif
            
-           w = weight(stdxcen, stdycen, nearestx, nearesty,  xcen(j), ycen(j), nearestflux)
+           w = weight(stdxcen, stdycen, nearestx, nearesty,  xcenarr(j), ycenarr(j), nearestflux)
            warr[j] = w
                                 ; print, 'testing', flux_m(j), w,  flux_m(j) / w
            flux(j) = flux_m2(j) / w
@@ -311,27 +337,30 @@ stopaor =   n_elements(aorname) - 1
            stdsqrtnp = stddev(nearestsqrtnp)
            sigma_np[j] = stdsqrtnp
            
-           w_np = weight_np(stdxcennp, stdycennp, stdsqrtnp, nearestxnp, nearestynp, nearestsqrtnp, xcen(j), ycen(j), sqrtnp(j), nearestfluxnp)
+           w_np = weight_np(stdxcennp, stdycennp, stdsqrtnp, nearestxnp, nearestynp, nearestsqrtnp, xcenarr(j), ycenarr(j), sqrtnparr(j), nearestfluxnp)
            warr_np[j] = w_np
-           flux_np(j) = flux_m(j) / w_np
-           fluxerr_np(j) = fluxerr_m(j) / w_np
+           flux_np(j) = flux_marr(j) / w_np
+           fluxerr_np(j) = fluxerr_marr(j) / w_np
                                 ;--------------------
            
         endfor
+
         
 ;  bad = where(finite(flux) lt 1, badcount)
 ;  print, 'nan? ', badcount
-        
-        
+        save, /all, filename =strcompress(dirname + 'pixphasecorr_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
+
+
+        print, 'about to plot blue ', median(flux_np), n_elements(flux_marr), n_elements(corrfluxarr), n_elements(flux), n_elements(flux_np)
 ;plot the results
-        p1 = plot(time[0:ni-1]/60./60., flux_m[0:ni-1]/ median(flux_m[0:ni-1]), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname, name = 'raw flux', yrange =[0.93, 1.15])
-        p4 =  plot(time[0:ni-1]/60./60., (corrflux[0:ni-1] /median( corrflux[0:ni-1])) + 0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
-        p2 = plot(time_0/60./60., flux/median(flux) -0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
-        p3 = plot(time_0/60./60., flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
+;        p1 = plot(time[0:ni-1]/60./60., flux_marr[0:ni-1]/ median(flux_marr[0:ni-1]), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname, name = 'raw flux', yrange =[0.93, 1.15])
+;        p4 =  plot(time[0:ni-1]/60./60., (corrfluxarr[0:ni-1] /median( corrfluxarr[0:ni-1])) + 0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
+;        p2 = plot(time_0/60./60., flux/median(flux) -0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
+;        p3 = plot(time_0/60./60., flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
         
         
-        p1 = plot(phase_0, flux_m[0:ni-1]/ median(flux_m[0:ni-1]), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Phase', ytitle = 'Flux', title = planetname, name = 'raw flux', yrange =[0.93, 1.15])
-        p4 =  plot(phase_0, (corrflux[0:ni-1] /median( corrflux[0:ni-1])) + 0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
+        p1 = plot(phase_0, flux_marr[0:ni-1]/ median(flux_marr[0:ni-1]), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Phase', ytitle = 'Flux', title = planetname, name = 'raw flux', yrange =[0.93, 1.15])
+        p4 =  plot(phase_0, (corrfluxarr[0:ni-1] /median( corrfluxarr[0:ni-1])) + 0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
         p2 = plot(phase_0, flux/median(flux) -0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
         p3 = plot(phase_0, flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
         
@@ -350,10 +379,9 @@ stopaor =   n_elements(aorname) - 1
 ;     if ni gt 12000 then print, 'stddev of raw, pmap, position, position+np corr', stddev(flux_m[12000:ni-1],/nan),stddev(corrflux[12000:ni-1],/nan), stddev(flux[12000:*],/nan), stddev(flux_np[12000:*],/nan)
         
 
-     save, /all, filename =strcompress(dirname + 'pixphasecorr_ch'+chname+'_'+aorname(a)+string(apradius)+'.sav',/remove_all)
 
 
-  endif
+;  endif
 
      
 ;  plothist, warr, xhist, yhist, bin = 0.5, /noplot
@@ -374,7 +402,7 @@ stopaor =   n_elements(aorname) - 1
 ;  ps = plot(xhist, yhist, /overplot, color = 'blue')
      
 
-  endfor
+;  endfor
      print,'total time in minutes', (systime(1)-t1)/60.
 
 end

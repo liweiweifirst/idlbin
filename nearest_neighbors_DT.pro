@@ -26,8 +26,13 @@ function nearest_neighbors_DT,x,y,chname, DISTANCES=nearest_d,NUMBER=k
      if c[point] gt  c[point+1] - 1 then begin
         ;the problem case
                                 ;make up a d that lets me know I should ignore this point
-                                ; or just keep the last d which is what doing nothing will do I think
-        print, 'got to the if statement that seems to fail'
+                                ; or just keep the last d which is
+                                ; what doing nothing will do I think
+                                ; This part seems to happen on the
+                                ; transit or eclipse part of the light
+                                ; curve, or at least only in those
+                                ; AORs where there is a transit or eclipse.
+;        print, 'got to the if statement that seems to fail'
  ;       print, point, c[point], c[point+1]
       endif  else begin
          p=c[c[point]:c[point+1]-1] ;start with this point's DT neighbors

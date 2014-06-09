@@ -65,8 +65,8 @@ planethash = hash()
 if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_120827_occthresh.fits'$
                                       else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
 fits_read,occ_filename, occdata, occheader
-startaor =1;0
-stopaor = 1;n_elements(aorname) - 1
+startaor =0
+stopaor = n_elements(aorname) - 1
 for a =startaor, stopaor do begin
    print, 'working on ',aorname(a)
    dir = dirname+ string(aorname(a) ) 
@@ -86,7 +86,7 @@ for a =startaor, stopaor do begin
 
 
 
-   for i =0.D, 10 do begin; n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
+   for i =0.D,  n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
  ;      print, 'working on ', fitsname(i)         
       header = headfits(fitsname(i)) ;
       sclk_obs= sxpar(header, 'SCLK_OBS')
@@ -237,9 +237,10 @@ for a =startaor, stopaor do begin
         corrflux = pmap_correct(x_center,y_center,abcdflux,ch,npcentroids,occdata, corr_unc = corrfluxerr, func = fs, datafile =pmapfile,/threshold_occ,/use_np) 
       endif else begin
                ;correct for pixel phase effect based on pmaps from Jim
-      ;file_suffix = ['500x500_0043_120828.fits','0p1s_x4_500x500_0043_121120.fits']
-;;;         corrflux = iracpc_pmap_corr(abcdflux,x_center,y_center,ch,/threshold_occ, threshold_val = 20) ;, file_suffix = file_suffix)
-         corrflux = abcdflux
+                                ;file_suffix =
+                                ;['500x500_0043_120828.fits','0p1s_x4_500x500_0043_121120.fits']
+         corrflux = iracpc_pmap_corr(abcdflux,x_center,y_center,ch,/threshold_occ, threshold_val = 20) ;, file_suffix = file_suffix)
+;         corrflux = abcdflux
          corrfluxerr = fs       ;leave out the pmap err for now
       endelse
 
@@ -342,10 +343,10 @@ endfor                          ;for each AOR
 if keyword_set(breatheap) then begin
    savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav')
 endif else begin
-   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'superdark.sav',/remove_all)
+   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
 endelse
 
-;save, planethash, filename=savename
+save, planethash, filename=savename
 print, 'saving planethash', savename
 print, 'time check', systime(1) - t1
 
