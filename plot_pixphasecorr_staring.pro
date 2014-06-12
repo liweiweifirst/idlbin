@@ -39,7 +39,7 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
         print, 'restoring', filename
         restore, filename
         
-        
+       
 ;binning
 ;        ncorr = where(finite([ planethash[aorname(a),'corrflux']]) gt 0, corrcount,/L64)
                                 ;if 20% of the values are correctable than go with the pmap corr 
