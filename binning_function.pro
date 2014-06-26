@@ -138,7 +138,8 @@ function binning_function, a,bin_level, pmapcorr
            junk = where(finite(corrflux[ri[ri[j]:ri[j+1]-1]]) gt 0,ngood)
            bin_ncorr[c] = ngood
 
-           meanclip, timearr[ri[ri[j]:ri[j+1]-1]], meantimearr, sigmatimearr
+           ;meanclip, timearr[ri[ri[j]:ri[j+1]-1]], meantimearr, sigmatimearr
+           meantimearr = median(timearr[ri[ri[j]:ri[j+1]-1]])
            bin_timearr[c]=meantimearr
            
           ; meanclip, phasearr[ri[ri[j]:ri[j+1]-1]], meanphasearr, sigmaphasearr
