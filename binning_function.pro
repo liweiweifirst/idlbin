@@ -26,7 +26,7 @@ function binning_function, a,bin_level, pmapcorr
      
 ;     print, 'testing good', good[0:10]
 
-     print, 'bad ',n_elements(bad), n_elements(good)
+     print, 'bad, good, percentage ',n_elements(bad), n_elements(good), n_elements(bad)/(n_elements(bad) + n_elements(good))
      print, 'badp ',n_elements(badpmap), n_elements(goodpmap)
      xarr = xarr[good]
      yarr = yarr[good]

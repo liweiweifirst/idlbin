@@ -99,7 +99,7 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 	badpix = [-9., 9.] * 1.D8
 	
 ; Number of apertures
-	napers = 4;11
+	napers = 11; 4
 ; Number of background annuli
 	nbacks = 2;4
 ; Edge limit
@@ -107,8 +107,8 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 
 ; First set of apertures	
   aps1 = [  2.0, 2.25];, 2.5];, 2.75]
-  naps1 = n_elements(aps1) 
 ;  aps1 = [ 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25]
+  naps1 = n_elements(aps1) 
 ; First background annulus
 	back1 =  [3., 7.]
 ; Second set of apertures

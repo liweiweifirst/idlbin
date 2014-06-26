@@ -7,6 +7,8 @@ planetinfo = create_planetinfo()
 if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
 basedir = planetinfo[planetname, 'basedir']
 intended_phase = planetinfo[planetname, 'intended_phase']
+utmjd_center = planetinfo[planetname, 'utmjd_center']
+period = planetinfo[planetname, 'period']
 dirname = strcompress(basedir + planetname +'/')
 savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
 restore, savefilename
@@ -24,8 +26,8 @@ get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,RSTAR = rstar, TR
                    DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,VERBOSE=verbose
 ra_ref = ra*15.                 ; comes in hours!
 dec_ref = dec
-utmjd_center = mjd_transit
-period = p_orbit
+;utmjd_center = mjd_transit
+;period = p_orbit
 semimaj = ar_semimaj
 dstar = 2.*rstar
 m_star = mstar
@@ -34,7 +36,7 @@ t_dur =  t14  ; in days
 
 
 for a = 0,  n_elements(aorname) - 1 do begin
-
+   print, 'working on aorname', aorname(a)
 
  ;for chopping off some initial part of the light curve
    startnum = intarr(n_elements(aorname))   ;empty now ; not using
@@ -279,6 +281,7 @@ for a = 0,  n_elements(aorname) - 1 do begin
   
   save, bin_phasearr, y, bin_timearr, yerr, filename=strcompress(dirname + 'selfcal'+ aorname(a) +string(apradius)+'.sav',/remove_all)
 
+  print, 'testing phase in selfcal_exoplanet', bin_phasearr
 endfor
 
 end

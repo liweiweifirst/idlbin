@@ -17,7 +17,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
 ;  plot_corrnorm = planetinfo[planetname, 'plot_corrnorm']
   
   dirname = strcompress(basedir + planetname +'/');+'/hybrid_pmap_nn/')
-  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'superdark.sav',/remove_all)
+  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)

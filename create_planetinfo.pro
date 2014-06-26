@@ -400,7 +400,7 @@ chname = 0
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
-  planetname = 'hat22'
+  planetname = 'HAT-P-22'
   ra_ref = 155.68122
   dec_ref = 50.128716
   aorname_ch2 = ['r45675008','r45674752' ] 

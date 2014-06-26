@@ -26,13 +26,13 @@ pro run_exoplanet, planetname, binning, nnearest, apradius, chname
   for n = 0, n_elements(planetname) - 1 do begin
 ;   help, chname(n)
 ;     snap_darkcorr,chname(n)
-     phot_exoplanet, planetname(n), apradius(n),chname(n), /hybrid
+;     phot_exoplanet, planetname(n), apradius(n),chname(n), /hybrid
 ;     phot_exoplanet_sdcorr, planetname(n), apradius(n),chname(n), /hybrid
 
      selfcal_exoplanet, planetname(n), binning(n), apradius(n), chname(n), /binning
      pixphasecorr_noisepix, planetname(n), nnearest(n), apradius(n), chname(n)
-     plot_pixphasecorr, planetname(n), binning(n), apradius(n), chname(n), /errorbars, /phaseplot,/selfcal
-     plot_exoplanet, planetname(n), binning(n), apradius(n),chname(n), /phaseplot
+     plot_pixphasecorr_staring, planetname(n), binning(n), apradius(n), chname(n), /errorbars, /phaseplot,/selfcal
+     plot_exoplanet, planetname(n), binning(n), apradius(n),chname(n), /timeplot
   endfor
 
 ;---------------------------------------------------------------------

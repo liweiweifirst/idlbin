@@ -1,4 +1,4 @@
-pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal, errorbars = errorbars, phaseplot = phaseplot, fit_eclipse = fit_eclipse
+pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=selfcal, errorbars = errorbars, phaseplot = phaseplot, fit_eclipse = fit_eclipse
 
 ;COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr
 
@@ -139,7 +139,7 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
 ;test the levels
         print, 'mean raw black flux', mean(bin_flux_m / median(bin_flux_m),/nan)
         print, 'mean corr gray flux', mean((bin_corrflux /median( bin_corrflux)),/nan)
-;        print, 'mean position red flux', mean(bin_flux/median(bin_flux),/nan)
+        print, 'mean red flux', mean(bin_flux,/nan)
         print, 'mean np blue flux', mean(bin_flux_np,/nan)
 ;     print, 'phase', bin_phase
         
@@ -186,7 +186,7 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
               
 ;              if a eq startaor then begin
                  print, 'normalizing black flux by ', median(bin_flux_m)
-                 p1 = errorplot(bin_phase, bin_flux_m/ rawnorm,bin_fluxerr_m/rawnorm,$ ;median(bin_flux_m)
+                 p1 = errorplot(bin_phase, bin_flux_m/ median(bin_flux_m),bin_fluxerr_m/median(bin_flux_m),$ ;median(bin_flux_m)
                                 '1s', sym_size = 0.3, sym_filled = 1,$
                                 color = 'black', xtitle = 'Phase', ytitle = 'Normalized Flux', title = planetname, $
                                 name = 'raw flux', yrange =[0.97, 1.026], axis_style = 1,  $
@@ -313,17 +313,19 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
 ;----------------------------------------------------
 ;     print, 'aor before selfcal', aorname
         if keyword_set(selfcal) then begin
+           ;this part has to be by AORkey
+           for a = 1, n_elements(aorname) - 1 do begin
            restore, strcompress(dirname + 'selfcal' +aorname(a) + string(apradius) + '.sav',/remove_all)    
                                 ; if intended_phase gt 0 then bin_phasearr = bin_phasearr + 0.5
            
            
            if keyword_set(phaseplot) then begin
-              help, bin_phasearr
+              print, bin_phasearr
               help, y
               help, yerr
               p5 = errorplot(bin_phasearr, y +delta_green, yerr, '1s', sym_size = 0.3,   sym_filled = 1, $
                              color = 'green',/overplot, name = 'selfcal', errorbar_color = 'green', $
-                             errorbar_capsize = 0.025)
+                             errorbar_capsize = 0.05)
                                 ; print, 'selfcal fluxes', y + delta_green
               if keyword_set(fit_eclipse) then begin
                  ;trap = fit_eclipse(bin_phasearr, y ,yerr,0.486 , 0.005,0.515,0.001, delta_green,'green')
@@ -335,7 +337,8 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
                              errorbar_capsize = 0.025)
            endelse
            
-           
+        endfor  ; for each AOR
+
 ;print out levels so that I can use them for TAP (or exofast I suppose)
 ;         print, 'selfcal for TAP'
 ;         for exofast = 0, n_elements(bin_phasearr) - 1 do begin
