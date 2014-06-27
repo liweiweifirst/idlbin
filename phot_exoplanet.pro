@@ -159,7 +159,7 @@ for a =startaor, stopaor do begin
          im[4:7, 13:16, *] = !Values.F_NAN ;mask region with nan set for bad regions      
       endif
 
-      if planetname eq 'hat22' then im[20:24, 11:15, *] = !Values.F_NAN ;mask region with nan set for bad regions
+      if planetname eq 'HAT-P-22' then im[20:24, 11:15, *] = !Values.F_NAN ;mask region with nan set for bad regions
       if planetname eq 'HD93385' then im[17:21, 21:27, *] = !Values.F_NAN ;mask region with nan set for bad regions                         
       ;run the centroiding and photometry
       get_centroids_for_calstar_jk,im, h, unc, ra_ref, dec_ref,  t, dt, hjd, xft, x3, y3, $
@@ -234,7 +234,8 @@ for a =startaor, stopaor do begin
 ;correction based on those neighbors.  
       if keyword_set(hybrid) then begin
                                 ;use hybrid technique with pmap dataset and nn techniques
-        corrflux = pmap_correct(x_center,y_center,abcdflux,ch,npcentroids,occdata, corr_unc = corrfluxerr, func = fs, datafile =pmapfile,/threshold_occ,/use_np) 
+        corrflux = pmap_correct(x_center,y_center,abcdflux,ch,npcentroids,occdata, corr_unc = corrfluxerr, func = fs,$
+                                datafile =pmapfile,/threshold_occ,/use_np) 
       endif else begin
                ;correct for pixel phase effect based on pmaps from Jim
                                 ;file_suffix =
