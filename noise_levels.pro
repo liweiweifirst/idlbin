@@ -182,8 +182,8 @@ pro noise_levels
 
 
 ;save
-p.save,'/Users/jkrick/conferences/IRACaas2014/noiseplot.png'
-
+;p.save,'/Users/jkrick/conferences/IRACaas2014/noiseplot.png'
+p.save, '/Users/jkrick/irac_warm/pcrs_planets/secondaries_paper/noiseplot.eps'
 
 
 end

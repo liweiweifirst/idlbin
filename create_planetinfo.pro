@@ -411,7 +411,7 @@ chname = 0
   period = 3.21222
   intended_phase = 0.5
   exptime = 0.4
-  stareaor = 0
+  stareaor = 2
   plot_norm = 0.1146;1.
   plot_corrnorm = 0.1146
 

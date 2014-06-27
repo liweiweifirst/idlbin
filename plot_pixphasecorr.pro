@@ -31,21 +31,21 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
 ;     CD, dir                    ; change directories to the correct AOR directory
 ;     command  = strcompress( 'find ch'+chname+"/bcd -name 'SPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
  ;    spawn, command   
-     readcol,strcompress(dirname +'bcdlist.txt'),fitsname, format = 'A', /silent
-     print, 'n fits', n_elements(fitsname)
-     if n_elements(fitsname) gt 15 then begin
+;     readcol,strcompress(dirname +'bcdlist.txt'),fitsname, format = 'A', /silent
+;     print, 'n fits', n_elements(fitsname)
+;     if n_elements(fitsname) gt 15 then begin
    
-        filename =strcompress(dirname +'pixphasecorr_ch'+chname+'_'+aorname(a) +string(apradius)+'.sav',/remove_all)
-        print, a, ' ', aorname(a), 'restoring', filename
-        restore, filename
+  filename =strcompress(dirname +'pixphasecorr_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
+  print, 'restoring', filename
+  restore, filename
         
         
 ;binning
-        ncorr = where(finite([ planethash[aorname(a),'corrflux']]) gt 0, corrcount,/L64)
-                                ;if 20% of the values are correctable than go with the pmap corr 
-        if corrcount gt 0.2*n_elements([planethash[aorname(a),'flux']]) then pmapcorr = 1 else pmapcorr = 0
-;        junkpar = binning_function(a, bin_level, pmapcorr)
-
+;        ncorr = where(finite([ planethash[aorname(a),'corrflux']]) gt 0, corrcount,/L64)
+;                                ;if 20% of the values are correctable than go with the pmap corr 
+;        if corrcount gt 0.2*n_elements([planethash[aorname(a),'flux']]) then pmapcorr = 1 else pmapcorr = 0
+;;        junkpar = binning_function(a, bin_level, pmapcorr)
+        
        numberarr = findgen(n_elements(flux_m))
         h = histogram(numberarr, OMIN=om, binsize = bin_level, reverse_indices = ri)
         print, 'omin', om, 'nh', n_elements(h)
@@ -367,8 +367,8 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
 ;     print, 'aorname at end', aorname
 
 
-     endif   ; if not a snapshot (n_elements fitsname gt 15) 
-  endfor                        ; n_elements(aorname)
+;     endif   ; if not a snapshot (n_elements fitsname gt 15) 
+;  endfor                        ; n_elements(aorname)
      
 
 ;;----------------------------------------------------

@@ -92,7 +92,7 @@ for a = 0,  n_elements(aorname) - 1 do begin
   ; later can make this somehow fit back in.
   transit_phase = t_dur / period ; what fraction of the phase is this in transit (or eclipse)
   print, 'test transit phase', transit_phase
-  print, 'phase going into flatline', phase(0), phase(n_elements(phase) - 1)
+  print, 'phase going into flatline', phase(0), n_elements(phase)
   flatline_1 = where(phase gt -0.5 + transit_phase /2. and phase lt 0.D - transit_phase/2., n_flatline_1)
   flatline_2 = where(phase gt 0.D + transit_phase /2. and phase lt 0.5 - transit_phase /2., n_flatline_2)
   ;put all the out of transit and eclipse phases together

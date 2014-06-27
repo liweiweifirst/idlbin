@@ -20,6 +20,11 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
   startaor = 1
   stopaor = stareaor - 1
 
+
+  ;making things look better on the plot
+  ;leave space for the selfcal plot, or not.
+  if keyword_set(selfcal) then delta_green = delta_green else delta_red = delta_green
+
   rawnorm = 0.017717
 
 
@@ -79,7 +84,7 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
              endelse
              
              icorrdataerr = corrfluxerrarr[ri[ri[j]:ri[j+1]-1]]
-;;             bin_corrfluxerr[c] =   sqrt(total(icorrdataerr^2))/ (n_elements(icorrdataerr))
+             bin_corrfluxerr[c] =   sqrt(total(icorrdataerr^2))/ (n_elements(icorrdataerr))
              
               meanclip, flux_marr[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
               bin_flux_m[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
@@ -116,6 +121,7 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
         endfor
         
         bin_corrflux =bin_corrflux[0:c-1]
+        bin_corrfluxerr = bin_corrfluxerr[0:c-1]
         bin_flux_m = bin_flux_m[0:c-1]
         bin_flux_np = bin_flux_np[0:c-1]
         bin_flux = bin_flux[0:c-1]
@@ -123,7 +129,6 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
         bin_time_0 =  bin_time_0[0:c-1]
         bin_phase = bin_phase[0:c-1]
         bin_bmjd = bin_bmjd[0:c-1]
-        bin_corrfluxerr = bin_corrfluxerr[0:c-1]
         bin_fluxerr_m = bin_fluxerr_m[0:c-1]
         bin_fluxerr_np = bin_fluxerr_np[0:c-1]
         bin_fluxerr = bin_fluxerr[0:c-1]
@@ -189,7 +194,7 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
                  p1 = errorplot(bin_phase, bin_flux_m/ median(bin_flux_m),bin_fluxerr_m/median(bin_flux_m),$ ;median(bin_flux_m)
                                 '1s', sym_size = 0.3, sym_filled = 1,$
                                 color = 'black', xtitle = 'Phase', ytitle = 'Normalized Flux', title = planetname, $
-                                name = 'raw flux', yrange =[0.97, 1.026], axis_style = 1,  $
+                                name = 'raw flux', yrange =[0.90, 1.026], axis_style = 1,  $
                                 xstyle = 1, errorbar_capsize = 0.025) ;
 ;              endif else begin
 ;                 print, 'normalizing black flux by ', median(bin_flux_m)
