@@ -1,10 +1,9 @@
-pro curveofgrowth, planetname, corrflux = corrflux, selfcal=selfcal
+pro curveofgrowth, planetname, chname, corrflux = corrflux, selfcal=selfcal
 
   planetinfo = create_planetinfo()
-  chname = planetinfo[planetname, 'chname']
   ra = planetinfo[planetname, 'ra']
   dec = planetinfo[planetname, 'dec']
-  aorname = planetinfo[planetname, 'aorname']
+  if chname eq '2'  then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
   basedir = planetinfo[planetname, 'basedir']
   dirname = basedir+ planetname + '/'
   ; from get_centroids_for_calstar_jk
@@ -13,9 +12,12 @@ pro curveofgrowth, planetname, corrflux = corrflux, selfcal=selfcal
   real_flux_ch1 = [8.68,647.38,38.20, 40.74,50.40]
   real_flux_ch2 = [5.66,421.19,24.74, 26.28,32.54]
   
+  print, 'aorname', aorname
+
   for a = 0,  0 do begin;n_elements(aorname) - 1 do begin
      
      dirloc =dirname +string(aorname(a) ) 
+     print, 'dirloc', dirloc
      cd, dirloc
      command  = strcompress( 'find ch'+chname+"/bcd -name '*_bcd.fits' > "+dirname+'bcdlist.txt')
      spawn, command
