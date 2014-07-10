@@ -102,6 +102,7 @@ pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
 ;    only provided for reference and sanity checking.
 ;
 ; HISTORY:
+;    Added correct np output for the case where 50% of pixels in source aperture are bad  10 jul 14 JK
 ;    Changed shape of background aperture to be square 6 May JK
 ;    Added keyword /TWOPASS to find the pixel that holds the centroid - 
 ;        avoids discrepancies based on where the box is initially centered 
@@ -268,7 +269,8 @@ pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
 		fs = !VALUES.D_NAN
 		xfwhm = !VALUES.D_NAN
 		yfwhm = !VALUES.D_NAN
-		xycov = !VALUES.D_NAN		
+		xycov = !VALUES.D_NAN
+                np = !VALUES.D_NAN
 	endelse
 
 return
