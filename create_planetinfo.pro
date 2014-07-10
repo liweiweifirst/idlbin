@@ -4,7 +4,7 @@ function create_planetinfo
   keys =['ra', 'dec','aorname_ch2','aorname_ch1','basedir','chname', 'utmjd_center', 'transit_duration', 'period', 'intended_phase', 'exptime','mask', 'maskreg','stareaor','plot_norm','plot_corrnorm']
 chname = 0
 ;---
-  planetname = 'wasp38'
+  planetname = 'WASP-38b'
   ra_ref = 243.95985208                    ; 16 15 50.3645 
   dec_ref = 10.03259056 ; +10 01 57.326 
   aorname_ch2 = ['r45676288', 'r45676032'] ;ch2
@@ -15,7 +15,7 @@ chname = 0
   period =   6.871815  ;days 
   exptime = 0.4
   intended_phase = 0.5
-  stareaor = 0
+  stareaor = 2
   plot_norm = 0.1039
   plot_corrnorm = 0.1025
 
@@ -83,11 +83,12 @@ chname = 0
   planetinfo[planetname] = HASH(keys, values)
 ;---
 
-  planetname = 'wasp62'
+  planetname = 'WASP-62b'
   ra_ref = 87.139641
   dec_ref =-63.988068
-  aorname_ch2 = ['r48680448','r48708608', 'r48708352', 'r48708096', 'r48707840', 'r48707584', 'r48707328', 'r48707072', 'r48706816', 'r48706560', 'r48706304', 'r48702720', 'r48702464', 'r48702208', 'r48701952', 'r48701696', 'r48701440', 'r48701184', 'r48700928', 'r48700672', 'r48700416', 'r48697600', 'r48697344', 'r48697088', 'r48696832', 'r48696576', 'r48696320', 'r48696064', 'r48690688', 'r48690432', 'r48690176', 'r48689920', 'r48689664', 'r48689408', 'r48689152', 'r48688896', 'r48688640', 'r48687360', 'r48687104', 'r48686848', 'r48686592', 'r48686336', 'r48686080', 'r48685824', 'r48685568', 'r48685312', 'r48685056', 'r49048576', 'r49048320', 'r49048064', 'r49047808', 'r49047552', 'r49047296', 'r49047040', 'r49046784', 'r49046528', 'r49046272', 'r49046016', 'r49045760', 'r49045504', 'r49045248', 'r49044992', 'r49044736', 'r49044480', 'r49044224', 'r49043968', 'r49043712', 'r49043456', 'r49043200', 'r49042944', 'r49042688', 'r49042432', 'r49042176', 'r49041920', 'r49041664', 'r49041408', 'r49041152', 'r49040896', 'r49040640', 'r49040384', 'r49040128', 'r49039872', 'r48695808'] 
- aorname_ch1 = ['r0000000000']
+;  aorname_ch2 = ['r48680448','r48708608', 'r48708352', 'r48708096', 'r48707840', 'r48707584', 'r48707328', 'r48707072', 'r48706816', 'r48706560', 'r48706304', 'r48702720', 'r48702464', 'r48702208', 'r48701952', 'r48701696', 'r48701440', 'r48701184', 'r48700928', 'r48700672', 'r48700416', 'r48697600', 'r48697344', 'r48697088', 'r48696832', 'r48696576', 'r48696320', 'r48696064', 'r48690688', 'r48690432', 'r48690176', 'r48689920', 'r48689664', 'r48689408', 'r48689152', 'r48688896', 'r48688640', 'r48687360', 'r48687104', 'r48686848', 'r48686592', 'r48686336', 'r48686080', 'r48685824', 'r48685568', 'r48685312', 'r48685056', 'r49048576', 'r49048320', 'r49048064', 'r49047808', 'r49047552', 'r49047296', 'r49047040', 'r49046784', 'r49046528', 'r49046272', 'r49046016', 'r49045760', 'r49045504', 'r49045248', 'r49044992', 'r49044736', 'r49044480', 'r49044224', 'r49043968', 'r49043712', 'r49043456', 'r49043200', 'r49042944', 'r49042688', 'r49042432', 'r49042176', 'r49041920', 'r49041664', 'r49041408', 'r49041152', 'r49040896', 'r49040640', 'r49040384', 'r49040128', 'r49039872', 'r48695808'] 
+  aorname_ch1 = ['r48702976', 'r48680960']
+  aorname_ch2 = ['r48695808', 'r48680448']
 ;aorname = [  'r48680448'] ;['r48680960','r48702976']
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   utmjd_center = 56545.36259D
@@ -95,7 +96,7 @@ chname = 0
   period = 4.411953          ;days intended_phase = 0.0
   exptime = 2.0
   intended_phase = 0.5
-  stareaor = 0
+  stareaor = 2
   plot_norm = 0.0450
   plot_corrnorm = 0.0451
 
@@ -304,10 +305,10 @@ chname = 0
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 ;---
-  planetname = 'wasp13'
+  planetname = 'WASP-13b'
   ra_ref = 140.10268
   dec_ref = 33.882288
-  aorname_ch2 = ['r45676544','r45675520','r47037952','r47047168'] ; from my PID
+  aorname_ch2 = ['r45676544','r45675520']; ,; from my PID
  ;aorname = ['r47047168', 'r47037952'] ;ch2 from Dessert PID this is the primary
   aorname_ch1 = ['r47036928', 'r47038208'] ;ch1 from Dessert PID this is the primary
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
@@ -316,7 +317,7 @@ chname = 0
   period = 4.353011
   intended_phase = 0.5
   exptime = 0.4
-  stareaor = 0
+  stareaor = 2
   plot_norm = 0.0383
   plot_corrnorm = 0.0278
 
@@ -365,7 +366,7 @@ chname = 0
   ra_ref = 208.92783
   dec_ref = -32.159837
 ;  aorname = ['r45675264', 'r45675776'] 
-  aorname_ch2 = [ 'r45675776'] 
+  aorname_ch2 = [ 'r45675264', 'r45675776'] 
   aorname_ch1 = ['r0000000000']
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   utmjd_center = 56184.45438D
@@ -373,7 +374,7 @@ chname = 0
   period = 3.752066
   intended_phase = 0.5
   exptime = 2
-  stareaor = 0
+  stareaor = 2
   plot_norm = 1.
   plot_corrnorm = 1.
 
@@ -381,18 +382,18 @@ chname = 0
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
-  planetname = 'wasp16'
+  planetname = 'WASP-16b'
   ra_ref = 214.68297
   dec_ref = -20.275605
   aorname_ch2 =['r45674240','r45674496'] ;['r48705536', 'r48692736'];
-  aorname_ch1 = ['r0000000000']
+  aorname_ch1 = ['r48705536', 'r48692736']
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   utmjd_center = 56578.27412; 56179.09319
   transit_duration=115.2
   period = 3.118601
   intended_phase = 0.5
   exptime = 2
-  stareaor = 0
+  stareaor = 2
   plot_norm = 1.
   plot_corrnorm = 1.
 
@@ -404,7 +405,7 @@ chname = 0
   ra_ref = 155.68122
   dec_ref = 50.128716
   aorname_ch2 = ['r45675008','r45674752' ] 
-  aorname_ch1 =['r48704512','r48693504']     ;
+  aorname_ch1 =['r49227008', 'r49227264']; ['r48704512','r48693504']     ;
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   utmjd_center =  56081.30088 ;56486.04060;
   transit_duration=172.2

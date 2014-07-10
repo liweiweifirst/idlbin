@@ -17,7 +17,7 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
   print, 'dirname', dirname
   ;a = 1
   print, 'stareaor', stareaor
-  startaor = 1
+  startaor = 0
   stopaor = stareaor - 1
 
   rawnorm = 0.017717
@@ -150,22 +150,28 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
                                 ;a guess at mid-transit
 ;        endif
                                 ;endfor
-        
+        outfilename =  strcompress(dirname +'test'+chname+'_'+string(apradius)+'.ascii',/remove_all)
+        openw, outlun, outfilename,/GET_LUN
+        for te = 0, n_elements(bin_phase) -1 do begin
+           printf, outlun, bin_phase(te), ' ', bin_corrflux(te), format = '(F0, A,F0)'
+        endfor
+
+
 ;-----------------
 ;compare two methods of measuring np
         gp1 = where(bin_phase gt -0.45 and bin_phase lt -0.1)
         gp2 = where(bin_phase gt 0.05 and bin_phase lt 0.45)
         
 ;what is the standard deviation of bin_flux_np away from eclipse and transit
-        print, a, startaor, 'a, startaor'
-        if a eq startaor then begin
-           print, 'a eq startaor'
-           test_flux = [bin_flux_np(gp1), bin_flux_np(gp2)] 
-        endif else begin
-           test_flux = [test_flux, bin_flux_np(gp1), bin_flux_np(gp2)] 
-        endelse
-        print, n_elements(gp1), n_elements(gp2), n_elements(test_flux)
-        print, 'standard deviation test flux', stddev(test_flux)
+;        print, a, startaor, 'a, startaor'
+;        if a eq startaor then begin
+;           print, 'a eq startaor'
+;           test_flux = [bin_flux_np(gp1), bin_flux_np(gp2)] 
+;        endif else begin
+;           test_flux = [test_flux, bin_flux_np(gp1), bin_flux_np(gp2)] 
+;        endelse
+;        print, n_elements(gp1), n_elements(gp2), n_elements(test_flux)
+;        print, 'standard deviation test flux', stddev(test_flux)
 
 
 ;-----------------
@@ -173,6 +179,7 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
 ;fitting the light curve
         if a eq startaor then phasearr = bin_phase else phasearr = [phasearr, bin_phase]
 ;XXX add the other fluxes as well.
+        print, 'a, startaor', a, startaor, n_elements(bin_flux_np)
         if a eq startaor then fluxarr_np = bin_flux_np else fluxarr_np = [fluxarr_np, bin_flux_np] 
         if a eq startaor then errarr_np =  bin_fluxerr_np else errarr_np = [errarr_np,  bin_fluxerr_np]  ; and error bars on above
 

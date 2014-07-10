@@ -99,14 +99,14 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 	badpix = [-9., 9.] * 1.D8
 	
 ; Number of apertures
-	napers = 11; 4
+	napers = 4
 ; Number of background annuli
 	nbacks = 2;4
 ; Edge limit
 	edge = 5.
 
 ; First set of apertures	
-  aps1 = [  2.0, 2.25];, 2.5];, 2.75]
+  aps1 = [  1.75, 2.0, 2.25, 2.50];, 2.5];, 2.75]
 ;  aps1 = [ 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25]
   naps1 = n_elements(aps1) 
 ; First background annulus
@@ -376,7 +376,7 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 		  ;	endif
               if (xmax lt edge or xmax gt xedge or ymax lt edge or ymax gt xedge) then begin 
                  expid =  sxpar(h, 'EXPID')
-                 print, 'Source outside array for image number ', expid
+                 if not keyword_set(silent) then print, 'Source outside array for image number ', expid
                  flag[0:ns-1] = -2
               endif 
 
@@ -417,7 +417,7 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ;                print, 'finished box_centroider', tx, ty
                 x3[i] = tx & y3[i] = ty & x3s[i] = txs & y3s[i] = tys
                 bb[i] = tb
-                np[i] = tnp
+                np[i] =tnp
 ; Store FWHM			
                 xfwhmarr[i] = xfwhm & yfwhmarr[i] = yfwhm
 ; 5 pixel half-width

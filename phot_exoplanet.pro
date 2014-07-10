@@ -10,16 +10,24 @@ pro phot_exoplanet, planetname, apradius,chname, columntrack = columntrack, brea
 case apradius of
 ;[ 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25]
    1.5: apval = 0
-   1.75: apval = 1
-   2.0: apval = 2
-   2.25: begin
+   1.75: begin
+      apval = 0
+      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r1p75_s3_7_0p1s_x4_140314.sav'
+      if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r1p75_s3_7_0p4s_140314.sav'
+   end
+   2.0: begin
       apval = 1
+      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p00_s3_7_0p1s_x4_140314.sav'
+      if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p00_s3_7_0p4s_140314.sav'
+   end
+   2.25: begin
+      apval = 2
       if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140314.sav'
       if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p25_s3_7_0p4s_140314.sav'
    end
    2.5: begin
-      apval = 2
-      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x16_sdark_140523.sav'
+      apval = 3
+      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p50_s3_7_0p1s_x4_140314.sav'
       if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p50_s3_7_0p4s_140314.sav'
    end
    2.75: apval = 5
@@ -159,7 +167,9 @@ for a =startaor, stopaor do begin
          im[4:7, 13:16, *] = !Values.F_NAN ;mask region with nan set for bad regions      
       endif
 
-      if planetname eq 'HAT-P-22' then im[20:24, 11:15, *] = !Values.F_NAN ;mask region with nan set for bad regions
+      if planetname eq 'HAT-P-22' and chname eq '2' then  im[19:25, 10:15, *] = !Values.F_NAN                              ;mask region with nan set for bad regions
+      if planetname eq 'HAT-P-22' and chname eq '1' then  im[6:12, 12:17, *] = !Values.F_NAN                              ;mask region with nan set for bad regions
+
       if planetname eq 'HD93385' then im[17:21, 21:27, *] = !Values.F_NAN ;mask region with nan set for bad regions                         
       ;run the centroiding and photometry
       get_centroids_for_calstar_jk,im, h, unc, ra_ref, dec_ref,  t, dt, hjd, xft, x3, y3, $

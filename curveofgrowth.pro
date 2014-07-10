@@ -14,7 +14,7 @@ pro curveofgrowth, planetname, chname, corrflux = corrflux, selfcal=selfcal
   
   print, 'aorname', aorname
 
-  for a = 0,  0 do begin;n_elements(aorname) - 1 do begin
+  for a = 1,  1 do begin;n_elements(aorname) - 1 do begin
      
      dirloc =dirname +string(aorname(a) ) 
      print, 'dirloc', dirloc
@@ -39,7 +39,7 @@ pro curveofgrowth, planetname, chname, corrflux = corrflux, selfcal=selfcal
            endfor         
         endif
                                 ;do the centroiding & photometry
-        get_centroids_for_calstar_jk,im, h, unc, ra, dec,  t, dt, hjd, xft, x3, y3, $
+        get_centroids_curveofgrowth,im, h, unc, ra, dec,  t, dt, hjd, xft, x3, y3, $
                                      x5, y5, x7, y7, xg, yg, xh, yh, f, b, x3s, y3s, x5s, y5s, $
                                      x7s, y7s, fs, bs, xp3, yp3, xp5, yp5, xp7, yp7, xp3s, yp3s, $
                                      xp5s, yp5s, xp7s, yp7s, fp, fps, np, flag, ns, sf, $
@@ -187,10 +187,10 @@ pro curveofgrowth, planetname, chname, corrflux = corrflux, selfcal=selfcal
   
   print, 'stdarr', stdarr
 
-  p = plot(aps1, meanarr/ stdarr, '1rs-', xtitle = 'aperture size', ytitle = 'SNR', title = planetname)
+  p = plot(aps1, meanarr/ stdarr, '1rs-', xtitle = 'aperture size', ytitle = 'SNR', title = planetname, xrange = [1.5, 3.5])
   p.save, dirname + 'curveofgrowth.png'
 
-  save, aps1, meanarr, stdarr, filename = dirname + 'curveofgrowth.sav' 
+  save, aps1, meanarr, stdarr, filename = dirname + 'curveofgrowth_ch'+chname+'.sav' 
  ;      yerr = stdarr / (real_flux_ch1(r)*ratioarr) 
   ;       ploterror, aps1, ratioarr, yerr, yrange = [0.5, 1.2], psym = psymarr[r], xrange = [0,12], xtitle = 'aper radius', $
   ;                 ytitle = 'fraction of predicted flux', thick = 3, xthick = 3, ythick = 3, charthick = 3, title = 'PC5 - 20'

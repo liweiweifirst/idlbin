@@ -364,16 +364,16 @@ stopaor =   n_elements(aorname) - 1
         p2 = plot(phase_0, flux/median(flux) -0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
         p3 = plot(phase_0, flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
         
-;        xtest = findgen(n_elements(ndimages))
-;        ptest = plot(xtest, ndimages, yrange = [0, 0.1], xtitle = 'Some indication of time with eclipse removed', ytitle = 'average distance to nearest neighbors')
-;        ptest.save, dirname+'nn_dist.png'
+        xtest = findgen(n_elements(ndimages))
+        ptest = plot(xtest, ndimages, yrange = [0, 0.1], xtitle = 'Some indication of time with eclipse removed', ytitle = 'average distance to nearest neighbors')
+        ptest.save, dirname+'nn_dist.png'
                                 ; l = legend(target = [p1, p4, p2,p3], position = [1.5, 1.18], /data, /auto_text_color)
         
 ;    print, 'mean and stddev of sigmax', mean(sigmax), stddev(sigmax)
 ;     print, 'mean and stddev of sigmay', mean(sigmay), stddev(sigmay)
 ;     print, 'mean and stddev of sigmanp', mean(sigma_np), stddev(sigma_np)
-;     print, 'mean and stddev of furthestx', mean(furthestx), stddev(furthestx)
-;     print, 'mean and stddev of furthesty', mean(furthesty), stddev(furthesty)
+     print, 'mean and stddev of furthestx', mean(furthestx), stddev(furthestx)
+     print, 'mean and stddev of furthesty', mean(furthesty), stddev(furthesty)
 ;     print, 'mean and stddev of deltatime', mean(delta_time), stddev(delta_time)
 ;     print, '------'
 ;     if ni gt 12000 then print, 'stddev of raw, pmap, position, position+np corr', stddev(flux_m[12000:ni-1],/nan),stddev(corrflux[12000:ni-1],/nan), stddev(flux[12000:*],/nan), stddev(flux_np[12000:*],/nan)

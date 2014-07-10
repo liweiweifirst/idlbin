@@ -141,9 +141,9 @@ endif
 
      for a = 0,n_elements(aorname) -1 do begin ; 0, n_elements(aorname) - 1 do begin
         if a eq 0 then begin
-           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'bkgd'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'Bkgd', xtitle = 'Time(hrs)') ;,title = planetname
+           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'bkgd'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], ytitle = 'Bkgd', xtitle = 'Time(hrs)') ;,title = planetname
         endif else begin
-           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'bkgd'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
+           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'bkgd'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a],/overplot)
         endelse
         
      endfor
@@ -521,6 +521,7 @@ endif
      print, 'n_elements time', n_elements(bin_timearr), n_elements(bin_xcen), n_elements(bin_phase)
      if keyword_set(timeplot) then begin ;make the plot as a function of time
         print, 'making plot as a function of time'
+        extra={xthick: 2, ythick:2, margin: 0.2, sym_size: 0.2,   sym_filled: 1, xstyle:1}
         corrnormoffset = 0;0.02
         corroffset = 0.001
         setynormfluxrange = [0.98, 1.01];[0.97, 1.005]
@@ -531,35 +532,33 @@ endif
            plot_norm = median(bin_flux)
            plot_corrnorm = mean(bin_corrfluxp,/nan)
            bkgd_norm = mean(bin_bkgd,/nan)
+           print, 'bkg_norm', bkgd_norm
            print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
 
-           pp = plot((bin_timearr - time_0)/60./60., bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1, $;title = planetname, $
-                     color = colorarr[a], ytitle = 'X position', margin = 0.2, position = [0.2,0.74,0.9,0.9], xstyle = 1, $
-                     xshowtext = 0, ymajor = 4, ytickformat = '(F10.1)', dimensions = [600, 900]) ;, $
-                     ;xrange = setxrange)
+           pp = plot((bin_timearr - time_0)/60./60., bin_xcen, '1s',  $;title = planetname, $
+                     color = colorarr[a], ytitle = 'X position', position = [0.2,0.74,0.9,0.9], ytickinterval = 0.1, $
+                     xshowtext = 0, ytickformat = '(F10.1)', dimensions = [600, 900], _extra = extra, yminor = 5) ;, $, ymajor = 4
+ 
           ;turn off refreshing to make this quicker hopefully
-           pp.Refresh, /Disable
+;           pp.Refresh, /Disable
 
            
-           pq= plot((bin_timearr - time_0)/60./60., bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], $
-                     ytitle = 'Y position', margin = 0.2, position = [0.2, 0.58, 0.9, 0.74],/current, xstyle = 1, $
-                    xshowtext = 0, ymajor = 4,ytickformat = '(F10.1)') ;, $, title = planetname
+           pq= plot((bin_timearr - time_0)/60./60., bin_ycen, '1s',  color = colorarr[a], $
+                     ytitle = 'Y position',  position = [0.2, 0.58, 0.9, 0.74],/current,  ytickinterval = 0.1,$
+                    xshowtext = 0,ytickformat = '(F10.1)', _extra = extra) ;, $, title = planetname , ymajor = 4
                      ;xrange = setxrange)
 
-           if keyword_set(errorbars) then begin
-              ps= errorplot((bin_timearr - time_0)/60./60., bin_flux/plot_norm,bin_fluxerr/plot_norm,  '1s', sym_size = 0.2,   $
-                             sym_filled = 1,  color =colorarr[a], $
-                             ytitle = 'Normalized Flux' ,yrange = setynormfluxrange, $ ;, title = planetname,
-                             xrange = setxrange ,  margin = 0.2,position = [0.2,0.1, 0.9, 0.26],/current, xstyle = 1, $
-                            ymajor = 4)
-           endif else begin
-              ps = plot((bin_timearr - time_0)/60./60., bin_flux/plot_norm, '1s', sym_size = 0.2,   sym_filled = 1,  $
-                        color = colorarr[a],   ytitle = 'Normalized Flux', xtitle = 'Time(hrs)',$ ;title = planetname, 
-                        yrange = setynormfluxrange,  margin = 0.2,position = [0.2,0.1, 0.9, 0.26], /current, $
-                        xstyle = 1, ymajor = 4) ;, xrange = setxrange);,/nodata) 
-           endelse  ;/errorbars
 
-           if pmapcorr eq 1 then begin
+           if keyword_set(errorbars) then begin
+              pr= errorplot((bin_timearr - time_0)/60./60., bin_flux/plot_norm,bin_fluxerr/plot_norm,  '1s',  color =colorarr[a], $
+                             ytitle = 'Normalized Flux' ,yrange = setynormfluxrange, yminor = 5, $ ;, title = planetname,
+                             xrange = setxrange ,  position = [0.2,0.1, 0.9, 0.26],/current, ymajor = 4, _extra = extra)
+           endif else begin
+              pr = plot((bin_timearr - time_0)/60./60., bin_flux/plot_norm, '1s',  $
+                        color = colorarr[a],   ytitle = 'Normalized Flux', xtitle = 'Time(hrs)',$ ;title = planetname, 
+                         position = [0.2,0.1, 0.9, 0.26], /current, _extra = extra, ytickinterval = 0.01, yminor = 5);, xrange = setxrange);,/nodata) yrange = setynormfluxrange, ,  ymajor = 4
+           endelse  ;/errorbars
+          if pmapcorr eq 1 then begin
               print, 'inside pmapcorr eq 1', median( (bin_corrfluxp/plot_corrnorm) ), median(bin_flux)
               if keyword_set(errorbars) then begin
                  pr = errorplot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm) -corrnormoffset,  $
@@ -572,14 +571,15 @@ endif
 
            endif  ;enough pmap corrections
 
-           ps= plot((bin_timearr - time_0)/60./60., bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
-                     ytitle = 'Noise Pixel',  margin = 0.2, position = [0.2, 0.42, 0.9, 0.58], /current, xstyle = 1, $
-                    xshowtext = 0, ymajor = 4,ytickformat = '(F10.2)') ;,$ title = planetname,
+ 
+           ps= plot((bin_timearr - time_0)/60./60., bin_npcent, '1s', color = colorarr[a], $
+                     ytitle = 'Noise Pixel',  position = [0.2, 0.42, 0.9, 0.58], /current, $
+                    xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.5, yminor = 5) ;,$ title = planetname,, ymajor = 4
                     ;xrange = setxrange)
 
-           pt = plot((bin_timearr - time_0)/60./60., bin_bkgd/ bkgd_norm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
-                     ytitle = 'Background',  margin = 0.2, position = [0.2, 0.26, 0.9, 0.42], /current, xstyle = 1, xshowtext = 0,$
-                    ymajor = 4,ytickformat = '(F10.2)')           ;, $ title = planetname,
+           pt = plot((bin_timearr - time_0)/60./60., bin_bkgd/ bkgd_norm, '1s' , color = colorarr[a], $
+                     ytitle = 'Normalized Bkgd',  margin = 0.2, position = [0.2, 0.26, 0.9, 0.42], /current, xshowtext = 0,$
+                    ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.1, yminor = 5)           ;, $ title = planetname,ymajor = 4,
 
            ;setup a plot for just the snaps
            if n_elements(aorname) gt 10 then begin
@@ -599,9 +599,9 @@ endif
            pq = plot((bin_timearr - time_0)/60./60., bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = pq,/current)
 ;           pr.window.SetCurrent
            pr = plot((bin_timearr - time_0)/60./60., bin_flux/plot_norm , '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pr,/current)
-           if pmapcorr eq 1 then begin
-              pr = plot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm)-corrnormoffset, /overplot, 's1', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/current)
-           endif
+ ;          if pmapcorr eq 1 then begin
+;              pr = plot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm)-corrnormoffset, /overplot, 's1', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/current,overplot = pr)
+;           endif
 
 ;           ps.window.SetCurrent
            ps = plot((bin_timearr - time_0)/60./60., bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = ps,/current) ;, xtitle = 'Time(hrs)', ytitle = 'Normalized Flux',) 
@@ -633,7 +633,7 @@ endif
 
 
            if pmapcorr eq 1 then begin
-              print, 'inside pmapcorr eq 1', median( (bin_corrfluxp/plot_corrnorm) +corroffset)
+              print, 'inside pmapcorr eq 1, a gt stareaor', median( (bin_corrfluxp/plot_corrnorm) +corroffset)
 
                if keyword_set(errorbars) then begin
                   pr = errorplot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm)- corrnormoffset,$
@@ -660,7 +660,7 @@ endif
 
         endif
 
-        pp.Refresh
+;        pp.Refresh
 ;        pp.save, dirname +'binxcen_time_ch'+chname+'.eps'
 ;        pq.save, dirname +'binycen_time_ch'+chname+'.eps'
 ;        pt.save, dirname +'binbkg_time_ch'+chname+'.eps'
@@ -709,8 +709,8 @@ endif
 
 
   savename = strcompress(dirname + planetname +'_plot_ch'+chname+'.sav')
-  save, /all, filename=savename
-  print, 'saving planethash', savename
+;  save, /all, filename=savename
+;  print, 'saving planethash', savename
 
 jumpend: print, 'ending '
 end
