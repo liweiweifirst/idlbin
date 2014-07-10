@@ -156,7 +156,15 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
                                 ;a guess at mid-transit
 ;        endif
                                 ;endfor
-        
+        outfilename =  strcompress(dirname +'phot_ch'+chname+'_TAP_pmap.ascii',/remove_all)
+        openw, outlun, outfilename,/GET_LUN
+        endval = fix(0.3*n_elements(bin_corrflux))
+        normfactor = median(bin_corrflux[0:endval])
+        print, 'n_elements(bin_phase)',n_elements(bin_phase)
+        for te = 0, n_elements(bin_phase) -1 do begin
+           printf, outlun, bin_bmjd(te) , ' ', bin_corrflux(te)/normfactor,  format = '(F0, A,F0)'
+        endfor
+        close, outlun
 ;-----------------
 ;compare two methods of measuring np
         gp1 = where(bin_phase gt -0.45 and bin_phase lt -0.1)
@@ -194,7 +202,7 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
                  p1 = errorplot(bin_phase, bin_flux_m/ median(bin_flux_m),bin_fluxerr_m/median(bin_flux_m),$ ;median(bin_flux_m)
                                 '1s', sym_size = 0.3, sym_filled = 1,$
                                 color = 'black', xtitle = 'Phase', ytitle = 'Normalized Flux', title = planetname, $
-                                name = 'raw flux', yrange =[0.90, 1.026], axis_style = 1,  $
+                                name = 'raw flux', axis_style = 1,  $ ;yrange =[0.90, 1.026], 
                                 xstyle = 1, errorbar_capsize = 0.025) ;
 ;              endif else begin
 ;                 print, 'normalizing black flux by ', median(bin_flux_m)
@@ -354,6 +362,7 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
 ;            endif
 ;      endfor
 
+
       t = text(0.3, 0.004+1.0+ delta_green, 'selfcal', color = 'green',/overplot,/data)
 
         endif   ; if selfcal
@@ -406,7 +415,7 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
   
 ;;----------------------------------------------------
   dirname = strcompress(basedir + planetname_final +'/')
-;  p5.save, dirname+'allfluxes_binned_ch'+chname+'.png'
+  p1.save, dirname+'allfluxes_binned_ch'+chname+'.eps'
   
 end
 
