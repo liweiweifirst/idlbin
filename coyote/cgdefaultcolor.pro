@@ -205,7 +205,7 @@ FUNCTION cgDefaultColor, inputColour, $
         ; Make sure the input color is in the range 0 to 255
         index = Where((inputcolor GT 255) OR (inputcolor LT 0), count)
         IF count GT 0 THEN BEGIN
-            Message, 'Improper input color. It is possible 24-bit colors (LONGs) are being used in indexed color mode to specify colors.'
+            Message, 'Improper input color. It is possible 24-bit colors (LONGs) are being used in indexed color mode to specify colors.',/continue
         ENDIF
         FOR j=0L,ncolors-1 DO colors[j] = cgColor24([r[inputColor[j]], g[inputColor[j]], b[inputColor[j]]]) 
         IF N_Elements(colors) EQ 1 THEN RETURN, colors[0] ELSE RETURN, colors

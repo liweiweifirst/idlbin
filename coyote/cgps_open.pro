@@ -197,6 +197,8 @@
 ;          created automatically without setting a raster output keyword on cgPS_Close. 29 Nov 2013. DWF.
 ;       Moved the check for Charsize to after setting to the PostScript device. 14 Jan 2014. DWF.
 ;       The program wasn't picking up default values from cgWindow_GetDefs. 22 Jan 2014. DWF.
+;       Modified the program so that the PostScript file location is printed only if the PostScript file 
+;          is being retrained. 17 March 2014. DWF.
 ;       
 ; :Copyright:
 ;     Copyright (c) 2008-2014, Fanning Software Consulting, Inc.
@@ -230,6 +232,7 @@ PRO cgPS_Open, filename, $
    
    ; Get the file extension. This will tell you what kind of raster file you need to make, if any.
    rootname = cgRootName(ps_filename, DIRECTORY=directory, EXTENSION=extension)
+   print_ps_location = 1
    CASE StrUpCase(extension) OF
        'PS': 
        'EPS':
@@ -241,7 +244,7 @@ PRO cgPS_Open, filename, $
           ; and we can delete the intermediate PostScript file.
           IF cgHasImageMagick() THEN BEGIN
              ps_struct.rasterFileType = extension
-             IF N_Elements(quiet) EQ 0 THEN quiet = 1
+             print_ps_location = 0
           END
           END
    ENDCASE
@@ -250,6 +253,14 @@ PRO cgPS_Open, filename, $
    IF Keyword_Set(dejavusans) && (Float(!Version.Release) GE 8.2) THEN BEGIN
       tt_font = 'DejaVuSans'
       font = 1
+   ENDIF
+   
+   ; I did a bad thing and made the keyword TT_FONT specify the name of a true-type font. This is
+   ; inconsistent with other software for setting up the PostScript device (e.g., FSC_PSConfig__Define
+   ; and cgPS_Config. Here I try to rectify the situation.
+   IF (N_Elements(tt_font) NE 0) && (Size(tt_font, /TNAME) EQ 'STRING') THEN BEGIN
+       setfont = tt_font
+       tt_font = 1
    ENDIF
    
    ; Save the current True-Type font before entering the PostScript device.
@@ -262,9 +273,9 @@ PRO cgPS_Open, filename, $
    ps_struct.font = font
    
    ; Set up the true-type font for PostScript, if needed.
-   IF (N_Elements(tt_font) EQ 0) AND (font EQ 1) THEN cgWindow_GetDefs, PS_TT_FONT=tt_font
-   IF N_Elements(tt_font) NE 0 THEN BEGIN
-        ps_struct.tt_font = tt_font
+   IF (N_Elements(setfont) EQ 0) AND (font EQ 1) THEN cgWindow_GetDefs, PS_TT_FONT=setfont
+   IF N_Elements(setfont) NE 0 THEN BEGIN
+        ps_struct.tt_font = setfont
         font = 1
    ENDIF
    
@@ -334,11 +345,13 @@ PRO cgPS_Open, filename, $
    ENDIF
    
    ; Let them know where the output will be.
-   IF ~quiet THEN Print, 'PostScript output will be created here: ', keywords.filename
+   IF ~quiet THEN BEGIN
+      IF print_ps_location THEN Print, 'PostScript output will be created here: ', keywords.filename
+   ENDIF
    
    Set_Plot, 'PS'
    Device, _EXTRA=keywords, SCALE_FACTOR=scale_factor
-   IF N_Elements(tt_font) NE 0 THEN Device, Set_Font=tt_font, /TT_Font
+   IF N_Elements(setfont) NE 0 THEN Device, Set_Font=setfont, /TT_Font
    
    ; Determine the character size.
    IF ps_struct.p.charsize EQ 0 THEN BEGIN
