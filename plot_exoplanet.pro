@@ -1,4 +1,4 @@
-pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phaseplot, sclkplot = sclkplot, timeplot = timeplot, Dsweet = dsweet, selfcal=selfcal, centerpixplot = centerpixplot, errorbars = errorbars, unbinned_xplot = unbinned_xplot, unbinned_yplot = unbinned_yplot, unbinned_fluxplot=unbinned_fluxplot, unbinned_npplot = unbinned_npplot, unbinned_bkgplot = unbinned_bkgplot, Position_plot = position_plot, DN_plot = DN_plot
+pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phaseplot, sclkplot = sclkplot, timeplot = timeplot, Dsweet = dsweet, selfcal=selfcal, centerpixplot = centerpixplot, errorbars = errorbars, unbinned_xplot = unbinned_xplot, unbinned_yplot = unbinned_yplot, unbinned_fluxplot=unbinned_fluxplot, unbinned_npplot = unbinned_npplot, unbinned_bkgplot = unbinned_bkgplot, Position_plot = position_plot, DN_plot = DN_plot, unbinned_xyfwhm = unbinned_xyfwhm
 ;example call plot_exoplanet, 'wasp15', 2*63L
 
 COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr
@@ -148,6 +148,22 @@ endif
         
      endfor
      ay.save, dirname +'bkgd_time_ch'+chname+'.png'
+  endif
+
+;------
+  if keyword_set(unbinned_xyfwhm) then begin
+
+     for a = 0,n_elements(aorname) -1 do begin ; 0, n_elements(aorname) - 1 do begin
+        if a eq 0 then begin
+           ax = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'xfwhm'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'XFWHM', xtitle = 'Time(hrs)') ;,title = planetname
+           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'yfwhm'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'YFWHM', xtitle = 'Time(hrs)') ;,title = planetname
+        endif else begin
+           ax = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'xfwhm'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = ax)
+           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'yfwhm'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = ay)
+        endelse
+        
+     endfor
+     ay.save, dirname +'xyfwhm_time_ch'+chname+'.png'
   endif
 
 ;------
@@ -376,6 +392,14 @@ endif
                      xtitle = 'Orbital Phase', ytitle = 'Background', title = planetname, $
                      xrange =setxrange)
 
+           pxf = plot(bin_phase, bin_xfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
+                     xtitle = 'Orbital Phase', ytitle = 'XFWHM', title = planetname, $
+                     xrange =setxrange)
+
+           pyf = plot(bin_phase, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
+                     xtitle = 'Orbital Phase', ytitle = 'YFWHM', title = planetname, $
+                     xrange =setxrange)
+
            ;setup a plot for just the snaps
            if n_elements(aorname) gt 10 then begin
               pu = plot(bin_phase, (bin_corrfluxp/plot_corrnorm) + corroffset, xtitle = 'Orbital Phase', $
@@ -570,6 +594,12 @@ endif
            pt = plot((bin_timearr - time_0)/60./60., bin_bkgd, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
                      xtitle = 'Time(hrs)', ytitle = 'Background',  aspect_ratio = 0.0, margin = 0.2);, $ title = planetname,
                     ; xrange =setxrange)
+
+           pxf = plot((bin_timearr - time_0)/60./60., bin_xfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
+                     xtitle = 'Time(hrs)', ytitle = 'XFWHM',  aspect_ratio = 0.0, margin = 0.2);, $ title = planetname,
+
+           pyf = plot((bin_timearr - time_0)/60./60., bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
+                     xtitle = 'Time(hrs)', ytitle = 'YFWHM',  aspect_ratio = 0.0, margin = 0.2);, $ title = planetname,
 
            ;setup a plot for just the snaps
            if n_elements(aorname) gt 10 then begin
