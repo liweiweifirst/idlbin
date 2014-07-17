@@ -4,9 +4,19 @@ pro phot_stability, chname
 
 
 t1 = systime(1)
-dirname =  '/Users/jkrick/irac_warm/calstars/pmap_star/'
-ra_ref= 269.72731
-dec_ref = 67.793348
+dirname =  '/Users/jkrick/irac_warm/calstars/pmap_star_'+chname+'/'
+if chname eq 'ch2' then begin
+   ra_ref= 269.72731
+   dec_ref = 67.793348
+   ftime = 0.1
+   starname = 'bd67_1044'
+endif else begin
+   ra_ref = 269.84561
+   dec_ref = 66.048782
+   ftime = 0.4
+   starname = 'KF09T1'
+endelse
+
 planethash = hash()
 
 ;need a list of all relevant AORs.
@@ -15,7 +25,7 @@ command = 'ls -d */ > aorlist.txt'
 spawn, command
 readcol, 'aorlist.txt', aorname, format = 'A', /silent
 
-for a = 0,  n_elements(aorname) -1 do begin
+for a = 0, n_elements(aorname) -1 do begin
    undefine, fitsname
    undefine, buncname
    print, 'working on aorname ', aorname(a) , a, n_elements(aorname)
@@ -37,8 +47,8 @@ for a = 0,  n_elements(aorname) -1 do begin
       naxis = sxpar(header, 'NAXIS')
       framtime = sxpar(header, 'FRAMTIME')
 
-      if naxis gt 2 and framtime eq 0.1 then begin  ; got some subarray 0.1s data
-         fluxarr = fltarr(64*n_elements(fitsname))
+      if naxis gt 2 and framtime eq ftime then begin  ; got some subarray data at the right exposure time
+         fluxarr = fltarr(61*n_elements(fitsname))
          fluxerrarr = fluxarr
          backarr = fluxarr
          backerrarr = fluxarr
@@ -48,22 +58,32 @@ for a = 0,  n_elements(aorname) -1 do begin
          yarr = fluxarr
 
       for i = 0, n_elements(fitsname) - 1 do begin
-
+;         print, 'working on fitsname', i
          fits_read, fitsname(i), im, h
          fits_read, buncname(i), unc, hunc
-         bmjdarr[i] = sxpar(header, 'BMJD_OBS')
+         bmjd_obs= sxpar(header, 'BMJD_OBS')
+         aintbeg = sxpar(header, 'AINTBEG')
+         atimeend = sxpar(header, 'ATIMEEND')
+
+         ;now not strictly correct, but I am going to bin anyway
+         deltatime = (atimeend - aintbeg) / 61.D ; real time for each of the 64 frames
+         nt = dindgen(61)
+         bmjdarr[i*61]= bmjd_obs + (deltatime*nt)/60./60./24.D   ; 0.5*(frametime/60./60./24.) + (frametime/60./60./24.)*nt
+
+
          get_centroids_for_calstar_jk,im, h, unc, ra_ref, dec_ref,  t, dt, hjd, xft, x3, y3, $
                                       x5, y5, x7, y7, xg, yg, xh, yh, f, b, x3s, y3s, x5s, y5s, $
                                       x7s, y7s, fs, bs, xp3, yp3, xp5, yp5, xp7, yp7, xp3s, yp3s, $
                                       xp5s, yp5s, xp7s, yp7s, fp, fps, np, flag, ns, sf, $
                                       xfwhm, yfwhm, /WARM,/silent
-         fluxarr[i*64] = f[*,1]      ; chose 2 pixel aperture size
-         fluxerrarr[i*64] = fs[*,1]
-         backarr[i*64] = b[*,0]
-         backerrarr[i*64] = bs[*,0]
-         nparr[i*64] = np
-         xarr[i*64] = x3
-         yarr[i*64] = y3
+
+         fluxarr[i*61] = f[3:*,1]      ; chose 2 pixel aperture size
+         fluxerrarr[i*61] = fs[3:*,1]
+         backarr[i*61] = b[3:*,0]
+         backerrarr[i*61] = bs[3:*,0]
+         nparr[i*61] = np[3:*]
+         xarr[i*61] = x3[3:*]
+         yarr[i*61] = y3[3:*]
        
       endfor  ; for each fits image
 
@@ -78,7 +98,7 @@ for a = 0,  n_elements(aorname) -1 do begin
 
    cd, dirname  ;reset for the next AOR
 endfor  ; for each AOR
-savename = strcompress(dirname + 'bd67_1044_phot_'+chname+'.sav',/remove_all)
+savename = strcompress(dirname + starname + '_phot_'+chname+'.sav',/remove_all)
 save, planethash, filename=savename
 print, 'saving planethash', savename
 print, 'time check', systime(1) - t1

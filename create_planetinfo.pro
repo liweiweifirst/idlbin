@@ -283,12 +283,12 @@ chname = 0
   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 ;---
-  planetname = 'HD7924'
+  planetname = 'HD7924b'
   ra_ref = 20.496279
   dec_ref = 76.710305
-  aorname_ch2= ['r44605184','r46981888']; 2012
+;  aorname_ch2= ['r44605184','r46981888']; 2012
   ;aorname = ['r44605184' ] ;2011
-;  aorname_ch2 = ['r44605184', 'r46981632','r46981888'] ; both 2011 and 2012
+  aorname_ch2 = ['r44605184', 'r46981632','r46981888'] ; both 2011 and 2012
    aorname_ch1 = ['r0000000000']
    basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   utmjd_center = 54727.49 - 0.16 ;don't know where this additional change comes from

@@ -156,13 +156,13 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
                                 ;a guess at mid-transit
 ;        endif
                                 ;endfor
-        outfilename =  strcompress(dirname +'phot_ch'+chname+'_TAP_pmap.ascii',/remove_all)
+        outfilename =  strcompress(dirname +'phot_ch'+chname+'_TAP_nn.ascii',/remove_all)
         openw, outlun, outfilename,/GET_LUN
-        endval = fix(0.3*n_elements(bin_corrflux))
-        normfactor = median(bin_corrflux[0:endval])
+        endval = fix(0.3*n_elements(bin_flux))
+        normfactor = median(bin_flux[0:endval])
         print, 'n_elements(bin_phase)',n_elements(bin_phase)
         for te = 0, n_elements(bin_phase) -1 do begin
-           printf, outlun, bin_bmjd(te) , ' ', bin_corrflux(te)/normfactor,  format = '(F0, A,F0)'
+           printf, outlun, bin_bmjd(te) , ' ', bin_flux(te)/normfactor,  format = '(F0, A,F0)'
         endfor
         close, outlun
 ;-----------------

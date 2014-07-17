@@ -164,8 +164,11 @@ stopaor =   n_elements(aorname) - 1
         
                                 ;mask intervals in time where astrophysical signals exist.
                                 ;I know where the transits and eclipses are
+        ;mess around with reducing transit period
+;        t_dur = t_dur / 2.
         s = mask_signal( phasearr, period, utmjd_center, t_dur)
-        
+ ;test without masking signal
+ ;       s = xcen2
                                 ;make sure the transit doesn't get included as a nearest neighbor
         good = where(s gt 0, ngood, complement = bad)
         print, 'ngood', ngood, n_elements(bad)
@@ -219,7 +222,7 @@ stopaor =   n_elements(aorname) - 1
                                 ;what is the average distance to the nearest neighbor
                                 ; will eventually want to plot that as a funciton of phase or time
               ndarr = fltarr(n_elements(nearestx))
-              for nd = 0, n_elements(nearestx) - 1 do begin
+               for nd = 0, n_elements(nearestx) - 1 do begin
                                 ;             print, 'testing inside', xcen2(j), nearestx(nd), ycen2(j), nearesty(nd)
                  ndarr(nd) = sqrt((xcen2(j) - nearestx(nd))^2 + (ycen2(j) - nearesty(nd))^2)
               endfor
