@@ -51,14 +51,19 @@ ra_ref = planetinfo[planetname, 'ra']
 dec_ref = planetinfo[planetname, 'dec']
 
 exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
-exosystem = strmid(planetname, 0, 7) + ' b' ;'HD 209458 b' ;
+;exosystem = strmid(planetname, 0, 7) + ' b' ;'HD 209458 b' ;
 if planetname eq 'WASP-52b' then teq_p = 1315
+if planetname eq 'HD 7924 b' then begin
+   inclination = 85.
+   rp_rstar = 0.001
+endif
+
 if chname eq '2' then lambdaname  = '4.5'
 if chname eq '1' then lambdaname  = '3.6'
-get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
-                       TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
-                       INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
-                       DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,VERBOSE=verbose
+;get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
+;                       TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
+;                       INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
+;                       DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose
 ;ra_ref = ra*15.   ; comes in hours!;
 ;dec_ref = dec
 ;utmjd_center = mjd_transit
@@ -126,6 +131,8 @@ for a =startaor, stopaor do begin
          backerrarr = xarr
          nparr = xarr
          npcentroidsarr = xarr
+         xfwhmarr = xarr
+         yfwhmarr = xarr
       endif
       if i eq 0 and naxis ne 3 then begin
          xarr = fltarr(n_elements(fitsname))
@@ -140,6 +147,8 @@ for a =startaor, stopaor do begin
          backerrarr = xarr
          nparr = xarr
          npcentroidsarr = xarr
+         xfwhmarr = xarr
+         yfwhmarr = xarr
       endif
 
 
@@ -271,6 +280,8 @@ for a =startaor, stopaor do begin
          backerrarr[i*63] = backerr[1:*]
          nparr[i*63] = np[1:*]
          npcentroidsarr[i*63] = npcentroids[1:*]
+         xfwhmarr[i*63] = xfwhm[1:*]
+         yfwhmarr[i*63] = yfwhm[1:*]
  ;        help, bmjd
          if keyword_set(columntrack) then begin 
                                 ; I think I deleted more parts of this than I may have intended, so if it is not working, that may be why
@@ -301,6 +312,8 @@ for a =startaor, stopaor do begin
          backerrarr[i]  = backerr
          nparr[i]  = np
          npcentroidsarr[i] = npcentroids
+         xfwhmarr[i] = xfwhm
+         yfwhmarr[i] = yfwhm
       endif
 
    endfor; for each fits file in the AOR
@@ -342,8 +355,8 @@ for a =startaor, stopaor do begin
       values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, centerpixarr1, centerpixarr2, centerpixarr3, centerpixarr4, centerpixarr5, centerpixarr6, sigmapixarr1, sigmapixarr2, sigmapixarr3, sigmapixarr4, sigmapixarr5, sigmapixarr6, phase)
       planethash[aorname(a)] = HASH(keys, values)
    endif else begin
-      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase', 'npcentroids','exptime']
-      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr, exptime)
+      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase', 'npcentroids','exptime','xfwhm', 'yfwhm']
+      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr, exptime, xfwhmarr, yfwhmarr)
       planethash[aorname(a)] = HASH(keys, values)
    endelse
 
