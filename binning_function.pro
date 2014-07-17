@@ -14,6 +14,8 @@ function binning_function, a,bin_level, pmapcorr
      np = [planethash[aorname(a),'np']]
      npcentroids = planethash[aorname(a),'npcentroids']
      phase = [planethash[aorname(a),'phase']]
+;     xfwhmarr = [planethash[aorname(a),'xfwhm']]
+;     yfwhmarr = [planethash[aorname(a),'yfwhm']]
 
 ;     centerpixarr = [ planethash[aorname(a),'centerpixarr5']]
 ;     print, 'testing xarr', xarr[0:10]
@@ -40,7 +42,8 @@ function binning_function, a,bin_level, pmapcorr
      phasearr = phase[good]
      nparr = np[good]
      npcentarr = npcentroids[good]
-
+;     xfwhm = xfwhmarr[good]
+;     yfwhm = yfwhmarr[good]
 ;     centerpixarr = centerpixarr[good]
 
 ;and a second set for those that are in the sweet spot
@@ -56,7 +59,10 @@ function binning_function, a,bin_level, pmapcorr
      phasearrp = phase[goodpmap]
      nparrp = np[goodpmap]
      npcentarrp = npcentroids[goodpmap]
-    phasearrp = phase[goodpmap]
+     phasearrp = phase[goodpmap]
+;     xfwhmp = xfwhmarr[goodpmap]
+;     yfwhmp = yfwhmarr[goodpmap]
+
 ;     centerpixarrp = centerpixarr[goodpmap]
 
 ;     print, 'testing after outlier', n_elements(xarr), flux[0:10], xarr[0:10], corrfluxp[0:10]
@@ -87,6 +93,8 @@ function binning_function, a,bin_level, pmapcorr
      bin_centerpix = bin_flux
      bin_np = bin_flux
      bin_npcent = bin_flux
+     bin_xfwhm = bin_flux
+     bin_yfwhm = bin_flux
 
      bin_fluxp = dblarr(n_elements(hp))
      bin_fluxerrp = bin_fluxp
@@ -103,6 +111,8 @@ function binning_function, a,bin_level, pmapcorr
      bin_centerpixp = bin_fluxp
      bin_nparrp = bin_fluxp
      bin_npcentarrp = bin_fluxp
+     bin_xfwhmp = bin_fluxp
+     bin_yfwhmp = bin_fluxp
 
      c = 0
      for j = 0L, n_elements(h) - 1 do begin
@@ -118,8 +128,14 @@ function binning_function, a,bin_level, pmapcorr
            meanclip, yarr[ri[ri[j]:ri[j+1]-1]], meany, sigmay
            bin_ycen[c] = meany   ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
 
-           meanclip, bkgdarr[ri[ri[j]:ri[j+1]-1]], meansky, sigmasky
-           bin_bkgd[c] = meansky ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+;           meanclip, xfwhm[ri[ri[j]:ri[j+1]-1]], meanxfwhm, sigmaxfwhm
+;           bin_xfwhm[c] = meanxfwhm   ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+
+;            meanclip, yfwhm[ri[ri[j]:ri[j+1]-1]], meanyfwhm, sigmayfwhm
+;            bin_yfwhm[c] = meanyfwhm ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+
+            meanclip, bkgdarr[ri[ri[j]:ri[j+1]-1]], meansky, sigmasky
+            bin_bkgd[c] = meansky ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
 
            meanclip, flux[ri[ri[j]:ri[j+1]-1]], meanflux, sigmaflux
            bin_flux[c] = meanflux ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
@@ -193,6 +209,9 @@ function binning_function, a,bin_level, pmapcorr
      bin_ncorr = bin_ncorr[0:c-1]
      bin_np = bin_np[0:c-1]
      bin_npcent = bin_npcent[0:c-1]
+;     bin_xfwhm = bin_xfwhm[0:c-1]
+;     bin_yfwhm = bin_yfwhm[0:c-1]
+
 ;     bin_centerpix = bin_centerpix[0:c-1]
 ;     print, 'bin_xcen', bin_xcen
 ;  bin_bkgderr = bin_bkgderr[0:c-1]
@@ -213,6 +232,12 @@ function binning_function, a,bin_level, pmapcorr
 
            meanclip, yarrp[rip[rip[j]:rip[j+1]-1]], meany, sigmay
            bin_ycenp[cp] = meany   ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
+
+;           meanclip, xfwhmp[rip[rip[j]:rip[j+1]-1]], meanxfwhm, sigmaxfwhm
+;           bin_xfwhmp[cp] = meanxfwhm   ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
+
+;           meanclip, yfwhmp[rip[rip[j]:rip[j+1]-1]], meanyfwhm, sigmayfwhm
+;           bin_yfwhmp[cp] = meanyfwhm   ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
 
 ;           meanclip, centerpixarrp[ri[ri[j]:ri[j+1]-1]], meancenterpix, sigmacenterpix
 ;           bin_centerpixp[cp]= meancenterpix
@@ -281,6 +306,9 @@ function binning_function, a,bin_level, pmapcorr
      bin_ncorrp = bin_ncorrp[0:cp-1]
      bin_nparrp = bin_nparrp[0:cp-1]
      bin_npcentarrp = bin_npcentarrp[0:cp-1]
+;     bin_xfwhmp = bin_xfwhmp[0:cp-1]
+;     bin_yfwhmp = bin_yfwhmp[0:cp-1]
+;
 ;     bin_centerpixp = bin_centerpixp[0:cp-1]
 ;  bin_bkgderrp = bin_bkgderrp[0:cp-1]
 
