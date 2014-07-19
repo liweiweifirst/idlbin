@@ -1,6 +1,5 @@
 PRO pmap_correct_interpolate_single,x,y,f,ch,np,func,f_interp,f_interp_unc,NNEAREST=nnearest, USE_NP = use_np
   COMMON pmap_data,x_pmap,y_pmap,f_pmap,np_pmap,func_pmap,scale,sigscale
-   ;print, 'testing use_np', use_np
   ;;; Find the nearest neighbors in the pmap dataset
    IF N_ELEMENTS(nnearest) EQ 0 THEN nnearest = 50
    np1d = SQRT(np)
@@ -81,7 +80,7 @@ FUNCTION pmap_correct,x,y,f,ch,np,occdata,FUNC=func,CORR_UNC=corr_unc,FULL=full,
       
 ;now check to see if we are in a region of the pmap with sufficient data
       IF KEYWORD_SET(THRESHOLD_OCC) THEN BEGIN
-         IF occdata[x[i]-xfov, y[i]-yfov] EQ !VALUES.F_NAN THEN f_pmap_interp[i] = !VALUES.F_NAN
+         IF (finite(x[i]) lt 1)|| (occdata[x[i]-xfov, y[i]-yfov] EQ !VALUES.F_NAN) THEN f_pmap_interp[i] = !VALUES.F_NAN
       endif
 
    ENDFOR
