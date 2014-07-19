@@ -407,7 +407,6 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
                 box_centroider, slice, sigma2, xmax, ymax, 3, 6,3, tx, ty, tf, tb, $
                                 txs, tys, tfs, tbs, tc, tcb, tnp, xfwhm, yfwhm, expid,/twopass
 
-
 ;pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
 ;                    backboxwidth, boxborder, x0, y0, f0, b, xs, ys, fs, bs, $
 ;                    c, cb, np, xfwhm, yfwhm, xys, xycov, expid, MMM=mmm

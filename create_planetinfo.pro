@@ -150,7 +150,7 @@ chname = 0
   ra_ref = 46.908914
   dec_ref = -72.321879
   aorname_ch1 = ['r0']  ;ch1
-  aorname_ch2 = ['r48408064','r48408320']  ;ch2 ;'r31756800','r36787968'
+  aorname_ch2 = ['r48408064','r48408320']  
    basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   ;utmjd_center =  [double(55944.25889), double(55947.20505),double(55949.41467), double(55957.51661)]  
   utmjd_center =  56537.696D
@@ -298,7 +298,7 @@ chname = 0
   period = 5.3978
   intended_phase = 0.0
   exptime = 0.1
-  stareaor = 2
+  stareaor = 3
   plot_norm = 1.46
   plot_corrnorm = 1.46
 

@@ -51,7 +51,7 @@ ra_ref = planetinfo[planetname, 'ra']
 dec_ref = planetinfo[planetname, 'dec']
 
 exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
-;exosystem = strmid(planetname, 0, 7) + ' b' ;'HD 209458 b' ;
+exosystem = strmid(planetname, 0, 7) + ' b' ;'HD 209458 b' ;
 if planetname eq 'WASP-52b' then teq_p = 1315
 if planetname eq 'HD 7924 b' then begin
    inclination = 85.
@@ -60,14 +60,14 @@ endif
 
 if chname eq '2' then lambdaname  = '4.5'
 if chname eq '1' then lambdaname  = '3.6'
-;get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
-;                       TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
-;                       INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
-;                       DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose
-;ra_ref = ra*15.   ; comes in hours!;
-;dec_ref = dec
-;utmjd_center = mjd_transit
-;period = p_orbit
+get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
+                       TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
+                       INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
+                       DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose
+ra_ref = ra*15.   ; comes in hours!;
+dec_ref = dec
+utmjd_center = mjd_transit
+period = p_orbit
 ;---------------
 
 print, 'ra, dec', ra_ref, dec_ref
@@ -96,10 +96,10 @@ for a =startaor, stopaor do begin
    print,'n_elements(fitsname)', n_elements(fitsname)
 ;     aparr = dblarr(n_elements(fitsname))  ;keep the aperture sizes used
    
+startfits = 0.D
 
 
-
-   for i =0.D,  n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
+   for i =startfits,  n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
  ;      print, 'working on ', fitsname(i)         
       header = headfits(fitsname(i)) ;
       sclk_obs= sxpar(header, 'SCLK_OBS')
@@ -115,10 +115,10 @@ for a =startaor, stopaor do begin
       atimeend = sxpar(header, 'ATIMEEND')
       naxis = sxpar(header, 'NAXIS')
       if ch eq '2' and frametime eq 2 then ronoise = 12.1
-      if i eq 0 then print, 'ronoise', ronoise, gain, fluxconv, exptime
-      if i eq 0 then sclk_0 = sclk_obs
+      if i eq startfits then print, 'ronoise', ronoise, gain, fluxconv, exptime
+      if i eq startfits then sclk_0 = sclk_obs
 
-      if i eq 0 and naxis eq 3 then begin
+      if i eq startfits and naxis eq 3 then begin
          xarr = fltarr(63*(n_elements(fitsname)))
          yarr = xarr
          fluxarr = xarr
@@ -134,7 +134,7 @@ for a =startaor, stopaor do begin
          xfwhmarr = xarr
          yfwhmarr = xarr
       endif
-      if i eq 0 and naxis ne 3 then begin
+      if i eq startfits and naxis ne 3 then begin
          xarr = fltarr(n_elements(fitsname))
          yarr = xarr
          fluxarr = xarr
@@ -186,6 +186,9 @@ for a =startaor, stopaor do begin
                                    x7s, y7s, fs, bs, xp3, yp3, xp5, yp5, xp7, yp7, xp3s, yp3s, $
                                    xp5s, yp5s, xp7s, yp7s, fp, fps, np, flag, ns, sf, $
                                    xfwhm, yfwhm, /WARM
+      nanfound = where(FINITE(np) lt 1, nancount)
+      if nancount gt 0 then print, 'NAN: ', fitsname(i), nanfound
+
       x_center = temporary(x3)
       y_center = temporary(y3)
      ;choose the requested pixel aperture
@@ -360,7 +363,7 @@ for a =startaor, stopaor do begin
       planethash[aorname(a)] = HASH(keys, values)
    endelse
 
-
+print, 'testing timearr', timearr[0:200]
 endfor                          ;for each AOR
 
 

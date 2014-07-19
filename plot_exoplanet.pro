@@ -1,7 +1,7 @@
 pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phaseplot, sclkplot = sclkplot, timeplot = timeplot, Dsweet = dsweet, selfcal=selfcal, centerpixplot = centerpixplot, errorbars = errorbars, unbinned_xplot = unbinned_xplot, unbinned_yplot = unbinned_yplot, unbinned_fluxplot=unbinned_fluxplot, unbinned_npplot = unbinned_npplot, unbinned_bkgplot = unbinned_bkgplot, Position_plot = position_plot, DN_plot = DN_plot, unbinned_xyfwhm = unbinned_xyfwhm
 ;example call plot_exoplanet, 'wasp15', 2*63L
 
-COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr
+COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm
 
  colorarr = ['blue', 'red','black','green','grey','purple', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ]
 ;
@@ -32,7 +32,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
  
 
 ;for debugging: skip some AORs
-startaor = 0;5
+startaor = 2;5
 stopaor =  n_elements(aorname) - 1
 
 
@@ -153,13 +153,13 @@ endif
 ;------
   if keyword_set(unbinned_xyfwhm) then begin
 
-     for a = 0,n_elements(aorname) -1 do begin ; 0, n_elements(aorname) - 1 do begin
-        if a eq 0 then begin
-           ax = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'xfwhm'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'XFWHM', xtitle = 'Time(hrs)') ;,title = planetname
-           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'yfwhm'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'YFWHM', xtitle = 'Time(hrs)') ;,title = planetname
+     for a = startaor,stopaor do begin ; 0, n_elements(aorname) - 1 do begin
+        if a eq startaor then begin
+           ax = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(startaor),'timearr'])(0))/60./60., planethash[aorname(a),'xfwhm'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], ytitle = 'XFWHM', xtitle = 'Time(hrs)', yrange = [1.9, 2.2]) ;,title = planetname
+           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(startaor),'timearr'])(0))/60./60., planethash[aorname(a),'yfwhm'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], ytitle = 'YFWHM', xtitle = 'Time(hrs)', yrange = [1.9, 2.2]) ;,title = planetname
         endif else begin
-           ax = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'xfwhm'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = ax)
-           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'yfwhm'],'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = ay)
+           ax = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(startaor),'timearr'])(0))/60./60., planethash[aorname(a),'xfwhm'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], overplot = ax)
+           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(startaor),'timearr'])(0))/60./60., planethash[aorname(a),'yfwhm'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], overplot = ay)
         endelse
         
      endfor
@@ -169,19 +169,19 @@ endif
 ;------
   if keyword_set(unbinned_npplot) then begin
 
-     for a = 0 ,n_elements(aorname) -1 do begin ; 0, n_elements(aorname) - 1 do begin
-        if a eq 0 then begin
-           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0))/60./60., planethash[aorname(a),'np'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], ytitle = 'NP',title = planetname, xtitle = 'Time(hrs)')
-        endif else begin
-           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'np'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], /overplot)
+;     for a = 0 ,n_elements(aorname) -1 do begin ; 0, n_elements(aorname) - 1 do begin
+;        if a eq 0 then begin
+;           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0))/60./60., planethash[aorname(a),'np'],'1s', sym_size = 0.1,   sym_fil;led = 1, color = colorarr[a], ytitle = 'NP',title = planetname, xtitle = 'Time(hrs)')
+;        endif else begin
+;           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'np'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], /overplot)
 ;           ay = plot( (planethash[aorname(a),'bmjdarr'] - (planethash[aorname(a),'bmjdarr'])(0)), planethash[aorname(a),'np'],'6r1s-', sym_size = 0.3,   sym_filled = 1, color = colorarr[a], xrange = [0.1501,0.15018], yrange = [7.3,8.5], ytitle = 'NP');,/overplot)
-        endelse
+;        endelse
         
-     endfor
-     ay.save, dirname +'np_time_ch'+chname+'.png'
+;     endfor
+;     ay.save, dirname +'np_time_ch'+chname+'.png'
 
 ;compare to np coming from box_centroider
-     for a = 0 ,n_elements(aorname) -1 do begin ; 0, n_elements(aorname) - 1 do begin
+     for a = 0 ,0 do begin ; 0, n_elements(aorname) - 1 do begin
         print, 'should be plotting npcent'
         if a eq 0 then begin
            ayc = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0))/60./60., planethash[aorname(a),'npcentroids'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], ytitle = 'NP',title = planetname, xtitle = 'Time(hrs)')
@@ -262,7 +262,7 @@ endif
      ;what is the distribution of standard deviations among the corrfluxes?
 
      meanclip, planethash[aorname(a),'corrflux'] , mean_corrflux, stddev_corrflux
-     stddev_corrfluxarr[a] = stddev_corrflux
+     stddev_corrfluxarr[a - startaor] = stddev_corrflux
 ;------------------------------------------------------
 ;now try plotting
 
