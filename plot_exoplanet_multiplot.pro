@@ -1,10 +1,13 @@
 pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname, phaseplot = phaseplot, sclkplot = sclkplot, timeplot = timeplot, Dsweet = dsweet, selfcal=selfcal, centerpixplot = centerpixplot, errorbars = errorbars, unbinned_xplot = unbinned_xplot, unbinned_yplot = unbinned_yplot, unbinned_fluxplot=unbinned_fluxplot, unbinned_npplot = unbinned_npplot, unbinned_bkgplot = unbinned_bkgplot, Position_plot = position_plot, DN_plot = DN_plot
 ;example call plot_exoplanet, 'wasp15', 2*63L
 
-COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr
+COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm
 
  colorarr = ['blue', 'red','black','green','grey','purple', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ]
 ;
+;for debugging: skip some AORs
+startaor = 2;5
+stopaor =  2;n_elements(aorname) - 1
 
 
 ;run code to read in all the input planet parameters
@@ -22,7 +25,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)
-  time_0 = (planethash[aorname(0),'timearr']) 
+  time_0 = (planethash[aorname(startaor),'timearr']) 
   time_0 = time_0(0)
 ;  plothist, planethash[aorname(0),'npcentroids'], xhist, yhist, /noplot, bin = 0.01
 ;  testplot = plot(xhist, yhist,  xtitle = 'NP', ytitle = 'Number', thick =3, color = 'blue')
@@ -31,9 +34,6 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
 
  
 
-;for debugging: skip some AORs
-startaor = 0;5
-stopaor =  n_elements(aorname) - 1
 
 
  xsweet = 15.12
@@ -71,7 +71,7 @@ stopaor =  n_elements(aorname) - 1
      ;what is the distribution of standard deviations among the corrfluxes?
 
      meanclip, planethash[aorname(a),'corrflux'] , mean_corrflux, stddev_corrflux
-     stddev_corrfluxarr[a] = stddev_corrflux
+     stddev_corrfluxarr[a- startaor] = stddev_corrflux
 ;------------------------------------------------------
 ;now try plotting
 
@@ -94,7 +94,7 @@ stopaor =  n_elements(aorname) - 1
            print, 'bkg_norm', bkgd_norm
            print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
 
-           pp = plot((bin_timearr - time_0)/60./60., bin_xcen, '1s',  $;title = planetname, $
+           pp = plot((bin_timearr-  time_0)/60./60., bin_xcen, '1s',  $;title = planetname, $
                      color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 0.1, $
                      xshowtext = 0, ytickformat = '(F10.1)', dimensions = [600, 900], _extra = extra, yminor = 5) ;, $, ymajor = 4
  
@@ -114,8 +114,8 @@ stopaor =  n_elements(aorname) - 1
                              xrange = setxrange ,  position = [0.2,0.08, 0.9, 0.21],/current, ymajor = 4, _extra = extra)
            endif else begin
               pr = plot((bin_timearr - time_0)/60./60., bin_flux/plot_norm, '1s',  $
-                        color = colorarr[a],   ytitle = 'Norm. Flux', xtitle = 'Time(hrs)',$ ;title = planetname, 
-                         position = [0.2,0.08, 0.9, 0.21], /current, _extra = extra, ytickinterval = 0.01, yminor = 5);, xrange = setxrange);,/nodata) yrange = setynormfluxrange, ,  ymajor = 4
+                        color = colorarr[a],   ytitle = 'Norm. Flux', xtitle = 'Time(hrs)',$ 
+                         position = [0.2,0.08, 0.9, 0.21], /current, _extra = extra, ytickinterval = 0.005, yminor = 5);
            endelse  ;/errorbars
           if pmapcorr eq 1 then begin
               print, 'inside pmapcorr eq 1', median( (bin_corrfluxp/plot_corrnorm) ), median(bin_flux)
@@ -133,18 +133,18 @@ stopaor =  n_elements(aorname) - 1
  
            ps= plot((bin_timearr - time_0)/60./60., bin_npcent, '1s', color = colorarr[a], $
                      ytitle = 'Noise Pixel',  position = [0.2, 0.36, 0.9, 0.49], /current, $
-                    xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, ytickinterval = 0.5, yminor = 5) ;,$ title = planetname,, ymajor = 4
+                    xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, ytickinterval = 0.2, yminor = 5) ;,$ title = planetname,, ymajor = 4
                     ;xrange = setxrange)
 
            pt = plot((bin_timearr - time_0)/60./60., bin_bkgd/ bkgd_norm, '1s' , color = colorarr[a], $
                      ytitle = 'Norm. Bkgd',  margin = 0.2, position = [0.2, 0.22, 0.9, 0.35], /current, xshowtext = 0,$
-                    ytickformat = '(F10.1)', _extra = extra, ytickinterval = 0.2, yminor = 5)           ;, $ title = planetname,ymajor = 4,
+                    ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.05, yminor = 5)           ;, $ title = planetname,ymajor = 4,
 
-;           pxy = plot((bin_timearr - time_0)/60./60., bin_xfwhm, '1s', color = colorarr[a], $
-;                     ytitle = 'X & Y FWHM',  position = [0.2, 0.50, 0.9, 0.63], /current, $
-;                    xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.5, yminor = 5) ;
-;           pxy = plot((bin_timearr - time_0)/60./60., bin_xfwhm, '1s', color = colorarr[a], $
-;                     overplot = pxy, _extra = extra) ;
+           pxy = plot((bin_timearr - time_0)/60./60., bin_xfwhm, '1s', color = 'blue', $
+                     ytitle = 'X & Y FWHM',  position = [0.2, 0.50, 0.9, 0.63], /current, $
+                    xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.05, yminor = 5) ;
+           pxy = plot((bin_timearr - time_0)/60./60., bin_yfwhm, '1s', color = 'black', $
+                     overplot = pxy, _extra = extra) ;
 
            ;setup a plot for just the snaps
            if n_elements(aorname) gt 10 then begin
