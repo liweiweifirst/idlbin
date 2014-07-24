@@ -18,12 +18,13 @@ function binning_function, a,bin_level, pmapcorr
      yfwhmarr = [planethash[aorname(a),'yfwhm']]
 
 ;     centerpixarr = [ planethash[aorname(a),'centerpixarr5']]
-;     print, 'testing xarr', xarr[0:10]
+     print, 'testing xarr', xarr[0:200]
+     print, 'mean xarr', mean(xarr,/nan), mean(yarr,/nan), stddev(xarr,/nan), stddev(yarr,/nan)
      ;remove outliers, 
 ;     if pmapcorr eq 1 then begin 
-     goodpmap = where(xarr lt mean(xarr) + 2.5*stddev(xarr) and xarr gt mean(xarr) -2.5*stddev(xarr) and xarr lt mean(xarr) +3.0*stddev(yarr) and yarr gt mean(yarr) - 3.0*stddev(yarr) and finite(corrfluxarr) gt 0  ,ngood_pmap, complement=badpmap) ;
+     goodpmap = where(xarr lt mean(xarr,/nan) + 2.5*stddev(xarr,/nan) and xarr gt mean(xarr,/nan) -2.5*stddev(xarr,/nan) and xarr lt mean(xarr,/nan) +3.0*stddev(yarr,/nan) and yarr gt mean(yarr,/nan) - 3.0*stddev(yarr,/nan) and finite(corrfluxarr) gt 0  ,ngood_pmap, complement=badpmap) ;
  ;    endif else begin
-     good = where(xarr lt mean(xarr) + 2.5*stddev(xarr) and xarr gt mean(xarr) -2.5*stddev(xarr) and xarr lt mean(xarr) +3.0*stddev(yarr) and yarr gt mean(yarr) - 3.0*stddev(yarr) ,ngood, complement=bad)
+     good = where(xarr lt mean(xarr,/nan) + 2.5*stddev(xarr,/nan) and xarr gt mean(xarr,/nan) -2.5*stddev(xarr,/nan) and xarr lt mean(xarr,/nan) +3.0*stddev(yarr,/nan) and yarr gt mean(yarr,/nan) - 3.0*stddev(yarr,/nan) ,ngood, complement=bad)
  ;    endelse
      
 ;     print, 'testing good', good[0:10]
