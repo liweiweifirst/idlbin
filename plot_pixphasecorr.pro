@@ -11,6 +11,7 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
   delta_red = -0.02
   delta_grey =  0.01
   delta_blue = 0.02
+  delta_cyan = 0.03
   delta_green =- 0.01
   planetname_final = planetname
   dirname = strcompress(basedir + planetname +'/')
@@ -64,6 +65,8 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
         bin_time = dblarr(n_elements(h))
         bin_time_0 = dblarr(n_elements(h))
         bin_phase = dblarr(n_elements(h))
+        bin_flux_fwhm = dblarr(n_elements(h))
+        bin_fluxerr_fwhm= dblarr(n_elements(h))
         c = 0
         for j = 0L, n_elements(h) - 1 do begin
            
@@ -98,6 +101,12 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
               idataerr = fluxerr[ri[ri[j]:ri[j+1]-1]]
               bin_fluxerr[c] =   sqrt(total(idataerr^2))/ (n_elements(idataerr))
               
+              meanclip, flux_fwhm[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
+              bin_flux_fwhm[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+              
+              idataerr = fluxerr_fwhm[ri[ri[j]:ri[j+1]-1]]
+              bin_fluxerr_fwhm[c] =   sqrt(total(idataerr^2))/ (n_elements(idataerr))
+
               meanclip, time[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
               bin_time[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
               
@@ -126,7 +135,9 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
         bin_fluxerr_m = bin_fluxerr_m[0:c-1]
         bin_fluxerr_np = bin_fluxerr_np[0:c-1]
         bin_fluxerr = bin_fluxerr[0:c-1]
-        
+        bin_flux_fwhm = bin_flux_fwhm[0:c-1]
+        bin_fluxerr_fwhm = bin_fluxerr_fwhm[0:c-1]
+
 ;if working on a secondary, then want to plot the phase around 0.5,
 ;and not split it around 0.
 ;     if intended_phase eq 0.5 then begin
@@ -140,6 +151,7 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
         print, 'mean corr gray flux', mean((bin_corrflux /median( bin_corrflux)),/nan)
 ;        print, 'mean position red flux', mean(bin_flux/median(bin_flux),/nan)
         print, 'mean np blue flux', mean(bin_flux_np,/nan)
+        print, 'mean fwhm cyan flux', mean(bin_flux_fwhm,/nan)
 ;     print, 'phase', bin_phase
         
 ;print out levels so that I can use them for TAP (or exofast I suppose)
@@ -207,25 +219,30 @@ pro plot_pixphasecorr, planetname, bin_level, apradius, chname, selfcal=selfcal,
 
                                 ;print, 'grey in plotting',
                                 ;bin_corrflux
-              print, 'normalizing grey flux by ',Median( bin_corrflux)
 
+              print, 'normalizing grey flux by ',Median( bin_corrflux)
               p4 =  errorplot(bin_phase, (bin_corrflux /Median( bin_corrflux)) + delta_grey, $
                               bin_corrfluxerr / median(bin_corrflux), '1s', sym_size = 0.3,   $
                               sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr', $
                               errorbar_color = 'grey', errorbar_capsize = 0.025)
-              print, 'normalizing red flux by ', median(bin_flux)
 
+              print, 'normalizing red flux by ', median(bin_flux)
               P2 = errorplot(bin_phase, bin_flux +delta_red , bin_fluxerr,$ ;median(bin_flux)
                              '1s', sym_size = 0.3, sym_filled = 1, errorbar_color = 'red',$
                              color = 'red', /overplot, name = 'position corr', errorbar_capsize = 0.025)
               
               print, 'normalizing blue flux by ', median(bin_flux_np)
-                            
               p3 = errorplot(bin_phase, bin_flux_np  + delta_blue, $ ;/median(bin_flux_np)
                              bin_fluxerr_np, '1s', sym_size = 0.3, errorbar_color = 'blue',   $
                              sym_filled = 1,color = 'blue', /overplot, name = 'position + np',$
                              errorbar_capsize = 0.025)
-              
+ 
+              print, 'normalizing cyan flux by ', median(bin_flux_fwhm)
+              p3 = errorplot(bin_phase, bin_flux_fwhm  + delta_cyan, $ ;/median(bin_flux_np)
+                             bin_fluxerr_fwhm, '1s', sym_size = 0.3, errorbar_color = 'cyan',   $
+                             sym_filled = 1,color = 'cyan', /overplot, name = 'position + fwhm',$
+                             errorbar_capsize = 0.025)
+             
            endif else begin     ;plot as a function of time
               if a eq startaor then begin
                  p1 = errorplot(bin_time/60./60., bin_flux_m/rawnorm ,bin_fluxerr_m/rawnorm,$ ;median(bin_flux_m)
