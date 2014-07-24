@@ -26,7 +26,7 @@
 ; MODIFICATION HISTORY:
 ; Dec 2012 JK initial version
 ;-
-pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breatheap, ballard_sigma = ballard_sigma
+pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breatheap, ballard_sigma = ballard_sigma, use_fwhm = use_fwhm, use_np = use_np
 
   t1 = systime(1)
 ;get all the necessary saved info/photometry
@@ -149,10 +149,13 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
   fluxerr = flux
   flux_np = flux                ; fltarr(n_elements(flux_m))
   fluxerr_np = flux
+  flux_fwhm = flux
+  fluxerr_fwhm = flux
   time_0 = timearr[0:ni - 1]
   phase_0 = phasearr[0:ni-1]
   warr = flux
   warr_np= flux
+  warr_fwhm = flux
   sigmax = flux
   sigmay = flux
   sigma_np = flux
@@ -160,6 +163,7 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
   furthesty= flux
   delta_time = flux
   delta_time_np =  flux
+  delta_time_fwhm = flux
   ndimages = flux
   
   xcen2 = xcenarr
@@ -186,11 +190,10 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
                                 ;do the nearest neighbors run with triangulation
                                 ;http://www.idlcoyote.com/code_tips/slowloops.html
                                 ;this returns a sorted list of the nn nearest neighbors
-  nearest_xyfwhm = nearest_neighbors_xyfwhm_DT(xcen2,ycen2,xfwhm, yfwhm,chname,DISTANCES=nearest_np_d,NUMBER=nn)
-  nearest_np = nearest_neighbors_np_DT(xcen2,ycen2,sqrtnp2,chname,DISTANCES=nearest_np_d,NUMBER=nn)
+if keyword_set(use_fwhm) then  nearest_xyfwhm = nearest_neighbors_xyfwhm_DT(xcen2,ycen2,xfwhm, yfwhm,chname,DISTANCES=nearest_np_d,NUMBER=nn)
+if keyword_set(use_np) then  nearest_np = nearest_neighbors_np_DT(xcen2,ycen2,sqrtnp2,chname,DISTANCES=nearest_np_d,NUMBER=nn)
   nearest = nearest_neighbors_DT(xcen2,ycen2,chname,DISTANCES=nearest_d,NUMBER=nn)
                                 ;quick statistics to see if np picks different nearest neighbors than xyfwhm
-  print, 'difference in nearest neighbor pointers', nearest_np[0:50] - nearest_xyfwhm[0:50]
 
   for j = 0L,   ni - 1 do begin ;for each centroid in the entire dataset, aka. 63*nimages
      if s[j] gt 0 then begin    ;out of transit
@@ -231,42 +234,48 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
 ;--------------------
 ;find the nearest neighbors using noise pixel
 ;--------------------
-        
-        nearestxnp = xcen2(nearest_np(*,j))
-        nearestynp = ycen2(nearest_np(*,j))
-        nearestsqrtnp = sqrtnp2(nearest_np(*,j))
-        nearestfluxnp = flux_m2(nearest_np(*,j))
-        nearesttimenp = time_02(nearest_np(*,j))
-        
-        delta_time_np(j) = abs(time_02[j]- nearesttimenp(n_elements(nearesttimenp)-1))
-        
+        if keyword_set(use_np) then begin
+           nearestxnp = xcen2(nearest_np(*,j))
+           nearestynp = ycen2(nearest_np(*,j))
+           nearestsqrtnp = sqrtnp2(nearest_np(*,j))
+           nearestfluxnp = flux_m2(nearest_np(*,j))
+           nearesttimenp = time_02(nearest_np(*,j))
+           
+           delta_time_np(j) = abs(time_02[j]- nearesttimenp(n_elements(nearesttimenp)-1))
+           
                                 ;make sure that the nearest neighbor is not the point itself
-        if  xcen2(j) eq nearestxnp(0) and ycen2(j) eq nearestynp(0) then begin
-           nearestxnp = nearestxnp[1:*]
-           nearestynp = nearestynp[1:*]
-           nearestsqrtnp  = nearestsqrtnp[1:*]
-           nearestfluxnp = nearestfluxnp[1:*]
-        endif
+           if  xcen2(j) eq nearestxnp(0) and ycen2(j) eq nearestynp(0) then begin
+              nearestxnp = nearestxnp[1:*]
+              nearestynp = nearestynp[1:*]
+              nearestsqrtnp  = nearestsqrtnp[1:*]
+              nearestfluxnp = nearestfluxnp[1:*]
+           endif
+        endif   ;/use_np
 
 
 ;--------------------
 ;find the nearest neighbors using XFWHM & YFWHM
 ;--------------------
-        
-        nearestxfwhm = xcen2(nearest_xyfwhm(*,j))
-        nearestyfwhm = ycen2(nearest_xyfwhm(*,j))
-        nearestfluxfwhm = flux_m2(nearest_xyfwhm(*,j))
-        nearesttimefwhm = time_02(nearest_xyfwhm(*,j))
-        
-        delta_time_fwhm(j) = abs(time_02[j]- nearesttimefwhm(n_elements(nearesttimefwhm)-1))
-        
+        if keyword_set(use_fwhm) then begin
+           nearestxfwhm = xcen2(nearest_xyfwhm(*,j))
+           nearestyfwhm = ycen2(nearest_xyfwhm(*,j))
+           nearestfluxfwhm = flux_m2(nearest_xyfwhm(*,j))
+           nearesttimefwhm = time_02(nearest_xyfwhm(*,j))
+           nearestxxfwhm = xfwhm(nearest_xyfwhm(*,j))
+           nearestyyfwhm = yfwhm(nearest_xyfwhm(*,j))
+           
+           delta_time_fwhm(j) = abs(time_02[j]- nearesttimefwhm(n_elements(nearesttimefwhm)-1))
+           
                                 ;make sure that the nearest neighbor is not the point itself
-        if  xcen2(j) eq nearestxfwhm(0) and ycen2(j) eq nearestyfwhm(0) then begin
-           nearestxfwhm = nearestxfwhm[1:*]
-           nearestyfwhm = nearestyfwhm[1:*]
-           nearestsqrtfwhm  = nearestsqrtfwhm[1:*]
-           nearestfluxfwhm = nearestfluxfwhm[1:*]
-        endif
+           if  xcen2(j) eq nearestxfwhm(0) and ycen2(j) eq nearestyfwhm(0) then begin
+              nearestxfwhm = nearestxfwhm[1:*]
+              nearestyfwhm = nearestyfwhm[1:*]
+              nearestfluxfwhm = nearestfluxfwhm[1:*]
+              nearestxxfwhm = nearestxxfwhm[1:*]
+              nearestyyfwhm = nearestyyfwhm[1:*]
+              
+           endif
+        endif  ; keyword_set(use_fwhm)
 
 
      endif else begin           ;end out of transit
@@ -304,69 +313,73 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
         
 ;for using np
 ;----------
-        goodxnp = fltarr(nouttransit + 1)
-        goodynp = fltarr(nouttransit + 1)
-        goodfluxnp = fltarr(nouttransit + 1)
-        goodsqrtnp = fltarr(nouttransit+1)
-
-        goodxnp[0] = xcenarr[j]
-        goodynp[0] = ycenarr[j]
-        goodfluxnp[0] = flux_marr[j]
-        goodsqrtnp[0] = sqrtnparr[j]
-        goodxnp[1:*] = xcenarr(outtransit)
-        goodynp[1:*] = ycenarr(outtransit)
-        goodfluxnp[1:*] = flux_marr(outtransit)
-        goodsqrtnp[1:*] = sqrtnparr(outtransit)
-        
+        if keyword_set(use_np) then begin
+           goodxnp = fltarr(nouttransit + 1)
+           goodynp = fltarr(nouttransit + 1)
+           goodfluxnp = fltarr(nouttransit + 1)
+           goodsqrtnp = fltarr(nouttransit+1)
+           
+           goodxnp[0] = xcenarr[j]
+           goodynp[0] = ycenarr[j]
+           goodfluxnp[0] = flux_marr[j]
+           goodsqrtnp[0] = sqrtnparr[j]
+           goodxnp[1:*] = xcenarr(outtransit)
+           goodynp[1:*] = ycenarr(outtransit)
+           goodfluxnp[1:*] = flux_marr(outtransit)
+           goodsqrtnp[1:*] = sqrtnparr(outtransit)
+           
 ; try the brute force way of finding distances in those arrays
-        dist = distance_np(goodx, goody, goodsqrtnp,0, chname)
-        sd = sort(dist)
-        sortdist = dist(sd)  ; sort those distances
-        sortxcen = goodx(sd)
-        sortycen = goody(sd)
-        sortflux_m = goodflux(sd)
-        sortsqrtnp = goodsqrtnp(sd)
-        
-        nearestxnp = sortxcen[1:nn] ;zeroth element will be the same position as the target image
-        nearestynp = sortycen[1:nn]
-        nearestfluxnp = sortflux_m[1:nn]
-        nearestsqrtnp = sortsqrtnp[1:nn]
+           dist = distance_np(goodx, goody, goodsqrtnp,0, chname)
+           sd = sort(dist)
+           sortdist = dist(sd)  ; sort those distances
+           sortxcen = goodx(sd)
+           sortycen = goody(sd)
+           sortflux_m = goodflux(sd)
+           sortsqrtnp = goodsqrtnp(sd)
+           
+           nearestxnp = sortxcen[1:nn] ;zeroth element will be the same position as the target image
+           nearestynp = sortycen[1:nn]
+           nearestfluxnp = sortflux_m[1:nn]
+           nearestsqrtnp = sortsqrtnp[1:nn]
+        endif  ;use_np
+
 ;for using XY FWHM
 ;----------
-        goodxfwhm = fltarr(nouttransit + 1)   ; this is the good xcen values using fwhm method
-        goodyfwhm = fltarr(nouttransit + 1)
-        goodfluxfwhm = fltarr(nouttransit + 1)
-        goodxxfwhm = goodxfwhm     ; this is the good XFWHM values
-        goodyyfwhm = goodxfwhm ; this is the good YFWHM values
-
-        goodxfwhm[0] = xcenarr[j]
-        goodyfwhm[0] = ycenarr[j]
-        goodfluxfwhm[0] = flux_marr[j]
-        goodxxfwhm[0] = xfwhm[j]
-        goodyyfwhm[0] = yfwhm[j]
-        goodxfwhm[1:*] = xcenarr(outtransit)
-        goodyfwhm[1:*] = ycenarr(outtransit)
-        goodfluxfwhm[1:*] = flux_marr(outtransit)
-        goodxxfwhm[1:*] = xfwhm(outtransit)
-        goodyyfwhm[1:*] = yfwhm(outtransit)
-
+        if keyword_set(use_fwhm) then begin
+           goodxfwhm = fltarr(nouttransit + 1) ; this is the good xcen values using fwhm method
+           goodyfwhm = fltarr(nouttransit + 1)
+           goodfluxfwhm = fltarr(nouttransit + 1)
+           goodxxfwhm = goodxfwhm ; this is the good XFWHM values
+           goodyyfwhm = goodxfwhm ; this is the good YFWHM values
+           
+           goodxfwhm[0] = xcenarr[j]
+           goodyfwhm[0] = ycenarr[j]
+           goodfluxfwhm[0] = flux_marr[j]
+           goodxxfwhm[0] = xfwhm[j]
+           goodyyfwhm[0] = yfwhm[j]
+           goodxfwhm[1:*] = xcenarr(outtransit)
+           goodyfwhm[1:*] = ycenarr(outtransit)
+           goodfluxfwhm[1:*] = flux_marr(outtransit)
+           goodxxfwhm[1:*] = xfwhm(outtransit)
+           goodyyfwhm[1:*] = yfwhm(outtransit)
+           
 ; try the brute force way of finding distances in those arrays
-        dist = distance_fwhm(goodx, goody, goodxxfwhm, goodyyfwhm,0, chname)
-        sd = sort(dist)
-        sortdist = dist(sd)  ; sort those distances
-        sortxcen = goodx(sd)
-        sortycen = goody(sd)
-        sortflux_m = goodflux(sd)
-        sortxfwhm = goodxxfwhm(sd)
-        sortyfwhm = goodyyfwhm(sd)
-
-        nearestxfwhm = sortxcen[1:nn] ;zeroth element will be the same position as the target image
-        nearestyfwhm = sortycen[1:nn]
-        nearestfluxfwhm = sortflux_m[1:nn]
-        nearestxxfwhm = sortxfwhm[1:nn]
-        nearestxyfwhm = sortyfwhm[1:nn]
-
-     endelse                    ;end in transit
+           dist = distance_fwhm(goodx, goody, goodxxfwhm, goodyyfwhm,0, chname)
+           sd = sort(dist)
+           sortdist = dist(sd)  ; sort those distances
+           sortxcen = goodx(sd)
+           sortycen = goody(sd)
+           sortflux_m = goodflux(sd)
+           sortxfwhm = goodxxfwhm(sd)
+           sortyfwhm = goodyyfwhm(sd)
+           
+           nearestxfwhm = sortxcen[1:nn] ;zeroth element will be the same position as the target image
+           nearestyfwhm = sortycen[1:nn]
+           nearestfluxfwhm = sortflux_m[1:nn]
+           nearestxxfwhm = sortxfwhm[1:nn]
+           nearestxyfwhm = sortyfwhm[1:nn]
+        endif ; use_fwhm
+        endelse                 ;end in transit
 ;------------------------------------------------  ----------------  -    
 ;calculate sigmas on the nearest neighbors for xy only
      stdxcen = stddev(nearestx)
@@ -389,36 +402,45 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
      
 ;---------------------
 ;calculate sigmas on the nearest neighbors for np
-     stdxcennp = stddev(nearestxnp)
-     stdycennp = stddev(nearestynp)
-     stdsqrtnp = stddev(nearestsqrtnp)
-     sigma_np[j] = stdsqrtnp
-     
-     w_np = weight_np(stdxcennp, stdycennp, stdsqrtnp, nearestxnp, nearestynp, nearestsqrtnp, xcenarr(j), ycenarr(j), sqrtnparr(j), nearestfluxnp)
-     warr_np[j] = w_np
-     flux_np(j) = flux_marr(j) / w_np
-     fluxerr_np(j) = fluxerr_marr(j) / w_np
-
+     if keyword_set(use_np) then begin
+        stdxcennp = stddev(nearestxnp)
+        stdycennp = stddev(nearestynp)
+        stdsqrtnp = stddev(nearestsqrtnp)
+        sigma_np[j] = stdsqrtnp
+        
+        w_np = weight_np(stdxcennp, stdycennp, stdsqrtnp, nearestxnp, nearestynp, nearestsqrtnp, xcenarr(j), ycenarr(j), sqrtnparr(j), nearestfluxnp)
+        warr_np[j] = w_np
+        flux_np(j) = flux_marr(j) / w_np
+        fluxerr_np(j) = fluxerr_marr(j) / w_np
+     endif ;use_np
 ;---------------------
 ;calculate sigmas on the nearest neighbors for XFWHM & YFWHM
-     stdxcenfwhm = stddev(nearestxfwhm)
-     stdycenfwhm = stddev(nearestyfwhm)
-     stdxfwhm = stddev(nearestxxfwhm)
-     stdyfwhm = stddev(nearestyyfwhm)
-
-     w_fwhm = weight_fwhm(stdxcenfwhm, stdycenfwhm, stdxfwhm, stdyfwhm, nearestxfwhm, nearestyfwhm, nearestxxfwhm, nearestyyfwhm, xcenarr(j), ycenarr(j), xfwhm(j), yfwhm(j), nearestfluxfwhm)
-     warr_fwhm[j] = w_fwhm
-     flux_fwhm(j) = flux_marr(j) / w_fwhm
-     fluxerr_fwhm(j) = fluxerr_marr(j) / w_fwhm
-
+     if keyword_set(use_fwhm) then begin
+        stdxcenfwhm = stddev(nearestxfwhm)
+        stdycenfwhm = stddev(nearestyfwhm)
+        stdxfwhm = stddev(nearestxxfwhm)
+        stdyfwhm = stddev(nearestyyfwhm)
+        
+        w_fwhm = weight_fwhm(stdxcenfwhm, stdycenfwhm, stdxfwhm, stdyfwhm, nearestxfwhm, nearestyfwhm, nearestxxfwhm, nearestyyfwhm, xcenarr(j), ycenarr(j), xfwhm(j), yfwhm(j), nearestfluxfwhm)
+        warr_fwhm[j] = w_fwhm
+        flux_fwhm(j) = flux_marr(j) / w_fwhm
+        fluxerr_fwhm(j) = fluxerr_marr(j) / w_fwhm
+     endif ;use_fwhm
      
-  endfor
+
+;testing if fwhm found same neighbors as np
+;     if j lt 100 and n_elements(nearestxfwhm) eq n_elements(nearestxnp) then begin
+;        print, 'j', j, nearestxfwhm - nearestxnp
+;     endif
+
+
+  endfor  ; for each centroid in the entire dataset.
+
   
   
 ;  intransit = where(finite(flux) lt 1, badcount)
 ;  print, 'nan? ', badcount
   save, /all, filename =strcompress(dirname + 'pixphasecorr_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
-  
   
   print, 'about to plot blue ', median(flux_np), n_elements(flux_marr), n_elements(corrfluxarr), n_elements(flux), n_elements(flux_np)
 ;plot the results
@@ -428,11 +450,11 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
 ;        p3 = plot(time_0/60./60., flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
   
   
-  p1 = plot(phase_0, flux_marr[0:ni-1]/ median(flux_marr[0:ni-1]), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Phase', ytitle = 'Flux', title = planetname, name = 'raw flux', yrange =[0.93, 1.20])
-  p4 =  plot(phase_0, (corrfluxarr[0:ni-1] /median( corrfluxarr[0:ni-1])) + 0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
-  p2 = plot(phase_0, flux/median(flux) -0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
-  p3 = plot(phase_0, flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
-  p5 = plot(phase_0, flux_fwhm /median(flux_fwhm)+ 0.15, '1s', sym_size = 0.1,   sym_filled = 1,color = 'cyan', /overplot, name = 'position + xyfwhm')
+;  p1 = plot(phase_0, flux_marr[0:ni-1]/ median(flux_marr[0:ni-1]), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Phase', ytitle = 'Flux', title = planetname, name = 'raw flux', yrange =[0.93, 1.20])
+;  p4 =  plot(phase_0, (corrfluxarr[0:ni-1] /median( corrfluxarr[0:ni-1])) + 0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
+;  p2 = plot(phase_0, flux/median(flux) -0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'red', /overplot, name = 'position corr')
+ ; p3 = plot(phase_0, flux_np /median(flux_np)+ 0.1, '1s', sym_size = 0.1,   sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
+;  p5 = plot(phase_0, flux_fwhm /median(flux_fwhm)+ 0.15, '1s', sym_size = 0.1,   sym_filled = 1,color = 'cyan', /overplot, name = 'position + xyfwhm')
 
 
   xtest = findgen(n_elements(ndimages))
@@ -513,8 +535,8 @@ function weight_fwhm, stdxcen, stdycen, stdxfwhm, stdyfwhm,nearestx, nearesty, n
    ;gaussian weighting function including noise pixel
   gaussx = exp( -((nearestx - xcenj)^2)/(2*stdxcen^2) )
   gaussy = exp(-((nearesty  - ycenj)^2)/(2*stdycen^2) )
-  gaussxfwhm = exp(-((nearestxfwhm  - xfwhm)^2)/(2*stdxfwhm^2) )
-  gaussyfwhm = exp(-((nearestyfwhm  - yfwhm)^2)/(2*stdyfwhm^2) )
+  gaussxfwhm = exp(-((nearestxfwhm  - xfwhmj)^2)/(2*stdxfwhm^2) )
+  gaussyfwhm = exp(-((nearestyfwhm  - yfwhmj)^2)/(2*stdyfwhm^2) )
 
   ;now sum
   w = total((gaussx*gaussy*gaussxfwhm*gaussyfwhm*nearestfluxfwhm)/total(gaussx*gaussy*gaussxfwhm*gaussyfwhm))
