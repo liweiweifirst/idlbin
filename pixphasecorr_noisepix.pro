@@ -28,7 +28,11 @@
 ;-
 pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breatheap, ballard_sigma = ballard_sigma, use_fwhm = use_fwhm, use_np = use_np, xyonly = xyonly
   
-  if keyword_set(use_fwhm) + keyword_set(use_np) + keyword_set(xyonlt) lt 1 then print, 'Must set one of the flags for using xy, np, or xyfwhm'
+  if keyword_set(use_fwhm) + keyword_set(use_np) + keyword_set(xyonlt) ne 1 then print, 'Must set one and only one of the flags for using xy, np, or xyfwhm'
+
+  if keyword_set(use_fwhm) then ending = 'fw'
+  if keyword_set(use_np) then ending = 'np'
+  if keyword_set(xyonly) then ending = 'xy'
 
   t1 = systime(1)
 ;get all the necessary saved info/photometry
@@ -335,7 +339,7 @@ t_dur =  t14  ; in days
   
 ;  intransit = where(finite(flux) lt 1, badcount)
 ;  print, 'nan? ', badcount
-  save, /all, filename =strcompress(dirname + 'pixphasecorr_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
+  save, /all, filename =strcompress(dirname + 'pixphasecorr_ch'+chname+'_'+string(apradius)+'_'+ending +'.sav',/remove_all)
   
   print, 'about to plot blue ', mean(flux,/nan), n_elements(flux_marr), n_elements(corrfluxarr), n_elements(flux), n_elements(flux)
 ;plot the results

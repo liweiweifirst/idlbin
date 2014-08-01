@@ -28,138 +28,128 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
 
   rawnorm = 0.017717
 
-
-;  for a =startaor, stopaor do begin; n_elements(aorname) -1  do begin
-;     print, 'a, startaor' , a, startaor
-     
-                                ;if this was a snapshot, need to not include it, aka I don't run pixphasecorr on snaps.
-;     dir = dirname+ string(aorname(a) ) 
-;     CD, dir                    ; change directories to the correct AOR directory
-;     command  = strcompress( 'find ch'+chname+"/bcd -name 'SPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
- ;    spawn, command   
-;     readcol,strcompress(dirname +'bcdlist.txt'),fitsname, format = 'A', /silent
-;     print, 'n fits', n_elements(fitsname)
-;     if n_elements(fitsname) gt 15 then begin
-   
-        filename =strcompress(dirname +'pixphasecorr_ch'+chname+'_' +string(apradius)+'.sav',/remove_all)
-        print, 'restoring', filename
-        restore, filename
+  ;need to look for all endings of the pixphasecorr file saved
+  filename =strcompress(dirname +'pixphasecorr_ch'+chname+'_'+string(apradius)+'_*.sav',/remove_all)
+  savfiles = FILE_SEARCH(filename,count=nfiles)
+  print, 'restoring',nfiles , 'files'
+  
+  for f = 0, nfiles -1 do begin
+     restore, savfiles[f]
         
-       
-;binning
-;        ncorr = where(finite([ planethash[aorname(a),'corrflux']]) gt 0, corrcount,/L64)
-                                ;if 20% of the values are correctable than go with the pmap corr 
-;        if corrcount gt 0.2*n_elements([planethash[aorname(a),'flux']]) then pmapcorr = 1 else pmapcorr = 0
-;        junkpar = binning_function(a, bin_level, pmapcorr)
-;XXXcheating for now
-        pmapcorr = 1
-        numberarr = findgen(n_elements(flux_marr))
-        h = histogram(numberarr, OMIN=om, binsize = bin_level, reverse_indices = ri)
-        print, 'omin', om, 'nh', n_elements(h)
+     ;which input version am I working with?  xy, np, fw
+     ending = strmid(savfiles[f], 5, 2, /reverse_offset)
+     if ending eq 'fw' then plotcolor='cyan'
+     if ending eq 'np' then plotcolor = 'blue'
+     if ending eq 'xy' then plotcolor = 'red'
+
+     pmapcorr = 1
+     numberarr = findgen(n_elements(flux_marr))
+     h = histogram(numberarr, OMIN=om, binsize = bin_level, reverse_indices = ri)
+     print, 'omin', om, 'nh', n_elements(h)
         
         
 ;mean together the flux values in each phase bin
-        bin_bmjd = dblarr(n_elements(h))
-        bin_corrflux = dblarr(n_elements(h))
-        bin_corrfluxerr = dblarr(n_elements(h))
-        bin_flux_m = dblarr(n_elements(h))
-        bin_fluxerr_m = dblarr(n_elements(h))
-        bin_flux_np = dblarr(n_elements(h))
-        bin_fluxerr_np = dblarr(n_elements(h))
-        bin_flux = dblarr(n_elements(h))
-        bin_fluxerr = dblarr(n_elements(h))
-        bin_time = dblarr(n_elements(h))
-        bin_time_0 = dblarr(n_elements(h))
-        bin_phase = dblarr(n_elements(h))
-        bin_flux_fwhm = dblarr(n_elements(h))
-        bin_fluxerr_fwhm= dblarr(n_elements(h))
-        c = 0
-        for j = 0L, n_elements(h) - 1 do begin
+     bin_bmjd = dblarr(n_elements(h))
+     bin_corrflux = dblarr(n_elements(h))
+     bin_corrfluxerr = dblarr(n_elements(h))
+     bin_flux_m = dblarr(n_elements(h))
+     bin_fluxerr_m = dblarr(n_elements(h))
+     bin_flux_np = dblarr(n_elements(h))
+     bin_fluxerr_np = dblarr(n_elements(h))
+     bin_flux = dblarr(n_elements(h))
+     bin_fluxerr = dblarr(n_elements(h))
+     bin_time = dblarr(n_elements(h))
+     bin_time_0 = dblarr(n_elements(h))
+     bin_phase = dblarr(n_elements(h))
+     bin_flux_fwhm = dblarr(n_elements(h))
+     bin_fluxerr_fwhm= dblarr(n_elements(h))
+     c = 0
+     for j = 0L, n_elements(h) - 1 do begin
            
 ;;get rid of the bins with no values and low numbers, meaning low overlap
-           if (ri[j+1] gt ri[j] + 2)  then begin ;require 3 elements in the bin
-              
-              if finite(corrfluxarr[ri[ri[j]]]) gt 0 and finite(corrfluxarr[ri[ri[j+1]-1]]) gt 0 then begin
-                 meanclip, corrfluxarr[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
-                 bin_corrflux[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
-              endif else begin
-                 bin_corrflux[c] = alog10(-1)
-             endelse
-             
-             icorrdataerr = corrfluxerrarr[ri[ri[j]:ri[j+1]-1]]
-             bin_corrfluxerr[c] =   sqrt(total(icorrdataerr^2))/ (n_elements(icorrdataerr))
-             
-              meanclip, flux_marr[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
-              bin_flux_m[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
-              
-              ifluxmerr = fluxerr_marr[ri[ri[j]:ri[j+1]-1]]
-              bin_fluxerr_m[c] =   sqrt(total(ifluxmerr^2))/ (n_elements(ifluxmerr))
-              
+        if (ri[j+1] gt ri[j] + 2)  then begin ;require 3 elements in the bin
+           
+           if finite(corrfluxarr[ri[ri[j]]]) gt 0 and finite(corrfluxarr[ri[ri[j+1]-1]]) gt 0 then begin
+              meanclip, corrfluxarr[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
+              bin_corrflux[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+           endif else begin
+              bin_corrflux[c] = alog10(-1)
+           endelse
+           
+           icorrdataerr = corrfluxerrarr[ri[ri[j]:ri[j+1]-1]]
+           bin_corrfluxerr[c] =   sqrt(total(icorrdataerr^2))/ (n_elements(icorrdataerr))
+           
+           meanclip, flux_marr[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
+           bin_flux_m[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+           
+           ifluxmerr = fluxerr_marr[ri[ri[j]:ri[j+1]-1]]
+           bin_fluxerr_m[c] =   sqrt(total(ifluxmerr^2))/ (n_elements(ifluxmerr))
+           
 ;              meanclip, flux_np[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
 ;              bin_flux_np[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
-              
+           
 ;              ifluxnperr = fluxerr_np[ri[ri[j]:ri[j+1]-1]]
 ;              bin_fluxerr_np[c] =   sqrt(total(ifluxnperr^2))/ (n_elements(ifluxnperr))
-              
-              meanclip, flux[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
-              bin_flux[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
-              
-              idataerr = fluxerr[ri[ri[j]:ri[j+1]-1]]
-              bin_fluxerr[c] =   sqrt(total(idataerr^2))/ (n_elements(idataerr))
-              
+           
+           meanclip, flux[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
+           bin_flux[c] = meanx  ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+           
+           idataerr = fluxerr[ri[ri[j]:ri[j+1]-1]]
+           bin_fluxerr[c] =   sqrt(total(idataerr^2))/ (n_elements(idataerr))
+           
 ;              meanclip, flux_fwhm[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
 ;              bin_flux_fwhm[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
-              
+           
 ;              idataerr = fluxerr_fwhm[ri[ri[j]:ri[j+1]-1]]
 ;              bin_fluxerr_fwhm[c] =   sqrt(total(idataerr^2))/ (n_elements(idataerr))
-
-              meanclip, timearr[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
-              bin_time[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
-              
-              meanclip, time_0[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
-              bin_time_0[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
-              
-              meanclip, phasearr[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
-              bin_phase[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
-              
-              meanclip, bmjdarr[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
-              bin_bmjd[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
-              
-              c = c + 1
-           endif
-        endfor
-        
-        bin_corrflux =bin_corrflux[0:c-1]
-        bin_corrfluxerr = bin_corrfluxerr[0:c-1]
-        bin_flux_m = bin_flux_m[0:c-1]
-        bin_flux_np = bin_flux_np[0:c-1]
-        bin_flux = bin_flux[0:c-1]
-        bin_time = bin_time[0:c-1]
-        bin_time_0 =  bin_time_0[0:c-1]
-        bin_phase = bin_phase[0:c-1]
-        bin_bmjd = bin_bmjd[0:c-1]
-        bin_fluxerr_m = bin_fluxerr_m[0:c-1]
-        bin_fluxerr_np = bin_fluxerr_np[0:c-1]
-        bin_fluxerr = bin_fluxerr[0:c-1]
-        bin_flux_fwhm = bin_flux_fwhm[0:c-1]
-        bin_fluxerr_fwhm = bin_fluxerr_fwhm[0:c-1]
-
+           
+           meanclip, timearr[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
+           bin_time[c] = meanx  ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+           
+           meanclip, time_0[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
+           bin_time_0[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+           
+           meanclip, phasearr[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
+           bin_phase[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+           
+           meanclip, bmjdarr[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
+           bin_bmjd[c] = meanx  ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+           
+           c = c + 1
+        endif
+     endfor
+     
+     bin_corrflux =bin_corrflux[0:c-1]
+     bin_corrfluxerr = bin_corrfluxerr[0:c-1]
+     bin_flux_m = bin_flux_m[0:c-1]
+     bin_flux_np = bin_flux_np[0:c-1]
+     bin_flux = bin_flux[0:c-1]
+     bin_time = bin_time[0:c-1]
+     bin_time_0 =  bin_time_0[0:c-1]
+     bin_phase = bin_phase[0:c-1]
+     bin_bmjd = bin_bmjd[0:c-1]
+     bin_fluxerr_m = bin_fluxerr_m[0:c-1]
+     bin_fluxerr_np = bin_fluxerr_np[0:c-1]
+     bin_fluxerr = bin_fluxerr[0:c-1]
+     bin_flux_fwhm = bin_flux_fwhm[0:c-1]
+     bin_fluxerr_fwhm = bin_fluxerr_fwhm[0:c-1]
+     
 ;if working on a secondary, then want to plot the phase around 0.5,
 ;and not split it around 0.
 ;     if intended_phase eq 0.5 then begin
 ;        pa = where(bin_phase lt 0.0,pacount)
 ;        if pacount gt 0 then bin_phase[pa] = bin_phase[pa] + 1.0
 ;     endif
-        
-        
+     
+     
 ;test the levels
-        print, 'mean raw black flux', mean(bin_flux_m / median(bin_flux_m),/nan)
-        print, 'mean corr gray flux', mean((bin_corrflux /median( bin_corrflux)),/nan)
-        print, 'mean red flux', mean(bin_flux,/nan)
-        print, 'mean np blue flux', mean(bin_flux_np,/nan)
-        print, 'mean fwhm cyan flux', mean(bin_flux_fwhm,/nan)
+     print, 'mean raw black flux', mean(bin_flux_m / median(bin_flux_m),/nan)
+     print, 'mean corr gray flux', mean((bin_corrflux /median( bin_corrflux)),/nan)
+     print, 'mean pixphasecorr flux', ending, mean(bin_flux,/nan)
+;     print, 'mean np blue flux', mean(bin_flux_np,/nan)
+;     print, 'mean fwhm cyan flux', mean(bin_flux_fwhm,/nan)
 ;     print, 'phase', bin_phase
-        
+     
 ;print out levels so that I can use them for TAP (or exofast I suppose)
                                 ;    for exofast = 0, n_elements(bin_time) - 1 do begin
 ;        if finite(bin_flux(exofast)) gt 0 then begin
@@ -168,19 +158,19 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
                                 ;a guess at mid-transit
 ;        endif
                                 ;endfor
-        outfilename =  strcompress(dirname +'phot_ch'+chname+'_TAP_nn.ascii',/remove_all)
-        openw, outlun, outfilename,/GET_LUN
-        endval = fix(0.3*n_elements(bin_flux))
-        normfactor = median(bin_flux[0:endval])
-        print, 'n_elements(bin_phase)',n_elements(bin_phase)
-        for te = 0, n_elements(bin_phase) -1 do begin
-           printf, outlun, bin_bmjd(te) , ' ', bin_flux(te)/normfactor,  format = '(F0, A,F0)'
-        endfor
-        close, outlun
+     outfilename =  strcompress(dirname +'phot_ch'+chname+'_TAP_nn.ascii',/remove_all)
+     openw, outlun, outfilename,/GET_LUN
+     endval = fix(0.3*n_elements(bin_flux))
+     normfactor = median(bin_flux[0:endval])
+     print, 'n_elements(bin_phase)',n_elements(bin_phase)
+     for te = 0, n_elements(bin_phase) -1 do begin
+        printf, outlun, bin_bmjd(te) , ' ', bin_flux(te)/normfactor,  format = '(F0, A,F0)'
+     endfor
+     close, outlun
 ;-----------------
 ;compare two methods of measuring np
-        gp1 = where(bin_phase gt -0.45 and bin_phase lt -0.1)
-        gp2 = where(bin_phase gt 0.05 and bin_phase lt 0.45)
+     gp1 = where(bin_phase gt -0.45 and bin_phase lt -0.1)
+     gp2 = where(bin_phase gt 0.05 and bin_phase lt 0.45)
         
 ;what is the standard deviation of bin_flux_np away from eclipse and transit
 ;        print, a, startaor, 'a, startaor'
@@ -204,14 +194,14 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
 
 ;-----------------
 ;plot the results
-        if keyword_set(errorbars) then begin
+     if keyword_set(errorbars) then begin
            
-           if keyword_set(phaseplot) then begin
+        if keyword_set(phaseplot) then begin
                                 ;print, 'inside plotting phase', bin_phase[0:10]
               
 ;              if a eq startaor then begin
-                 print, 'normalizing black flux by ', median(bin_flux_m)
-                 p1 = errorplot(bin_phase, bin_flux_m/ median(bin_flux_m),bin_fluxerr_m/median(bin_flux_m),$ ;median(bin_flux_m)
+           print, 'normalizing black flux by ', median(bin_flux_m)
+           if f eq 0 then p1 = errorplot(bin_phase, bin_flux_m/ median(bin_flux_m),bin_fluxerr_m/median(bin_flux_m),$ ;median(bin_flux_m)
                                 '1s', sym_size = 0.3, sym_filled = 1,$
                                 color = 'black', xtitle = 'Phase', ytitle = 'Normalized Flux', title = planetname, $
                                 name = 'raw flux', axis_style = 1,  $ ;yrange =[0.90, 1.026], 
@@ -232,10 +222,10 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
                               sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr', $
                               errorbar_color = 'grey', errorbar_capsize = 0.025)
 
-              print, 'normalizing red flux by ', median(bin_flux)
-              P2 = errorplot(bin_phase, bin_flux +delta_red , bin_fluxerr,$ ;median(bin_flux)
-                             '1s', sym_size = 0.3, sym_filled = 1, errorbar_color = 'red',$
-                             color = 'red', /overplot, name = 'position corr', errorbar_capsize = 0.025)
+              print, 'normalizing', ending, ' flux by ', median(bin_flux)
+              P2 = errorplot(bin_phase, bin_flux +delta_red +f*0.01, bin_fluxerr,$ ;median(bin_flux)
+                             '1s', sym_size = 0.3, sym_filled = 1, errorbar_color =plotcolor,$
+                             color = plotcolor, /overplot, name = 'position corr', errorbar_capsize = 0.025)
               
 ;              print, 'normalizing blue flux by ', median(bin_flux_np)
 ;              p3 = errorplot(bin_phase, bin_flux_np  + delta_blue, $ ;/median(bin_flux_np)
@@ -250,12 +240,7 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
 ;                             sym_filled = 1,color = 'cyan', /overplot, name = 'position + fwhm',$
 ;                             errorbar_capsize = 0.025)
 
-                   ;print output for data challenge
-              openw, outlun, '/Users/jkrick/irac_warm/pcrs_planets/WASP-52b/jk_corrected.txt',/GET_LUN
-              
-              for nm = 0, n_elements(bin_phase) - 1 do printf, outlun, bin_phase(nm), bin_flux_np(nm), bin_fluxerr_np(nm)
-              close, outlun
-
+ 
            endif else begin     ;plot as a function of time
 ;              if a eq startaor then begin
                  p1 = errorplot(bin_time/60./60., bin_flux_m/rawnorm ,bin_fluxerr_m/rawnorm,$ ;median(bin_flux_m)
@@ -330,7 +315,8 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
               
            endelse              ;phaseplot
         endelse                 ; no errorbars
-        
+     endfor  ; for each version of pixphasecorr (xy, np, fw)?
+
 ;----------------------------------------------------
                                 ;fit the curves to a trapezoid, and plot
 ;        if keyword_set(phaseplot) and keyword_set(fit_eclipse) then begin
@@ -416,8 +402,8 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
   ;make a legend
   t = text(0.3, 0.004+ 1.0, 'Raw', color = 'black',/overplot,/data)
   t = text(0.3, 0.004+1.0 + delta_grey, 'pmap', color = 'grey',/overplot,/data)
-  t = text(0.3, 0.004+1.0+ delta_red, 'nn', color = 'red',/overplot,/data)
-  t = text(0.3, 0.004+1.0 + delta_blue, 'nn_np', color = 'blue',/overplot,/data)
+;  t = text(0.3, 0.004+1.0+ delta_red, 'nn', color = 'red',/overplot,/data)
+;  t = text(0.3, 0.004+1.0 + delta_blue, 'nn_np', color = 'blue',/overplot,/data)
   
 
 ;;----------------------------------------------------
