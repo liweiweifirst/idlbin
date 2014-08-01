@@ -122,9 +122,10 @@ FUNCTION pmap_correct,x,y,f,ch,xfwhm,yfwhm,POSITION_ONLY=position_only,NP=NP,FUN
    corr_unc = MAKE_ARRAY(SIZE=sz,VALUE=!VALUES.F_NAN)
    f_pmap_interp = DBLARR(ndata)
    f_pmap_interp_unc = DBLARR(ndata)
-   
+  
 ;;; Loop through the input data
    igood = WHERE(FINITE(F) AND FINITE(x) AND FINITE(y),ngood)
+
    IF keyword_set(verbose) THEN Print,'Attempting to correct '+STRN(ngood)+' out of '+STRN(ndata)+' data points'
    CASE 1 OF 
       KEYWORD_SET(POSITION_ONLY): BEGIN
@@ -138,7 +139,7 @@ FUNCTION pmap_correct,x,y,f,ch,xfwhm,yfwhm,POSITION_ONLY=position_only,NP=NP,FUN
          ENDFOR
       END
       N_ELEMENTS(NP) EQ ndata: BEGIN
-         FOR i = 0,ndata-1 DO BEGIN
+         FOR i = 0,ngood-1 DO BEGIN ;JK changed this from ndata to ngood
             IF KEYWORD_SET(verbose) THEN Iterwait,i,100,1000,Text='Completed '
             pmap_correct_interpolate_single,x[igood[i]]-xfov,y[igood[i]]-yfov,channel[igood[i]],func[igood[i]],fi,fiu,NP=np[igood[i]],$
                                             NNEAREST=nnearest,MAX_DIST=max_dist,OCCUPATION=occi,OCC_MIN=occ_min
@@ -148,7 +149,7 @@ FUNCTION pmap_correct,x,y,f,ch,xfwhm,yfwhm,POSITION_ONLY=position_only,NP=NP,FUN
          ENDFOR
       END
       ELSE: BEGIN
-         FOR i = 0,ndata-1 DO BEGIN
+         FOR i = 0,ngood-1 DO BEGIN   ;JK changed this from ndata to ngood
             IF KEYWORD_SET(verbose) THEN Iterwait,i,100,1000,Text='Completed '
             pmap_correct_interpolate_single,x[igood[i]]-xfov,y[igood[i]]-yfov,channel[igood[i]],func[igood[i]],fi,fiu,xfwhm[igood[i]],yfwhm[igood[i]],$
                                             NNEAREST=nnearest,MAX_DIST=max_dist,OCCUPATION=occi,OCC_MIN=occ_min
