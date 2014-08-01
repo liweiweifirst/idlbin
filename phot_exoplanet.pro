@@ -22,7 +22,7 @@ case apradius of
    end
    2.25: begin
       apval = 2
-      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140314.sav'
+      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140716.sav'
       if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p25_s3_7_0p4s_140314.sav'
    end
    2.5: begin
@@ -44,14 +44,23 @@ planetinfo = create_planetinfo()
 ;dec_ref = planetinfo[planetname, 'dec']
 if chname eq '2'  then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
 basedir = planetinfo[planetname, 'basedir']
-utmjd_center = planetinfo[planetname, 'utmjd_center']
-period = planetinfo[planetname, 'period']
+;utmjd_center = planetinfo[planetname, 'utmjd_center']
+;period = planetinfo[planetname, 'period']
 intended_phase = planetinfo[planetname, 'intended_phase']
-ra_ref = planetinfo[planetname, 'ra']
-dec_ref = planetinfo[planetname, 'dec']
+;ra_ref = planetinfo[planetname, 'ra']
+;dec_ref = planetinfo[planetname, 'dec']
 
 exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
-exosystem = strmid(planetname, 0, 7) + ' b' ;'HD 209458 b' ;
+exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
+;exosystem = planetname
+if planetname eq 'WASP-13b' then exosystem = 'WASP-13 b'
+if planetname eq 'WASP-15b' then exosystem = 'WASP-15 b'
+if planetname eq 'WASP-16b' then exosystem = 'WASP-16 b'
+if planetname eq 'WASP-38b' then exosystem = 'WASP-38 b'
+if planetname eq 'WASP-62b' then exosystem = 'WASP-62 b'
+if planetname eq 'HAT-P-22' then exosystem = 'HAT-P-22 b'
+
+print, exosystem, 'exosystem'
 if planetname eq 'WASP-52b' then teq_p = 1315
 if planetname eq 'HD 7924 b' then begin
    inclination = 85.
@@ -125,7 +134,7 @@ startfits = 0.D
          fluxerrarr = xarr
          corrfluxarr = xarr
          corrfluxerrarr = xarr
-         timearr = xarr
+         timearr =  dblarr(63*(n_elements(fitsname)))
          bmjd = dblarr(63*(n_elements(fitsname)))
          backarr = xarr
          backerrarr = xarr
@@ -141,7 +150,7 @@ startfits = 0.D
          fluxerrarr = xarr
          corrfluxarr = xarr
          corrfluxerrarr = xarr
-         timearr = xarr
+         timearr =dblarr(n_elements(fitsname))
          bmjd = dblarr(n_elements(fitsname))
          backarr = xarr
          backerrarr = xarr
@@ -176,8 +185,8 @@ startfits = 0.D
          im[4:7, 13:16, *] = !Values.F_NAN ;mask region with nan set for bad regions      
       endif
 
-      if planetname eq 'HAT-P-22' and chname eq '2' then  im[19:25, 10:15, *] = !Values.F_NAN                              ;mask region with nan set for bad regions
-      if planetname eq 'HAT-P-22' and chname eq '1' then  im[6:12, 12:17, *] = !Values.F_NAN                              ;mask region with nan set for bad regions
+      if planetname eq 'HAT-P-22' and chname eq '2' then  im[19:25, 9:15, *] = !Values.F_NAN                              ;mask region with nan set for bad regions
+      if planetname eq 'HAT-P-22' and chname eq '1' then  im[5:11, 11:17, *] = !Values.F_NAN                              ;mask region with nan set for bad regions
 
       if planetname eq 'HD93385' then im[17:21, 21:27, *] = !Values.F_NAN ;mask region with nan set for bad regions                         
       ;run the centroiding and photometry
@@ -256,8 +265,12 @@ startfits = 0.D
 ;correction based on those neighbors.  
       if keyword_set(hybrid) then begin
                                 ;use hybrid technique with pmap dataset and nn techniques
-        corrflux = pmap_correct(x_center,y_center,abcdflux,ch,npcentroids,occdata, corr_unc = corrfluxerr, func = fs,$
-                                datafile =pmapfile,/threshold_occ,/use_np) 
+         corrflux = pmap_correct(x_center,y_center,abcdflux,$
+                                  ch,xfwhm,yfwhm,NP = npcentroids,$
+                                  FUNC=fs,CORR_UNC=corrfluxerr,$
+                                  DATAFILE=pmapfile,NNEAREST=nn)
+         ;corrflux = pmap_correct(x_center,y_center,abcdflux,ch,npcentroids,occdata, corr_unc = corrfluxerr, func = fs,$
+         ;                       datafile =pmapfile,/threshold_occ,/use_np) 
       endif else begin
                ;correct for pixel phase effect based on pmaps from Jim
                                 ;file_suffix =
@@ -340,13 +353,19 @@ startfits = 0.D
 ;   high = where(phase gt 0.5 and phase le 1.0)
 ;   phase(high) = phase(high) - 1.0
    phase = phase- (phase gt 0.5 and phase le 1.0)
-  
-   if intended_phase gt 0.4 and intended_phase lt 0.6 then begin ;secondary eclipse
- ;     print, 'secondary eclipse intended'
-      phase = temporary(phase)+0.5
-   endif 
    
-;print, 'testing phase', phase[0:200]
+;instead of wrapping the phase at 0.5, this makes the secondary eclipse be in the middle
+   n = where(phase lt 0)
+   phase(n) = phase(n) + 1
+  
+
+;   if intended_phase gt 0.4 and intended_phase lt 0.6 then begin ;secondary eclipse
+;      print, 'secondary eclipse intended'
+;      phase = temporary(phase)+0.5
+;   endif 
+   
+print, 'testing phase', phase[0:200]
+print, 'end phase', phase[n_elements(phase) - 1]
 ;--------------------------------
 ;fill in that hash of hases
 ;--------------------------------
@@ -363,7 +382,6 @@ startfits = 0.D
       planethash[aorname(a)] = HASH(keys, values)
    endelse
 
-print, 'testing timearr', timearr[0:200]
 endfor                          ;for each AOR
 
 
