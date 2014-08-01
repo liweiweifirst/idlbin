@@ -26,7 +26,7 @@
 ; MODIFICATION HISTORY:
 ; Dec 2012 JK initial version
 ;-
-pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breatheap, ballard_sigma = ballard_sigma, use_fwhm = use_fwhm, use_np = use_np
+pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breatheap, ballard_sigma = ballard_sigma, use_fwhm = use_fwhm, use_np = use_np, xyonly = xyonly
 
   t1 = systime(1)
 ;get all the necessary saved info/photometry
@@ -34,10 +34,10 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
   if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
   basedir = planetinfo[planetname, 'basedir']
 ;  chname = planetinfo[planetname, 'chname']
-;  period = planetinfo[planetname, 'period']
-;  utmjd_center = planetinfo[planetname, 'utmjd_center']
+  period = planetinfo[planetname, 'period']
+  utmjd_center = planetinfo[planetname, 'utmjd_center']
   exptime = planetinfo[planetname, 'exptime']
-;  transit_duration = planetinfo[planetname, 'transit_duration']
+  t_dur = planetinfo[planetname, 'transit_duration']
   dirname = strcompress(basedir + planetname +'/')
   if keyword_set(breatheap) then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav') else savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
 
@@ -45,6 +45,9 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
 ;==========================================
   exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
   exosystem = strmid(planetname, 0, 7) + ' b' ;'HD 209458 b' ;
+  if planetname eq 'HD7924b' then exosystem = 'HD 7924 b'
+  if planetname eq 'HAT-P-22' then exosystem = 'HAT-P-22 b'
+  if planetname eq 'HD20003' then exosystem = planetname + ' b'
   if planetname eq 'WASP-52b' then teq_p = 1315
   if planetname eq 'HD7924b' then begin
      t_dur = 0.1                ; completely made up since this is non-transiting
@@ -54,29 +57,29 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
   if chname eq '2' then lambdaname  = '4.5'
   if chname eq '1' then lambdaname  = '3.6'
   print, 'exosystem', exosystem
-;get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,RSTAR = rstar, TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,$
-;                   AR_SEMIMAJ=ar_semimaj,$
-;                   TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
-;                   INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
-;                   DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,VERBOSE=verbose
-;ra_ref = ra*15.                 ; comes in hours!
-;dec_ref = dec
-;utmjd_center = mjd_transit
-;period = p_orbit
-;semimaj = ar_semimaj
-;dstar = 2.*rstar
-;m_star = mstar
+  get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,RSTAR = rstar, TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,$
+                   AR_SEMIMAJ=ar_semimaj,$
+                   TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
+                   INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
+                   DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,VERBOSE=verbose
+  ra_ref = ra*15.               ; comes in hours!
+  dec_ref = dec
+  utmjd_center = mjd_transit
+  period = p_orbit
+  semimaj = ar_semimaj
+  dstar = 2.*rstar
+  m_star = mstar
 ;;t_dur = 13.*dstar*sqrt(semimaj/m_star)
 ;;b = semimaj* cos(inclination*!Pi/180.)
 ;;print, period, rstar, rp_rstar*rstar, b, semimaj, inclination
-;t_dur =  t14  ; in days
+t_dur =  t14  ; in days
 ;;t_dur = transit_duration( period, rstar, rp_rstar * rstar, b, semimaj)
-  print,'transit duration in days', t_dur
+ print,'transit duration in days', t_dur
 ;==========================================
   
   
-  startaor = 0
-  stopaor =   0                 ; n_elements(aorname) - 1
+  startaor = 1
+  stopaor =   1                 ; n_elements(aorname) - 1
   
   
   
@@ -187,99 +190,113 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
   ycen2(intransit) = 1E5
   sqrtnp2(intransit) = 1E5
   
+  cgHistoplot, xcen2,/nan, thick = 3, xtitle = 'xcen', ytitle = 'Number',  datacolorname = 'black', title = planetname, /outline
                                 ;do the nearest neighbors run with triangulation
                                 ;http://www.idlcoyote.com/code_tips/slowloops.html
                                 ;this returns a sorted list of the nn nearest neighbors
-if keyword_set(use_fwhm) then  nearest_xyfwhm = nearest_neighbors_xyfwhm_DT(xcen2,ycen2,xfwhm, yfwhm,chname,DISTANCES=nearest_np_d,NUMBER=nn)
-if keyword_set(use_np) then  nearest_np = nearest_neighbors_np_DT(xcen2,ycen2,sqrtnp2,chname,DISTANCES=nearest_np_d,NUMBER=nn)
-  nearest = nearest_neighbors_DT(xcen2,ycen2,chname,DISTANCES=nearest_d,NUMBER=nn)
+  if keyword_set(use_fwhm) then  nearest_xyfwhm = nearest_neighbors_xyfwhm_DT(xcen2,ycen2,xfwhm, yfwhm,chname,DISTANCES=nearest_np_d,NUMBER=nn)
+  if keyword_set(use_np) then  nearest_np = nearest_neighbors_np_DT(xcen2,ycen2,sqrtnp2,chname,DISTANCES=nearest_np_d,NUMBER=nn)
+  if keyword_set(xyonly) then nearest = nearest_neighbors_DT(xcen2,ycen2,chname,DISTANCES=nearest_d,NUMBER=nn)
                                 ;quick statistics to see if np picks different nearest neighbors than xyfwhm
 
   for j = 0L,   ni - 1 do begin ;for each centroid in the entire dataset, aka. 63*nimages
+     ;sometimes the nearest neighbor just doesn't work
+     anan = where (finite(nearest(*,j) lt 1), nancount)
+     if nancount gt 0 then begin
+; jump to the end
+        flux(j)=  !VALUES.F_NAN
+        fluxerr(j) =  !VALUES.F_NAN
+        flux_np(j)=  !VALUES.F_NAN
+        fluxerr_np(j) =  !VALUES.F_NAN
+        flux_fwhm(j) =  !VALUES.F_NAN
+        fluxerr_fwhm(j)  =  !VALUES.F_NAN
+        GOTO, jumpend
+     endif
+
      if s[j] gt 0 then begin    ;out of transit
 ;not inside a transit, so do the normal nearest neighbor search 
 ;----------------------------------------------------------
 ;setup to find the nearest neighbors without using noise pixel
 ;----------------------------------------------------------
-        nearestx = xcen2(nearest(*,j))
-        nearesty = ycen2(nearest(*,j))
-        nearestflux = flux_m2(nearest(*,j))
-        nearestfluxerr = fluxerr_m2(nearest(*,j))
-        nearesttime = time_02(nearest(*,j))
-        
+           nearestx = xcen2(nearest(*,j))
+           nearesty = ycen2(nearest(*,j))
+           nearestflux = flux_m2(nearest(*,j))
+           nearestfluxerr = fluxerr_m2(nearest(*,j))
+           nearesttime = time_02(nearest(*,j))
+           
                                 ;what is the time distribution like of the points chosen as nearest in position
                                 ;track the range in time for each point
-        delta_time(j) = abs(time_0[j]- nearesttime(n_elements(nearesttime)-1))
+           delta_time(j) = abs(time_0[j]- nearesttime(n_elements(nearesttime)-1))
 ;                                       
                                 ;make sure that the nearest neighbor is not the point itself
-        if  xcen2(j) eq nearestx(0) and ycen2(j) eq nearesty(0) then begin
-           nearestx = nearestx[1:*]
-           nearesty = nearesty[1:*]
-           nearestflux = nearestflux[1:*]
-           nearestfluxerr = nearestfluxerr[1:*]
-        endif
-        
-        furthestx[j] = abs(xcen2(j) - nearestx(n_elements(nearestx)-1))
-        furthesty[j] = abs(ycen2(j) - nearesty(n_elements(nearesty)-1))
-        
+           if  xcen2(j) eq nearestx(0) and ycen2(j) eq nearesty(0) then begin
+              nearestx = nearestx[1:*]
+              nearesty = nearesty[1:*]
+              nearestflux = nearestflux[1:*]
+              nearestfluxerr = nearestfluxerr[1:*]
+           endif
+           
+           furthestx[j] = abs(xcen2(j) - nearestx(n_elements(nearestx)-1))
+           furthesty[j] = abs(ycen2(j) - nearesty(n_elements(nearesty)-1))
+           
                                 ;some debugging
                                 ;what is the average distance to the nearest neighbor
-        ndarr = fltarr(n_elements(nearestx))
-        for nd = 0, n_elements(nearestx) - 1 do begin
+           ndarr = fltarr(n_elements(nearestx))
+           for nd = 0, n_elements(nearestx) - 1 do begin
                                 ;             print, 'testing inside', xcen2(j), nearestx(nd), ycen2(j), nearesty(nd)
-           ndarr(nd) = sqrt((xcen2(j) - nearestx(nd))^2 + (ycen2(j) - nearesty(nd))^2)
-        endfor
-        ndimages(j) = mean(ndarr, /nan)              
-        
+              ndarr(nd) = sqrt((xcen2(j) - nearestx(nd))^2 + (ycen2(j) - nearesty(nd))^2)
+           endfor
+           ndimages(j) = mean(ndarr, /nan)              
+           
 ;--------------------
 ;find the nearest neighbors using noise pixel
 ;--------------------
-        if keyword_set(use_np) then begin
-           nearestxnp = xcen2(nearest_np(*,j))
-           nearestynp = ycen2(nearest_np(*,j))
-           nearestsqrtnp = sqrtnp2(nearest_np(*,j))
-           nearestfluxnp = flux_m2(nearest_np(*,j))
-           nearesttimenp = time_02(nearest_np(*,j))
-           
-           delta_time_np(j) = abs(time_02[j]- nearesttimenp(n_elements(nearesttimenp)-1))
-           
+           if keyword_set(use_np) then begin
+              nearestxnp = xcen2(nearest_np(*,j))
+              nearestynp = ycen2(nearest_np(*,j))
+              nearestsqrtnp = sqrtnp2(nearest_np(*,j))
+              nearestfluxnp = flux_m2(nearest_np(*,j))
+              nearesttimenp = time_02(nearest_np(*,j))
+              
+              delta_time_np(j) = abs(time_02[j]- nearesttimenp(n_elements(nearesttimenp)-1))
+              
                                 ;make sure that the nearest neighbor is not the point itself
-           if  xcen2(j) eq nearestxnp(0) and ycen2(j) eq nearestynp(0) then begin
-              nearestxnp = nearestxnp[1:*]
-              nearestynp = nearestynp[1:*]
-              nearestsqrtnp  = nearestsqrtnp[1:*]
-              nearestfluxnp = nearestfluxnp[1:*]
-           endif
-        endif   ;/use_np
-
-
+              if  xcen2(j) eq nearestxnp(0) and ycen2(j) eq nearestynp(0) then begin
+                 nearestxnp = nearestxnp[1:*]
+                 nearestynp = nearestynp[1:*]
+                 nearestsqrtnp  = nearestsqrtnp[1:*]
+                 nearestfluxnp = nearestfluxnp[1:*]
+              endif
+           endif                ;/use_np
+           
+           
 ;--------------------
 ;find the nearest neighbors using XFWHM & YFWHM
 ;--------------------
-        if keyword_set(use_fwhm) then begin
-           nearestxfwhm = xcen2(nearest_xyfwhm(*,j))
-           nearestyfwhm = ycen2(nearest_xyfwhm(*,j))
-           nearestfluxfwhm = flux_m2(nearest_xyfwhm(*,j))
-           nearesttimefwhm = time_02(nearest_xyfwhm(*,j))
-           nearestxxfwhm = xfwhm(nearest_xyfwhm(*,j))
-           nearestyyfwhm = yfwhm(nearest_xyfwhm(*,j))
-           
-           delta_time_fwhm(j) = abs(time_02[j]- nearesttimefwhm(n_elements(nearesttimefwhm)-1))
-           
-                                ;make sure that the nearest neighbor is not the point itself
-           if  xcen2(j) eq nearestxfwhm(0) and ycen2(j) eq nearestyfwhm(0) then begin
-              nearestxfwhm = nearestxfwhm[1:*]
-              nearestyfwhm = nearestyfwhm[1:*]
-              nearestfluxfwhm = nearestfluxfwhm[1:*]
-              nearestxxfwhm = nearestxxfwhm[1:*]
-              nearestyyfwhm = nearestyyfwhm[1:*]
+           if keyword_set(use_fwhm) then begin
+              nearestxfwhm = xcen2(nearest_xyfwhm(*,j))
+              nearestyfwhm = ycen2(nearest_xyfwhm(*,j))
+              nearestfluxfwhm = flux_m2(nearest_xyfwhm(*,j))
+              nearesttimefwhm = time_02(nearest_xyfwhm(*,j))
+              nearestxxfwhm = xfwhm(nearest_xyfwhm(*,j))
+              nearestyyfwhm = yfwhm(nearest_xyfwhm(*,j))
               
-           endif
-        endif  ; keyword_set(use_fwhm)
-
+              delta_time_fwhm(j) = abs(time_02[j]- nearesttimefwhm(n_elements(nearesttimefwhm)-1))
+              
+                                ;make sure that the nearest neighbor is not the point itself
+              if  xcen2(j) eq nearestxfwhm(0) and ycen2(j) eq nearestyfwhm(0) then begin
+                 nearestxfwhm = nearestxfwhm[1:*]
+                 nearestyfwhm = nearestyfwhm[1:*]
+                 nearestfluxfwhm = nearestfluxfwhm[1:*]
+                 nearestxxfwhm = nearestxxfwhm[1:*]
+                 nearestyyfwhm = nearestyyfwhm[1:*]
+                 
+              endif
+           endif                ; keyword_set(use_fwhm)
+           
 
      endif else begin           ;end out of transit
-        
+           
 ;----------------------------------------------------------
 ; now look at the case of being in transit/eclipse
 ;this is harder because I have to find all the distances the slow way, 
@@ -433,7 +450,7 @@ if keyword_set(use_np) then  nearest_np = nearest_neighbors_np_DT(xcen2,ycen2,sq
 ;        print, 'j', j, nearestxfwhm - nearestxnp
 ;     endif
 
-
+     jumpend: print, 'ignore this position'
   endfor  ; for each centroid in the entire dataset.
 
   
@@ -442,7 +459,7 @@ if keyword_set(use_np) then  nearest_np = nearest_neighbors_np_DT(xcen2,ycen2,sq
 ;  print, 'nan? ', badcount
   save, /all, filename =strcompress(dirname + 'pixphasecorr_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
   
-  print, 'about to plot blue ', median(flux_np), n_elements(flux_marr), n_elements(corrfluxarr), n_elements(flux), n_elements(flux_np)
+  print, 'about to plot blue ', mean(flux_np,/nan), n_elements(flux_marr), n_elements(corrfluxarr), n_elements(flux), n_elements(flux_np)
 ;plot the results
 ;        p1 = plot(time[0:ni-1]/60./60., flux_marr[0:ni-1]/ median(flux_marr[0:ni-1]), '1s', sym_size = 0.1,   sym_filled = 1,color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname, name = 'raw flux', yrange =[0.93, 1.15])
 ;        p4 =  plot(time[0:ni-1]/60./60., (corrfluxarr[0:ni-1] /median( corrfluxarr[0:ni-1])) + 0.05, '1s', sym_size = 0.1,   sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
@@ -465,8 +482,8 @@ if keyword_set(use_np) then  nearest_np = nearest_neighbors_np_DT(xcen2,ycen2,sq
 ;    print, 'mean and stddev of sigmax', mean(sigmax), stddev(sigmax)
 ;     print, 'mean and stddev of sigmay', mean(sigmay), stddev(sigmay)
 ;     print, 'mean and stddev of sigmanp', mean(sigma_np), stddev(sigma_np)
-  print, 'mean and stddev of furthestx', mean(furthestx), stddev(furthestx)
-  print, 'mean and stddev of furthesty', mean(furthesty), stddev(furthesty)
+;  print, 'mean and stddev of furthestx', mean(furthestx), stddev(furthestx)
+;  print, 'mean and stddev of furthesty', mean(furthesty), stddev(furthesty)
 ;     print, 'mean and stddev of deltatime', mean(delta_time), stddev(delta_time)
 ;     print, '------'
 ;     if ni gt 12000 then print, 'stddev of raw, pmap, position, position+np corr', stddev(flux_m[12000:ni-1],/nan),stddev(corrflux[12000:ni-1],/nan), stddev(flux[12000:*],/nan), stddev(flux_np[12000:*],/nan)
@@ -578,6 +595,7 @@ function distance, xcen, ycen,  j, chname
 end
 
 function mask_signal, phase, period, utmjd_center, t_dur
+  print, 'beginning and ending phase', phase[0], phase[n_elements(phse) - 1]
                                  ;turn transit duration into phase
   transit_dur = t_dur       ; now in days  / 60/24. 
   transit_phase = transit_dur / period          ; what fraction of the phase is this in transit (or eclipse)
