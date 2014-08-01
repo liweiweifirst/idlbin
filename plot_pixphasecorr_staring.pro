@@ -95,11 +95,11 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
               ifluxmerr = fluxerr_marr[ri[ri[j]:ri[j+1]-1]]
               bin_fluxerr_m[c] =   sqrt(total(ifluxmerr^2))/ (n_elements(ifluxmerr))
               
-              meanclip, flux_np[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
-              bin_flux_np[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+;              meanclip, flux_np[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
+;              bin_flux_np[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
               
-              ifluxnperr = fluxerr_np[ri[ri[j]:ri[j+1]-1]]
-              bin_fluxerr_np[c] =   sqrt(total(ifluxnperr^2))/ (n_elements(ifluxnperr))
+;              ifluxnperr = fluxerr_np[ri[ri[j]:ri[j+1]-1]]
+;              bin_fluxerr_np[c] =   sqrt(total(ifluxnperr^2))/ (n_elements(ifluxnperr))
               
               meanclip, flux[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
               bin_flux[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
@@ -107,11 +107,11 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
               idataerr = fluxerr[ri[ri[j]:ri[j+1]-1]]
               bin_fluxerr[c] =   sqrt(total(idataerr^2))/ (n_elements(idataerr))
               
-              meanclip, flux_fwhm[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
-              bin_flux_fwhm[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+;              meanclip, flux_fwhm[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
+;              bin_flux_fwhm[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
               
-              idataerr = fluxerr_fwhm[ri[ri[j]:ri[j+1]-1]]
-              bin_fluxerr_fwhm[c] =   sqrt(total(idataerr^2))/ (n_elements(idataerr))
+;              idataerr = fluxerr_fwhm[ri[ri[j]:ri[j+1]-1]]
+;              bin_fluxerr_fwhm[c] =   sqrt(total(idataerr^2))/ (n_elements(idataerr))
 
               meanclip, timearr[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
               bin_time[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
@@ -237,18 +237,18 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
                              '1s', sym_size = 0.3, sym_filled = 1, errorbar_color = 'red',$
                              color = 'red', /overplot, name = 'position corr', errorbar_capsize = 0.025)
               
-              print, 'normalizing blue flux by ', median(bin_flux_np)
-              p3 = errorplot(bin_phase, bin_flux_np  + delta_blue, $ ;/median(bin_flux_np)
-                             bin_fluxerr_np, '1s', sym_size = 0.3, errorbar_color = 'blue',   $
-                             sym_filled = 1,color = 'blue', /overplot, name = 'position + np',$
-                             errorbar_capsize = 0.025)
+;              print, 'normalizing blue flux by ', median(bin_flux_np)
+;              p3 = errorplot(bin_phase, bin_flux_np  + delta_blue, $ ;/median(bin_flux_np)
+;                             bin_fluxerr_np, '1s', sym_size = 0.3, errorbar_color = 'blue',   $
+;                             sym_filled = 1,color = 'blue', /overplot, name = 'position + np',$
+;                             errorbar_capsize = 0.025)
 
 
-              print, 'normalizing cyan flux by ', median(bin_flux_fwhm)
-              p3 = errorplot(bin_phase, bin_flux_fwhm  + delta_cyan, $ ;/median(bin_flux_np)
-                             bin_fluxerr_fwhm, '1s', sym_size = 0.3, errorbar_color = 'cyan',   $
-                             sym_filled = 1,color = 'cyan', /overplot, name = 'position + fwhm',$
-                             errorbar_capsize = 0.025)
+;              print, 'normalizing cyan flux by ', median(bin_flux_fwhm)
+;              p3 = errorplot(bin_phase, bin_flux_fwhm  + delta_cyan, $ ;/median(bin_flux_np)
+;                             bin_fluxerr_fwhm, '1s', sym_size = 0.3, errorbar_color = 'cyan',   $
+;                             sym_filled = 1,color = 'cyan', /overplot, name = 'position + fwhm',$
+;                             errorbar_capsize = 0.025)
 
                    ;print output for data challenge
               openw, outlun, '/Users/jkrick/irac_warm/pcrs_planets/WASP-52b/jk_corrected.txt',/GET_LUN

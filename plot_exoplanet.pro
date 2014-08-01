@@ -32,7 +32,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
  
 
 ;for debugging: skip some AORs
-startaor = 2;5
+startaor = 0;5
 stopaor =  n_elements(aorname) - 1
 
 
@@ -123,7 +123,7 @@ endif
                                 ;       ymin = 14.9             ; mean(planethash[aorname(a),'ycen'])-0.25
                                 ;       ymax = 16.0             ;mean(planethash[aorname(a),'ycen'])+0.25
                                 ;print, 'ymin.ymax', ymin, ymax
-           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'flux'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], ytitle = 'Flux', xtitle = 'Time(hrs)',title = planetname, yrange = [0.160, 0.172], xrange = [0,40])
+           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'flux'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a], ytitle = 'Flux', xtitle = 'Time(hrs)',title = planetname, yrange = [0.170, 0.195])
            ;ay = plot( (planethash[aorname(a),'phase']), (planethash[aorname(a),'flux'])/plot_corrnorm - 0.001,'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'Raw Flux', xtitle = 'Phase', yrange = [0.985, 1.015], xrange = [-0.5, 0.5]) ;,title = planetname, xtitle = 'Time(hrs)'
         endif else begin
            ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., planethash[aorname(a),'flux'],'1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a],/overplot)
@@ -261,7 +261,7 @@ endif
      ;possible comparison statistic
      ;what is the distribution of standard deviations among the corrfluxes?
 
-     meanclip, planethash[aorname(a),'corrflux'] , mean_corrflux, stddev_corrflux
+     meanclip_jk, planethash[aorname(a),'corrflux'] , mean_corrflux, stddev_corrflux
      stddev_corrfluxarr[a - startaor] = stddev_corrflux
 ;------------------------------------------------------
 ;now try plotting
@@ -270,13 +270,13 @@ endif
         ;measure mean distance from the sweet spot
         xdist = (planethash[aorname(a),'xcen'] - xsweet)
         ydist = (planethash[aorname(a),'ycen'] - ysweet)
-        meanclip, ydist, meany, stddevy
-        meanclip, xdist, meanx, stddevx
+        meanclip_jk, ydist, meany, stddevy
+        meanclip_jk, xdist, meanx, stddevx
 
         dsweet = sqrt(xdist^2 + ydist^2)
-        meanclip, dsweet, mean_dsweet, stddev_dsweet
+        meanclip_jk, dsweet, mean_dsweet, stddev_dsweet
         
-        meanclip, planethash[aorname(a),'corrflux'] , mean_corrflux, stddev_corrflux
+        meanclip_jk, planethash[aorname(a),'corrflux'] , mean_corrflux, stddev_corrflux
 
         theta = 180./!Pi*ATAN(ydist, xdist) ; in degrees
         
@@ -285,7 +285,7 @@ endif
 ;        if mean(xdist) ge 0 and mean(ydist) lt 0 then theta = theta + 360
 ;        if mean(xdist) lt 0 then theta = theta +180
 
-       meanclip, theta, mean_theta, stddev_theta
+       meanclip_jk, theta, mean_theta, stddev_theta
 
         if a eq startaor then begin 
            normfactor = mean_corrflux
@@ -520,10 +520,10 @@ endif
 
               if (ri[j+1] gt ri[j] + 2)  then begin ;require 3 elements in the bin
                  
-                 meanclip, time[ri[ri[j]:ri[j+1]-1]], meant, sigmat
+                 meanclip_jk, time[ri[ri[j]:ri[j+1]-1]], meant, sigmat
                  bin_time[c] = meant
 
-                 meanclip, corr_flux[ri[ri[j]:ri[j+1]-1]], meanc, sigmac
+                 meanclip_jk, corr_flux[ri[ri[j]:ri[j+1]-1]], meanc, sigmac
                  bin_corr_flux[c] = meanc
 
                  c = c + 1
@@ -797,7 +797,7 @@ end
 ;     start = 0
 ;     print, 'nflux', n_elements(bin_corrflux)
 ;     for ni = 50, n_elements(bin_corrflux) -1, 50 do begin
-;        meanclip,bin_corrflux[start:ni], m, s, subs = subs ;,/verbose
+;        meanclip_jk,bin_corrflux[start:ni], m, s, subs = subs ;,/verbose
                                 ;print, 'good', subs+start
                                 ;now keep a list of the good ones
 ;        if ni eq 50 then good_ni = subs+start else good_ni = [good_ni, subs+start]

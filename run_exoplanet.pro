@@ -34,7 +34,7 @@ pro run_exoplanet, planetname, binning, nnearest, apradius, chname
 ;     phot_exoplanet_sdcorr, planetname(n), apradius(n),chname(n), /hybrid
 
 ;     selfcal_exoplanet, planetname(n), binning(n), apradius(n), chname(n), /binning
-     pixphasecorr_noisepix, planetname(n), nnearest(n), apradius(n), chname(n),/use_np
+;     pixphasecorr_noisepix, planetname(n), nnearest(n), apradius(n), chname(n),/use_np
 ;     plot_pixphasecorr_staring, planetname(n), binning(n), apradius(n), chname(n), /errorbars, /phaseplot;,/selfcal
 ;     plot_exoplanet_multiplot, planetname(n), binning(n), apradius(n),chname(n), /timeplot
   endfor
