@@ -12,7 +12,7 @@ function nearest_neighbors_np_DT,x,y,sqrtnp, chname, DISTANCES=nearest_d,NUMBER=
   print, x[0:100]
   print, y[0:100]
   for point=0L,n-1 do begin 
-     print, 'working on ', x[point], y[point]
+;     print, 'working on ', x[point], y[point]
      if c[point] gt  c[point+1] - 1 then begin
                                 ;the problem case
                                 ;make up a d that lets me know I should ignore this point
