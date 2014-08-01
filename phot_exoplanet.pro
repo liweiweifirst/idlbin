@@ -355,8 +355,10 @@ startfits = 0.D
    phase = phase- (phase gt 0.5 and phase le 1.0)
    
 ;instead of wrapping the phase at 0.5, this makes the secondary eclipse be in the middle
-   n = where(phase lt 0)
-   phase(n) = phase(n) + 1
+   if intended_phase gt 0.4 and intended_phase lt 0.6 then begin
+      n = where(phase lt 0)
+      phase(n) = phase(n) + 1
+   endif
   
 
 ;   if intended_phase gt 0.4 and intended_phase lt 0.6 then begin ;secondary eclipse
