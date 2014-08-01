@@ -61,6 +61,7 @@ IF n_elements(clipsig) LT 1 THEN clipsig = 3
 IF n_elements(converge_num) LT 1 THEN converge_num = 0.02
 
 subs = where(finite(image),ct)
+print, 'ct', ct
 iter=0
 REPEAT BEGIN
     skpix = image[subs]
