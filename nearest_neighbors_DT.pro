@@ -23,7 +23,6 @@ function nearest_neighbors_DT,x,y,chname, DISTANCES=nearest_d,NUMBER=k
      ;if point gt 94300 then print, 'point gt 94300', point, c[point], c[point+1] - 1, c[c[point]], c[c[point+1]]
      nearest[*,point] = !VALUES.F_NAN
      nearest_d[*,point] = !VALUES.F_NAN
-     GOTO, jumpend
 
      ;triangulate gets bad results in certain cases ????
      if c[point] gt  c[point+1] - 1 then begin
@@ -37,6 +36,8 @@ function nearest_neighbors_DT,x,y,chname, DISTANCES=nearest_d,NUMBER=k
                                 ; AORs where there is a transit or eclipse.
 ;        print, 'got to the if statement that seems to fail'
  ;       print, point, c[point], c[point+1]
+        GOTO, jumpend
+
       endif  else begin
          p=c[c[point]:c[point+1]-1] ;start with this point's DT neighbors
          d=(x[p]-x[point])^2+((y[p]-y[point])/b)^2
