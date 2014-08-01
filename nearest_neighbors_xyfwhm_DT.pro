@@ -15,6 +15,10 @@ function nearest_neighbors_xyfwhm_DT,x,y,xfwhm, yfwhm, chname, DISTANCES=nearest
                                 ;the problem case
                                 ;make up a d that lets me know I should ignore this point
                                 ; or just keep the last d which is what doing nothing will do I think
+        nearest[*,point] = !VALUES.F_NAN
+        nearest_d[*,point] = !VALUES.F_NAN
+        print,point,  'didnt find neighbors for this one'
+        GOTO, jumpend
      endif  else begin
         p=c[c[point]:c[point+1]-1] ;start with this point's DT neighbors
         d=(x[p]-x[point])^2+((y[p]-y[point])/b)^2 + (xfwhm[p]-xfwhm[point])^2+ (yfwhm[p]-yfwhm[point])^2
@@ -43,6 +47,7 @@ function nearest_neighbors_xyfwhm_DT,x,y,xfwhm, yfwhm, chname, DISTANCES=nearest
            d=d[1:*]
         endelse 
      endfor
+     JUMPEND: print, 'didnt find neighbors for this one'
   endfor 
   if arg_present(nearest_d) then nearest_d=sqrt(nearest_d)
  return, nearest
