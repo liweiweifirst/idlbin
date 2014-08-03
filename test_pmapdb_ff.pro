@@ -30,7 +30,8 @@ pro test_pmapdb_ff, planetname, run_photometry = run_photometry,make_plots = mak
      save, corrfluxff, filename = '/Users/jkrick/irac_warm/pcrs_planets/' + planetname + '/corrflux_ff.sav'
      print, 'finished pmap_correct x, y, np'
      
-     
+     restore, '/Users/jkrick/irac_warm/pcrs_planets/'+planetname+'/corrflux2.sav'
+
 ;--------------------------------------------------------------------
 ;4) nearest_neighbors on the data itself with x, y
 ;     pixphasecorr_noisepix, planetname, nn, apradius,chname,/use_fwhm, /use_np
@@ -43,7 +44,7 @@ pro test_pmapdb_ff, planetname, run_photometry = run_photometry,make_plots = mak
   endif else begin              ;keyword_set(run_photometry)
      restore, '/Users/jkrick/irac_warm/pcrs_planets/'+planetname+'/corrflux2.sav'
      restore, '/Users/jkrick/irac_warm/pcrs_planets/'+planetname+'/corrflux_ff.sav'
-
+     corrflux_ff = corrfluxff
      savename = strcompress(dirname + 'pixphasecorr_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
      restore, savename
 
@@ -59,7 +60,7 @@ pro test_pmapdb_ff, planetname, run_photometry = run_photometry,make_plots = mak
   numberarr = findgen(n_elements(fluxarr))
   h = histogram(numberarr, OMIN=om, binsize = bin_level, reverse_indices = ri)
   
-   bin_time = dblarr(n_elements(h))
+  bin_time = dblarr(n_elements(h))
   bin_flux = bin_time
   bin_corrflux2= bin_time
   bin_corrfluxff= bin_time
@@ -76,13 +77,15 @@ pro test_pmapdb_ff, planetname, run_photometry = run_photometry,make_plots = mak
         meanclip_jk, corrflux2[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
         bin_corrflux2[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
         meanclip_jk, corrflux_ff[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
-        bin_corrflux3[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+        bin_corrfluxff[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
         meanclip_jk, nnflux1[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
         bin_nn1[c] = meanx      ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
         meanclip_jk, nnflux2[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
         bin_nn2[c] = meanx      ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
         meanclip_jk, nnflux3[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
         bin_nn3[c] = meanx      ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+        c = c + 1
+
      endif
   endfor
   bin_time = bin_time[0:c-1]
@@ -159,8 +162,9 @@ pro test_pmapdb_ff, planetname, run_photometry = run_photometry,make_plots = mak
      p = plot(bin_time/60./60., bin_flux / mean(bin_flux), xtitle = 'Time', ytitle = 'Normalized flux', '1s', title = planetname +  ' pmap correct', sym_size = 0.2,sym_filled = 1,color = 'black', name = 'raw'+ string(fwhmraw))
      p2= plot(bin_time/60./60., (bin_corrflux2 / mean(bin_corrflux2,/nan)) + 0.005,  '1s', sym_size = 0.3,sym_filled = 1,color = 'blue', overplot = p, name = 'X Y NP'+ string(fwhmc2))
      p3= plot(bin_time/60./60., (bin_corrfluxff / mean(bin_corrfluxff,/nan)) + 0.005,  '1s', sym_size = 0.3,sym_filled = 1,color = 'cyan', overplot = p, name = 'X Y NP FF'+ string(fwhmc3))
-     l = legend(target = [p, p1, p2, p3], position = [4, 1.018], /data, /auto_text_color)
+     l = legend(target = [p,  p2, p3], position = [4, 0.999], /data, /auto_text_color)
      
+ 
 ;pixphasecorr_noisepix = nn
 ;     p = plot(bin_time/60./60., bin_flux / mean(bin_flux), xtitle = 'Time', ytitle = 'Normalized flux', title = planetname + ' nearest neighbor', '1s', sym_size = 0.2,sym_filled = 1,color = 'black', name = 'raw' + string(fwhmraw))
 ;     p4= plot(bin_time/60./60., (bin_nn1 / mean(bin_nn1,/nan)) + 0.005,  '1s', sym_size = 0.3,sym_filled = 1,color = 'gray', overplot = p, name = 'X Y'+ string(fwhmnn1))
