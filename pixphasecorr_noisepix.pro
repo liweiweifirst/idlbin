@@ -26,7 +26,7 @@
 ; MODIFICATION HISTORY:
 ; Dec 2012 JK initial version
 ;-
-pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breatheap, ballard_sigma = ballard_sigma, use_fwhm = use_fwhm, use_np = use_np, xyonly = xyonly
+pro pixphasecorr_noisepix, planetname, nn, apradius, chname, startaor, stopaor, breatheap = breatheap, ballard_sigma = ballard_sigma, use_fwhm = use_fwhm, use_np = use_np, xyonly = xyonly
   
   if keyword_set(use_fwhm) + keyword_set(use_np) + keyword_set(xyonlt) ne 1 then print, 'Must set one and only one of the flags for using xy, np, or xyfwhm'
 
@@ -43,7 +43,7 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
   period = planetinfo[planetname, 'period']
   utmjd_center = planetinfo[planetname, 'utmjd_center']
   exptime = planetinfo[planetname, 'exptime']
-  t_dur = planetinfo[planetname, 'transit_duration']
+  t_dur = (planetinfo[planetname, 'transit_duration'])/24./60. ; now in daysxs
   dirname = strcompress(basedir + planetname +'/')
   if keyword_set(breatheap) then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav') else savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
 
@@ -54,6 +54,7 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
   if planetname eq 'HD7924b' then exosystem = 'HD 7924 b'
   if planetname eq 'HAT-P-22' then exosystem = 'HAT-P-22 b'
   if planetname eq 'HD20003' then exosystem = planetname + ' b'
+  if planetname eq 'WASP-15b' then exosystem = 'WASP-15 b'
   if planetname eq 'WASP-52b' then teq_p = 1315
   if planetname eq 'HD7924b' then begin
      t_dur = 0.1                ; completely made up since this is non-transiting
@@ -63,28 +64,28 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, breatheap = breathe
   if chname eq '2' then lambdaname  = '4.5'
   if chname eq '1' then lambdaname  = '3.6'
   print, 'exosystem', exosystem
-  get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,RSTAR = rstar, TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,$
-                   AR_SEMIMAJ=ar_semimaj,$
-                   TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
-                   INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
-                   DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,VERBOSE=verbose
-  ra_ref = ra*15.               ; comes in hours!
-  dec_ref = dec
-  utmjd_center = mjd_transit
-  period = p_orbit
-  semimaj = ar_semimaj
-  dstar = 2.*rstar
-  m_star = mstar
+;  get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,RSTAR = rstar, TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,$
+;                   AR_SEMIMAJ=ar_semimaj,$
+;                   TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
+;                   INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
+;                   DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,VERBOSE=verbose
+;  ra_ref = ra*15.               ; comes in hours!
+;  dec_ref = dec
+;  utmjd_center = mjd_transit
+;  period = p_orbit
+;  semimaj = ar_semimaj
+;  dstar = 2.*rstar
+;  m_star = mstar
 ;;t_dur = 13.*dstar*sqrt(semimaj/m_star)
 ;;b = semimaj* cos(inclination*!Pi/180.)
 ;;print, period, rstar, rp_rstar*rstar, b, semimaj, inclination
-t_dur =  t14  ; in days
+;t_dur =  t14  ; in days
 ;;t_dur = transit_duration( period, rstar, rp_rstar * rstar, b, semimaj)
  print,'transit duration in days', t_dur
 ;==========================================
   
-  startaor = 1
-  stopaor =   1                 ; n_elements(aorname) - 1
+;  startaor = 0
+;  stopaor =  0;  n_elements(aorname) - 1
   
   for a = startaor, stopaor do begin ;run through all AORs
      print, 'working on aor', aorname(a)
@@ -124,6 +125,8 @@ t_dur =  t14  ; in days
            phasearr = phase
            corrfluxarr = corrflux
            corrfluxerrarr = corrfluxerr
+           xfwhmarr = xfwhm
+           yfwhmarr = yfwhm
            timearr = (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0)) ; XXXXX careful, I used aorname(0)
         endif else begin
            xcenarr = [xcenarr, xcen]
@@ -135,6 +138,8 @@ t_dur =  t14  ; in days
            phasearr = [phasearr, phase]
            corrfluxarr = [corrfluxarr, corrflux]
            corrfluxerrarr = [corrfluxerrarr,corrfluxerr]
+           xfwhmarr = [xfwhmarr, xfwhm]
+           yfwhmarr = [yfwhmarr, yfwhm]
            timearr = [timearr, (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))]
         endelse
      endif                      ;not a snapshot
@@ -178,7 +183,8 @@ t_dur =  t14  ; in days
   flux_m2 = flux_marr
   fluxerr_m2 = fluxerr_marr
   time_02  = time_0
-  
+  xfwhm2 = xfwhmarr
+  yfwhm2 = yfwhmarr
                                 ;mask intervals in time where astrophysical signals exist.
                                 ;I know where the transits and eclipses are
 ;mess around with reducing transit period
@@ -192,8 +198,10 @@ t_dur =  t14  ; in days
   xcen2(intransit) = 1E5
   ycen2(intransit) = 1E5
   sqrtnp2(intransit) = 1E5
-  
-  cgHistoplot, xcen2,/nan, thick = 3, xtitle = 'xcen', ytitle = 'Number',  datacolorname = 'black', title = planetname, /outline
+  xfwhm2(intransit) = 1E5
+  yfwhm2(intransit) = 1E5
+
+;  cgHistoplot, flux_m,/nan, thick = 3, xtitle = 'raw flux', ytitle = 'Number',  datacolorname = 'black', title = planetname, /outline
                                 ;do the nearest neighbors run with triangulation
                                 ;http://www.idlcoyote.com/code_tips/slowloops.html
                                 ;this returns a sorted list of the nn nearest neighbors
@@ -202,17 +210,18 @@ t_dur =  t14  ; in days
   if keyword_set(xyonly) then nearest = nearest_neighbors_DT(xcen2,ycen2,chname,DISTANCES=nearest_d,NUMBER=nn)
                                 ;quick statistics to see if np picks different nearest neighbors than xyfwhm
 
-  for j = 0L,   ni - 1 do begin ;for each centroid in the entire dataset, aka. 63*nimages
+  for j = 0L, ni - 1 do begin ;for each centroid in the entire dataset, aka. 63*nimages
      ;sometimes the nearest neighbor just doesn't work
-     anan = where (finite(nearest(*,j) lt 1), nancount)
+     anan = where (finite(nearest(*,j)) lt 0.9, nancount)
      if nancount gt 0 then begin
+        print, j ,'not finite nearest'
 ; jump to the end
         flux(j)=  !VALUES.F_NAN
         fluxerr(j) =  !VALUES.F_NAN
-        flux_np(j)=  !VALUES.F_NAN
-        fluxerr_np(j) =  !VALUES.F_NAN
-        flux_fwhm(j) =  !VALUES.F_NAN
-        fluxerr_fwhm(j)  =  !VALUES.F_NAN
+;        flux_np(j)=  !VALUES.F_NAN
+;        fluxerr_np(j) =  !VALUES.F_NAN
+;        flux_fwhm(j) =  !VALUES.F_NAN
+;        fluxerr_fwhm(j)  =  !VALUES.F_NAN
         GOTO, jumpend
      endif
 
@@ -223,7 +232,10 @@ t_dur =  t14  ; in days
            nearestflux = flux_m2(nearest(*,j))
            nearestfluxerr = fluxerr_m2(nearest(*,j))
            nearesttime = time_02(nearest(*,j))
-           
+           nearestsqrtnp = sqrtnp2(nearest(*,j))
+           nearestxfwhm = xfwhm2(nearest(*,j))
+           nearestyfwhm = yfwhm2(nearest(*,j))
+
                                 ;what is the time distribution like of the points chosen as nearest in position
                                 ;track the range in time for each point
            delta_time(j) = abs(time_0[j]- nearesttime(n_elements(nearesttime)-1))
@@ -234,6 +246,9 @@ t_dur =  t14  ; in days
               nearesty = nearesty[1:*]
               nearestflux = nearestflux[1:*]
               nearestfluxerr = nearestfluxerr[1:*]
+              nearestsqrtnp = nearestsqrtnp[1:*]
+              nearestxfwhm = nearestxfwhm[1:*]
+              nearestyfwhm = nearestyfwhm[1:*]
            endif
            
            furthestx[j] = abs(xcen2(j) - nearestx(n_elements(nearestx)-1))
@@ -284,8 +299,8 @@ t_dur =  t14  ; in days
 
 ; try the brute force way of finding distances in those arrays
         if keyword_set(xyonly) then dist = distance(goodx, goody, 0, chname)
-        if keyword_set(use_np) then dist = distance_np(goodx, goody, 0, chname)
-        if keyword_set(use_fwhm) then dist = distance_fwhm(goodx, goody, 0, chname)
+        if keyword_set(use_np) then dist = distance_np(goodx, goody, goodsqrtnp, 0, chname)
+        if keyword_set(use_fwhm) then dist = distance_fwhm(goodx, goody, goodxfwhm, goodyfwhm, 0, chname)
 
         sd = sort(dist)
         sortdist = dist(sd)     ;sort those distances
@@ -332,7 +347,7 @@ t_dur =  t14  ; in days
      flux(j) = flux_m2(j) / w
      fluxerr(j) = fluxerr_m2(j) / w
      
-     jumpend: ;print, 'ignore this position'
+     jumpend:; print, 'ignore this position', j
   endfor  ; for each centroid in the entire dataset.
 
   
@@ -419,7 +434,7 @@ function weight_np, stdxcen, stdycen, stdsqrtnp,nearestx, nearesty, nearestsqrtn
    ;gaussian weighting function including noise pixel
   gaussx = exp( -((nearestx - xcenj)^2)/(2*stdxcen^2) )
   gaussy = exp(-((nearesty  - ycenj)^2)/(2*stdycen^2) )
-  gaussnp = exp(-((nearestsqrtnp  - sqrtnpj)^2)/(2*stdsqrtnp^2) )
+  gaussnp = (exp(-((nearestsqrtnp  - sqrtnpj)^2)/(2*stdsqrtnp^2) )) ;/ 2.
 
   ;now sum
   w = total((gaussx*gaussy*gaussnp*nearestfluxnp)/total(gaussx*gaussy*gaussnp))
@@ -434,8 +449,8 @@ function weight_fwhm, stdxcen, stdycen, stdxfwhm, stdyfwhm,nearestx, nearesty, n
    ;gaussian weighting function including noise pixel
   gaussx = exp( -((nearestx - xcenj)^2)/(2*stdxcen^2) )
   gaussy = exp(-((nearesty  - ycenj)^2)/(2*stdycen^2) )
-  gaussxfwhm = exp(-((nearestxfwhm  - xfwhmj)^2)/(2*stdxfwhm^2) )
-  gaussyfwhm = exp(-((nearestyfwhm  - yfwhmj)^2)/(2*stdyfwhm^2) )
+  gaussxfwhm = (exp(-((nearestxfwhm  - xfwhmj)^2)/(2*stdxfwhm^2) ));/2.
+  gaussyfwhm = (exp(-((nearestyfwhm  - yfwhmj)^2)/(2*stdyfwhm^2) )); / 2.
 
   ;now sum
   w = total((gaussx*gaussy*gaussxfwhm*gaussyfwhm*nearestfluxfwhm)/total(gaussx*gaussy*gaussxfwhm*gaussyfwhm))
@@ -447,7 +462,7 @@ end
 
 function distance_fwhm, xcen, ycen, xfwhm, yfwhm, j, chname
   ;calculate the "distance" from the working centroid to all other centroids.
-  if chname eq 1 then  b = 0.8 else b = 1.0 ; from knutson et al. 2012
+  if chname eq '1' then  b = 0.8 else b = 1.0 ; from knutson et al. 2012
                        ; for 3.6micron channel taken from paper
   dist = (xcen - xcen(j))^2 + ((ycen -ycen(j))/b)^2 + (xfwhm - xfwhm(j))^2+ (yfwhm - yfwhm(j))^2
 
@@ -457,7 +472,7 @@ end
 
 function distance_np, xcen, ycen, sqrtnp, j, chname
   ;calculate the "distance" from the working centroid to all other centroids.
-  if chname eq 1 then  b = 0.8 else b = 1.0 ; from knutson et al. 2012
+  if chname eq '1' then  b = 0.8 else b = 1.0 ; from knutson et al. 2012
                        ; for 3.6micron channel taken from paper
   dist = (xcen - xcen(j))^2 + ((ycen -ycen(j))/b)^2 + (sqrtnp - sqrtnp(j))^2
 
@@ -468,7 +483,7 @@ end
 function distance, xcen, ycen,  j, chname
                                 ;calculate the "distance" from the working centroid to all other centroids.
  
-  if chname eq 1 then  b = 0.8 else b = 1.0 ; from knutson et al. 2012
+  if chname eq '1' then  b = 0.8 else b = 1.0 ; from knutson et al. 2012
                       ; for 3.6micron channel taken from paper
   dist = (xcen - xcen(j))^2 + ((ycen -ycen(j))/b)^2 
 
