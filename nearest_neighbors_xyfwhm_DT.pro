@@ -47,7 +47,7 @@ function nearest_neighbors_xyfwhm_DT,x,y,xfwhm, yfwhm, chname, DISTANCES=nearest
            d=d[1:*]
         endelse 
      endfor
-     JUMPEND: print, 'didnt find neighbors for this one'
+     JUMPEND: ;print, 'didnt find neighbors for this one'
   endfor 
   if arg_present(nearest_d) then nearest_d=sqrt(nearest_d)
  return, nearest

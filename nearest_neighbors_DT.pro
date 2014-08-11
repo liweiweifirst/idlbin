@@ -21,8 +21,8 @@ function nearest_neighbors_DT,x,y,chname, DISTANCES=nearest_d,NUMBER=k
      ;if point eq 0 then help, point
      ;if point gt limit - 100 then print, 'point', point, c[point], c[point+1]
      ;if point gt 94300 then print, 'point gt 94300', point, c[point], c[point+1] - 1, c[c[point]], c[c[point+1]]
-     nearest[*,point] = !VALUES.F_NAN
-     nearest_d[*,point] = !VALUES.F_NAN
+;     nearest[*,point] = !VALUES.F_NAN
+;     nearest_d[*,point] = !VALUES.F_NAN
 
      ;triangulate gets bad results in certain cases ????
      if c[point] gt  c[point+1] - 1 then begin
@@ -67,7 +67,7 @@ function nearest_neighbors_DT,x,y,chname, DISTANCES=nearest_d,NUMBER=k
            d=d[1:*]
         endelse 
      endfor
-     JUMPEND: print, 'didnt find neighbors for this one'
+     JUMPEND: 
 
   endfor 
   if arg_present(nearest_d) then nearest_d=sqrt(nearest_d)
