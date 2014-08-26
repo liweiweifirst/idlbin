@@ -58,6 +58,7 @@ if planetname eq 'WASP-15b' then exosystem = 'WASP-15 b'
 if planetname eq 'WASP-16b' then exosystem = 'WASP-16 b'
 if planetname eq 'WASP-38b' then exosystem = 'WASP-38 b'
 if planetname eq 'WASP-62b' then exosystem = 'WASP-62 b'
+if planetname eq 'WASP-52b' then exosystem = 'WASP-52 b'
 if planetname eq 'HAT-P-22' then exosystem = 'HAT-P-22 b'
 
 print, exosystem, 'exosystem'
@@ -98,14 +99,17 @@ for a =startaor, stopaor do begin
    spawn, command
    command2 =  strcompress('find ch'+chname+"/bcd -name '*bunc.fits' > "+dirname + 'bunclist.txt')
    spawn, command2
-   
+   command3 =  strcompress('find ch'+chname+"/raw -name '*dce.fits' > "+dirname + 'dcelist.txt')
+   spawn, command3
+ 
    readcol,strcompress(dirname +'bcdlist.txt'),fitsname, format = 'A', /silent
    readcol,strcompress(dirname+'bunclist.txt'),buncname, format = 'A', /silent
-   
+   readcol,strcompress(dirname+'dcelist.txt'),rawname, format = 'A', /silent
+
    print,'n_elements(fitsname)', n_elements(fitsname)
 ;     aparr = dblarr(n_elements(fitsname))  ;keep the aperture sizes used
    
-startfits = 0.D
+   startfits = 0.D
 
 
    for i =startfits,  n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
@@ -142,6 +146,7 @@ startfits = 0.D
          npcentroidsarr = xarr
          xfwhmarr = xarr
          yfwhmarr = xarr
+         peakpixDNarr = xarr
       endif
       if i eq startfits and naxis ne 3 then begin
          xarr = fltarr(n_elements(fitsname))
@@ -158,6 +163,7 @@ startfits = 0.D
          npcentroidsarr = xarr
          xfwhmarr = xarr
          yfwhmarr = xarr
+         peakpixDNarr = xarr
       endif
 
 
@@ -221,7 +227,27 @@ startfits = 0.D
          backerr = abcdflux
       endif 
       
-      
+;read in the raw data file and get the DN level of the peakpixel      
+        fits_read, rawname(i), rawdata, rawheader
+        
+        barrel = fxpar(rawheader, 'A0741D00')
+        fowlnum = fxpar(rawheader, 'A0614D00')
+        pedsig = fxpar(rawheader, 'A0742D00')
+        ichan = fxpar (rawheader, 'CHNLNUM')
+              
+                                ;use Bill's code to conver to DN
+        dewrap2, rawdata, ichan, barrel, fowlnum, pedsig, 0, rawdata
+     
+                                ;or use Jim's code to convert to DN
+;            rawdata = irac_raw2dn(rawdata,ichan,barrel,fowlnum)
+        rawdata = reform(rawdata, 32, 32, 64)
+        peakpixDN = abcdflux
+        if naxis eq 3 then begin
+           for pp = 0, 64 do begin
+              peakpixDN[pp] = rawdata[fix(x3(pp)),fix(y3(pp)),pp]
+           endfor
+        endif
+
 ;track the value of a column
       if keyword_set(columntrack) then begin 
          centerpixval1 = findgen(64)
@@ -298,6 +324,7 @@ startfits = 0.D
          npcentroidsarr[i*63] = npcentroids[1:*]
          xfwhmarr[i*63] = xfwhm[1:*]
          yfwhmarr[i*63] = yfwhm[1:*]
+         peakpixDNarr[i*63] = peakpixDN[1:*]
  ;        help, bmjd
          if keyword_set(columntrack) then begin 
                                 ; I think I deleted more parts of this than I may have intended, so if it is not working, that may be why
@@ -330,6 +357,7 @@ startfits = 0.D
          npcentroidsarr[i] = npcentroids
          xfwhmarr[i] = xfwhm
          yfwhmarr[i] = yfwhm
+         peakpixDNarr[i] = peakpixDN
       endif
 
    endfor; for each fits file in the AOR
@@ -379,8 +407,8 @@ print, 'end phase', phase[n_elements(phase) - 1]
       values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, centerpixarr1, centerpixarr2, centerpixarr3, centerpixarr4, centerpixarr5, centerpixarr6, sigmapixarr1, sigmapixarr2, sigmapixarr3, sigmapixarr4, sigmapixarr5, sigmapixarr6, phase)
       planethash[aorname(a)] = HASH(keys, values)
    endif else begin
-      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase', 'npcentroids','exptime','xfwhm', 'yfwhm']
-      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr, exptime, xfwhmarr, yfwhmarr)
+      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase', 'npcentroids','exptime','xfwhm', 'yfwhm','peakpixDN']
+      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, peakpixDNarr)
       planethash[aorname(a)] = HASH(keys, values)
    endelse
 
