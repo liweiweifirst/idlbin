@@ -74,10 +74,18 @@ get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=tra
                        TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
                        INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
                        DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose
-ra_ref = ra*15.   ; comes in hours!;
-dec_ref = dec
-utmjd_center = mjd_transit
-period = p_orbit
+if ra lt 400 then begin  ; that means get_exoplanet_data actually found the target
+   ra_ref = ra*15.       ; comes in hours!;
+   dec_ref = dec
+   utmjd_center = mjd_transit
+   period = p_orbit
+endif else begin
+   ;warning these could be junk as well
+   ra_ref = planetinfo[planetname, 'ra']
+   dec_ref = planetinfo[planetname, 'dec']
+   utmjd_center = planetinfo[planetname, 'utmjd_center']
+   period = planetinfo[planetname, 'period']
+endelse
 ;---------------
 
 print, 'ra, dec', ra_ref, dec_ref
