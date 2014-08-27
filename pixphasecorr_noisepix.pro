@@ -64,22 +64,22 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, startaor, stopaor, 
   if chname eq '2' then lambdaname  = '4.5'
   if chname eq '1' then lambdaname  = '3.6'
   print, 'exosystem', exosystem
-;  get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,RSTAR = rstar, TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,$
-;                   AR_SEMIMAJ=ar_semimaj,$
-;                   TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
-;                   INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
-;                   DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,VERBOSE=verbose
-;  ra_ref = ra*15.               ; comes in hours!
-;  dec_ref = dec
-;  utmjd_center = mjd_transit
-;  period = p_orbit
-;  semimaj = ar_semimaj
-;  dstar = 2.*rstar
-;  m_star = mstar
+  get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,RSTAR = rstar, TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,$
+                   AR_SEMIMAJ=ar_semimaj,$
+                   TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
+                   INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
+                   DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,VERBOSE=verbose
+  ra_ref = ra*15.               ; comes in hours!;
+  dec_ref = dec
+  utmjd_center = mjd_transit
+  period = p_orbit
+  semimaj = ar_semimaj
+  dstar = 2.*rstar
+  m_star = mstar
 ;;t_dur = 13.*dstar*sqrt(semimaj/m_star)
 ;;b = semimaj* cos(inclination*!Pi/180.)
 ;;print, period, rstar, rp_rstar*rstar, b, semimaj, inclination
-;t_dur =  t14  ; in days
+t_dur =  t14  ; in days
 ;;t_dur = transit_duration( period, rstar, rp_rstar * rstar, b, semimaj)
  print,'transit duration in days', t_dur
 ;==========================================
@@ -153,7 +153,7 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, startaor, stopaor, 
   
                                 ;change this to a smaller number to test code in less time than a full run
   ni =  n_elements(xcenarr) 
-  print, 'ni, phase', ni, n_elements(phasearr)
+  print, 'ni, phase', ni, n_elements(phasearr), n_elements(xfwhmarr)
   
                                 ;setup arrays for the corrected fluxes
   flux = dblarr(ni)             ; fltarr(n_elements(flux_m))
@@ -212,9 +212,10 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, startaor, stopaor, 
 
   for j = 0L, ni - 1 do begin ;for each centroid in the entire dataset, aka. 63*nimages
      ;sometimes the nearest neighbor just doesn't work
+  ;   print, 'nearest(*,j)', nearest(*,j)
      anan = where (finite(nearest(*,j)) lt 0.9, nancount)
      if nancount gt 0 then begin
-        print, j ,'not finite nearest'
+        ;print, j ,ni,'not finite nearest'
 ; jump to the end
         flux(j)=  !VALUES.F_NAN
         fluxerr(j) =  !VALUES.F_NAN
@@ -287,15 +288,15 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, startaor, stopaor, 
         goody[0] = ycenarr[j]
         goodflux[0] = flux_marr[j]
         goodsqrtnp[0] = sqrtnparr[j]
-        goodxfwhm[0] = xfwhm[j]
-        goodyfwhm[0] = yfwhm[j]
+        goodxfwhm[0] = xfwhmarr[j]
+        goodyfwhm[0] = yfwhmarr[j]
 
         goodx[1:*] = xcenarr(outtransit)  ; fill the rest of the array with all out of transit points
         goody[1:*] = ycenarr(outtransit)
         goodflux[1:*] = flux_marr(outtransit)
         goodsqrtnp[1:*] = sqrtnparr(outtransit)
-        goodxfwhm[1:*] = xfwhm(outtransit)
-        goodyfwhm[1:*] = yfwhm(outtransit)
+        goodxfwhm[1:*] = xfwhmarr(outtransit)
+        goodyfwhm[1:*] = yfwhmarr(outtransit)
 
 ; try the brute force way of finding distances in those arrays
         if keyword_set(xyonly) then dist = distance(goodx, goody, 0, chname)
