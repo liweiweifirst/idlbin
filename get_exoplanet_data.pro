@@ -113,6 +113,7 @@ CASE 1 OF
          iuse = WHERE(exodata.NAME EQ EXOSYSTEM,nuse)
          IF NUSE EQ 0 THEN BEGIN
             print,'GET_EXOPLANET_DATA: Cannot find "'+exosystem+'" in '+exoplanet_data_file+'.  Returning.'
+            RA = 1000. ; set this so I know when the output is useless JK
             return
          ENDIF
          MSINI = exodata.MSINI[iuse[0]]
