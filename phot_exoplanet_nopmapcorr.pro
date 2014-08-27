@@ -55,11 +55,15 @@ exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
 ;exosystem = planetname
 if planetname eq 'WASP-13b' then exosystem = 'WASP-13 b'
 if planetname eq 'WASP-15b' then exosystem = 'WASP-15 b'
+if planetname eq 'WASP-14b' then exosystem = 'WASP-14 b'
 if planetname eq 'WASP-16b' then exosystem = 'WASP-16 b'
 if planetname eq 'WASP-38b' then exosystem = 'WASP-38 b'
 if planetname eq 'WASP-62b' then exosystem = 'WASP-62 b'
 if planetname eq 'WASP-52b' then exosystem = 'WASP-52 b'
 if planetname eq 'HAT-P-22' then exosystem = 'HAT-P-22 b'
+if planetname eq 'HAT-P-8' then exosystem = 'HAT-P-8 b'
+if planetname eq 'HD209458' then exosystem = 'HD209458 b'
+
 
 print, exosystem, 'exosystem'
 if planetname eq 'WASP-52b' then teq_p = 1315
@@ -136,6 +140,9 @@ for a =startaor, stopaor do begin
       aintbeg = sxpar(header, 'AINTBEG')
       atimeend = sxpar(header, 'ATIMEEND')
       naxis = sxpar(header, 'NAXIS')
+      ;XXXX remove this later, for now I only want subarray
+      if naxis eq 2 then goto, SKIPAOR
+
       if ch eq '2' and frametime eq 2 then ronoise = 12.1
       if i eq startfits then print, 'ronoise', ronoise, gain, fluxconv, exptime
       if i eq startfits then sclk_0 = sclk_obs
@@ -225,7 +232,7 @@ for a =startaor, stopaor do begin
       np = findgen(64)
       ; if changing the apertures then use this to calculate photometry
       if keyword_set(breatheap) then begin
-         abcdflux = betap(im, x_center, y_center, ronoise, gain, exptime, fluxconv,np, chname)
+         abcdflux = betap(im, x_center, y_center, ronoise, gain, exptime, fluxconv,npcentroids, chname)
          ;XXXfake these for now
          fs = abcdflux
          back = abcdflux
@@ -373,8 +380,8 @@ for a =startaor, stopaor do begin
 ;      phase = temporary(phase)+0.5
 ;   endif 
    
-print, 'testing phase', phase[0:200]
-print, 'end phase', phase[n_elements(phase) - 1]
+;print, 'testing phase', phase[0:200]
+;print, 'end phase', phase[n_elements(phase) - 1]
 ;--------------------------------
 ;fill in that hash of hases
 ;--------------------------------
@@ -390,7 +397,7 @@ print, 'end phase', phase[n_elements(phase) - 1]
       values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, peakpixDNarr)
       planethash[aorname(a)] = HASH(keys, values)
    endelse
-
+SKIPAOR: print, 'skipped this AOR'
 endfor                          ;for each AOR
 
 
@@ -406,8 +413,8 @@ print, 'time check', systime(1) - t1
 
 
 ;testplot = plot(timearr, xarr, '1s', sym_size = 0.1, sym_filled = 1, xtitle = 'time', ytitle = 'xcen')
-plothist, npcentroidsarr, xhist, yhist, /noplot, bin = 0.01
-testplot = plot(xhist, yhist,  xtitle = 'NP', ytitle = 'Number', thick =3, color = 'blue')
+plothist, fluxarr, xhist, yhist, /noplot
+testplot = plot(xhist, yhist,  xtitle = 'Flux', ytitle = 'Number', thick =3, color = 'blue')
 
                                 ; print, planethash.keys()
  ; print, planethash[aorname(0)].keys()
@@ -473,8 +480,7 @@ function betap, im, xcen, ycen, ronoise, gain, exptime, fluxconv, np, chname
   convfac = gain*exptime/fluxconv
   eim = im * convfac
 
-  varap = sqrt(np)  + 0.2
-  ;print, 'testing vartap', varap
+  varap = sqrt(np)  +1.0  ; sqrt(np)  + 0.2
 
   ;XXX add some way of keeping track of varap
   ;don't know how to return that
@@ -498,7 +504,8 @@ function betap, im, xcen, ycen, ronoise, gain, exptime, fluxconv, np, chname
 ;     print, 'varap, abcdflux', varap[s], abcdflux[s]
   endfor
 
-
+;  print, 'testing varap', varap
+;  print, 'testing abcdflux', abcdflux
   return, abcdflux
 end
 
