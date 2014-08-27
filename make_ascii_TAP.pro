@@ -1,8 +1,8 @@
 pro make_ascii_TAP, bin_level
 
-  planetname = 'HAT-P-22'
+  planetname = 'WASP-15b'
   chname = '2'
-  apradius = 2.25
+  apradius = 1.75
   planetinfo = create_planetinfo()
   aorname= planetinfo[planetname, 'aorname_ch2'] 
   basedir = planetinfo[planetname, 'basedir']

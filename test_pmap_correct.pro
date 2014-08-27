@@ -14,6 +14,7 @@ pro test_pmap_correct, planetname, startaor, stopaor, run_nn = run_nn, run_pmap 
   restore, savefilename
   print, 'aorname', aorname(startaor), aorname(stopaor)
   ;4xbinning, including all 64 subframes ; this is the standard
+  pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r3p00_s3_7_0p1s_x4_140314.sav'
   pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140716.sav'
   ;4xbinning, removing first four subframes
   if keyword_set(pmapff) then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140805.sav'
@@ -37,15 +38,15 @@ pro test_pmap_correct, planetname, startaor, stopaor, run_nn = run_nn, run_pmap 
 ;--------------------------------------------------------------------
      
 ;1) pmap_correct with x, y
-;     corrflux1= pmap_correct((planethash[aorname(startaor),'xcen']),(planethash[aorname(startaor),'ycen']),$
-;                             planethash[aorname(startaor),'flux'],2,planethash[aorname(startaor),'xfwhm'],$
-;                             planethash[aorname(startaor),'yfwhm'],/POSITION_ONLY,$
-;                             FUNC=planethash[aorname(startaor),'fluxerr'],CORR_UNC=corr_unc,$
-;                             DATAFILE=pmapfile,NNEAREST=nn) 
-;     savefile =strcompress(dirname + '/corrflux1.sav',/remove_all)
-;     if keyword_set(pmapff) then savefile = strcompress(dirname + '/corrflux1_noff.sav',/remove_all)
-;     save, corrflux1, filename =savefile
-;     print, 'finished pmap_correct x, y'
+     corrflux1= pmap_correct((planethash[aorname(startaor),'xcen']),(planethash[aorname(startaor),'ycen']),$
+                             planethash[aorname(startaor),'flux'],2,planethash[aorname(startaor),'xfwhm'],$
+                             planethash[aorname(startaor),'yfwhm'],/POSITION_ONLY,$
+                             FUNC=planethash[aorname(startaor),'fluxerr'],CORR_UNC=corr_unc,$
+                             DATAFILE=pmapfile,NNEAREST=nn) 
+     savefile =strcompress(dirname + '/corrflux1.sav',/remove_all)
+     if keyword_set(pmapff) then savefile = strcompress(dirname + '/corrflux1_noff.sav',/remove_all)
+     save, corrflux1, filename =savefile
+     print, 'finished pmap_correct x, y'
 ;--------------------------------------------------------------------
 ;2) pmap_correct with x, y, np
      corrflux2 = pmap_correct((planethash[aorname(startaor),'xcen']),(planethash[aorname(startaor),'ycen']),$
