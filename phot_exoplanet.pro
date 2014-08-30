@@ -135,6 +135,8 @@ for a =startaor, stopaor do begin
       aintbeg = sxpar(header, 'AINTBEG')
       atimeend = sxpar(header, 'ATIMEEND')
       naxis = sxpar(header, 'NAXIS')
+      framedly = sxpar(header, 'FRAMEDLY')
+
       if ch eq '2' and frametime eq 2 then ronoise = 12.1
       if i eq startfits then print, 'ronoise', ronoise, gain, fluxconv, exptime
       if i eq startfits then sclk_0 = sclk_obs
@@ -155,6 +157,7 @@ for a =startaor, stopaor do begin
          xfwhmarr = xarr
          yfwhmarr = xarr
          peakpixDNarr = xarr
+         framedlyarr = xarr
       endif
       if i eq startfits and naxis ne 3 then begin
          xarr = fltarr(n_elements(fitsname))
@@ -172,6 +175,7 @@ for a =startaor, stopaor do begin
          xfwhmarr = xarr
          yfwhmarr = xarr
          peakpixDNarr = xarr
+         framedlyarr = xarr
       endif
 
 
@@ -249,10 +253,10 @@ for a =startaor, stopaor do begin
                                 ;or use Jim's code to convert to DN
 ;            rawdata = irac_raw2dn(rawdata,ichan,barrel,fowlnum)
         rawdata = reform(rawdata, 32, 32, 64)
-        peakpixDN = abcdflux
+        peakpixDN = abcdflux  ; set up the array to be the same size as abcdflux
         if naxis eq 3 then begin
-           for pp = 0, 64 do begin
-              peakpixDN[pp] = rawdata[fix(x3(pp)),fix(y3(pp)),pp]
+           for pp = 0, 63 do begin
+               peakpixDN[pp] = max(rawdata[13:16,13:16,pp])
            endfor
         endif
 
@@ -305,14 +309,14 @@ for a =startaor, stopaor do begin
                                   DATAFILE=pmapfile,NNEAREST=nn)
          ;corrflux = pmap_correct(x_center,y_center,abcdflux,ch,npcentroids,occdata, corr_unc = corrfluxerr, func = fs,$
          ;                       datafile =pmapfile,/threshold_occ,/use_np) 
-      endif else begin
+      endif ;else begin
                ;correct for pixel phase effect based on pmaps from Jim
                                 ;file_suffix =
                                 ;['500x500_0043_120828.fits','0p1s_x4_500x500_0043_121120.fits']
-         corrflux = iracpc_pmap_corr(abcdflux,x_center,y_center,ch,/threshold_occ, threshold_val = 20) ;, file_suffix = file_suffix)
+;         corrflux = iracpc_pmap_corr(abcdflux,x_center,y_center,ch,/threshold_occ, threshold_val = 20) ;, file_suffix = file_suffix)
 ;         corrflux = abcdflux
-         corrfluxerr = fs       ;leave out the pmap err for now
-      endelse
+;         corrfluxerr = fs       ;leave out the pmap err for now
+;      endelse
 
 
 ;---------------------------------
@@ -333,6 +337,7 @@ for a =startaor, stopaor do begin
          xfwhmarr[i*63] = xfwhm[1:*]
          yfwhmarr[i*63] = yfwhm[1:*]
          peakpixDNarr[i*63] = peakpixDN[1:*]
+         framedlyarr[i*63] = framedly[1:*]
  ;        help, bmjd
          if keyword_set(columntrack) then begin 
                                 ; I think I deleted more parts of this than I may have intended, so if it is not working, that may be why
@@ -366,6 +371,7 @@ for a =startaor, stopaor do begin
          xfwhmarr[i] = xfwhm
          yfwhmarr[i] = yfwhm
          peakpixDNarr[i] = peakpixDN
+         framedlyarr[i] = framedly
       endif
 
    endfor; for each fits file in the AOR
@@ -415,8 +421,8 @@ print, 'end phase', phase[n_elements(phase) - 1]
       values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, centerpixarr1, centerpixarr2, centerpixarr3, centerpixarr4, centerpixarr5, centerpixarr6, sigmapixarr1, sigmapixarr2, sigmapixarr3, sigmapixarr4, sigmapixarr5, sigmapixarr6, phase)
       planethash[aorname(a)] = HASH(keys, values)
    endif else begin
-      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase', 'npcentroids','exptime','xfwhm', 'yfwhm','peakpixDN']
-      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, peakpixDNarr)
+      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase', 'npcentroids','exptime','xfwhm', 'yfwhm','peakpixDN', 'framedly']
+      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, peakpixDNarr, framedlyarr)
       planethash[aorname(a)] = HASH(keys, values)
    endelse
 
