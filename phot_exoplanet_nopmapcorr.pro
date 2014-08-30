@@ -102,7 +102,7 @@ if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pm
                                       else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
 fits_read,occ_filename, occdata, occheader
 startaor =0
-stopaor = n_elements(aorname) - 1
+stopaor =  n_elements(aorname) - 1
 for a =startaor, stopaor do begin
    print, 'working on ',aorname(a)
    dir = dirname+ string(aorname(a) ) 
@@ -239,7 +239,9 @@ for a =startaor, stopaor do begin
          backerr = abcdflux
       endif 
       
-;read in the raw data file and get the DN level of the peakpixel      
+;read in the raw data file and get the DN level of the peakpixel 
+      ;only do this if the star is on the image
+      if x_center(0) gt 0 and x_center(0) lt 32 and y_center(0) gt 0 and y_center(0) lt 32 then begin
         fits_read, rawname(i), rawdata, rawheader
         
         barrel = fxpar(rawheader, 'A0741D00')
@@ -248,17 +250,24 @@ for a =startaor, stopaor do begin
         ichan = fxpar (rawheader, 'CHNLNUM')
               
                                 ;use Bill's code to conver to DN
-        dewrap2, rawdata, ichan, barrel, fowlnum, pedsig, 0, rawdata
+;        dewrap2, rawdata, ichan, barrel, fowlnum, pedsig, 0, rawdata
      
                                 ;or use Jim's code to convert to DN
-;            rawdata = irac_raw2dn(rawdata,ichan,barrel,fowlnum)
+        rawdata = irac_raw2dn(rawdata,ichan,barrel,fowlnum)
         rawdata = reform(rawdata, 32, 32, 64)
-        peakpixDN = abcdflux
+        peakpixDN = abcdflux  ; set up the array to be the same size as abcdflux
         if naxis eq 3 then begin
            for pp = 0, 63 do begin
-              peakpixDN[pp] = rawdata[fix(x_center(pp)),fix(y_center(pp)),pp]
+           ;   print, 'x, y, f', x_center(pp), y_center(pp), rawdata[15,16,pp]
+           ;   if x_center(pp) gt 0 and x_center(pp) lt 32 and y_center(pp) gt 0 and y_center(pp) lt 32 then begin
+           ;      peakpixDN[pp] = rawdata[fix(x_center(pp)),fix(y_center(pp)),pp]
+              peakpixDN[pp] = max(rawdata[13:16,13:16,pp])
+           ;   endif else begin
+          ;       print, 'dont understand', x_center(pp), y_center(pp)
+          ;    endelse
            endfor
         endif
+     endif
 
 ;track the value of a column
       if keyword_set(columntrack) then begin 
