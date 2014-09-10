@@ -60,6 +60,9 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
      print, '0.2nflux, ncorr, ', 0.2*n_elements([planethash[aorname(a),'flux']]), corrcount
      if corrcount gt 0.2*n_elements([planethash[aorname(a),'flux']]) then pmapcorr = 1 else pmapcorr = 0
      print, 'pmapcorr', pmapcorr
+     peakpixDN = planethash[aorname(a), 'peakpixDN']
+     print, 'median peakpixDN', median(peakpixDN)
+
 ; bin within each AOR only, don't want to bin across boundaries.
      junkpar = binning_function(a, bin_level, pmapcorr)
 ;     print, 'testing phase', (planethash[aorname(a),'phase'] )[0:10], (planethash[aorname(a),'phase'] )[600:610]
@@ -70,7 +73,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
      ;possible comparison statistic
      ;what is the distribution of standard deviations among the corrfluxes?
 
-     meanclip, planethash[aorname(a),'corrflux'] , mean_corrflux, stddev_corrflux
+     meanclip_jk, planethash[aorname(a),'corrflux'] , mean_corrflux, stddev_corrflux
      stddev_corrfluxarr[a- startaor] = stddev_corrflux
 ;------------------------------------------------------
 ;now try plotting
@@ -95,16 +98,16 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
            print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
 
            pp = plot((bin_timearr-  time_0)/60./60., bin_xcen, '1s',  $;title = planetname, $
-                     color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 0.1, $
-                     xshowtext = 0, ytickformat = '(F10.1)', dimensions = [600, 900], _extra = extra, yminor = 5) ;, $, ymajor = 4
+                     color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 0.5, $
+                     xshowtext = 0, ytickformat = '(F10.1)', dimensions = [600, 900], _extra = extra, yminor = 0, yrange = [13.0, 15.0]) ;, $, ymajor = 4
  
           ;turn off refreshing to make this quicker hopefully
 ;           pp.Refresh, /Disable
 
            
            pq= plot((bin_timearr - time_0)/60./60., bin_ycen, '1s',  color = colorarr[a], $
-                     ytitle = 'Y position',  position = [0.2, 0.64, 0.9, 0.77],/current,  ytickinterval = 0.1,$
-                    xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, yminor = 5) ;, $, title = planetname , ymajor = 4
+                     ytitle = 'Y position',  position = [0.2, 0.64, 0.9, 0.77],/current,  ytickinterval = 1.0,$
+                    xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, yminor = 0, yrange = [15.5, 17.5]) ;, $, title = planetname , ymajor = 4
                      ;xrange = setxrange)
 
 
@@ -115,7 +118,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
            endif else begin
               pr = plot((bin_timearr - time_0)/60./60., bin_flux/plot_norm, '1s',  $
                         color = colorarr[a],   ytitle = 'Norm. Flux', xtitle = 'Time(hrs)',$ 
-                         position = [0.2,0.08, 0.9, 0.21], /current, _extra = extra, ytickinterval = 0.005, yminor = 5);
+                         position = [0.2,0.08, 0.9, 0.21], /current, _extra = extra, ytickinterval = 0.5, yminor = 0);
            endelse  ;/errorbars
           if pmapcorr eq 1 then begin
               print, 'inside pmapcorr eq 1', median( (bin_corrfluxp/plot_corrnorm) ), median(bin_flux)
@@ -133,24 +136,24 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
  
            ps= plot((bin_timearr - time_0)/60./60., bin_npcent, '1s', color = colorarr[a], $
                      ytitle = 'Noise Pixel',  position = [0.2, 0.36, 0.9, 0.49], /current, $
-                    xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, ytickinterval = 0.2, yminor = 5) ;,$ title = planetname,, ymajor = 4
+                    xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, ytickinterval = 1.0, yminor = 0, yrange = [2.5, 8.0]) ;,$ title = planetname,, ymajor = 4
                     ;xrange = setxrange)
 
            pt = plot((bin_timearr - time_0)/60./60., bin_bkgd/ bkgd_norm, '1s' , color = colorarr[a], $
                      ytitle = 'Norm. Bkgd',  margin = 0.2, position = [0.2, 0.22, 0.9, 0.35], /current, xshowtext = 0,$
-                    ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.05, yminor = 5)           ;, $ title = planetname,ymajor = 4,
+                    ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.5, yminor = 0, yrange = [0.5, 1.8])           ;, $ title = planetname,ymajor = 4,
 
            pxy = plot((bin_timearr - time_0)/60./60., bin_xfwhm, '1s', color = 'blue', $
                      ytitle = 'X & Y FWHM',  position = [0.2, 0.50, 0.9, 0.63], /current, $
-                    xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.05, yminor = 5) ;
+                    xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.5, yminor = 0) ;
            pxy = plot((bin_timearr - time_0)/60./60., bin_yfwhm, '1s', color = 'black', $
                      overplot = pxy, _extra = extra) ;
 
            ;setup a plot for just the snaps
-           if n_elements(aorname) gt 10 then begin
-              pu = plot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm) + corroffset, xtitle = 'Time(hrs)', $
-                        title = planetname, ytitle = 'Normalized Flux',  yrange = [0.989, 1.005], aspect_ratio = 0.0, margin = 0.2);, xrange = setxrange, /nodata) ;
-           endif
+ ;          if n_elements(aorname) gt 10 then begin
+ ;             pu = plot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm) + corroffset, xtitle = 'Time(hrs)', $
+ ;                       title = planetname, ytitle = 'Normalized Flux',  yrange = [0.989, 1.005], aspect_ratio = 0.0, margin = 0.2);, xrange = setxrange, /nodata) ;
+ ;          endif
 
         endif                   ; if a = 0
 
@@ -186,7 +189,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
            print, 'inside a gt stareaor', a
            pp.window.SetCurrent
            pp = plot((bin_timearr - time_0)/60./60., bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],$
-                     /overplot,/current, layout = [1,5,1])
+                     overplot = pp,/current, layout = [1,5,1])
 
            pp.window.SetCurrent
            pp = plot((bin_timearr - time_0)/60./60., bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],$

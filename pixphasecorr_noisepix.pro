@@ -37,6 +37,7 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, startaor, stopaor, 
   t1 = systime(1)
 ;get all the necessary saved info/photometry
   planetinfo = create_planetinfo()
+  print, 'create planetinfo done'
   if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
   basedir = planetinfo[planetname, 'basedir']
 ;  chname = planetinfo[planetname, 'chname']
@@ -45,9 +46,10 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, startaor, stopaor, 
   exptime = planetinfo[planetname, 'exptime']
   t_dur = (planetinfo[planetname, 'transit_duration'])/24./60. ; now in daysxs
   dirname = strcompress(basedir + planetname +'/')
+  
   if keyword_set(breatheap) then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav') else savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
-
   restore, savefilename
+  print, 'just restored savefilename'
 ;==========================================
   exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
   exosystem = strmid(planetname, 0, 7) + ' b' ;'HD 209458 b' ;
@@ -100,13 +102,13 @@ t_dur =  t14  ; in days
      yfwhm =  planethash[aorname(a),'yfwhm']
                                 ;make sure we are not trying to correct snapshots with nearest neighbors, 
                                 ; won't work because some are in the transits and eclipses which I have excluded.
-     if n_elements(np) gt 1000 then begin
+     if n_elements(np) gt 800 then begin
         
         time = (planethash[aorname(a),'timearr'] - (planethash[aorname(a),'timearr'])(0)) ; in seconds;/60./60. ; in hours from beginning of obs.    
         sqrtnp = sqrt(np)
         
-        corrflux = planethash[aorname(a), 'corrflux'] ;pmap corrected
-        corrfluxerr = planethash[aorname(a), 'corrfluxerr']
+;        corrflux = planethash[aorname(a), 'corrflux'] ;pmap corrected
+;        corrfluxerr = planethash[aorname(a), 'corrfluxerr']
         
 ;need to put all aor's togehter, otherwise the normalization of
 ;the weighting process is flattening the light curves.
@@ -116,6 +118,7 @@ t_dur =  t14  ; in days
         
         if a eq startaor then begin
            xcenarr = xcen 
+           help, xcenarr
            ycenarr = ycen
            nparr = np
            sqrtnparr = sqrtnp
@@ -123,8 +126,8 @@ t_dur =  t14  ; in days
            fluxerr_marr = fluxerr_m 
            bmjdarr = bmjd
            phasearr = phase
-           corrfluxarr = corrflux
-           corrfluxerrarr = corrfluxerr
+;           corrfluxarr = corrflux
+;           corrfluxerrarr = corrfluxerr
            xfwhmarr = xfwhm
            yfwhmarr = yfwhm
            timearr = (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0)) ; XXXXX careful, I used aorname(0)
@@ -136,8 +139,8 @@ t_dur =  t14  ; in days
            flux_marr = [flux_marr, flux_m]
            fluxerr_marr = [fluxerr_marr,fluxerr_m]
            phasearr = [phasearr, phase]
-           corrfluxarr = [corrfluxarr, corrflux]
-           corrfluxerrarr = [corrfluxerrarr,corrfluxerr]
+;           corrfluxarr = [corrfluxarr, corrflux]
+;           corrfluxerrarr = [corrfluxerrarr,corrfluxerr]
            xfwhmarr = [xfwhmarr, xfwhm]
            yfwhmarr = [yfwhmarr, yfwhm]
            timearr = [timearr, (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))]
@@ -200,12 +203,15 @@ t_dur =  t14  ; in days
   sqrtnp2(intransit) = 1E5
   xfwhm2(intransit) = 1E5
   yfwhm2(intransit) = 1E5
+  
+  ;just checking
+  ptest = plot(findgen(n_elements(xcen2)), xcen2, '1s')
 
 ;  cgHistoplot, flux_m,/nan, thick = 3, xtitle = 'raw flux', ytitle = 'Number',  datacolorname = 'black', title = planetname, /outline
                                 ;do the nearest neighbors run with triangulation
                                 ;http://www.idlcoyote.com/code_tips/slowloops.html
                                 ;this returns a sorted list of the nn nearest neighbors
-  if keyword_set(use_fwhm) then  nearest= nearest_neighbors_xyfwhm_DT(xcen2,ycen2,xfwhm, yfwhm,chname,DISTANCES=nearest_np_d,NUMBER=nn)
+  if keyword_set(use_fwhm) then  nearest= nearest_neighbors_xyfwhm_DT(xcen2,ycen2,xfwhm2, yfwhm2,chname,DISTANCES=nearest_np_d,NUMBER=nn)
   if keyword_set(use_np) then  nearest = nearest_neighbors_np_DT(xcen2,ycen2,sqrtnp2,chname,DISTANCES=nearest_np_d,NUMBER=nn)
   if keyword_set(xyonly) then nearest = nearest_neighbors_DT(xcen2,ycen2,chname,DISTANCES=nearest_d,NUMBER=nn)
                                 ;quick statistics to see if np picks different nearest neighbors than xyfwhm

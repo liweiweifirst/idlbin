@@ -68,16 +68,17 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
            
 ;;get rid of the bins with no values and low numbers, meaning low overlap
         if (ri[j+1] gt ri[j] + 2)  then begin ;require 3 elements in the bin
+ 
+;commenting this out for the case that I have no corrfluxes          
+;           if finite(corrfluxarr[ri[ri[j]]]) gt 0 and finite(corrfluxarr[ri[ri[j+1]-1]]) gt 0 then begin
+;              meanclip, corrfluxarr[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
+;              bin_corrflux[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+;           endif else begin
+;              bin_corrflux[c] = alog10(-1)
+;           endelse
            
-           if finite(corrfluxarr[ri[ri[j]]]) gt 0 and finite(corrfluxarr[ri[ri[j+1]-1]]) gt 0 then begin
-              meanclip, corrfluxarr[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
-              bin_corrflux[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
-           endif else begin
-              bin_corrflux[c] = alog10(-1)
-           endelse
-           
-           icorrdataerr = corrfluxerrarr[ri[ri[j]:ri[j+1]-1]]
-           bin_corrfluxerr[c] =   sqrt(total(icorrdataerr^2))/ (n_elements(icorrdataerr))
+;           icorrdataerr = corrfluxerrarr[ri[ri[j]:ri[j+1]-1]]
+;           bin_corrfluxerr[c] =   sqrt(total(icorrdataerr^2))/ (n_elements(icorrdataerr))
            
            meanclip, flux_marr[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
            bin_flux_m[c] = meanx ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
@@ -123,8 +124,8 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
         endif
      endfor
      
-     bin_corrflux =bin_corrflux[0:c-1]
-     bin_corrfluxerr = bin_corrfluxerr[0:c-1]
+;     bin_corrflux =bin_corrflux[0:c-1]
+;     bin_corrfluxerr = bin_corrfluxerr[0:c-1]
      bin_flux_m = bin_flux_m[0:c-1]
      bin_flux_np = bin_flux_np[0:c-1]
      bin_flux = bin_flux[0:c-1]
@@ -148,7 +149,7 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
      
 ;test the levels
      print, 'mean raw black flux', mean(bin_flux_m / median(bin_flux_m),/nan)
-     print, 'mean corr gray flux', mean((bin_corrflux /median( bin_corrflux)),/nan)
+;     print, 'mean corr gray flux', mean((bin_corrflux /median( bin_corrflux)),/nan)
      print, 'mean pixphasecorr flux', ending, mean(bin_flux,/nan)
 ;     print, 'mean np blue flux', mean(bin_flux_np,/nan)
 ;     print, 'mean fwhm cyan flux', mean(bin_flux_fwhm,/nan)
@@ -198,6 +199,18 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
 
 ;-----------------
 ;plot the results
+
+;qucik junk
+
+     pqt = plot(bin_time_0/60./60. - 1.0, bin_flux + 0.002,$ ;/median(bin_flux)
+                    '1s', sym_size = 0.3, sym_filled = 1,color = plotcolor, $
+                     name = 'position corr', xrange = [0, 55])
+
+;     pqt = plot(findgen(51), fltarr(51) + 1.00,overplot = pqt, thick = 2)
+     readcol, '/Users/jkrick/irac_warm/pcrs_planets/WASP-52b/WASP-52_b_model_predicted_lightcurve.txt', model_time, model_flux
+     model_time = model_time * 24. ; from days to hours
+     pqt = plot(model_time, model_flux, color = 'aqua', overplot = pqt)
+
      if keyword_set(errorbars) then begin
            
         if keyword_set(phaseplot) then begin
@@ -221,10 +234,10 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
                                 ;print, 'grey in plotting',
                                 ;bin_corrflux
               print, 'normalizing grey flux by ',Median( bin_corrflux)
-              p4 =  errorplot(bin_phase, (bin_corrflux /Median( bin_corrflux)) + delta_grey, $
-                              bin_corrfluxerr / median(bin_corrflux), '1s', sym_size = 0.3,   $
-                              sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr', $
-                              errorbar_color = 'grey', errorbar_capsize = 0.025)
+;              p4 =  errorplot(bin_phase, (bin_corrflux /Median( bin_corrflux)) + delta_grey, $
+;                              bin_corrfluxerr / median(bin_corrflux), '1s', sym_size = 0.3,   $
+;                              sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr', $
+;                              errorbar_color = 'grey', errorbar_capsize = 0.025)
 
               print, 'normalizing', ending, ' flux by ', median(bin_flux)
               P2 = errorplot(bin_phase, bin_flux +delta_red - f*0.01, bin_fluxerr,$ ;median(bin_flux)
@@ -247,16 +260,15 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
  
            endif else begin     ;plot as a function of time
               if f eq 0 then p1 = errorplot(bin_time/60./60., bin_flux_m/median(bin_flux_m) ,bin_fluxerr_m/median(bin_flux_m),$ ;median(bin_flux_m)
-                                            '1s', sym_size = 0.3,sym_filled = 1, yrange = [0.94,1.02],$
+                                            '1s', sym_size = 0.3,sym_filled = 1, yrange = [0.97,0.99],$
                                             color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname,$
-                                            name = 'raw flux',  axis_style = 1, $
-                                            xstyle = 1, errorbar_capsize = 0.025)
+                                            name = 'raw flux',   errorbar_capsize = 0.025)
               
-              print, 'gray', bin_corrflux
-              p4 =  errorplot(bin_time/60./60., (bin_corrflux /median( bin_corrflux)) + delta_grey, $
-                              bin_corrfluxerr / median(bin_corrflux), '1s', sym_size = 0.3, $
-                              sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr', $
-                              errorbar_color = 'grey', errorbar_capsize = 0.025)
+;              print, 'gray', bin_corrflux
+;              p4 =  errorplot(bin_time/60./60., (bin_corrflux /median( bin_corrflux)) + delta_grey, $
+;                              bin_corrfluxerr / median(bin_corrflux), '1s', sym_size = 0.3, $
+;                              sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr', $
+;                              errorbar_color = 'grey', errorbar_capsize = 0.025)
               
               print, 'normalizing', ending, ' flux by ', median(bin_flux)
               p2 = errorplot(bin_time_0/60./60., bin_flux+delta_red - f*0.01, bin_fluxerr,$ ;/median(bin_flux)
@@ -286,8 +298,8 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
                            color = 'black', /overplot)
               endelse
 
-              p4 =  plot(bin_phase, (bin_corrflux /median( bin_corrflux)) + delta_grey, '1s', sym_size = 0.3,   $
-                         sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
+;              p4 =  plot(bin_phase, (bin_corrflux /median( bin_corrflux)) + delta_grey, '1s', sym_size = 0.3,   $
+;                         sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
               
               p2 = plot(bin_phase, bin_flux/median(bin_flux)+delta_red , '1s', sym_size = 0.3, sym_filled = 1,$
                         color = 'red', /overplot, name = 'position corr')
@@ -305,8 +317,8 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
                            color = 'black', /overplot)
               endelse
 
-              p4 =  plot(bin_time/60./60., (bin_corrflux /median( bin_corrflux)) + delta_grey, '1s', sym_size = 0.3, $
-                         sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
+;              p4 =  plot(bin_time/60./60., (bin_corrflux /median( bin_corrflux)) + delta_grey, '1s', sym_size = 0.3, $
+;                         sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
               
               p2 = plot(bin_time_0/60./60., bin_flux/median(bin_flux)+delta_red , '1s', sym_size = 0.3, $
                         sym_filled = 1,color = 'red', /overplot, name = 'position corr')

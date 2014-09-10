@@ -3,7 +3,7 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
 
 COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm
 
- colorarr = ['blue', 'red','black','green','grey','purple', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ]
+ colorarr = ['blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ,'blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ,'blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua']
 ;
 
 
@@ -14,11 +14,49 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
   period =  planetinfo[planetname, 'period']
   stareaor = planetinfo[planetname, 'stareaor']
   print, 'stareaor', stareaor
-;  plot_norm= planetinfo[planetname, 'plot_norm']
-;  plot_corrnorm = planetinfo[planetname, 'plot_corrnorm']
+exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
+exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
+;exosystem = planetname
+if planetname eq 'WASP-13b' then exosystem = 'WASP-13 b'
+if planetname eq 'WASP-15b' then exosystem = 'WASP-15 b'
+if planetname eq 'WASP-16b' then exosystem = 'WASP-16 b'
+if planetname eq 'WASP-38b' then exosystem = 'WASP-38 b'
+if planetname eq 'WASP-62b' then exosystem = 'WASP-62 b'
+if planetname eq 'WASP-52b' then exosystem = 'WASP-52 b'
+if planetname eq 'HAT-P-22' then exosystem = 'HAT-P-22 b'
+if planetname eq 'GJ1214' then exosystem = 'GJ 1214 b'
+
+
+print, exosystem, 'exosystem'
+if planetname eq 'WASP-52b' then teq_p = 1315
+if planetname eq 'HD 7924 b' then begin
+   inclination = 85.
+   rp_rstar = 0.001
+endif
+
+if chname eq '2' then lambdaname  = '4.5'
+if chname eq '1' then lambdaname  = '3.6'
+get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
+                       TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
+                       INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
+                       DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose
+if ra lt 400 then begin  ; that means get_exoplanet_data actually found the target
+;   ra_ref = ra*15.       ; comes in hours!;
+;   dec_ref = dec
+   utmjd_center = mjd_transit
+   period = p_orbit
+endif else begin
+   
+   ;warning these could be junk as well
+;   ra_ref = planetinfo[planetname, 'ra']
+;   dec_ref = planetinfo[planetname, 'dec']
+   utmjd_center = planetinfo[planetname, 'utmjd_center']
+   period = planetinfo[planetname, 'period']
+endelse
+;---------------
   
   dirname = strcompress(basedir + planetname +'/');+'/hybrid_pmap_nn/')
-  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
+  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all);
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)
@@ -32,7 +70,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
  
 
 ;for debugging: skip some AORs
-startaor = 0;5
+startaor =  0;  n_elements(aorname) -29
 stopaor =  n_elements(aorname) - 1
 
 
@@ -243,7 +281,7 @@ endif
  
   for a = startaor,stopaor do begin
      print, '------------------------------------------------------'
-     print, 'working on AOR', a, '   ', aorname(a)
+     print, 'working on AOR', a, '   ', aorname(a), startaor
 
      ;check if I should be using pmap corr or not
      ncorr = where(finite([ planethash[aorname(a),'corrflux']]) gt 0, corrcount,/L64)
@@ -252,6 +290,8 @@ endif
      if corrcount gt 0.2*n_elements([planethash[aorname(a),'flux']]) then pmapcorr = 1 else pmapcorr = 0
      print, 'pmapcorr', pmapcorr
 ; bin within each AOR only, don't want to bin across boundaries.
+;     junk =planethash[aorname(a),'corrflux'] 
+;     print, 'corrflux before binning', junk[0:100]
      junkpar = binning_function(a, bin_level, pmapcorr)
 ;     print, 'testing phase', (planethash[aorname(a),'phase'] )[0:10], (planethash[aorname(a),'phase'] )[600:610]
 ;     print, 'testing x', bin_xcen[0:10]
@@ -341,16 +381,16 @@ endif
 
      if keyword_set(phaseplot) then begin ;make the plot as a function of phase
         
-        setxrange = [-0.5, 0.5]
+        setxrange = [-0.5, 0.5];[0, 1.0]; 
         corrnormoffset =  0.02
         corroffset = 0;0.001
-        setynormfluxrange = [0.97, 1.005];[0.97, 1.005]
+        setynormfluxrange = [0.989, 1.005];[0.97, 1.005]
         if a eq startaor then begin    ; for the first AOR
                                 ;set the normalization values from the
                                 ;medians of the first AOR...is close enough
-           plot_norm = median(bin_flux)
+           plot_norm = median(bin_flux)  ; only happens for the first AOR
            plot_corrnorm = mean(bin_corrfluxp,/nan)
-           print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
+;           print, 'plot_corrnorm', plot_corrnorm, bin_corrfluxp[0:3]
            pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1, title = planetname, $
                      color = colorarr[a], xtitle = 'Orbital Phase', ytitle = 'X position', $
                      xrange = setxrange)
@@ -365,7 +405,7 @@ endif
                              ytitle = 'Normalized Flux', title = planetname, yrange = setynormfluxrange, $
                              xrange = setxrange )
            endif else begin
-              print, 'testing bin_flux', bin_flux[1:10]/plot_norm
+ ;             print, 'testing bin_flux', bin_flux[1:10]/plot_norm
               pr = plot(bin_phase, bin_flux/plot_norm, '1s', sym_size = 0.2,   sym_filled = 1,  $
                         color = 'green',  xtitle = 'Orbital Phase', ytitle = 'Normalized Flux', $
                         title = planetname, yrange = setynormfluxrange, xrange = setxrange,/nodata) 
@@ -378,7 +418,7 @@ endif
                         sym_filled = 1, color = colorarr[a])
               endif else begin
                  print, 'plotting corrfluxp',  (bin_corrfluxp(1)/plot_corrnorm) -corrnormoffset
-                 pr = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm) -corrnormoffset ,/overplot, '1s', $
+                 pr = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm) -corrnormoffset ,overplot = pr, '1s', $
                            sym_size = 0.2,   sym_filled = 1, color = colorarr[a])
               endelse           ;/errorbars
 
@@ -402,8 +442,9 @@ endif
 
            ;setup a plot for just the snaps
            if n_elements(aorname) gt 10 then begin
-              pu = plot(bin_phase, (bin_corrfluxp/plot_corrnorm) + corroffset, xtitle = 'Orbital Phase', $
-                        title = planetname, ytitle = 'Normalized Flux',  yrange = [0.989, 1.005], xrange = setxrange, /nodata) ;
+              pu = plot(bin_phase, (bin_corrfluxp/plot_corrnorm) + corroffset,  '1s', sym_size = 0.2,  $
+                        sym_filled = 1,color = colorarr[a],xtitle = 'Orbital Phase', $
+                        title = planetname, ytitle = 'Pmap Corrected Flux',  yrange = [0.989, 1.005], xrange = setxrange) ;
            endif
 
         endif                   ; if a = 0
@@ -422,7 +463,7 @@ endif
 
            if pmapcorr eq 1 then begin
               print, 'inside pmapcorr agt 0 a le stareaor'
-              print, 'mean levle', mean((bin_corrfluxp/plot_corrnorm)-corrnormoffset)
+              print, 'mean levle', plot_corrnorm, mean((bin_corrfluxp/plot_corrnorm)-corrnormoffset)
               pr = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm)-corrnormoffset, /overplot, 's1', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/current)
            endif
 
@@ -431,6 +472,15 @@ endif
 
            pt.window.SetCurrent
            pt = plot(bin_phase, bin_bkgd, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a],/overplot,/current) 
+
+           pu.window.SetCurrent
+           pu =  plot(bin_phase, (bin_corrfluxp/plot_corrnorm) + corroffset, '1s', sym_size = 0.2,  $
+                        sym_filled = 1,color = colorarr[a], /overplot, /current)
+
+           pxf = plot(bin_phase, bin_xfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pxf)
+
+           pyf = plot(bin_phase, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pyf)
+
         endif
 
 

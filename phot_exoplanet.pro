@@ -22,7 +22,9 @@ case apradius of
    end
    2.25: begin
       apval = 2
-      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140716.sav'
+;      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140716.sav'
+;      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140314.sav'
+      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140904.sav'
       if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p25_s3_7_0p4s_140314.sav'
    end
    2.5: begin
@@ -49,9 +51,9 @@ basedir = planetinfo[planetname, 'basedir']
 intended_phase = planetinfo[planetname, 'intended_phase']
 ;ra_ref = planetinfo[planetname, 'ra']
 ;dec_ref = planetinfo[planetname, 'dec']
+exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
 
 exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
-exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
 ;exosystem = planetname
 if planetname eq 'WASP-13b' then exosystem = 'WASP-13 b'
 if planetname eq 'WASP-15b' then exosystem = 'WASP-15 b'
@@ -60,6 +62,9 @@ if planetname eq 'WASP-38b' then exosystem = 'WASP-38 b'
 if planetname eq 'WASP-62b' then exosystem = 'WASP-62 b'
 if planetname eq 'WASP-52b' then exosystem = 'WASP-52 b'
 if planetname eq 'HAT-P-22' then exosystem = 'HAT-P-22 b'
+if planetname eq 'GJ1214' then exosystem = 'GJ 1214 b'
+if planetname eq '55CNCe' then exosystem = '55 CNC e'
+
 
 print, exosystem, 'exosystem'
 if planetname eq 'WASP-52b' then teq_p = 1315
@@ -97,7 +102,7 @@ if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pm
                                       else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
 fits_read,occ_filename, occdata, occheader
 startaor =0
-stopaor = n_elements(aorname) - 1
+stopaor =n_elements(aorname) - 1
 for a =startaor, stopaor do begin
    print, 'working on ',aorname(a)
    dir = dirname+ string(aorname(a) ) 
@@ -136,9 +141,14 @@ for a =startaor, stopaor do begin
       atimeend = sxpar(header, 'ATIMEEND')
       naxis = sxpar(header, 'NAXIS')
       framedly = sxpar(header, 'FRAMEDLY')
+      if ra_ref gt 359. then begin
+        print, 'inside ra_ref gt 359'
+        ra_ref = sxpar(header, 'RA_RQST')
+        dec_ref = sxpar(header, 'DEC_REF')
+     endif
 
       if ch eq '2' and frametime eq 2 then ronoise = 12.1
-      if i eq startfits then print, 'ronoise', ronoise, gain, fluxconv, exptime
+      if i eq startfits then print, 'ronoise', ronoise, gain, fluxconv, exptime, ra_ref, dec_ref
       if i eq startfits then sclk_0 = sclk_obs
 
       if i eq startfits and naxis eq 3 then begin
@@ -306,10 +316,12 @@ for a =startaor, stopaor do begin
 ;correction based on those neighbors.  
       if keyword_set(hybrid) then begin
                                 ;use hybrid technique with pmap dataset and nn techniques
+;         print, 'starting corrflux', x_center[0], y_center[0], abcdflux[0], ch, xfwhm[0], yfwhm[0], npcentroids[0]
          corrflux = pmap_correct(x_center,y_center,abcdflux,$
                                   ch,xfwhm,yfwhm,NP = npcentroids,$
                                   FUNC=fs,CORR_UNC=corrfluxerr,$
                                   DATAFILE=pmapfile,NNEAREST=nn)
+;         print, 'corrflux', corrflux[0:10]
          ;corrflux = pmap_correct(x_center,y_center,abcdflux,ch,npcentroids,occdata, corr_unc = corrfluxerr, func = fs,$
          ;                       datafile =pmapfile,/threshold_occ,/use_np) 
       endif else begin
@@ -445,8 +457,8 @@ print, 'time check', systime(1) - t1
 
 
 ;testplot = plot(timearr, xarr, '1s', sym_size = 0.1, sym_filled = 1, xtitle = 'time', ytitle = 'xcen')
-plothist, npcentroidsarr, xhist, yhist, /noplot, bin = 0.01
-testplot = plot(xhist, yhist,  xtitle = 'NP', ytitle = 'Number', thick =3, color = 'blue')
+;plothist, npcentroidsarr, xhist, yhist, /noplot, bin = 0.01
+;testplot = plot(xhist, yhist,  xtitle = 'NP', ytitle = 'Number', thick =3, color = 'blue')
 
                                 ; print, planethash.keys()
  ; print, planethash[aorname(0)].keys()

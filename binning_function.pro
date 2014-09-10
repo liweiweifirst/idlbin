@@ -18,7 +18,7 @@ function binning_function, a,bin_level, pmapcorr
      yfwhmarr = [planethash[aorname(a),'yfwhm']]
 
 ;     centerpixarr = [ planethash[aorname(a),'centerpixarr5']]
-     print, 'testing xarr', xarr[0:200]
+;     print, 'testing xarr', xarr[0:200]
      print, 'mean xarr', mean(xarr,/nan), mean(yarr,/nan), stddev(xarr,/nan), stddev(yarr,/nan)
      ;remove outliers, 
 ;     if pmapcorr eq 1 then begin 
