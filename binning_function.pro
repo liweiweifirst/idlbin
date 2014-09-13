@@ -14,6 +14,9 @@ function binning_function, a,bin_level, pmapcorr
      np = [planethash[aorname(a),'np']]
      npcentroids = planethash[aorname(a),'npcentroids']
      phase = [planethash[aorname(a),'phase']]
+     ;fix a small bug
+     bp = where(phase gt 1.0, bpcount)
+     if bpcount gt 0 then phase(bp) = phase(bp) - 1.
      xfwhmarr = [planethash[aorname(a),'xfwhm']]
      yfwhmarr = [planethash[aorname(a),'yfwhm']]
 
