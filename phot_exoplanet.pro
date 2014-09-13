@@ -64,7 +64,7 @@ if planetname eq 'WASP-52b' then exosystem = 'WASP-52 b'
 if planetname eq 'HAT-P-22' then exosystem = 'HAT-P-22 b'
 if planetname eq 'GJ1214' then exosystem = 'GJ 1214 b'
 if planetname eq '55CNCe' then exosystem = '55 CNC e'
-
+if planetname eq 'HD209458' then exosystem = 'HD 209458 b'
 
 print, exosystem, 'exosystem'
 if planetname eq 'WASP-52b' then teq_p = 1315
@@ -414,8 +414,8 @@ for a =startaor, stopaor do begin
    
 ;instead of wrapping the phase at 0.5, this makes the secondary eclipse be in the middle
    if intended_phase gt 0.4 and intended_phase lt 0.6 then begin
-      n = where(phase lt 0)
-      phase(n) = phase(n) + 1
+      n = where(phase lt 0, ncount)
+      if ncount gt 0 then phase(n) = phase(n) + 1
    endif
   
 
