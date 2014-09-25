@@ -1,167 +1,95 @@
 pro calstar_stability
-!P.multi = [0,2,1]
-ps_open, filename='/Users/jkrick/irac_warm/calstars/stability.ps',/portrait,/square,/color
 
+ t1 = systime(1)
 
-      dirloc = ['/Users/jkrick/iracdata/flight/IWIC/calstars','/Users/jkrick/irac_warm/calstars/r38419200','/Users/jkrick/irac_warm/calstars/r38418432','/Users/jkrick/irac_warm/calstars/r38686976','/Users/jkrick/irac_warm/calstars/r38418944','/Users/jkrick/irac_warm/calstars/r38686208','/Users/jkrick/irac_warm/calstars/r38686720','/Users/jkrick/irac_warm/calstars/r38705920','/Users/jkrick/irac_warm/calstars/r38705664','/Users/jkrick/irac_warm/calstars/r38705152','/Users/jkrick/irac_warm/calstars/r38818048','/Users/jkrick/irac_warm/calstars/r38817280','/Users/jkrick/irac_warm/calstars/r38817792']
+  dirloc = ['/Users/jkrick/iracdata/flight/IWIC/S19repro/cals']
+  
+;start by getting all of the fits files from ch1, then later sort based on  naxis and exptime and maybe star name, then add ch2
+  cd, dirloc
+  command ="find ./IRAC*/bcd/00*/ -name 'IRAC.1*bcd_fp.fits' > /Users/jkrick/irac_warm/calstars/allch1bcdlist.txt "
+;  spawn, command
+  command2 ="find ./IRAC*/bcd/00*/ -name 'IRAC.1*sig_dntoflux.fits' >  /Users/jkrick/irac_warm/calstars/allch1unclist.txt "
+;  spawn, command2
+  readcol,'/Users/jkrick/irac_warm/calstars/allch1bcdlist.txt', fitsname, format = 'A', /silent
+  readcol,'/Users/jkrick/irac_warm/calstars/allch1unclist.txt', uncname, format = 'A', /silent
 
+  print, 'nfits', n_elements(fitsname) 
+;set up storage arrays
+  xcenarr = fltarr(n_elements(fitsname))
+  ycenarr = xcenarr
+  starnamearr = strarr(n_elements(fitsname))
+  timearr = xcenarr
+  fluxarr = xcenarr
+  fluxerrarr = xcenarr
+  backarr = xcenarr
+  raarr = xcenarr
+  decarr = xcenarr
 
-;for array dependant photometric correction
-fits_read, '/Users/jkrick/iwic/photcorr_cryo/ch1_photcorr_rj.fits', photcor_cryo_ch1, photcorhead_cryo_ch1
-fits_read, '/Users/jkrick/iwic/ch1_photcorr_gauss.fits', photcor_warm_ch1, photcorhead_warm_ch1
+;for array dependant photometric correction warm
+  fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch1_photcorr_ap_5.fits', photcor_ch1, photcorhead_ch1
+  fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch2_photcorr_ap_5.fits', photcor_ch2, photcorhead_ch2
 
-fits_read, '/Users/jkrick/iwic/photcorr_cryo/ch2_photcorr_rj.fits', photcor_cryo_ch2, photcorhead_cryo_ch2
-fits_read, '/Users/jkrick/iwic/ch2_photcorr_gauss.fits', photcor_warm_ch2, photcorhead_warm_ch2
-
-
-name = ['1812095_cal', 'NPM1p60' ]
-ra = [273.04000000 , 261.2178 ]
-dec = [63.49508333, 60.430817]
-real_flux_ch1 = [8.68,647.38,38.20]
-real_flux_ch2 = [5.66,421.19,24.74]
-
-;comparison stars
-;HD165459 has no other stars in the field
-
-;npm1p60.   
-;two stars that are each visible on 2 of the frames.
-ra_comp_2 = [261.32117, 261.26517]
-dec_comp_2 = [60.444476, 60.397291]
-
-;1812095
-;bright star right next to it so visible on all 5! second one fainter,
-;but visible on all frames as well.
-ra_comp_1 = [273.05545,273.07844]
-dec_comp_1 = [63.493464,63.49424]
-
-for ch = 0, 1 do begin
-   print, 'Channel', ch+1
-   ratioarr = fltarr(n_elements(ra))
-
-   for r = 0, 0 do begin; n_elements(ra) - 1 do begin
-      print, 'working on ra', ra(r), dec(r)
-      comp0fluxarr = fltarr(10000)
-      comp1fluxarr = fltarr(10000)
-      clockarr = fltarr(10000)
-      j = 0
+  startfits = 0L
+  stopfits = n_elements(fitsname) - 1
+  c = 0
+   for i= startfits, stopfits do begin
+         
+;      print, 'working on fitsname', fitsname(i)
+      header = headfits(fitsname(i)) ;
+      NAXIS= sxpar(header, 'NAXIS')
       
-      ;get the appropriate comparison stars
-      if r eq 0 then begin
-         ra_comp = ra_comp_1
-         dec_comp = dec_comp_1
-      endif
-      if r eq 1 then begin
-         ra_comp = ra_comp_2
-         dec_comp = dec_comp_2
-      endif
-       
+       AORLABEL= sxpar(header, 'AORLABEL')
+;       print, i, strmid(AORLABEL, 0, 12), naxis
+       ;cut on full array calstars only (for now)
+       if strmid(AORLABEL, 0, 12) eq 'IRAC_calstar' and NAXIS lt 3 then begin
 
+          fits_read,fitsname(i), im, h
+          fits_read, uncname(i), unc, hunc
 
-      for c = 0, n_elements(dirloc) - 1 do begin ;for each directory with calstars in it
-         cd, dirloc(c)
-         print, 'working on directory', dirloc(c)
-         if ch eq 0 then begin
-            if c eq 0 then command  =  "find . -name 'IRAC.1*bcd_fp.fits' > /Users/jkrick/irac_warm/list.txt"
-            if c gt 0 then command =  "find . -name 'SPITZER_I1*_bcd.fits' > /Users/jkrick/irac_warm/list.txt"
-            spawn, command
-         endif
-         
-         if ch eq 1 then begin
-            if c eq 0 then command  =  "find . -name 'IRAC.2*bcd_fp.fits' | grep -v 0000.0000 > /Users/jkrick/irac_warm/list.txt"
-            if c gt 0 then command =  "find . -name 'SPITZER_I2*_bcd.fits' > /Users/jkrick/irac_warm/list.txt"
-            spawn, command
-         endif
-         
-         readcol,'/Users/jkrick/irac_warm/list.txt', fitsname, format = 'A', /silent
-         
-         for i =1, n_elements(fitsname) - 1 do begin
-            print, 'working on fitsname', fitsname(i)
-            fits_read,fitsname(i), bcddata, bcdheader
-            adxy, bcdheader, ra(r), dec(r), bcdx, bcdy
-;            adxy, bcdheader,  ra_comp(0), dec_comp(0), comp_0_x, comp_0_y
-;            adxy, bcdheader,  ra_comp(1), dec_comp(1), comp_1_x, comp_1_y
+          chnlnum = sxpar(h, 'CHNLNUM')
+          ra_ref = sxpar(h, 'RA_REF')
+          dec_ref = sxpar(h, 'DEC_REF')
+          
+          ;make sure it is on the frame
+          ADXY, h, ra_ref, dec_ref, xcen, ycen
+          if xcen gt 5 and ycen gt 5 and xcen lt 250 and ycen lt 250 then begin
+             timearr[c]  = sxpar(h, 'SCLK_OBS')
+             raarr[c] = ra_ref
+             decarr[c] = dec_ref
+             starnamearr[c] = strmid(AORLABEL, 13, 7)
 
-            clockarr[j]  = sxpar(bcdheader, 'SCLK_OBS')
+             get_centroids_for_calstar_jk,im, h, unc, ra_ref, dec_ref,  t, dt, hjd, xft, x3, y3, $
+                                          x5, y5, x7, y7, xg, yg, xh, yh, f, b, x3s, y3s, x5s, y5s, $
+                                          x7s, y7s, fs, bs, xp3, yp3, xp5, yp5, xp7, yp7, xp3s, yp3s, $
+                                          xp5s, yp5s, xp7s, yp7s, fp, fps, np, flag, ns, sf, $
+                                          xfwhm, yfwhm, /WARM
 
-;            if bcdx gt 20 and bcdy gt 20 and bcdy lt 240 and bcdx lt 240 then begin
-            if bcdx gt 120 and bcdy gt 120 and bcdy lt 140 and bcdx lt 140 then begin
+;make a correction for pixel phase ??
 
-                                ;do the photometry
-               get_centroids, fitsname(i), t, dt, bcdxcen, bcdycen, bcdflux, xs, ys, fs, b, /WARM, /APER, RA=ra(r), DEC=dec(r),/silent
-               get_centroids, fitsname(i), t, dt, comp_0_x, comp_0_y, comp_0_flux, xs, ys, fs, b, /WARM, /APER, RA=ra_comp(0), DEC=dec_comp(0),/silent
-               get_centroids, fitsname(i), t, dt, comp_1_x, comp_1_y, comp_1_flux, xs, ys, fs, b, /WARM, /APER, RA=ra_comp(1), DEC=dec_comp(1),/silent
-               print, 'bcdxcen, bcdycen', bcdxcen, bcdycen
-;               print, '0', comp_0_x, comp_0_y, comp_0_flux
-;               print, '1', comp_1_x, comp_1_y, comp_1_flux
+                                ;apply array dependent correction
+             if chnlnum eq '1' then photcorr = photcor_ch1(x3, y3) else photcorr = photcor_ch2(x3, y3)
+             f[2] = f[2] * photcorr
+             
+             ;save them
+             xcenarr[c]  = x3 &  ycenarr[c] = y3
+             fluxarr[c] = f[2] & fluxerrarr[c] = fs[2] & backarr[c]= b[0]
+             c = c + 1
+          endif                 ; if the target is on the frame
+          
+       endif  ; if full array calstar
+    endfor  ; for each fits image
 
-                             ;make a correction for pixel phase 
-               corrected_flux = pixel_phase_correct_gauss(bcdflux,bcdxcen,bcdycen,ch+1)
-               corrected_comp0flux = pixel_phase_correct_gauss(comp_0_flux, comp_0_x, comp_0_y,ch+1)
-               corrected_comp1flux = pixel_phase_correct_gauss(comp_1_flux, comp_1_x, comp_1_y,ch+1)
-
-                      ;apply array dependent correction
-               photcor_ch1 = photcor_warm_ch1(bcdxcen, bcdycen)
-               photcor_ch2 = photcor_warm_ch2(bcdxcen, bcdycen)
-
-               photcor_comp0_ch1 = photcor_warm_ch1(comp_0_x, comp_0_y)
-               photcor_comp0_ch2 = photcor_warm_ch2(comp_0_x, comp_0_y)
-
-               photcor_comp1_ch1 = photcor_warm_ch1(comp_1_x, comp_1_y)
-               photcor_comp1_ch2 = photcor_warm_ch2(comp_1_x, comp_1_y)
-
-               if ch eq 0 then begin
-                  corrected_flux = corrected_flux * photcor_ch1
-                  corrected_comp0flux = corrected_comp0flux * photcor_comp0_ch1
-                  corrected_comp1flux = corrected_comp1flux * photcor_comp1_ch1
-               endif
-
-               if ch eq 1 then begin
-                  corrected_flux = corrected_flux * photcor_ch2
-                  corrected_comp0flux = corrected_comp0flux * photcor_comp0_ch2
-                  corrected_comp1flux = corrected_comp1flux * photcor_comp1_ch2
-               endif
-               
-                 ; fluxes off by a factor of 1000 (mJy)     
-               comp0fluxarr(j) = 1000*(corrected_flux - corrected_comp0flux) ; in mJy
-               comp1fluxarr(j) = 1000*(corrected_flux - corrected_comp1flux) ; in mJy
-
-               j = j + 1
-            endif
-            
-         endfor                 ;end for each fits image
-      endfor    ;end for each directory
-
-         
-         comp0fluxarr = comp0fluxarr[0:j-1]
-         comp1fluxarr = comp1fluxarr[0:j-1]
-         clockarr = clockarr[0:j-1]
-
-         ;clip any high sigma values out of the mean
-         meanclip, comp0fluxarr, mean0flux, sigma0flux, clipsig = 3
-         meanclip, comp1fluxarr, mean1flux, sigma1flux, clipsig = 3
-
-         ;plot something
-         print, '0', comp0fluxarr, mean0flux
-         print, '1', comp1fluxarr, mean1flux
-
-
-         plot, (clockarr - clockarr(0))/ (86400.), comp0fluxarr, psym = 2, yrange = [-5,10], xtitle = 'days', ytitle = 'delta flux', title = 'ch' + string(ch+1), xrange = [-50, 150]
-         oplot, (clockarr - clockarr(0)) / (86400.), comp1fluxarr, psym =4
-
-         yarr = fltarr(n_elements(clockarr))
-         yarr[*] = mean0flux
-         oplot,  (clockarr - clockarr(0)) / (86400.), yarr, linestyle = 2
-         yarr[*] = mean1flux
-         oplot,  (clockarr - clockarr(0)) / (86400.), yarr, linestyle = 2
-
-         xyouts, 0,-3, sigma0flux
-         xyouts, 0,8, sigma1flux
-
-      endfor                    ; end for each ra, for each star
-   
-endfor  ;for each channel
-
-
-ps_close, /noprint,/noid
+   xcenarr = xcenarr[0:c-1] 
+   ycenarr = ycenarr[0:c-1] 
+   fluxarr = fluxarr[0:c-1] 
+   fluxerrarr = fluxerrarr[0:c-1] 
+   backarr = backarr[0:c-1] 
+   timearr = timearr[0:c-1] 
+   starnamearr = starnamearr[0:c-1] 
+   raarr = raarr[0:c-1] 
+   decarr = decarr[0:c-1] 
+   ;save the variables for plotting seperately
+   save,  xcenarr,  ycenarr,  starnamearr,  timearr,  fluxarr,  fluxerrarr,  backarr,  raarr,  decarr , filename = '/Users/jkrick/irac_warm/calstars/allch1phot.sav'
+print, 'time check', systime(1) - t1
 
 end
