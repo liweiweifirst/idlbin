@@ -1,4 +1,4 @@
-pro plot_calstar_stability
+pro plot_calstar_stability, chname
 
 restore, '/Users/jkrick/irac_warm/calstars/allch1phot.sav'
 ;potential calstar names
@@ -9,16 +9,25 @@ colors = ['black', 'grey', 'red', 'blue', 'chocolate', 'cyan', 'orange', 'maroon
 ;start with the first four, the rest were observed differently
 keyname = ['f12s', 'F12sc', 'F12sc', 'F12s', 'F2s', 'F2sc', 'F0p4s', 'F0p4sc', 'FS0p4sc']
 
- ;add a correction for pixel phase effect and array location dependence
+;add a correction for pixel phase effect 
 corrflux = pixel_phase_correct_gauss(fluxarr,xcenarr,ycenarr,1, '3_3_7')
-;   if chnlnum eq '1' then photcorr = photcor_ch1(xcenarr, ycenarr) else photcorr = photcor_ch2(xcenarr, ycenarr)
-;   corrflux= corrflux * photcorr
+
+;for array dependant photometric correction warm
+fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch1_photcorr_ap_5.fits', photcor_ch1, photcorhead_ch1
+fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch2_photcorr_ap_5.fits', photcor_ch2, photcorhead_ch2
+if chname eq '1' then photcorr = photcor_ch1(xcenarr, ycenarr) else photcorr = photcor_ch2(xcenarr, ycenarr)
+corrflux= corrflux * photcorr
 
 
 
 for n = 0, n_elements(names) - 1 do begin
 
    a = where(starnamearr eq names(n), count)
+   timeb = timearr(a)
+   fluxb = fluxarr(a)
+   fluxerrb = fluxerrarr(a)
+   starnameb = starnamearr(a)
+   corrfluxb  = corrflux(a)
 
 ;   p1 = errorplot((timearr(a) - min(timearr))/60./60./ 24./365, fluxarr(a)/median(fluxarr(a)), fluxerrarr(a)/median(fluxarr(a)),$
 ;                  '1s', sym_size = 0.2,   sym_filled = 1, color = colors(n),errorbar_color = colors(n), yrange = [0.9, 1.1],$
@@ -27,11 +36,6 @@ for n = 0, n_elements(names) - 1 do begin
 ;----------------------------------------------------
 ;need some binning on time, since there are either 5 or 6 observations per visit.
 ;XXXch2 has 6 frames, ch1 has 5 frames.  Would like to ignore the first frame on ch2 anyway.
-   timeb = timearr(a)
-   fluxb = fluxarr(a)
-   fluxerrb = fluxerrarr(a)
-   starnameb = starnamearr(a)
-   corrfluxb  = corrflux(a)
 
    x = indgen(n_elements(timeb))
    h = histogram(x, OMIN=om, binsize = binning_ch1(n), reverse_indices = ri)
