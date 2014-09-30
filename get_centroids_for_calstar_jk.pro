@@ -301,10 +301,10 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ; Centroids using alternate uncertainty estimate
 	xp3 = x3
 	yp3 = x3
-	xp5 = x3
-	yp5 = x3
-	xp7 =x3
-	yp7 = x3
+;	xp5 = x3
+;	yp5 = x3
+;	xp7 =x3
+;	yp7 = x3
 
 ; Flux and background arrays, 4 choices of background annulus
 	f = dblarr(ns, napers)* !VALUES.D_NAN
@@ -319,17 +319,17 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ; Sigma arrays
 	x3s = x3; fltarr(ns)* !VALUES.D_NAN
 	y3s = x3;fltarr(ns)* !VALUES.D_NAN
-	x5s = x3;fltarr(ns)* !VALUES.D_NAN
-	y5s = x3;fltarr(ns)* !VALUES.D_NAN
-	x7s = x3;fltarr(ns)* !VALUES.D_NAN
-	y7s = x3;fltarr(ns)* !VALUES.D_NAN
+;	x5s = x3;fltarr(ns)* !VALUES.D_NAN
+;	y5s = x3;fltarr(ns)* !VALUES.D_NAN
+;	x7s = x3;fltarr(ns)* !VALUES.D_NAN
+;	y7s = x3;fltarr(ns)* !VALUES.D_NAN
 
 	xp3s = x3;fltarr(ns)* !VALUES.D_NAN
 	yp3s = x3;fltarr(ns)* !VALUES.D_NAN
-	xp5s = x3;fltarr(ns)* !VALUES.D_NAN
-	yp5s = x3;fltarr(ns)* !VALUES.D_NAN
-	xp7s = x3;fltarr(ns)* !VALUES.D_NAN
-	yp7s = x3;fltarr(ns)* !VALUES.D_NAN
+;	xp5s = x3;fltarr(ns)* !VALUES.D_NAN
+;	yp5s = x3;fltarr(ns)* !VALUES.D_NAN
+;	xp7s = x3;fltarr(ns)* !VALUES.D_NAN
+;	yp7s = x3;fltarr(ns)* !VALUES.D_NAN
 
 	fs = f;fltarr(ns, napers)* !VALUES.D_NAN
 	bs = f;fltarr(ns, nbacks)* !VALUES.D_NAN
@@ -588,17 +588,17 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ; Return sigma instead of variance
 	x3s = sqrt(x3s)
 	y3s = sqrt(y3s)
-	x5s = sqrt(x5s)
-	y5s = sqrt(y5s)
-	x7s = sqrt(x7s)
-	y7s = sqrt(y7s)
+;	x5s = sqrt(x5s)
+;	y5s = sqrt(y5s)
+;	x7s = sqrt(x7s)
+;	y7s = sqrt(y7s)
 
 	xp3s = sqrt(xp3s)
 	yp3s = sqrt(yp3s)
-	xp5s = sqrt(xp5s)
-	yp5s = sqrt(yp5s)
-	xp7s = sqrt(xp7s)
-	yp7s = sqrt(yp7s)
+;	xp5s = sqrt(xp5s)
+;	yp5s = sqrt(yp5s)
+;	xp7s = sqrt(xp7s)
+;	yp7s = sqrt(yp7s)
 
 	fs = fs * scale
 	fps = sqrt(fps)
