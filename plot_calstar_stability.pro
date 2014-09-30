@@ -2,23 +2,27 @@ pro plot_calstar_stability
 
 restore, '/Users/jkrick/irac_warm/calstars/allch1phot.sav'
 ;potential calstar names
-names = [ '1812095', 'KF08T3_', 'KF06T2_', 'KF06T1_'];, 'KF09T1_', 'NPM1p60', 'NPM1p67', 'NPM1p68', 'HD16545']
-colors = ['black', 'grey', 'red', 'blue'];, 'chocolate', 'cyan', 'orange', 'maroon', 'medium purple']
+names = [ '1812095', 'KF08T3_', 'KF06T2_', 'KF06T1_', 'KF09T1_',  'NPM1p67','NPM1p60', 'NPM1p68'];, 'HD16545']
+
+binning_ch1 = [5L,5L, 5L,5L,5L,5L,10L, 10L]
+colors = ['black', 'grey', 'red', 'blue', 'chocolate', 'cyan', 'orange', 'maroon', 'medium purple']
 ;start with the first four, the rest were observed differently
 keyname = ['f12s', 'F12sc', 'F12sc', 'F12s', 'F2s', 'F2sc', 'F0p4s', 'F0p4sc', 'FS0p4sc']
+
+ ;add a correction for pixel phase effect and array location dependence
+corrflux = pixel_phase_correct_gauss(fluxarr,xcenarr,ycenarr,1, '3_3_7')
+;   if chnlnum eq '1' then photcorr = photcor_ch1(xcenarr, ycenarr) else photcorr = photcor_ch2(xcenarr, ycenarr)
+;   corrflux= corrflux * photcorr
+
 
 
 for n = 0, n_elements(names) - 1 do begin
 
-   ;add a correction for pixel phase effect
-   corrflux = pixel_phase_correct_gauss(fluxarr,xcenarr,ycenarr,1, '3_3_7')
-
-
    a = where(starnamearr eq names(n), count)
 
-   p1 = errorplot((timearr(a) - min(timearr))/60./60./ 24./365, fluxarr(a)/median(fluxarr(a)), fluxerrarr(a)/median(fluxarr(a)),$
-                  '1s', sym_size = 0.2,   sym_filled = 1, color = colors(n),errorbar_color = colors(n), yrange = [0.9, 1.1],$
-                   xtitle = 'Time(years)', ytitle = 'Normalized Flux', title = 'Ch 1 Primary Calibrators', overplot = p1)
+;   p1 = errorplot((timearr(a) - min(timearr))/60./60./ 24./365, fluxarr(a)/median(fluxarr(a)), fluxerrarr(a)/median(fluxarr(a)),$
+;                  '1s', sym_size = 0.2,   sym_filled = 1, color = colors(n),errorbar_color = colors(n), yrange = [0.9, 1.1],$
+;                   xtitle = 'Time(years)', ytitle = 'Normalized Flux', title = 'Ch 1 Primary Calibrators', overplot = p1)
                   
 ;----------------------------------------------------
 ;need some binning on time, since there are either 5 or 6 observations per visit.
@@ -30,7 +34,7 @@ for n = 0, n_elements(names) - 1 do begin
    corrfluxb  = corrflux(a)
 
    x = indgen(n_elements(timeb))
-   h = histogram(x, OMIN=om, binsize = 5L, reverse_indices = ri)
+   h = histogram(x, OMIN=om, binsize = binning_ch1(n), reverse_indices = ri)
    print, n, n_elements(h)
    bin_flux = dblarr(n_elements(h))
    bin_corrflux = bin_flux
@@ -48,7 +52,8 @@ for n = 0, n_elements(names) - 1 do begin
          bin_corrflux[c] = meanx    ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
          
          idataerr = fluxerrb[ri[ri[j]:ri[j+1]-1]]
-         bin_fluxerr[c] =   sqrt(total(idataerr^2))/ (n_elements(idataerr))
+         bin_fluxerr[c] = sigmax/sqrt(n_elements(idataerr))  ; sqrt(total(idataerr^2))/ (n_elements(idataerr))     ; just the standard deviation in the bins
+                                ;
          
          meanclip, timeb[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
          bin_time[c] = meanx    ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
@@ -66,10 +71,29 @@ for n = 0, n_elements(names) - 1 do begin
    
 ;----------------------------------------------------
 ;and some binned plotting
-   pb = errorplot((bin_time - min(bin_time))/60./60./ 24./365, bin_corrflux/median(bin_corrflux), bin_fluxerr/median(bin_flux),$
+   btime = (bin_time - min(bin_time))
+   pb = errorplot(btime, bin_corrflux/median(bin_corrflux), bin_fluxerr/median(bin_flux),$
                   '1s', sym_size = 0.2,   sym_filled = 1, color = colors(n),errorbar_color = colors(n), yrange = [0.96, 1.04],$
                   xtitle = 'Time(years)', ytitle = 'Normalized Flux', title = 'Ch 1 Primary Calibrators', overplot = pb)
+   ;and now what about fitting the best fit slope?
+;fit with a liner function.
    
+   start = [1E-6,1.0]
+   startflat = [1.0]
+   result= MPFITFUN('linear',btime, bin_corrflux/median(bin_corrflux), bin_fluxerr/median(bin_corrflux), $
+                    start, perror = perror, bestnorm = bestnorm)    
+
+   fp = plot(btime, result(0)*(btime) + result(1),  color = colors(n), overplot = pb, thick = 3)
+
+   DOF     = N_ELEMENTS(time) - N_ELEMENTS(result) ; deg of freedom
+   PCERROR = PERROR * SQRT(BESTNORM / DOF)         ; scaled uncertainties
+   print, 'linear result', result, 'pcerror', pcerror, ' perror', perror, 'bestnorm', bestnorm, 'dof', DOF, sqrt(bestnorm/dof)
+   t1 = text(1.00, 0.981- (0.003*n), sigfig(result(0), 3, /scientific) + '    ' + sigfig(bestnorm/DOF, 5), /data, color = colors(n), font_style = 'bold') ;pcerror(0)
+   
+   result2 = MPFITFUN('flatline',btime,bin_corrflux/median(bin_corrflux), bin_fluxerr/median(bin_corrflux), startflat, perror = perror, bestnorm = bestnorm)    
+   fp = plot(btime, 0*btime + result2(0),  color = colors(n), overplot = pb,thick = 3, linestyle = 2)
+   tt1 = text(6E7, 0.981- (0.003*n), '0    ' + sigfig(bestnorm/DOF, 5), /data, color =colors(n), font_style = 'bold')
+
 ;----------------------------------------------------
 ;fill in multiple star array
 ;a bit messy because I don't know how big each array will be up front
@@ -105,7 +129,7 @@ endfor  ; for each star
          bin_all_corrflux[c] = meanx    ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
          
          idataerr = all_fluxerr[ri[ri[j]:ri[j+1]-1]]
-         bin_all_fluxerr[c] =   sqrt(total(idataerr^2))/ (n_elements(idataerr))
+         bin_all_fluxerr[c] =   sigmax/sqrt(n_elements(idataerr)); sqrt(total(idataerr^2))/ (n_elements(idataerr))
          
          meanclip, all_time[ri[ri[j]:ri[j+1]-1]], meanx, sigmax
          bin_all_time[c] = meanx    ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
@@ -121,14 +145,30 @@ endfor  ; for each star
 ;----------------------------------------------------
 ;and some binned plotting
    
-   print, 'bin_all_corrflux', bin_all_corrflux
-    print, 'bin_all_time', bin_all_time
+   time = (bin_all_time - min(bin_all_time))/60./60./ 24./365
+   utime = (bin_all_time - min(bin_all_time))
+   pb2 = errorplot(utime, bin_all_corrflux/median(bin_all_corrflux), bin_all_fluxerr/median(bin_all_corrflux),$
+                   '1s', sym_size = 0.2,   sym_filled = 1, color = 'black', yrange = [0.99, 1.015],$
+                   xtitle = 'Time(seconds)', ytitle = 'Normalized Flux', title = 'Ch 1 Primary Calibrators', overplot = pb2)
+   
+;----------------------------------------------------
+;and now what about fitting the best fit slope?
+;fit with a liner function.
 
-   pb2 = errorplot((bin_all_time - min(bin_all_time))/60./60./ 24./365,$
-                   bin_all_corrflux/median(bin_all_corrflux), bin_all_fluxerr/median(bin_all_corrflux),$
-                   '1s', sym_size = 0.2,   sym_filled = 1, color = 'black', yrange = [0.98, 1.02],$
-                   xtitle = 'Time(years)', ytitle = 'Normalized Flux', title = 'Ch 1 Primary Calibrators', overplot = pb2)
- 
+start = [1E-6,1.0]
+startflat = [1.0]
+result= MPFITFUN('linear',utime, bin_all_corrflux/median(bin_all_corrflux), bin_all_fluxerr/median(bin_all_corrflux), $
+                 start, perror = perror, bestnorm = bestnorm)    
 
+fp = plot(utime, result(0)*(utime) + result(1),  color = 'black', overplot = pb2, thick = 3)
+
+DOF     = N_ELEMENTS(time) - N_ELEMENTS(result) ; deg of freedom
+PCERROR = PERROR * SQRT(BESTNORM / DOF)     ; scaled uncertainties
+print, 'linear result', result, 'pcerror', pcerror, ' perror', perror, 'bestnorm', bestnorm, 'dof', DOF, sqrt(bestnorm/dof)
+t1 = text(1.00, 0.991, sigfig(result(0), 3, /scientific) + '    ' + sigfig(bestnorm/DOF, 5), /data, color = 'black', font_style = 'bold');pcerror(0)
+
+result2 = MPFITFUN('flatline',utime,bin_all_corrflux/median(bin_all_corrflux), bin_all_fluxerr/median(bin_all_corrflux), startflat, perror = perror, bestnorm = bestnorm)    
+fp = plot(utime, 0*utime + result2(0),  color = 'blue', overplot = pb2,thick = 3, linestyle = 2)
+tt1 = text(6E7, 0.991, '0    ' + sigfig(bestnorm/DOF, 5), /data, color = 'blue', font_style = 'bold')
 
 end

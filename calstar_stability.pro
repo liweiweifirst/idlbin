@@ -11,7 +11,7 @@ pro calstar_stability
   command2 ="find ./IRAC*/bcd/00*/ -name 'IRAC.2*sig_dntoflux.fits' >  /Users/jkrick/irac_warm/calstars/allch2unclist.txt "
 ;  spawn, command2
   
-  for ch = 0, 1 do begin
+  for ch = 0, 0 do begin
      
      readcol,strcompress('/Users/jkrick/irac_warm/calstars/allch'+string(ch + 1)+'bcdlist.txt',/remove_all), fitsname, format = 'A', /silent
      readcol,strcompress('/Users/jkrick/irac_warm/calstars/allch'+ string(ch + 1)+'unclist.txt',/remove_all), uncname, format = 'A', /silent
@@ -25,6 +25,7 @@ pro calstar_stability
      fluxarr = xcenarr
      fluxerrarr = xcenarr
      backarr = xcenarr
+     corrfluxarr = xcenarr
      raarr = xcenarr
      decarr = xcenarr
      
@@ -69,16 +70,16 @@ pro calstar_stability
                                            xfwhm, yfwhm, /WARM
               
                                 ;make a correction for pixel phase 
-              arraycorr = pixel_phase_correct_gauss(f[0],x3,y3,ch+1, '3_3_7')
-              corrflux = f[0]*arraycorr
+;              arraycorr = pixel_phase_correct_gauss(f[0],x3,y3,ch+1, '3_3_7')
+;              corrflux = f[0]*arraycorr
 
                                 ;apply array dependent correction
-              if chnlnum eq '1' then photcorr = photcor_ch1(x3, y3) else photcorr = photcor_ch2(x3, y3)
-              corrflux= corrflux * photcorr
+;              if chnlnum eq '1' then photcorr = photcor_ch1(x3, y3) else photcorr = photcor_ch2(x3, y3)
+;              corrflux= corrflux * photcorr
               
                                 ;save them
               xcenarr[c]  = x3 &  ycenarr[c] = y3
-              fluxarr[c] = f[0] & fluxerrarr[c] = fs[0] & backarr[c]= b[0] & corrfluxarr[c] = corrflux
+              fluxarr[c] = f[0] & fluxerrarr[c] = fs[0] & backarr[c]= b[0] ;& corrfluxarr[c] = corrflux
               c = c + 1
            endif                ; if the target is on the frame
            
@@ -88,7 +89,7 @@ pro calstar_stability
      xcenarr = xcenarr[0:c-1] 
      ycenarr = ycenarr[0:c-1] 
      fluxarr = fluxarr[0:c-1] 
-     corrfluxarr = corrfluxarr[0:c-1]
+;     corrfluxarr = corrfluxarr[0:c-1]
      fluxerrarr = fluxerrarr[0:c-1] 
      backarr = backarr[0:c-1] 
      timearr = timearr[0:c-1] 
@@ -96,7 +97,7 @@ pro calstar_stability
      raarr = raarr[0:c-1] 
      decarr = decarr[0:c-1] 
                                 ;save the variables for plotting seperately
-     save,  xcenarr,  ycenarr,  starnamearr,  timearr,  fluxarr,  corrfluxarr, fluxerrarr,  backarr,  raarr,  decarr , filename =strcompress( '/Users/jkrick/irac_warm/calstars/allch'+string(ch + 1)+'phot.sav',/remove_all)
+     save,  xcenarr,  ycenarr,  starnamearr,  timearr,  fluxarr,  fluxerrarr,  backarr,  raarr,  decarr , filename =strcompress( '/Users/jkrick/irac_warm/calstars/allch'+string(ch + 1)+'phot.sav',/remove_all) ;corrfluxarr, 
      print, 'time check', systime(1) - t1
   endfor ; for each channel
  
