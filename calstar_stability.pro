@@ -2,19 +2,19 @@ pro calstar_stability
 
  t1 = systime(1)
 
-  dirloc = ['/Users/jkrick/iracdata/flight/IWIC/S19repro/cals']
+  dirloc = ['/Users/jkrick/iracdata/flight/IWIC/']
   
 ;start by getting all of the fits files from ch1, then later sort based on  naxis and exptime and maybe star name, then add ch2
   cd, dirloc
-  command ="find ./IRAC*/bcd/00*/ -name 'IRAC.2*bcd_fp.fits' > /Users/jkrick/irac_warm/calstars/allch2bcdlist.txt "
+;  command ="find ./IRAC03*/bcd/00*/ -name 'IRAC.1*bcd_fp.fits' >> /Users/jkrick/irac_warm/calstars/allch1bcdlist.txt "
 ;  spawn, command
-  command2 ="find ./IRAC*/bcd/00*/ -name 'IRAC.2*sig_dntoflux.fits' >  /Users/jkrick/irac_warm/calstars/allch2unclist.txt "
+;  command2 ="find ./IRAC03*/bcd/00*/ -name 'IRAC.1*sig_dntoflux.fits' >>  /Users/jkrick/irac_warm/calstars/allch1unclist.txt "
 ;  spawn, command2
   
   for ch = 0, 0 do begin
      
      readcol,strcompress('/Users/jkrick/irac_warm/calstars/allch'+string(ch + 1)+'bcdlist.txt',/remove_all), fitsname, format = 'A', /silent
-     readcol,strcompress('/Users/jkrick/irac_warm/calstars/allch'+ string(ch + 1)+'unclist.txt',/remove_all), uncname, format = 'A', /silent
+;     readcol,strcompress('/Users/jkrick/irac_warm/calstars/allch'+ string(ch + 1)+'unclist.txt',/remove_all), uncname, format = 'A', /silent
      
      print, 'nfits', n_elements(fitsname) 
 ;set up storage arrays
@@ -35,7 +35,7 @@ pro calstar_stability
 
      startfits = 0L
      stopfits = n_elements(fitsname) - 1
-     c = 0
+     c = 0L
      for i= startfits, stopfits do begin
         ;track progress
         if i mod 10000 eq 0 then print, 'fits file ', i
@@ -49,7 +49,9 @@ pro calstar_stability
         if strmid(AORLABEL, 0, 12) eq 'IRAC_calstar' and NAXIS lt 3 then begin
            
            fits_read,fitsname(i), im, h
-           fits_read, uncname(i), unc, hunc
+           inter = strmid(fitsname, 0, 30)
+           uncname = strcompress(b+ 'sig_dntoflux.fits',/remove_all)
+           fits_read, uncname, unc, hunc,/no_abort  ; so it won't crash if the file isn't there but should use the last unc file.
            
            chnlnum = sxpar(h, 'CHNLNUM')
            ra_ref = sxpar(h, 'RA_REF')
@@ -85,7 +87,7 @@ pro calstar_stability
            
         endif                   ; if full array calstar
      endfor                     ; for each fits image
-     
+     print, 'final c', c
      xcenarr = xcenarr[0:c-1] 
      ycenarr = ycenarr[0:c-1] 
      fluxarr = fluxarr[0:c-1] 
