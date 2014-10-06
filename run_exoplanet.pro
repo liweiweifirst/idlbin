@@ -5,6 +5,7 @@ pro run_exoplanet, planetname, binning, nnearest, apradius, chname;, startaor, s
 ;run_exoplanet, [ 'WASP-13b', 'WASP-15b', 'WASP-16b', 'WASP-16b', 'WASP-38b', 'WASP-62b', 'WASP-62b', 'HAT-P-22','HAT-P-22'], 63L, 50, [2.25, 1.75, 2.0, 2.25, 2.25, 2.25, 2.5, 1.75,2.25], [ '2', '2', '1', '2', '2', '1', '2', '1','2']
 ;run_exoplanet, ['HD158460', 'WASP-62b', 'HAT-P-8', 'HD209458','WASP-14b', 'WASP-13b','pmap_star_ch2'], 63L, 50, 2.25,[ '2','2','2','2','2','1','2']
 ;run_exoplanet, ['HD158460', 'WASP-62b', 'HAT-P-8', 'HD209458'], 63L, 50, 2.25,[ '2','2','2','2']
+
 ;.run nearest_neighbors_DT.pro
 ;.run nearest_neighbors_np_DT.pro
 ;.run nearest_neighbors_xyfwhm_DT.pro

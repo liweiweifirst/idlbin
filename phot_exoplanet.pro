@@ -25,7 +25,7 @@ case apradius of
 ;      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140716.sav'
 ;      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140314.sav'
       if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140904.sav'
-      if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p25_s3_7_0p4s_140314.sav'
+      if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p25_s3_7_0p4s_140716.sav'
    end
    2.5: begin
       apval = 3
@@ -143,7 +143,7 @@ for a =startaor, stopaor do begin
       framedly = sxpar(header, 'FRAMEDLY')
       if ra_ref gt 359. then begin
         print, 'inside ra_ref gt 359'
-        ra_ref = sxpar(header, 'RA_RQST')
+        ra_ref = sxpar(header, 'RA_REF')
         dec_ref = sxpar(header, 'DEC_REF')
      endif
 
@@ -184,6 +184,7 @@ for a =startaor, stopaor do begin
          xfwhmarr = xarr
          yfwhmarr = xarr
          peakpixDNarr = xarr
+         piarr = xarr
       endif
       fdarr = fltarr(n_elements(fitsname))
       fdarr[i] = framedly
@@ -269,9 +270,9 @@ for a =startaor, stopaor do begin
            endfor
         endif
 
-;track the values of the 5x5 pixel box around the centroid
-        pi = track_box(im, x_center, y_center)   ; tb now a 25 x 64 element array
-
+;track the values of the 7x7 pixel box around the centroid
+;        pi = track_box(im, x_center, y_center)   ; tb now a 25 x 64 element array
+        pi = im[12:18, 12:18,*]  ; now a 7x7x64 element array
 
 ;track the value of a column
       if keyword_set(columntrack) then begin 
@@ -355,6 +356,7 @@ for a =startaor, stopaor do begin
          xfwhmarr[i*63] = xfwhm[1:*]
          yfwhmarr[i*63] = yfwhm[1:*]
          peakpixDNarr[i*63] = peakpixDN[1:*]
+         piarr[i*63] = pi[*,*,1:*]
  ;        help, bmjd
          if keyword_set(columntrack) then begin 
                                 ; I think I deleted more parts of this than I may have intended, so if it is not working, that may be why
@@ -388,6 +390,7 @@ for a =startaor, stopaor do begin
          xfwhmarr[i] = xfwhm
          yfwhmarr[i] = yfwhm
          peakpixDNarr[i] = peakpixDN
+         piarr[i] = pi
       endif
 
    endfor; for each fits file in the AOR
@@ -438,7 +441,7 @@ print, 'end phase', phase[n_elements(phase) - 1]
       planethash[aorname(a)] = HASH(keys, values)
    endif else begin
       keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase', 'npcentroids','exptime','xfwhm', 'yfwhm','peakpixDN', 'framedly','pixvals']
-      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, peakpixDNarr, fdarr,pi)
+      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, peakpixDNarr, fdarr,piarr)
       planethash[aorname(a)] = HASH(keys, values)
    endelse
 
