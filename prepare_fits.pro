@@ -8,7 +8,7 @@ function prepare_fits, f
   u = uniq(strmid(fitsname, 0, 57))
   fitsname = fitsname(u)
   
-  openw, outlun, '/Users/jkrick/irac_warm/calstars/allch1bcdlist_sort.txt',/get_lun
+  openw, outlun, '/Users/jkrick/irac_warm/calstars/allch2bcdlist_sort.txt',/get_lun
   for fn = 0, n_elements(fitsname) - 1 do begin
      printf, outlun, fitsname(fn)
      

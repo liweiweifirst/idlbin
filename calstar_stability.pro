@@ -11,11 +11,11 @@ pro calstar_stability
 ;  command2 ="find ./IRAC03*/bcd/00*/ -name 'IRAC.1*sig_dntoflux.fits' >>  /Users/jkrick/irac_warm/calstars/allch1unclist.txt "
 ;  spawn, command2
   
-  for ch = 0, 0 do begin
+  for ch = 1, 1 do begin
      
      
-     ;fitsname = prepare_fits('/Users/jkrick/irac_warm/calstars/allch1bcdlist.txt')
-     readcol, '/Users/jkrick/irac_warm/calstars/allch1bcdlist_sort.txt', fitsname, format = 'A', /silent
+;     fitsname = prepare_fits('/Users/jkrick/irac_warm/calstars/allch2bcdlist.txt')
+     readcol, '/Users/jkrick/irac_warm/calstars/allch2bcdlist_sort.txt', fitsname, format = 'A', /silent
      
      print, 'nfits', n_elements(fitsname) 
 ;set up storage arrays
@@ -35,7 +35,8 @@ pro calstar_stability
      fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch2_photcorr_ap_5.fits', photcor_ch2, photcorhead_ch2
 
 ;filename saver
-     openw, outlun, '/Users/jkrick/irac_warm/calstars/ch1_calstar_bcdlist.txt', /get_lun
+     if ch eq 1 then openw, outlun, '/Users/jkrick/irac_warm/calstars/ch1_calstar_bcdlist.txt', /get_lun
+     if ch eq 2 then openw, outlun, '/Users/jkrick/irac_warm/calstars/ch2_calstar_bcdlist.txt', /get_lun
 
      startfits = 0L
      stopfits = n_elements(fitsname) - 1
