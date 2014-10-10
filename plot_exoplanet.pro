@@ -16,6 +16,15 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
  print, 'stareaor', stareaor
  exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
  exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
+=======
+  planetinfo = create_planetinfo()
+  if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
+  basedir = planetinfo[planetname, 'basedir']
+  period =  planetinfo[planetname, 'period']
+  stareaor = planetinfo[planetname, 'stareaor']
+  print, 'stareaor', stareaor
+exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
+exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
 ;exosystem = planetname
 if planetname eq 'WASP-13b' then exosystem = 'WASP-13 b'
 if planetname eq 'WASP-15b' then exosystem = 'WASP-15 b'
@@ -94,10 +103,18 @@ if keyword_set(position_plot) then begin
          ;scolor = 'blue'
 ;         scolor = 'red'
 
+;         xcen500 = 500.* ((planethash[aorname(a),'xcen']) - 14.5)
+;         ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
+;         an = plot(xcen500, ycen500, '1s', sym_size = 0.1,   sym_filled = 1, color = colorarr(a),/overplot)
+;      endif
+      if planethash[aorname(a),'exptime'] gt 0.2 then begin
+         ;scolor = 'blue'
+         scolor = 'red'
+
          xcen500 = 500.* ((planethash[aorname(a),'xcen']) - 14.5)
          ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
-         an = plot(xcen500, ycen500, '1s', sym_size = 0.1,   sym_filled = 1, color = colorarr(a),/overplot)
-;      endif
+         an = plot(xcen500, ycen500, '1s', sym_size = 0.1,   sym_filled = 1, color = scolor,/overplot)
+      endif
 
 ;     npmax = [4.8, 37., 4.5]
 ;     testnp = where((planethash[aorname(a),'np']) gt npmax(a) , complement = nospike)
@@ -301,7 +318,7 @@ endif
 ;     print, 'corrflux before binning', junk[0:100]
      
      ;make one data point per AOR
-     bin_level = n_elements([planethash[aorname(a),'flux']]) 
+;     bin_level = n_elements([planethash[aorname(a),'flux']]) 
      junkpar = binning_function(a, bin_level, pmapcorr)
 ;     print, 'testing phase', (planethash[aorname(a),'phase'] )[0:10], (planethash[aorname(a),'phase'] )[600:610]
 ;     print, 'testing x', bin_xcen[0:10]
@@ -627,7 +644,7 @@ endif
                                 ;set the normalization values from the
                                 ;medians of the first AOR...is close enough
            plot_norm = median(bin_flux)
-           plot_corrnorm = mean(bin_corrfluxp,/nan) 
+           plot_corrnorm = mean(bin_corrfluxp,/nan)
            print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp,/nan)
            pp = plot((bin_timearr - time_0)/60./60., bin_xcen, '1s', sym_size = 0.3,   sym_filled = 1, $;title = planetname, $
                      color = colorarr[a], xtitle = 'Time(hrs)', ytitle = 'X position', aspect_ratio = 0.0, margin = 0.2);, $
@@ -726,6 +743,11 @@ endif
               pu =  errorplot(((bin_timearr - time_0)/60./60.) , (bin_corrfluxp/plot_corrnorm) + corroffset, $ ;- 5.5E3)/24.
                               bin_corrfluxerrp/plot_corrnorm, sym_size = 2.0,  $
                               symbol = plotsym, sym_filled = 1,color = colorarr(a), errorbar_color =  scolor, overplot = pu, /current)
+;              pu =  errorplot((bin_timearr - time_0)/60./60., (bin_flux/plot_norm) + corroffset, bin_fluxerr/plot_norm, sym_size = 0.7,  $
+;                                                 symbol = plotsym, sym_filled = 1,color = scolor, errorbar_color =  scolor, overplot = pu, /current)
+;              pu =  errorplot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm) + corroffset, $
+;                              bin_corrfluxerrp/plot_corrnorm, sym_size = 0.7,  $
+;                              symbol = plotsym, sym_filled = 1,color = scolor, errorbar_color =  scolor, overplot = pu, /current)
 
            endif
 
@@ -773,6 +795,12 @@ endif
                   pu =  errorplot(((bin_timearr - time_0)/60./60.) , (bin_corrfluxp/plot_corrnorm) + corroffset, $ ;- 5.5E3)/24.
                                   bin_corrfluxerrp/plot_corrnorm, sym_size = 2.0,  $
                                   symbol = plotsym, sym_filled = 1,color = colorarr(a), errorbar_color =  scolor, overplot = pu, /current)
+
+;              pu =  errorplot((bin_timearr - time_0)/60./60., (bin_flux/plot_norm) + corroffset, bin_fluxerr/plot_norm, sym_size = 0.7,  $
+;                              symbol = plotsym, sym_filled = 1,color = scolor, errorbar_color =  scolor, overplot = pu, /current)
+;                  pu =  errorplot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm) + corroffset, $
+;                                  bin_corrfluxerrp/plot_corrnorm, sym_size = 0.7,  $
+;                                  symbol = plotsym, sym_filled = 1,color = scolor, errorbar_color =  scolor, overplot = pu, /current)
                endif
                
             endif

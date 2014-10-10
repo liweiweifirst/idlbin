@@ -1,34 +1,33 @@
-pro plot_calstar_stability, chname, binperstar = binperstar, montecarlo = montecarlo, fit_slope=fit_slope
+pro plot_calstar_stability, chname, binperstar = binperstar
 
-  restore, '/Users/jkrick/irac_warm/calstars/allch1phot.sav'
-  print, 'testing time', timearr[0:10], format = D0
+restore, '/Users/jkrick/irac_warm/calstars/allch1phot_save.sav'
 ;potential calstar names
-  names = [ '1812095', 'KF08T3_', 'KF06T2_', 'KF06T1_', 'KF09T1_',  'NPM1p67','NPM1p60', 'NPM1p68'] ;, 'HD16545']
+names = [ '1812095', 'KF08T3_', 'KF06T2_', 'KF06T1_', 'KF09T1_',  'NPM1p67','NPM1p60', 'NPM1p68'];, 'HD16545']
 
-  binning_ch1 = [5L,5L, 5L,5L,5L,5L,10L, 10L]
-  colors = ['black', 'grey', 'red', 'blue', 'chocolate', 'cyan', 'orange', 'maroon', 'medium purple']
+binning_ch1 = [5L,5L, 5L,5L,5L,5L,10L, 10L]
+colors = ['black', 'grey', 'red', 'blue', 'chocolate', 'cyan', 'orange', 'maroon', 'medium purple']
 ;start with the first four, the rest were observed differently
-  keyname = ['f12s', 'F12sc', 'F12sc', 'F12s', 'F2s', 'F2sc', 'F0p4s', 'F0p4sc', 'FS0p4sc']
-  
+keyname = ['f12s', 'F12sc', 'F12sc', 'F12s', 'F2s', 'F2sc', 'F0p4s', 'F0p4sc', 'FS0p4sc']
+
 ;add a correction for pixel phase effect 
-  corrflux = pixel_phase_correct_gauss(fluxarr,xcenarr,ycenarr,1, '3_3_7')
-  
+corrflux = pixel_phase_correct_gauss(fluxarr,xcenarr,ycenarr,1, '3_3_7')
+
 ;for array dependant photometric correction warm
-  fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch1_photcorr_ap_5.fits', photcor_ch1, photcorhead_ch1
-  fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch2_photcorr_ap_5.fits', photcor_ch2, photcorhead_ch2
-  if chname eq '1' then photcorr = photcor_ch1(xcenarr, ycenarr) else photcorr = photcor_ch2(xcenarr, ycenarr)
-  corrflux= corrflux * photcorr
-  
-  
-  
-  for n = 0, n_elements(names) - 1 do begin
-     
-     a = where(starnamearr eq names(n), count)
-     timeb = timearr(a)
-     fluxb = fluxarr(a)
-     fluxerrb = fluxerrarr(a)
-     starnameb = starnamearr(a)
-     corrfluxb  = corrflux(a)
+fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch1_photcorr_ap_5.fits', photcor_ch1, photcorhead_ch1
+fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch2_photcorr_ap_5.fits', photcor_ch2, photcorhead_ch2
+if chname eq '1' then photcorr = photcor_ch1(xcenarr, ycenarr) else photcorr = photcor_ch2(xcenarr, ycenarr)
+corrflux= corrflux * photcorr
+
+
+
+for n = 0, n_elements(names) - 1 do begin
+
+   a = where(starnamearr eq names(n), count)
+   timeb = timearr(a)
+   fluxb = fluxarr(a)
+   fluxerrb = fluxerrarr(a)
+   starnameb = starnamearr(a)
+   corrfluxb  = corrflux(a)
 
 ;   p1 = errorplot((timearr(a) - min(timearr))/60./60./ 24./365, fluxarr(a)/median(fluxarr(a)), fluxerrarr(a)/median(fluxarr(a)),$
 ;                  '1s', sym_size = 0.2,   sym_filled = 1, color = colors(n),errorbar_color = colors(n), yrange = [0.9, 1.1],$
@@ -188,6 +187,7 @@ pcrf = plot(bin_all_corrflux, chop_cr_ch1, '1s', sym_filled = 1, xtitle = 'Norma
 
 lin = findgen(4)
 pcrf = plot(lin, lin, '1-', overplot = pcrf)
+
 ;----------------------------------------------------
 ;Monte Carlo
 ;randomize the time variables, re-measure the slopes.  
@@ -321,4 +321,5 @@ function binperstar, timeb, fluxb, corrfluxb, fluxerrb, starnameb, binning_ch1, 
   
   
   return, 0
+
 end

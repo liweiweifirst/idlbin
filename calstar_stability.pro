@@ -2,7 +2,11 @@ pro calstar_stability
 
  t1 = systime(1)
 
+<<<<<<< HEAD
   dirloc = ['/Volumes/iracdata/flight/IWIC/']
+=======
+  dirloc = ['/Users/jkrick/iracdata/flight/IWIC/']
+>>>>>>> 43a8839412e21e0a5962d5d3d49e2c26063915d3
   
 ;start by getting all of the fits files from ch1, then later sort based on  naxis and exptime and maybe star name, then add ch2
   cd, dirloc
@@ -11,11 +15,18 @@ pro calstar_stability
 ;  command2 ="find ./IRAC03*/bcd/00*/ -name 'IRAC.1*sig_dntoflux.fits' >>  /Users/jkrick/irac_warm/calstars/allch1unclist.txt "
 ;  spawn, command2
   
+<<<<<<< HEAD
   for ch = 1, 1 do begin
      
      
 ;     fitsname = prepare_fits('/Users/jkrick/irac_warm/calstars/allch2bcdlist.txt')
      readcol, '/Users/jkrick/irac_warm/calstars/allch2bcdlist_sort.txt', fitsname, format = 'A', /silent
+=======
+  for ch = 0, 0 do begin
+     
+     readcol,strcompress('/Users/jkrick/irac_warm/calstars/allch'+string(ch + 1)+'bcdlist.txt',/remove_all), fitsname, format = 'A', /silent
+;     readcol,strcompress('/Users/jkrick/irac_warm/calstars/allch'+ string(ch + 1)+'unclist.txt',/remove_all), uncname, format = 'A', /silent
+>>>>>>> 43a8839412e21e0a5962d5d3d49e2c26063915d3
      
      print, 'nfits', n_elements(fitsname) 
 ;set up storage arrays
@@ -34,16 +45,23 @@ pro calstar_stability
      fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch1_photcorr_ap_5.fits', photcor_ch1, photcorhead_ch1
      fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch2_photcorr_ap_5.fits', photcor_ch2, photcorhead_ch2
 
+<<<<<<< HEAD
 ;filename saver
      if ch eq 1 then openw, outlun, '/Users/jkrick/irac_warm/calstars/ch1_calstar_bcdlist.txt', /get_lun
      if ch eq 2 then openw, outlun, '/Users/jkrick/irac_warm/calstars/ch2_calstar_bcdlist.txt', /get_lun
 
+=======
+>>>>>>> 43a8839412e21e0a5962d5d3d49e2c26063915d3
      startfits = 0L
      stopfits = n_elements(fitsname) - 1
      c = 0L
      for i= startfits, stopfits do begin
         ;track progress
+<<<<<<< HEAD
         if i mod 10000 eq 0 then print, 'fits file ', i, ' ',  systime(1) - t1
+=======
+        if i mod 10000 eq 0 then print, 'fits file ', i
+>>>>>>> 43a8839412e21e0a5962d5d3d49e2c26063915d3
 ;      print, 'working on fitsname', fitsname(i)
         header = headfits(fitsname(i)) ;
         NAXIS= sxpar(header, 'NAXIS')
@@ -51,6 +69,7 @@ pro calstar_stability
         AORLABEL= sxpar(header, 'AORLABEL')
 ;       print, i, strmid(AORLABEL, 0, 12), naxis
                                 ;cut on full array calstars only (for now)
+<<<<<<< HEAD
         if strmid(AORLABEL, 0, 12) eq 'IRAC_calstar' and NAXIS lt 3 then begin            ;got a good one
 
 ;add this name to a list of filenames
@@ -63,12 +82,24 @@ pro calstar_stability
            uncname = strcompress(inter + 'sig_dntoflux.fits',/remove_all)
 ;           print, 'uncname',i,  uncname, fitsname(i)
            fits_read, uncname, unc, hunc, /no_abort  ; so it won't crash if the file isn't there but should use the last unc file.
+=======
+        if strmid(AORLABEL, 0, 12) eq 'IRAC_calstar' and NAXIS lt 3 then begin
+           
+           fits_read,fitsname(i), im, h
+           inter = strmid(fitsname, 0, 30)
+           uncname = strcompress(b+ 'sig_dntoflux.fits',/remove_all)
+           fits_read, uncname, unc, hunc,/no_abort  ; so it won't crash if the file isn't there but should use the last unc file.
+>>>>>>> 43a8839412e21e0a5962d5d3d49e2c26063915d3
            
            chnlnum = sxpar(h, 'CHNLNUM')
            ra_ref = sxpar(h, 'RA_REF')
            dec_ref = sxpar(h, 'DEC_REF')
+<<<<<<< HEAD
            sos_ver = sxpar(h, 'SOS_VER')
 
+=======
+           
+>>>>>>> 43a8839412e21e0a5962d5d3d49e2c26063915d3
           ;make sure it is on the frame
            ADXY, h, ra_ref, dec_ref, xcen, ycen
            if xcen gt 5 and ycen gt 5 and xcen lt 250 and ycen lt 250 then begin
@@ -113,7 +144,10 @@ pro calstar_stability
                                 ;save the variables for plotting seperately
      save,  xcenarr,  ycenarr,  starnamearr,  timearr,  fluxarr,  fluxerrarr,  backarr,  raarr,  decarr , filename =strcompress( '/Users/jkrick/irac_warm/calstars/allch'+string(ch + 1)+'phot.sav',/remove_all) ;corrfluxarr, 
      print, 'time check', systime(1) - t1
+<<<<<<< HEAD
      free_lun, outlun
+=======
+>>>>>>> 43a8839412e21e0a5962d5d3d49e2c26063915d3
   endfor ; for each channel
  
 end
