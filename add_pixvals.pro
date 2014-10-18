@@ -21,13 +21,14 @@ pro add_pixvals, planetname, chname, apradius
      spawn, command
      
      readcol,strcompress(dirname +'bcdlist.txt'),fitsname, format = 'A', /silent
-     print, 'nfits', n_elements(fitsname)
+     print, 'nfits', n_elements(fitsname), '  ', aorname(a)
      piarr = findgen(7,7,63*n_elements(fitsname)) ; ignore the first frame
-     
-     for i =0,  n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
+;     help, piarr
+     for i =0L,  n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
         
                                 ;read in the files
         fits_read, fitsname(i), im, h
+;        print, 'i', i,i*63
         piarr[i*63]= im[12:18, 12:18,1:*] 
      endfor                     ; for each fits file
      

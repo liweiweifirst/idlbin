@@ -127,13 +127,33 @@ chname = 0
   planetinfo[planetname] = HASH(keys, values)
 ;---
 
+  planetname = 'Kepler-5'
+  ra_ref = 299.40663
+  dec_ref = 44.034842
+  aorname_ch1 = ['r38405632', 'r38406144' ]  ;ch1
+  aorname_ch2 = ['r38404608', 'r38405120']  ;ch2 
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  utmjd_center =  54955.40122
+  transit_duration=0.
+  period = 3.54846
+  intended_phase = 0.5
+  exptime = 12.
+  stareaor = 0
+  mask = 'no'
+  plot_norm = 1.
+  plot_corrnorm = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+
   planetname = 'HD158460'   ; !!!This is a standard star, ie should have a flat light curve
   ra_ref = 261.42213
   dec_ref = 60.048479
   aorname_ch1 = ['r42051584', 'r42506496']  ;ch1
 ;  aorname_ch2 = [ 'r45184256','r45184512','r45184768','r45185024','r45185280','r45185536','r45185792','r45186048','r45186304','r45186560','r45186816','r45187072','r45187328','r45187584','r45187840','r45188096','r45188352','r45188608'] ;0,1s snaps
-aorname_ch2 = ['r42051584', 'r42506496']; stares
-;aorname_ch2 = ['r44499968','r44499712','r44497408','r44501504','r44501248','r44500992','r44500736', 'r44500480', 'r44500224','r44499456', 'r44499200','r44498944','r44498688','r44498432','r44498176','r44497920','r44497664','r44497152']  ; think these are saturated but not sure.
+;aorname_ch2 = ['r42051584', 'r42506496']; stares
+aorname_ch2 = ['r44499968','r44499712','r44497408','r44501504','r44501248','r44500992','r44500736', 'r44500480', 'r44500224','r44499456', 'r44499200','r44498944','r44498688','r44498432','r44498176','r44497920','r44497664','r44497152']  ; think these are saturated but not sure.
 
  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   utmjd_center =  55556.83649D; junk
