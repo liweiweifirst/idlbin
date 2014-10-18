@@ -16,7 +16,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
  print, 'stareaor', stareaor
  exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
  exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
-=======
+
   planetinfo = create_planetinfo()
   if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
   basedir = planetinfo[planetname, 'basedir']
@@ -409,10 +409,15 @@ endif
 
      if keyword_set(phaseplot) then begin ;make the plot as a function of phase
 ;        print, ' phase', (planethash[aorname(a),'phase'])
-        setxrange = [0, 1.0]; [-0.5, 0.5];
+        setxrange = [0.43, 0.56]; [-0.5, 0.5];
         corrnormoffset =  0; 0.02
         corroffset = 0;0.001
-        setynormfluxrange = [0.995, 1.005];[0.97, 1.005]
+        setynormfluxrange = [0.96, 1.02];[0.97, 1.005]
+
+        cphase = where(bin_phase lt 0)
+        bin_phase(cphase) = bin_phase(cphase) + 1.0
+
+
         if a eq startaor then begin    ; for the first AOR
                                 ;set the normalization values from the
                                 ;medians of the first AOR...is close enough
@@ -430,17 +435,17 @@ endif
                      xtitle = 'Orbital Phase', ytitle = 'Y position', title = planetname, $
                      xrange = setxrange)
 
-;           if keyword_set(errorbars) then begin
-;              pr = errorplot(bin_phase, bin_flux/plot_norm,bin_fluxerr/plot_norm,  '1s', sym_size = 0.2,   $
-;                             sym_filled = 1,  color =colorarr[a],  xtitle = 'Orbital Phase', $
-;                             ytitle = 'Normalized Flux', title = planetname, yrange = setynormfluxrange, $
-;                             xrange = setxrange )
-;           endif else begin
+           if keyword_set(errorbars) then begin
+              pr = errorplot(bin_phase, bin_flux/plot_norm,bin_fluxerr/plot_norm,  '1s', sym_size = 0.2,   $
+                             sym_filled = 1,  color =colorarr[a],  xtitle = 'Orbital Phase', $
+                             ytitle = 'Normalized Flux', title = planetname, yrange = setynormfluxrange, $
+                             xrange = setxrange )
+           endif else begin
  ;             print, 'testing bin_flux', bin_flux[1:10]/plot_norm
-;              pr = plot(bin_phase, bin_flux/plot_norm, '1s', sym_size = 0.2,   sym_filled = 1,  $
-;                        color = 'green',  xtitle = 'Orbital Phase', ytitle = 'Normalized Flux', $
-;                        title = planetname, yrange = setynormfluxrange, xrange = setxrange,/nodata) 
-;           endelse  ;/errorbars
+              pr = plot(bin_phase, bin_flux/plot_norm, '1s', sym_size = 0.2,   sym_filled = 1,  $
+                        color = colorarr[a],  xtitle = 'Orbital Phase', ytitle = 'Normalized Flux', $
+                        title = planetname, yrange = setynormfluxrange, xrange = setxrange) 
+           endelse  ;/errorbars
            if pmapcorr eq 1 then begin
               print, 'inside pmapcorr eq 1', median( (bin_corrfluxp/plot_corrnorm) ), median(bin_flux)
 ;              if keyword_set(errorbars) then begin
@@ -477,7 +482,7 @@ endif
 ;                        symbol = plotsym, sym_filled = 1,color =scolor ,xtitle = 'Orbital Phase', errorbar_color =  scolor, $
 ;                        title = planetname, ytitle = 'Flux',  yrange = [0.995, 1.02], xrange = setxrange) ;
               pu = errorplot(bin_phase, (bin_corrfluxp/plot_corrnorm) + corroffset, bin_corrfluxerrp/plot_corrnorm,  sym_size = 0.7,  $
-                        symbol = plotsym, sym_filled = 1,color =scolor ,xtitle = 'Orbital Phase', errorbar_color =  scolor, $
+                        symbol = plotsym, sym_filled = 1,color =colorarr[a] ,xtitle = 'Orbital Phase', errorbar_color =  scolor, $
                         title = planetname, ytitle = 'Pmap Corrected Flux',  yrange = [0.995, 1.02], xrange = setxrange) ;
            endif
 
@@ -485,7 +490,8 @@ endif
 
       ;  test_med(a) = median(bin_corrfluxp)
         print,'median bin_corrfluxp ',  median(bin_corrfluxp), median(bin_flux)
-        if (a gt 0) and (a le stareaor) then begin
+        print, 'a', a
+        if (a gt 0) and (a lt stareaor) then begin
            print, 'inside a gt 0 a le stareaor', a
            pp.window.SetCurrent
            pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],  /overplot,/current)
@@ -533,14 +539,14 @@ endif
            pq = plot(bin_phase, bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],$
                      /overplot,/current)
 
-;           pr.window.SetCurrent
-;           if keyword_set(errorbars) then begin
-;              pr = errorplot(bin_phase, bin_flux/(plot_norm) , bin_fluxerr/plot_norm, '1s', $
-;                        sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], /overplot,/current) 
-;           endif else begin
-;              pr = plot(bin_phase, bin_flux/(plot_norm) , '1s', sym_size = 0.2,   sym_filled = 1,  $
-;                        color = colorarr[a], /overplot,/current,/nodata)
-;           endelse
+           pr.window.SetCurrent
+           if keyword_set(errorbars) then begin
+              pr = errorplot(bin_phase, bin_flux/(plot_norm) , bin_fluxerr/plot_norm, '1s', $
+                        sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], /overplot,/current) 
+           endif else begin
+              pr = plot(bin_phase, bin_flux/(plot_norm) , '1s', sym_size = 0.2,   sym_filled = 1,  $
+                        color = colorarr[a], /overplot,/current)
+           endelse
 
 
            if pmapcorr eq 1 then begin

@@ -14,8 +14,8 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
   period =  planetinfo[planetname, 'period']
   stareaor = planetinfo[planetname, 'stareaor']
 ;for debugging: skip some AORs
-  startaor = 0                  ;5
-  stopaor =  n_elements(aorname) - 1
+  startaor = 1                  ;5
+  stopaor =  1;n_elements(aorname) - 1
   print, 'stopaor', stopaor
 ;  plot_norm= planetinfo[planetname, 'plot_norm']
 ;  plot_corrnorm = planetinfo[planetname, 'plot_corrnorm']
@@ -31,10 +31,6 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
 ;  testplot = plot(xhist, yhist,  xtitle = 'NP', ytitle = 'Number', thick =3, color = 'blue')
 
   ;print, 'testing phase', (planethash[aorname(0),'phase'] )[0:10], (planethash[aorname(0),'phase'] )[600:610]
-
- 
-
-
 
  xsweet = 15.12
  ysweet = 15.00
@@ -94,12 +90,13 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
            plot_norm = median(bin_flux)
            plot_corrnorm = mean(bin_corrfluxp,/nan)
            bkgd_norm = mean(bin_bkgd,/nan)
-           print, 'bkg_norm', bkgd_norm
+           print, 'bin_xcen', bin_xcen
            print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
 
+           
            pp = plot((bin_timearr-  time_0)/60./60., bin_xcen, '1s',  $;title = planetname, $
                      color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 0.5, $
-                     xshowtext = 0, ytickformat = '(F10.1)', dimensions = [600, 900], _extra = extra, yminor = 0, yrange = [13.0, 15.0]) ;, $, ymajor = 4
+                     xshowtext = 0, ytickformat = '(F10.1)', dimensions = [600, 900], _extra = extra, yminor = 0, yrange = [126.4, 126.8]) ;, $, ymajor = 4
  
           ;turn off refreshing to make this quicker hopefully
 ;           pp.Refresh, /Disable
@@ -107,7 +104,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
            
            pq= plot((bin_timearr - time_0)/60./60., bin_ycen, '1s',  color = colorarr[a], $
                      ytitle = 'Y position',  position = [0.2, 0.64, 0.9, 0.77],/current,  ytickinterval = 1.0,$
-                    xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, yminor = 0, yrange = [15.5, 17.5]) ;, $, title = planetname , ymajor = 4
+                    xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, yminor = 0);, yrange = [15.5, 17.5]) ;, $, title = planetname , ymajor = 4
                      ;xrange = setxrange)
 
 
@@ -117,8 +114,8 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
                              xrange = setxrange ,  position = [0.2,0.08, 0.9, 0.21],/current, ymajor = 4, _extra = extra)
            endif else begin
               pr = plot((bin_timearr - time_0)/60./60., bin_flux/plot_norm, '1s',  $
-                        color = colorarr[a],   ytitle = 'Norm. Flux', xtitle = 'Time(hrs)',$ 
-                         position = [0.2,0.08, 0.9, 0.21], /current, _extra = extra, ytickinterval = 0.5, yminor = 0);
+                        color = colorarr[a],   ytitle = 'Norm. Flux', xtitle = 'Time(hrs)', yrange = [0.98, 1.02],$ 
+                         position = [0.2,0.08, 0.9, 0.21], /current, _extra = extra, ytickinterval = 0.02, yminor = 0);
            endelse  ;/errorbars
           if pmapcorr eq 1 then begin
               print, 'inside pmapcorr eq 1', median( (bin_corrfluxp/plot_corrnorm) ), median(bin_flux)
