@@ -65,6 +65,7 @@ if planetname eq 'HAT-P-22' then exosystem = 'HAT-P-22 b'
 if planetname eq 'GJ1214' then exosystem = 'GJ 1214 b'
 if planetname eq '55CNCe' then exosystem = '55 CNC e'
 if planetname eq 'HD209458' then exosystem = 'HD 209458 b'
+if planetname eq 'Kepler-5' then exosystem = 'Kepler-5 b'
 
 print, exosystem, 'exosystem'
 if planetname eq 'WASP-52b' then teq_p = 1315
@@ -85,7 +86,7 @@ if ra lt 400 then begin  ; that means get_exoplanet_data actually found the targ
    utmjd_center = mjd_transit
    period = p_orbit
 endif else begin
-   ;warning these could be junk as well
+   print, 'parameters from create_planetinfo'
    ra_ref = planetinfo[planetname, 'ra']
    dec_ref = planetinfo[planetname, 'dec']
    utmjd_center = planetinfo[planetname, 'utmjd_center']
@@ -93,7 +94,7 @@ endif else begin
 endelse
 ;---------------
 
-print, 'ra, dec', ra_ref, dec_ref
+;print, 'ut_mjd',utmjd_center
 dirname = strcompress(basedir + planetname +'/')
 planethash = hash()
 
@@ -107,8 +108,8 @@ for a =startaor, stopaor do begin
    print, 'working on ',aorname(a)
    dir = dirname+ string(aorname(a) ) 
    CD, dir                      ; change directories to the correct AOR directory
-   command  = strcompress( 'find ch'+chname+"/bcd -name 'SPITZER*bcd.fits' > "+dirname+'bcdlist.txt')
-   print, 'command', command
+   command  = strcompress( 'find ch'+chname+"/bcd -name 'SPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
+;   print, 'command', command
    spawn, command
    command2 =  strcompress('find ch'+chname+"/bcd -name '*bunc.fits' > "+dirname + 'bunclist.txt')
    spawn, command2
@@ -122,11 +123,11 @@ for a =startaor, stopaor do begin
    print,'n_elements(fitsname)', n_elements(fitsname)
 ;     aparr = dblarr(n_elements(fitsname))  ;keep the aperture sizes used
    
-   startfits = 0.D
+   startfits = 0L
 
 
    for i =startfits,  n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
- ;      print, 'working on ', fitsname(i)         
+;       print, 'working on ', fitsname(i)         
       header = headfits(fitsname(i)) ;
       sclk_obs= sxpar(header, 'SCLK_OBS')
       frametime = sxpar(header, 'FRAMTIME')
@@ -167,6 +168,7 @@ for a =startaor, stopaor do begin
          xfwhmarr = xarr
          yfwhmarr = xarr
          peakpixDNarr = xarr
+         piarr = findgen(7,7,63*n_elements(fitsname))
       endif
       if i eq startfits and naxis ne 3 then begin
          xarr = fltarr(n_elements(fitsname))
@@ -184,7 +186,7 @@ for a =startaor, stopaor do begin
          xfwhmarr = xarr
          yfwhmarr = xarr
          peakpixDNarr = xarr
-         piarr = xarr
+         piarr =findgen(7,7,n_elements(fitsname))
       endif
       fdarr = fltarr(n_elements(fitsname))
       fdarr[i] = framedly
@@ -225,7 +227,7 @@ for a =startaor, stopaor do begin
                                    xfwhm, yfwhm, /WARM
       nanfound = where(FINITE(np) lt 1, nancount)
       if nancount gt 0 then print, 'NAN: ', fitsname(i), nanfound
-
+      
       x_center = temporary(x3)
       y_center = temporary(y3)
      ;choose the requested pixel aperture
@@ -272,7 +274,8 @@ for a =startaor, stopaor do begin
 
 ;track the values of the 7x7 pixel box around the centroid
 ;        pi = track_box(im, x_center, y_center)   ; tb now a 25 x 64 element array
-        pi = im[12:18, 12:18,*]  ; now a 7x7x64 element array
+        if naxis eq 3 then pi = im[12:18, 12:18,*]  ; now a 7x7x64 element array
+        if naxis eq 2 then pi = im[(fix(x_center) - 3):(fix(x_center+3)), (fix(y_center) - 3):(fix(y_center+3))]  ; now a 7x7x64 element array
 
 ;track the value of a column
       if keyword_set(columntrack) then begin 
@@ -385,12 +388,12 @@ for a =startaor, stopaor do begin
          bmjd[i]  = bmjdarr
          backarr[i]  =  back
          backerrarr[i]  = backerr
-         nparr[i]  = np
+         nparr[i]  = npcentroids
          npcentroidsarr[i] = npcentroids
          xfwhmarr[i] = xfwhm
          yfwhmarr[i] = yfwhm
          peakpixDNarr[i] = peakpixDN
-         piarr[i] = pi
+         piarr[*,*,i] = pi
       endif
 
    endfor; for each fits file in the AOR
