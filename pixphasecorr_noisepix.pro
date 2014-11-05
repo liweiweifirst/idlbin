@@ -57,7 +57,11 @@ pro pixphasecorr_noisepix, planetname, nn, apradius, chname, startaor, stopaor, 
   if planetname eq 'HAT-P-22' then exosystem = 'HAT-P-22 b'
   if planetname eq 'HD20003' then exosystem = planetname + ' b'
   if planetname eq 'WASP-15b' then exosystem = 'WASP-15 b'
+  if planetname eq 'Kepler-5' then exosystem = 'Kepler-5 b'
+  if planetname eq 'Kepler-17' then exosystem = 'Kepler-17 b'
+  if planetname eq 'Kepler-9' then exosystem = 'Kepler-9 b'
   if planetname eq 'WASP-52b' then teq_p = 1315
+
   if planetname eq 'HD7924b' then begin
      t_dur = 0.1                ; completely made up since this is non-transiting
      period = 5.3978
@@ -205,23 +209,23 @@ t_dur =  t14  ; in days
   yfwhm2(intransit) = 1E5
   
   ;just checking
-  ptest = plot(findgen(n_elements(xcen2)), xcen2, '1s')
+;  ptest = plot(findgen(n_elements(xcen2)), xcen2, '1s', xtitle = 'frame number', ytitle = 'xcen', title = 'just checking')
 
 ;  cgHistoplot, flux_m,/nan, thick = 3, xtitle = 'raw flux', ytitle = 'Number',  datacolorname = 'black', title = planetname, /outline
                                 ;do the nearest neighbors run with triangulation
                                 ;http://www.idlcoyote.com/code_tips/slowloops.html
                                 ;this returns a sorted list of the nn nearest neighbors
-  if keyword_set(use_fwhm) then  nearest= nearest_neighbors_xyfwhm_DT(xcen2,ycen2,xfwhm2, yfwhm2,chname,DISTANCES=nearest_np_d,NUMBER=nn)
-  if keyword_set(use_np) then  nearest = nearest_neighbors_np_DT(xcen2,ycen2,sqrtnp2,chname,DISTANCES=nearest_np_d,NUMBER=nn)
+  if keyword_set(use_fwhm) then nearest= nearest_neighbors_xyfwhm_DT(xcen2,ycen2,xfwhm2, yfwhm2,chname,DISTANCES=nearest_np_d,NUMBER=nn)
+  if keyword_set(use_np) then nearest = nearest_neighbors_np_DT(xcen2,ycen2,sqrtnp2,chname,DISTANCES=nearest_np_d,NUMBER=nn)
   if keyword_set(xyonly) then nearest = nearest_neighbors_DT(xcen2,ycen2,chname,DISTANCES=nearest_d,NUMBER=nn)
                                 ;quick statistics to see if np picks different nearest neighbors than xyfwhm
 
   for j = 0L, ni - 1 do begin ;for each centroid in the entire dataset, aka. 63*nimages
      ;sometimes the nearest neighbor just doesn't work
-  ;   print, 'nearest(*,j)', nearest(*,j)
+;     print, 'nearest(*,j)', nearest(*,j)
      anan = where (finite(nearest(*,j)) lt 0.9, nancount)
      if nancount gt 0 then begin
-        ;print, j ,ni,'not finite nearest'
+        print, j ,ni,'not finite nearest'
 ; jump to the end
         flux(j)=  !VALUES.F_NAN
         fluxerr(j) =  !VALUES.F_NAN
@@ -350,7 +354,7 @@ t_dur =  t14  ; in days
      if keyword_set(use_fwhm) then w = weight_fwhm(stdxcen, stdycen, stdxfwhm, stdyfwhm, nearestx, nearesty, nearestxfwhm, nearestyfwhm, xcenarr(j), ycenarr(j), xfwhm(j), yfwhm(j), nearestflux)
 
      warr[j] = w
-                                ; print, 'testing', flux_m(j), w,  flux_m(j) / w
+;     print, 'testing', flux_m(j), w,  flux_m(j) / w
      flux(j) = flux_m2(j) / w
      fluxerr(j) = fluxerr_m2(j) / w
      

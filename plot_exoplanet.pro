@@ -34,7 +34,7 @@ if planetname eq 'WASP-62b' then exosystem = 'WASP-62 b'
 if planetname eq 'WASP-52b' then exosystem = 'WASP-52 b'
 if planetname eq 'HAT-P-22' then exosystem = 'HAT-P-22 b'
 if planetname eq 'GJ1214' then exosystem = 'GJ 1214 b'
-
+if planetname eq '55Cnc' then exosystem = '55 Cnc e'
 
 print, exosystem, 'exosystem'
 if planetname eq 'WASP-52b' then teq_p = 1315
@@ -107,14 +107,14 @@ if keyword_set(position_plot) then begin
 ;         ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
 ;         an = plot(xcen500, ycen500, '1s', sym_size = 0.1,   sym_filled = 1, color = colorarr(a),/overplot)
 ;      endif
-      if planethash[aorname(a),'exptime'] gt 0.2 then begin
+;      if planethash[aorname(a),'exptime'] gt 0.2 then begin
          ;scolor = 'blue'
          scolor = 'red'
 
          xcen500 = 500.* ((planethash[aorname(a),'xcen']) - 14.5)
          ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
          an = plot(xcen500, ycen500, '1s', sym_size = 0.1,   sym_filled = 1, color = scolor,/overplot)
-      endif
+;      endif
 
 ;     npmax = [4.8, 37., 4.5]
 ;     testnp = where((planethash[aorname(a),'np']) gt npmax(a) , complement = nospike)

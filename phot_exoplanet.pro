@@ -66,6 +66,7 @@ if planetname eq 'GJ1214' then exosystem = 'GJ 1214 b'
 if planetname eq '55CNCe' then exosystem = '55 CNC e'
 if planetname eq 'HD209458' then exosystem = 'HD 209458 b'
 if planetname eq 'Kepler-5' then exosystem = 'Kepler-5 b'
+if planetname eq 'Kepler-17' then exosystem = 'Kepler-17 b'
 
 print, exosystem, 'exosystem'
 if planetname eq 'WASP-52b' then teq_p = 1315

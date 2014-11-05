@@ -9,8 +9,8 @@ function nearest_neighbors_np_DT,x,y,sqrtnp, chname, DISTANCES=nearest_d,NUMBER=
   n=n_elements(x) 
   nearest=lonarr(k,n,/NOZERO)
   nearest_d=fltarr(k,n,/NOZERO)
-  print, x[0:100]
-  print, y[0:100]
+;  print, x[0:100]
+;  print, y[0:100]
   for point=0L,n-1 do begin 
 ;     print, 'working on ', x[point], y[point]
      if c[point] gt  c[point+1] - 1 then begin
@@ -19,7 +19,7 @@ function nearest_neighbors_np_DT,x,y,sqrtnp, chname, DISTANCES=nearest_d,NUMBER=
                                 ; or just keep the last d which is what doing nothing will do I think
         nearest[*,point] = !VALUES.F_NAN
         nearest_d[*,point] = !VALUES.F_NAN
-        print, point, 'didnt find neighbors for this one'
+ ;       print, point, 'didnt find neighbors for this one'
      
         GOTO, jumpend
      endif  else begin

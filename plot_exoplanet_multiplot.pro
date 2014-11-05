@@ -96,7 +96,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
            
            pp = plot((bin_timearr-  time_0)/60./60., bin_xcen, '1s',  $;title = planetname, $
                      color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 0.5, $
-                     xshowtext = 0, ytickformat = '(F10.1)', dimensions = [600, 900], _extra = extra, yminor = 0, yrange = [126.4, 126.8]) ;, $, ymajor = 4
+                     xshowtext = 0, ytickformat = '(F10.1)', dimensions = [600, 900], _extra = extra, yminor = 0, yrange = [127.0, 127.5]) ;, $, ymajor = 4
  
           ;turn off refreshing to make this quicker hopefully
 ;           pp.Refresh, /Disable
