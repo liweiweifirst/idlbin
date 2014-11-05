@@ -146,6 +146,45 @@ chname = 0
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 ;---
+;---
+
+  planetname = 'Kepler-17'
+  ra_ref = 298.39583
+  dec_ref = 47.815
+  aorname_ch1 = ['r40251904', 'r40252416' ]  ;ch1
+  aorname_ch2 = ['r40252160', 'r40251648']  ;ch2 
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  utmjd_center =   55185.17803
+  transit_duration=0.
+  period = 1.485710
+  intended_phase = 0.0
+  exptime = 12.
+  stareaor = 0
+  mask = 'no'
+  plot_norm = 1.
+  plot_corrnorm = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'Kepler-9'
+  ra_ref = 285.57398
+  dec_ref = 38.401
+  aorname_ch1 = ['r47052800', 'r47044608' ,'r47025920', 'r47044352','r47038976','r47043584','47053312','47043072']  ;ch1
+  aorname_ch2 = ['r47027968', 'r47055104','r47043328', 'r47054848', 'r47056896', 'r47054592', 'r47028736', 'r47054336']  ;ch2 
+  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  utmjd_center =  55072.93381
+  transit_duration=0.
+  period = 19.22418
+  intended_phase = 0.0
+  exptime = 2.
+  stareaor = 0
+  mask = 'no'
+  plot_norm = 1.
+  plot_corrnorm = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
 
   planetname = 'HD158460'   ; !!!This is a standard star, ie should have a flat light curve
   ra_ref = 261.42213
@@ -266,7 +305,7 @@ aorname_ch2 = ['r44499968','r44499712','r44497408','r44501504','r44501248','r445
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
-  planetname = '55Cnce'
+  planetname = '55Cnc'
   ra_ref = 133.14756
   dec_ref = 28.330094
 ;aorname = [ 'r39524608', 'r42000384', 'r43981056', 'r43981312', 'r43981568', 'r43981824', 'r48069888', 'r48070144', 'r48070400', 'r48070656', 'r48070912', 'r48071168', 'r48071424', 'r48071680', 'r48071936', 'r48072192', 'r48072448', 'r48072704', 'r48072960', 'r48073216', 'r48073472', 'r48073728'] ; all ch2
