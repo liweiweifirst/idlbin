@@ -16,10 +16,8 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
   planetname_final = planetname
   dirname = strcompress(basedir + planetname +'/')
   print, 'dirname', dirname
-  ;a = 1
-  print, 'stareaor', stareaor
-  startaor = 1
-  stopaor = stareaor - 1
+  startaor = 0
+  stopaor = 1
 
 
   ;making things look better on the plot
@@ -32,7 +30,7 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
   filename =strcompress(dirname +'pixphasecorr_ch'+chname+'_'+string(apradius)+'_*.sav',/remove_all)
   savfiles = FILE_SEARCH(filename,count=nfiles)
   print, 'restoring',nfiles , 'files'
-  
+;  print, 'flux_np', flux_np
   for f = 0, nfiles -1 do begin
      restore, savfiles[f]
 
@@ -132,6 +130,10 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
      bin_time = bin_time[0:c-1]
      bin_time_0 =  bin_time_0[0:c-1]
      bin_phase = bin_phase[0:c-1]
+
+     offp = where(bin_phase lt 0)
+     bin_phase[offp] = bin_phase[offp] + 1.0
+
      bin_bmjd = bin_bmjd[0:c-1]
      bin_fluxerr_m = bin_fluxerr_m[0:c-1]
      bin_fluxerr_np = bin_fluxerr_np[0:c-1]
@@ -202,14 +204,14 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
 
 ;qucik junk
 
-     pqt = plot(bin_time_0/60./60. - 1.0, bin_flux + 0.002,$ ;/median(bin_flux)
-                    '1s', sym_size = 0.3, sym_filled = 1,color = plotcolor, $
-                     name = 'position corr', xrange = [0, 55])
+;     pqt = plot(bin_time_0/60./60. , bin_flux + 0.002,xtitle = 'time', ytitle = 'bin_flux',$ ;/median(bin_flux)
+;                    '1s', sym_size = 0.3, sym_filled = 1,color = plotcolor, $
+;                     name = 'position corr', xrange = [0, 10], yrange = [0.99, 1.03])
 
 ;     pqt = plot(findgen(51), fltarr(51) + 1.00,overplot = pqt, thick = 2)
-     readcol, '/Users/jkrick/irac_warm/pcrs_planets/WASP-52b/WASP-52_b_model_predicted_lightcurve.txt', model_time, model_flux
-     model_time = model_time * 24. ; from days to hours
-     pqt = plot(model_time, model_flux, color = 'aqua', overplot = pqt)
+;     readcol, '/Users/jkrick/irac_warm/pcrs_planets/WASP-52b/WASP-52_b_model_predicted_lightcurve.txt', model_time, model_flux
+;     model_time = model_time * 24. ; from days to hours
+;     pqt = plot(model_time, model_flux, color = 'aqua', overplot = pqt)
 
      if keyword_set(errorbars) then begin
            
@@ -219,10 +221,10 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
 ;              if a eq startaor then begin
            print, 'normalizing black flux by ', median(bin_flux_m)
            if f eq 0 then p1 = errorplot(bin_phase, bin_flux_m/ median(bin_flux_m),bin_fluxerr_m/median(bin_flux_m),$ ;median(bin_flux_m)
-                                '1s', sym_size = 0.3, sym_filled = 1,$
+                                '1s', sym_size = 0.3, sym_filled = 1,xrange = [0.40, 0.60],$
                                 color = 'black', xtitle = 'Phase', ytitle = 'Normalized Flux', title = planetname, $
-                                name = 'raw flux', axis_style = 1,  $ ;yrange =[0.90, 1.026], 
-                                xstyle = 1, errorbar_capsize = 0.025) ;
+                                name = 'raw flux', axis_style = 1, yrange =[0.95, 1.04], $
+                                xstyle = 1, errorbar_capsize = 0.1) ;
 ;              endif else begin
 ;                 print, 'normalizing black flux by ', median(bin_flux_m)
 ;
@@ -242,7 +244,7 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
               print, 'normalizing', ending, ' flux by ', median(bin_flux)
               P2 = errorplot(bin_phase, bin_flux +delta_red - f*0.01, bin_fluxerr,$ ;median(bin_flux)
                              '1s', sym_size = 0.3, sym_filled = 1, errorbar_color =plotcolor,$
-                             color = plotcolor, /overplot, name = 'position corr', errorbar_capsize = 0.025)
+                             color = plotcolor, /overplot, name = 'position corr', errorbar_capsize = 0.1)
               
 ;              print, 'normalizing blue flux by ', median(bin_flux_np)
 ;              p3 = errorplot(bin_phase, bin_flux_np  + delta_blue, $ ;/median(bin_flux_np)
@@ -287,16 +289,15 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
            
         endif else begin        ;now without errorbars
            if keyword_set(phaseplot) then begin
-              
-              if a eq startaor then begin
+              print, 'no error bars, phaseplot'
                  p1 = plot(bin_phase, bin_flux_m/ median(bin_flux_m), '1s', sym_size = 0.3, sym_filled = 1,$
                            color = 'black', xtitle = 'Phase', ytitle = 'Normalized Flux', title = planetname, $
-                           name = 'raw flux', yrange =[0.984, 1.013], xrange = [0.47, 0.53], axis_style = 1,  $
-                           xstyle = 1)
-              endif else begin
-                 p1 = plot(bin_phase, bin_flux_m/ median(bin_flux_m), '1s', sym_size = 0.3, sym_filled = 1,$
-                           color = 'black', /overplot)
-              endelse
+                           name = 'raw flux', xrange = [0.47, 0.53], axis_style = 1, yrange =[0.95, 1.013],$
+                           xstyle = 1, overplot = p1)
+;              endif else begin
+;                 p1 = plot(bin_phase, bin_flux_m/ median(bin_flux_m), '1s', sym_size = 0.3, sym_filled = 1,$
+;                           color = 'black', /overplot)
+;              endelse
 
 ;              p4 =  plot(bin_phase, (bin_corrflux /median( bin_corrflux)) + delta_grey, '1s', sym_size = 0.3,   $
 ;                         sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
@@ -304,18 +305,20 @@ pro plot_pixphasecorr_staring, planetname, bin_level, apradius, chname, selfcal=
               p2 = plot(bin_phase, bin_flux/median(bin_flux)+delta_red , '1s', sym_size = 0.3, sym_filled = 1,$
                         color = 'red', /overplot, name = 'position corr')
               
+              print, 'bin_flux_np', bin_flux_np
               p3 = plot(bin_phase, bin_flux_np /median(bin_flux_np) + delta_blue, '1s', sym_size = 0.3,   $
                         sym_filled = 1,color = 'blue', /overplot, name = 'position + np')
               
            endif else begin     ;plot as a function of time
-              if a eq startaor then begin
+;              if a eq startaor then begin
                  p1 = plot(bin_time/60./60., bin_flux_m/ median(bin_flux_m), '1s', sym_size = 0.3,sym_filled = 1,$
                            color = 'black', xtitle = 'Time (hrs)', ytitle = 'Flux', title = planetname,$
-                           name = 'raw flux', yrange =[0.984, 1.013], xrange = [0,7.5], axis_style = 1,  xstyle = 1)
-              endif else begin
-                 p1 = plot(bin_time/60./60., bin_flux_m/ median(bin_flux_m), '1s', sym_size = 0.3,sym_filled = 1,$
-                           color = 'black', /overplot)
-              endelse
+                           name = 'raw flux', yrange =[0.984, 1.013], xrange = [0,7.5], axis_style = 1,  $
+                           xstyle = 1, overplot = p1)
+;              endif else begin
+;                 p1 = plot(bin_time/60./60., bin_flux_m/ median(bin_flux_m), '1s', sym_size = 0.3,sym_filled = 1,$
+;                           color = 'black', /overplot)
+;              endelse
 
 ;              p4 =  plot(bin_time/60./60., (bin_corrflux /median( bin_corrflux)) + delta_grey, '1s', sym_size = 0.3, $
 ;                         sym_filled = 1,color = 'grey',/overplot, name = 'pmap corr')
