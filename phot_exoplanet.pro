@@ -63,7 +63,7 @@ if planetname eq 'WASP-62b' then exosystem = 'WASP-62 b'
 if planetname eq 'WASP-52b' then exosystem = 'WASP-52 b'
 if planetname eq 'HAT-P-22' then exosystem = 'HAT-P-22 b'
 if planetname eq 'GJ1214' then exosystem = 'GJ 1214 b'
-if planetname eq '55CNCe' then exosystem = '55 CNC e'
+if planetname eq '55Cnc' then exosystem = '55 Cnc e'
 if planetname eq 'HD209458' then exosystem = 'HD 209458 b'
 if planetname eq 'Kepler-5' then exosystem = 'Kepler-5 b'
 if planetname eq 'Kepler-17' then exosystem = 'Kepler-17 b'
@@ -81,8 +81,12 @@ get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=tra
                        TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
                        INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
                        DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose
-if ra lt 400 then begin  ; that means get_exoplanet_data actually found the target
-   ra_ref = ra*15.       ; comes in hours!;
+ra = 1000.
+if ra lt 400. then begin  ; that means get_exoplanet_data actually found the target
+   ra_ref = double(ra)*15.D       ; comes in hours!;
+   help, ra_ref
+   help, double(ra)
+   print, ra, ra_ref, double(ra) * 15.D, double(ra) * 15.D/ 15.D
    dec_ref = dec
    utmjd_center = mjd_transit
    period = p_orbit
