@@ -18,16 +18,16 @@ pro superdark
      expdir = dirname + expname(e)
      cd, expdir
      ntotdarks = 0
-
      if e eq 0 then aorname = ['r38712320','r38811136','r38814720','r38927872','r38931456','r39105792','r39109376','r39123456','r39127040','r39144192','r39147776','r39206144','r39209728','r39220480','r39224064','r39340288','r39343872','r39354112','r39357696','r39427328','r39430912','r39452672','r39456256','r39535360','r39538944','r39552768','r39556352','r40258048','r40261632','r40277760','r40281344','r40322048','r40325632','r41019392','r41022976','r41083648','r41087232','r41178624','r41180928','r41232384','r41235968','r41254144','r41257728','r41406464','r41410048','r41433856','r41437440','r41605120','r41608704','r41622784','r41626368','r41680128','r41683712','r41861632','r41865216','r41888000','r41891584','r41994752','r41998336','r42012672','r42016256','r42040320','r42043904','r42083584','r42087168','r42157312','r42159616','r42554368','r42559232','r42600704','r42604288','r42772480','r42776064','r43953920','r43957504','r43993600','r44152576','r44156160','r44235008','r44238592','r44375552','r44379136','r44396288','r44399872','r44421888','r44425472','r44484608','r44488192','r44617728','r44621312','r44920064','r45048320','r45052160','r45178368','r45181952','r45211904','r45215488','r45249792','r45253376','r45281024','r45284864','r45375744','r45379328','r45418496','r45422080','r45522944','r45526528','r45561600','r45565440','r45648896','r45652480','r45670912','r45682944','r45696256','r45699840','r45730816','r45734400','r45751552','r45755136','r45772032','r45775360','r45804800','r45808128','r45826816','r45830144','r45860096','r45863424','r45965824','r45969152','r46013696','r46017024','r46081024','r46084352','r46098432','r46102016','r46499584','r46503168','r46925568','r46929152','r47076352','r47079936','r47584256','r47587840','r47607552','r47611392','r48400896','r48404480','r48426240','r48429824','r48490240','r48493824','r48566272','r48569856','r48582400','r48593152','r48608512','r48619520','r48625920','r48637184','r48648448','r48659200','r48752384','r48763136','r48801280','r48812032','r48828160','r48839680','r48854528','r48866560','r48871680','r48882432','r48903680','r48920832','r48939776','r48953600','r48986880','r48997632','r49004544','r49015296','r49021696','r49036032','r49052928','r49063680','r49078528','r49089280','r49100544','r49111552','r49122304','r49133056','r49231616','r49241088','r49871360','r49882112','r50096384','r50107136','r50691584','r50702336','r50762752','r50773504','r50805504','r50816256','r50823680','r50834432','r50847232','r50857984','r50885888','r50896640','r50907136','r50918144','r50957824','r50976256','r50999808','r51010560','r51021312','r51032064','r51046912','r51057408','r51074048','r51084800','r51186944','r51197696','r51441408'] ;'r41930496','r41934080','r44660224',
 
 ;ugh 4 dimensions
      bigim = fltarr(32, 32, 128, n_elements(aorname)*18)  ; XXXmaking this number up for now
      count = 0
+     testpix = fltarr( n_elements(aorname)*18)
 
 
      for a = 0, n_elements(aorname) - 1 do begin
-        print, 'working on ', aorname(a)
+;        print, 'working on ', aorname(a)
         cd, expdir
        ;make a superskyflat for each subframe
         skyflatname = strcompress( aorname(a) + '/ch'+ chname + '/cal/*superskyflat*.fits',/remove_all)
@@ -81,6 +81,7 @@ pro superdark
 
               ;and put it together with the others tomake the superdark
               bigim(0, 0, 0, count) = data
+              testpix[count] = data[11,11]
               count = count + 1
            endif   ; if the correct darks
 
@@ -91,15 +92,32 @@ pro superdark
      
      
 ;now make a median
-        superdark = median(bigim, dimension = 4)
-        fits_write, dirname+ 'superdark_'+expname(e)+'.fits', superdark, header ; just use the last header
+     superdark = median(bigim, dimension = 4)
+     fits_write, dirname+ 'superdark_'+expname(e)+'.fits', superdark, header ; just use the last header
      
+     ;print, 'testpix', n_elements(testpix), testpix
+     plothist, testpix, xhist, yhist, /noprint,/noplot
+     ph = barplot(xhist, yhist,  xtitle = 'Single pixel value', ytitle = 'Number', fill_color = 'sky blue')
+     ph = plot(intarr(300) + median(testpix), indgen(300), linestyle = 4, thick = 2, overplot = ph)
+
+;and what would a meanclip look like.
+     meanclip, testpix, meanout, sigmaout
+     ph = plot(intarr(300) + meanout, indgen(300), linestyle = 1, thick = 2, overplot = ph)
+
+
+;a plot of the difference between a mean and a median for all
+;pixels
+     superdark_mean = mean(bigim, dimension = 4,/double, /nan)
+
+     delta = superdark - superdark_mean
+     plothist, delta, xhist, yhist, bin = 0.05, /noprint, /noplot
+     phd = barplot(xhist, yhist,  xtitle = 'Median - Mean', ytitle = 'Number', fill_color = 'orange', xrange = [-0.5, 0.5])
 
 ;------------------------------------------------
     
-  endfor   ; for each expname
+  endfor                        ; for each expname
 
-  end
+end
   
 
 
