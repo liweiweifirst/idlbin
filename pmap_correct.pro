@@ -1,3 +1,57 @@
+;+
+; NAME: PMAP_CORRECT.PRO
+;
+; PURPOSE:  Correct IRAC observed aperture photometry-derived fluxes from the post-cryogenic, or warm mission (IRACPC) for the intra-pixel response, using the gain map dataset of the 3.6 micron (channel 1) and 4.5 micron (channel 2) subarray “sweet spots”. This is different from iracpc_pmap_corr in that it does not use interpolation to make a map of the gain variation across the chip, which should improve accuracy.  Instead, for each data point with independent values x, y, NP, XFWHM, YFWHM, it finds the nearest neighbors in the gain map dataset, and uses those neighbors to generate a correction to the photometry.  The definition of nearest neighbor is chosen by the user to be those data points nearest in (X,Y) position, or nearest in the combination of (X,Y, and NP).
+;
+; CATEGORY:  Photometry, corrections
+;
+; CALLING SEQUENCE:  corrected_flux = PMAP_CORRECT ( X, Y, $
+;          OBSERVED_FLUX, CHANNEL, XFWHM, YFWHM, /POSITION_ONLY, $
+;          NP = np, FUNC = func, CORR_UNC = corr_unc, /FULL, DATAFILE = datafile, NNEAREST = nnearest, $
+;          MAX_DIST = max_dist, /VERBOSE, OCC_MIN = occ_min, OCCUPATION = occupation)
+;
+; INPUTS:
+;
+;
+; OPTIONAL INPUTS:
+;
+;
+;
+; KEYWORD PARAMETERS:
+;
+;
+;
+; OUTPUTS:
+;
+;
+;
+; OPTIONAL OUTPUTS:
+;
+;
+;
+; COMMON BLOCKS:
+;
+;
+;
+; SIDE EFFECTS:
+;
+;
+;
+; RESTRICTIONS:
+;
+;
+;
+; PROCEDURE:
+;
+;
+;
+; EXAMPLE:
+;
+;
+;
+; MODIFICATION HISTORY:
+;
+;-
 PRO pmap_correct_interpolate_single,x,y,ch,func,f_interp,f_interp_unc,xfwhm,yfwhm,NNEAREST=nnearest,POSITION_ONLY=position_only,MAX_DIST=max_dist,$
                                     NP=np,OCC_MIN=occ_min,OCCUPATION=occupation
    COMMON pmap_data,x_pmap,y_pmap,f_pmap,np_pmap,xfwhm_pmap,yfwhm_pmap,func_pmap,scale,sigscale
