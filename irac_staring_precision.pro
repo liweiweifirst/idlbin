@@ -101,7 +101,7 @@ y =  (sigma_poisson / root_n) / source_electrons
 
 p2 = plot( bin_scale, y/y(0), thick = 3, linestyle = 2, overplot = p2)
 ;now add root2 * root N
-y2 =  3. * y/y(0)
+y2 =  2. * y/y(0)
 p2 = plot( bin_scale, y2, thick = 3, linestyle = 2, color = 'grey', overplot = p2)
 
 ;ch1
@@ -118,12 +118,14 @@ y =  (sigma_poisson / root_n) / source_electrons
 p1 = plot( bin_scale, y/y(0), thick = 3, linestyle = 2, overplot = p1)
 
 ;now add root2 * root N
-y2 =  3. * y/y(0)
+y2 =  2. * y/y(0)
 p1 = plot( bin_scale, y2, thick = 3, linestyle = 2, color = 'grey', overplot = p1)
+
+
 
 ;and some labels
 t = text(180, .02, 'Photon noise', /data, target = p1)
-t = text(23, 0.7, '3X photon', /data, target = p1, color = 'grey')
+t = text(13, 0.6, '2X photon', /data, target = p1, color = 'grey')
 t = text(180, .02, 'Photon noise', /data, target = p2)
-t = text(23, 0.7, '3X photon', /data, target = p2, color = 'grey')
+t = text(13, 0.6, '2X photon', /data, target = p2, color = 'grey')
 end
