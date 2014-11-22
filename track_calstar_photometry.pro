@@ -70,22 +70,26 @@ print, 'after while loop ', ti
 ;save,  ti, bigxcen,  bigycen,  bigstarnamearr,  bigtimearr,  bigfluxarr,  bigfluxerrarr,  bigcorrfluxarr, bigbackarr,  bigraarr,  bigdecarr , filename =savefilename
 
 
-;test plot
+
 if keyword_set(make_plot) then begin
-     colorarr = ['black', 'red', 'blue', 'green', 'gray', 'indigo','orange']
+     colorarr = ['blue', 'red','black','green','grey','purple', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ]
 
    ;need to sort by star
-     names = [ '1812095', 'KF08T3_', 'KF06T2_', 'KF06T1_', 'KF09T1_',  'NPM1p67','NPM1p60'];, 'NPM1p68'] ;, 'HD16545']
+     names = [ '1812095', 'KF08T3_', 'KF06T2_', 'KF06T1_', 'KF09T1_',  'NPM1p67','NPM1p60','BD20_417', 'HD4182', 'HD37725', 'HD55677','HD77823', 'HD89562', 'HD99253', 'HD113745', 'HD131769', 'HD137429', 'HD156896', 'HD184837', 'HD195061', 'HD218528', 'HD284370'];, 'NPM1p68'] ;, 'HD16545']
+     
      ;XXX need to add secondary star names
      normvals = fltarr(n_elements(names))
      for n = 0, n_elements(names) - 1 do begin
         
         an = where(bigstarnamearr eq names(n), count)
         ;XXX not finding all the colors?
-        ;XXX want this to be corrflux
-        p = errorplot((bigtimearr - bigtimearr(0))/60./60./ 24., bigfluxarr, bigfluxerrarr, '1s', sym_size = 0.3, $
-                      xtitle = 'Time (days)', ytitle = 'Flux',color = colorarr(n), overplot = p)
-      
+        if count gt 0 then begin
+           print, 'n, name', n, bigstarnamearr(an), colorarr(n)
+                                ;XXX want this to be corrflux
+           p = errorplot((bigtimearr - bigtimearr(0))/60./60./ 24., bigfluxarr, bigfluxerrarr, '1s', sym_size = 0.5, $
+                      sym_filled = 1, xtitle = 'Time (days)', ytitle = 'Flux',color = colorarr(n), overplot = p)
+        endif
+
            
      endfor
 
