@@ -118,6 +118,7 @@ CASE 1 OF
          ENDIF
          MSINI = exodata.MSINI[iuse[0]]
          MSTAR = exodata.MSTAR[iuse[0]]
+         help, exodata.RA
          RA = exodata.RA[iuse[0]]
          DEC = exodata.DEC[iuse[0]]
          P_ORBIT = exodata.PER[iuse[0]]
