@@ -253,11 +253,18 @@ nflux = N_ELEMENTS(observed_flux)
 nx = N_ELEMENTS(x)
 ny = N_ELEMENTS(y)
 nch = N_ELEMENTS(channel)
+;print, 'inside pixphas', nflux, nx, ny, nch
 IF nch EQ 1 THEN BEGIN
-   IF Nflux GT 1 THEN channel = FIX(MAKE_ARRAY(SIZE=size(observed_flux),VALUE=channel)) ELSE channel = FIX(channel)
+   IF nflux GT 1 THEN BEGIN
+;      print, 'nflux if', nflux
+      channel = FIX(MAKE_ARRAY(SIZE=size(observed_flux),VALUE=channel)) 
+   ENDIF ELSE BEGIN
+;      print, 'nflux else', nflux
+      channel = FIX(channel)
+   ENDELSE
+
    nch = N_ELEMENTS(channel)
 ENDIF
-
 IF nflux NE nx OR nflux NE ny OR nflux NE nch THEN BEGIN
    print,'PIXEL_PHASE_CORRECT_GAUSS:  Input array sizes don''t match.  Exiting.'
    RETALL
