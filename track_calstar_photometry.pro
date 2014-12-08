@@ -2,7 +2,6 @@ pro track_calstar_photometry, savefilename,ch, make_plot = make_plot, binning = 
 ;track_calstar_photometry,'/Users/jkrick/irac_warm/calstars/track_calstar_ch2.sav', 2, /make_plot
  st1 = systime(1)
 
-;maybe add a flat line at corrflux = 1.0
 ;how do I set xrange with dates?
 
 COMMON track_block, photcordata, photcorhead, xarr,  yarr,  starnamearr,  timearr,  fluxarr,  fluxerrarr,  backarr,  corrfluxarr ,  raarr ,  decarr, bmjdarr
@@ -14,7 +13,7 @@ if ch eq 2 then fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch2_ph
  
    
 result = file_test(savefilename)
-orig_num = 33800                ;33500  38500
+orig_num = 33500                ;33500  38500
 
 if result eq 1 then begin  ;file exists
 ;if that file exists then figure out which campaign was last done and
@@ -107,13 +106,14 @@ if keyword_set(make_plot) then begin
            p = errorplot(bigtimearr(an) , bigcorrfluxarr(an)/median(bigcorrfluxarr(an)), $ ;- bigtimearr(0))/60./60./ 24.
                          bigfluxerrarr(an)/median(bigcorrfluxarr(an)), '1s', sym_size = 0.5, ERRORBAR_COLOR = colorarr(n),$
                          sym_filled = 1, ytitle = 'Corrected Flux',color = colorarr(n), overplot = p,$
-                         yrange = [0.85,1.15], XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = 'months', xtickinterval = 1)
+                         yrange = [0.85,1.15], XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = 'months', $
+                         title = 'Ch' + string(ch), xrange = [min(bigtimearr),max(bigtimearr)])
 
            pz = errorplot(bigtimearr(an) , bigfluxarr(an)/median(bigfluxarr(an)), $
                          bigfluxerrarr(an)/median(bigfluxarr(an)), '1s', sym_size = 0.5, ERRORBAR_COLOR = colorarr(n),$
                          sym_filled = 1, ytitle = 'Flux',color = colorarr(n), overplot = pz,$
-                         yrange = [0.85,1.15], XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))')  ;- bigtimearr(0))/60./60./ 24.
-
+                         yrange = [0.85,1.15], XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = 'months', $
+                          title = 'Ch' + string(ch), xrange = [min(bigtimearr),max(bigtimearr)])
 
           ;-----------------
 
@@ -160,10 +160,9 @@ if keyword_set(make_plot) then begin
               pb = errorplot(bin_time , bin_corrflux/median(bin_corrflux), $
                              bin_fluxerrarr/median(bin_corrflux), '1s', sym_size = 0.5, ERRORBAR_COLOR = colorarr(n),$
                              sym_filled = 1, ytitle = 'Binned Corrected Flux',color = colorarr(n), overplot = pb,$
-                             yrange = [0.95,1.05], xrange = [min(bin_time),max(bin_time)], $
-                             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))') ;- bigtimearr(0))/60./60./ 24.
-              pbl = plot(bin_time, intarr(n_elements(bin_time)) + 1.0)
-
+                             yrange = [0.95,1.05], xrange = [min(bigtimearr),max(bigtimearr)], xtickunits = 'months', $
+                             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', title = 'Ch' + string(ch)) ;- bigtimearr(0))/60./60./ 24.
+              pbl = plot(bin_time, intarr(n_elements(bin_time)) + 1.0, overplot = pb)
            endif   ;if keyword set binning
            
         endif
@@ -173,185 +172,24 @@ if keyword_set(make_plot) then begin
      
      
   endif
-
-
-
+;save these to /Volumes/IRAC/Calibration/XXX when that page starts
+;loading again
+plotname = strcompress('/Users/jkrick/irac_warm/calstars/ch' + string(ch) + '_track_binned.png',/remove_all)
+if keyword_set(binning) then pb.save, plotname
+plotname = strcompress('/Users/jkrick/irac_warm/calstars/ch' + string(ch) + '_track_corrected.png',/remove_all)
+p.save, plotname
+plotname = strcompress('/Users/jkrick/irac_warm/calstars/ch' + string(ch) + '_track_flux.png',/remove_all)
+pz.save, plotname
 print, 'time check', systime(1) - st1
 
 
+;need these for running this as a cron job so that the script finishes
+;remove for actually looking at the plots
+p.close
+pz.close
+pb.close
 end
 
 
-
-
-
-
-;----------------------------------------
-function do_calstar_photometry, ch, dirname
-  common track_block
-
-  cd, dirname
-  pwd
-  command ="find ./bcd/00*/ -name 'IRAC.2*bcd_fp.fits' > /Users/jkrick/irac_warm/calstars/allch2bcdlist.txt "
-  spawn, command  
-  readcol,strcompress('/Users/jkrick/irac_warm/calstars/allch'+string(ch)+'bcdlist.txt',/remove_all), fitsname, format = 'A', /silent
-  
-  nfits =  n_elements(fitsname) 
-  
-;set up storage arrays
-  ;assume all sub array then cut down later
-  xarr = fltarr(nfits*64)
-  starnamearr = strarr(nfits*64)
-  timearr = dblarr(nfits*64)
-  yarr = xarr 
-  fluxarr = xarr
-  fluxerrarr = xarr
-  backarr = xarr
-  backerrarr = xarr
-  corrfluxarr = xarr
-  raarr = xarr
-  decarr = xarr
-  nparr = xarr
-  xfwhmarr = xarr
-  yfwhmarr = xarr
-  raarr = timearr
-  decarr = timearr
-  bmjdarr = timearr    
-  
-
-  startfits = 0L
-  stopfits =  nfits - 1
-  i = 0L
-  for c = startfits, stopfits do begin
-     header = headfits(fitsname(c)) ;
-     NAXIS= sxpar(header, 'NAXIS')
-     AORLABEL= sxpar(header, 'AORLABEL')
-
-;       print, i, strmid(AORLABEL, 0, 12), naxis
-     if strmid(AORLABEL, 0, 12) eq 'IRAC_calstar'  then begin ;got a good one  
-        
-;read in the image, get important info from the header
-        fits_read,fitsname(c), im, h
-        inter = strmid(fitsname(c), 0, 48)
-        uncname = strcompress(inter + 'sig_dntoflux.fits',/remove_all)
-;        print, 'uncname',i,  uncname, fitsname(i)
-        fits_read, uncname, unc, hunc, /no_abort ; so it won't crash if the file isn't there but should use the last unc file.
-        chnlnum = sxpar(h, 'CHNLNUM')
-        ra_ref = sxpar(h, 'RA_REF')
-        dec_ref = sxpar(h, 'DEC_REF')
-        sos_ver = sxpar(h, 'SOS_VER')
-        sclk_obs = sxpar(h, 'SCLK_OBS')
-        aintbeg = sxpar(header, 'AINTBEG')
-        atimeend = sxpar(header, 'ATIMEEND')
-        bmjd_obs = sxpar(header, 'BMJD_OBS')
-        starname = strmid(AORLABEL, 13, 7)
-
-;make sure the target is on the frame
-        ADXY, h, ra_ref, dec_ref, xcen, ycen
-        if naxis eq 2 then begin
-           xmax =250
-           ymax = 250
-        endif else begin
-           xmax = 30
-           ymax = 30
-        endelse
-        ;if starname eq '1812095' then print, 'working on 1812095'
-        if xcen gt 5 and ycen gt 5 and xcen lt xmax and ycen lt ymax then begin
-;           print, 'starting photometry ' , i, c, fitsname(c), starname
-           ;do photometry
-           get_centroids_for_calstar_jk,im, h, unc, ra_ref, dec_ref,  t, dt, hjd, xft, x3, y3, $
-                                        x5, y5, x7, y7, xg, yg, xh, yh, f, b, x3s, y3s, x5s, y5s, $
-                                        x7s, y7s, fs, bs, xp3, yp3, xp5, yp5, xp7, yp7, xp3s, yp3s, $
-                                        xp5s, yp5s, xp7s, yp7s, fp, fps, np, flag, ns, sf, $
-                                        xfwhm, yfwhm, /WARM
-           
-                                ;choose the requested pixel aperture =
-                                ;3.0 pixels to match
-                                ;pixphasecorrectgauss
-           abcdflux = f[*,4]      
-;           print, 'flux', x3, y3, abcdflux
-           fs = fs[*,4]
-                                ; 3-7 pixel background
-           back = b[*,0]
-           backerr = bs[*,0]
-           
-                                ;make a correction for pixel phase 
-           if naxis eq 3 then corrflux = pixel_phase_correct_gauss(abcdflux,x3,y3,chnlnum, '3_3_7',/subarray) $ 
-           else corrflux = pixel_phase_correct_gauss(abcdflux,x3,y3,chnlnum, '3_3_7')
-
-           ;corrflux = abcdflux*ppcorr
-                                ;apply array dependent correction
-           arraycorr = photcordata(x3, y3) 
-           corrflux= corrflux * arraycorr
-           
-                                ;save them
-           starnamearr[c] = strmid(AORLABEL, 13, 7)
-           if naxis eq 3 then begin  
-              xarr[i] = x3
-              yarr[i] = y3
-              fluxarr[i] = abcdflux
-              fluxerrarr[i] = fs
-              corrfluxarr[i] = corrflux
-              backarr[i] = back
-              backerrarr[i] = backerr
-              nparr[i] = np
-              xfwhmarr[i] = xfwhm
-              yfwhmarr[i] = yfwhm
-              raarr[i:i+63] = ra_ref
-              decarr[i:i+63] = dec_ref
-              starnamearr[i:i+63] = starname
-              
-              deltatime = (atimeend - aintbeg) / 64.D ; real time for each of the 64 frames
-              nt = dindgen(64)
-              timearr[i] = sclk_obs  + (deltatime*nt)/60./60./24.D ; 0.5*frametime + frametime*nt
-              bmjdarr[i] = bmjd_obs + (deltatime*nt)/60./60./24.D  ; 0.5*(frametime/60./60./24.) + (frametime/60./60./24.)*nt
-              i = i + 64
-           endif 
-           if naxis eq 2 then begin ; and i eq 0 then begin
-              xarr[i] = x3
-              yarr[i]  =  y3
-              fluxarr[i]  =  abcdflux
-              fluxerrarr[i]  =  fs
-              corrfluxarr[i]  = corrflux
-              timearr[i]  = sclk_obs
-              bmjdarr[i]  = bmjd_obs
-              backarr[i]  =  back
-              backerrarr[i]  = backerr
-              nparr[i]  = np
-              xfwhmarr[i] = xfwhm
-              yfwhmarr[i] = yfwhm
-              raarr[i] = ra_ref
-              decarr[i] = dec_ref
-              starnamearr[i] = starname
-              i = i + 1
-           endif
-          ;print, 'xarr', xarr[0:100]
-        endif                   ; if the target is on the frame
-        
-     endif                      ; if  calstar
-  endfor                        ; for each fits image
-  print, 'final i', i, ' ', nfits
-  final = i
-  xarr = xarr[0:final-1] 
-  yarr = yarr[0:final-1] 
-  fluxarr = fluxarr[0:final-1] 
-  corrfluxarr = corrfluxarr[0:final-1]
-  fluxerrarr = fluxerrarr[0:final-1] 
-  backarr = backarr[0:final-1] 
-  backerrarr = backerrarr[0:final-1] 
-  timearr = timearr[0:final-1] 
-  bmjdarr = bmjdarr[0:final-1] 
-  nparr = nparr[0:final-1] 
-  xfwhmarr = xfwhmarr[0:final-1] 
-  yfwhmar = yfwhmarr[0:final-1] 
-  starnamearr = starnamearr[0:final-1] 
-  raarr = raarr[0:final-1] 
-  decarr = decarr[0:final-1] 
-          
-
-
-
-  return, 0
-end
 
 
