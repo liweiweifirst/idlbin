@@ -102,7 +102,7 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 	edge = 5.
 
 ; First set of apertures	
-  aps1 = [  1.75, 2.0, 2.25, 2.50];, 2.5];, 2.75]
+  aps1 = [  1.75, 2.0, 2.25, 2.50, 3.0];, 2.5];, 2.75]
 ;  aps1 = [ 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25]
   naps1 = n_elements(aps1) 
 ; First background annulus
