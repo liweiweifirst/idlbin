@@ -1,13 +1,13 @@
 function do_calstar_photometry, ch, dirname
   common track_block
-
+  ft1 = systime(1)
   cd, dirname
   pwd
   if ch eq 1 then command ="find ./bcd/00*/ -name 'IRAC.1*bcd_fp.fits' > /Users/jkrick/irac_warm/calstars/allch1bcdlist.txt "
   if ch eq 2 then command ="find ./bcd/00*/ -name 'IRAC.2*bcd_fp.fits' > /Users/jkrick/irac_warm/calstars/allch2bcdlist.txt "
   spawn, command  
   readcol,strcompress('/Users/jkrick/irac_warm/calstars/allch'+string(ch)+'bcdlist.txt',/remove_all), fitsname, format = 'A', /silent
-  
+;  print, '      read in bcdlist', systime(1) - ft1
   nfits =  n_elements(fitsname) 
   
 ;set up storage arrays
@@ -35,6 +35,8 @@ function do_calstar_photometry, ch, dirname
   stopfits =  nfits - 1
   i = 0L
   for c = startfits, stopfits do begin
+       ;print, '      starting another fits file', systime(1) - ft1
+
      header = headfits(fitsname(c)) ;
      NAXIS= sxpar(header, 'NAXIS')
      AORLABEL= sxpar(header, 'AORLABEL')
@@ -71,12 +73,15 @@ function do_calstar_photometry, ch, dirname
         if xcen gt 5 and ycen gt 5 and xcen lt xmax and ycen lt ymax then begin
 ;           print, 'starting photometry ' , i, c, fitsname(c), starname
            ;do photometry
+;           print, '      about to start get_centroids', systime(1) - ft1
+
            get_centroids_for_calstar_jk,im, h, unc, ra_ref, dec_ref,  t, dt, hjd, xft, x3, y3, $
                                         x5, y5, x7, y7, xg, yg, xh, yh, f, b, x3s, y3s, x5s, y5s, $
                                         x7s, y7s, fs, bs, xp3, yp3, xp5, yp5, xp7, yp7, xp3s, yp3s, $
                                         xp5s, yp5s, xp7s, yp7s, fp, fps, np, flag, ns, sf, $
                                         xfwhm, yfwhm, /WARM
-           
+;           print, '      finished get_centroids', systime(1) - ft1
+
                                 ;choose the requested pixel aperture =
                                 ;3.0 pixels to match
                                 ;pixphasecorrectgauss
@@ -95,7 +100,8 @@ function do_calstar_photometry, ch, dirname
                                 ;apply array dependent correction
            arraycorr = photcordata(x3, y3) 
            corrflux= corrflux * arraycorr
-           
+;           print, '      finished both corrections', systime(1) - ft1
+
                                 ;save them
            starnamearr[c] = strmid(AORLABEL, 13, 7)
            if naxis eq 3 then begin  
