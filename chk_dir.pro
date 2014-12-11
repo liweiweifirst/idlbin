@@ -82,7 +82,8 @@ FUNCTION chk_dir, dir_name, output, fullname=fullname,err=err
 
    output = ''
    IF (!version.os NE 'vms') THEN BEGIN
-      IF OS_FAMILY() EQ 'Windows' THEN suffix = '\..' ELSE suffix = '/..'
+;      IF OS_FAMILY() EQ 'Windows' THEN suffix = '\..' ELSE suffix = '/..'
+      suffix = '/..'
       IF STRPOS(dir_name,'~') EQ 0 THEN temp = chklog(dir_name) $
       ELSE temp = dir_name
       rr = findfile(temp+suffix)
