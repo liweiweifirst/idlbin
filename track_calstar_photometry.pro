@@ -13,7 +13,7 @@ if ch eq 2 then fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch2_ph
  
    
 result = file_test(savefilename)
-orig_num = 33500                ;33500  38500
+orig_num = 38500                ;33500  38500
 
 if result eq 1 then begin  ;file exists
 ;if that file exists then figure out which campaign was last done and
@@ -37,7 +37,10 @@ while good_dir eq 1 do begin  ; while there is data to work with, and not an emp
    good_dir = chk_dir(dirname)
 
    if good_dir eq 1 then begin  ;got a live one
+;      print, 'starting photometry', systime(1) - st1
       junk = do_calstar_photometry(ch, dirname)
+;      print, 'finished photometry', systime(1) - st1
+
       if ti eq orig_num + 100 then begin
       ;need to dynamically assaign these arrays since I don't
       ;know how many there are
@@ -172,22 +175,24 @@ if keyword_set(make_plot) then begin
      
      
   endif
-;save these to /Volumes/IRAC/Calibration/XXX when that page starts
-;loading again
-plotname = strcompress('/Users/jkrick/irac_warm/calstars/ch' + string(ch) + '_track_binned.png',/remove_all)
+basedir = '/Volumes/IRAC/Calibration/Trending/'
+plotname = strcompress(basedir + 'ch' + string(ch) + '_track_binned.png',/remove_all)
 if keyword_set(binning) then pb.save, plotname
-plotname = strcompress('/Users/jkrick/irac_warm/calstars/ch' + string(ch) + '_track_corrected.png',/remove_all)
+plotname = strcompress(basedir + 'ch' + string(ch) + '_track_corrected.png',/remove_all)
 p.save, plotname
-plotname = strcompress('/Users/jkrick/irac_warm/calstars/ch' + string(ch) + '_track_flux.png',/remove_all)
+plotname = strcompress(basedir + 'ch' + string(ch) + '_track_flux.png',/remove_all)
 pz.save, plotname
 print, 'time check', systime(1) - st1
 
 
 ;need these for running this as a cron job so that the script finishes
 ;remove for actually looking at the plots
-p.close
-pz.close
-pb.close
+;if keyword_set(make_plot) then begin
+;   p.close
+;   pz.close
+;   if keyword_set(binning) then pb.close
+;endif
+
 end
 
 
