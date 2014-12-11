@@ -24,7 +24,7 @@ case apradius of
       apval = 2
 ;      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140716.sav'
 ;      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140314.sav'
-      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140904.sav'
+      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_sd_0p1s_x4_sdark_141209.sav'
       if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p25_s3_7_0p4s_140716.sav'
    end
    2.5: begin
@@ -39,6 +39,7 @@ case apradius of
    Else: apval = 2              ; if no decision, then choose an apradius = 2.5 pixels
 endcase
 
+print, 'using pmap file', pmapfile, apval
 
 ;run code to read in all the planet parameters
 planetinfo = create_planetinfo()
@@ -56,6 +57,7 @@ exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
 exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
 ;exosystem = planetname
 if planetname eq 'WASP-13b' then exosystem = 'WASP-13 b'
+if planetname eq 'WASP-14b' then exosystem = 'WASP-14 b'
 if planetname eq 'WASP-15b' then exosystem = 'WASP-15 b'
 if planetname eq 'WASP-16b' then exosystem = 'WASP-16 b'
 if planetname eq 'WASP-38b' then exosystem = 'WASP-38 b'
