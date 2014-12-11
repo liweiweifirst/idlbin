@@ -409,7 +409,7 @@ endif
 
      if keyword_set(phaseplot) then begin ;make the plot as a function of phase
 ;        print, ' phase', (planethash[aorname(a),'phase'])
-        setxrange = [0.43, 0.56]; [-0.5, 0.5];
+        setxrange = [-0.5, 0.5];[0.43, 0.56]; 
         corrnormoffset =  0; 0.02
         corroffset = 0;0.001
         setynormfluxrange = [0.96, 1.02];[0.97, 1.005]
@@ -483,7 +483,7 @@ endif
 ;                        title = planetname, ytitle = 'Flux',  yrange = [0.995, 1.02], xrange = setxrange) ;
               pu = errorplot(bin_phase, (bin_corrfluxp/plot_corrnorm) + corroffset, bin_corrfluxerrp/plot_corrnorm,  sym_size = 0.7,  $
                         symbol = plotsym, sym_filled = 1,color =colorarr[a] ,xtitle = 'Orbital Phase', errorbar_color =  scolor, $
-                        title = planetname, ytitle = 'Pmap Corrected Flux',  yrange = [0.995, 1.02], xrange = setxrange) ;
+                        title = planetname, ytitle = 'Pmap Corrected Flux',  yrange = [0.989, 1.005], xrange = setxrange) ;
            endif
 
         endif                   ; if a = 0
@@ -566,7 +566,7 @@ endif
                if n_elements(aorname) gt 10 then begin
                   
                   pu.window.SetCurrent
-                  pu = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm) + corroffset, bin_corrfluxerrp/plot_corrnorm, '1s', $
+                  pu = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm) + corroffset, '1s', $, bin_corrfluxerrp/plot_corrnorm
                             sym_size = 0.2,   sym_filled = 1, color = colorarr[a],overplot = pu,/current)
                endif
             endif
