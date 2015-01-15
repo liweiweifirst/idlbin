@@ -41,12 +41,13 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
 
 ;delete this if I want to overplot on the plot_pixphasecorr plot
  ;XXX will need to add the color offsets.
- testplot = errorplot(phasearr, fluxarr, errarr, '1s', yrange = [0.97, 1.005])
+; testplot = errorplot(phasearr, fluxarr, errarr, '1s', yrange = [0.97, 1.005])
 
 ;Initial guess, start with those from the literature
- amplitude = 1.0              ; messing around with amplitude of the phase curve.
- phase_offset = 0.
+ amplitude = .001             ; messing around with amplitude of the phase curve.
+ phase_offset = 1.
  params0 = [fp_fstar0, rp_rstar, ar_semimaj, inclination, amplitude, phase_offset]
+; params0 = [fp_fstar0, .08, ar_semimaj, inclination, amplitude, phase_offset]
  parinfo = replicate({value:0.D, fixed:0, limited:[0,0], limits:[0.D,0.D]}, n_elements(params0))
 ; ;limit fp_f_star0 to be positive and less than 1.
  parinfo[0].limited[0] = 1
@@ -59,13 +60,15 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
  parinfo[1].limits[0] = 0.0 ;;
  parinfo[1].limited[1] = 1
  parinfo[1].limits[1] = 1.0
+; parinfo[1].fixed = 1  ; just testing
 ; ;limit ar_semimaj to be positive 
  parinfo[2].limited[0] = 1
  parinfo[2].limits[0] = 0.0 ;;
 ; limit inclination to be positive 
  parinfo[3].limited[0] = 1
  parinfo[3].limits[0] = 0.0 ;;
-
+;parinfo[4].fixed = 1
+;parinfo[5].fixed = 1
 ;do the fitting
  afargs = {t:phasearr, flux:fluxarr, err:errarr, p_orbit:p_orbit, mjd_start:mjd_start, mjd_transit:mjd_transit, savefilename:savefilename} ;, rp_rstar:rp_rstar ar_semimaj:ar_semimaj,,inclination:inclination}
  print, 'calling mandel_agol'
@@ -78,10 +81,11 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
 
   print, 'primary depth', pa(1)^2, spa(1)^2
   print, 'secondary depth', pa(0), spa(0)
+
 ;want to overplot the fitted curve
   params0 = pa  ; just give it the answer, and run with overplot
   ph = findgen(100) / 100. - 0.5   ; give it a nice set of phases for a nice plot
-  model = mandel_agol(params0, t=ph, flux=fluxarr, err=errarr, p_orbit=p_orbit, mjd_start=mjd_start, mjd_transit=mjd_transit ,savefilename = savefilename, /overplot);, rp_rstar=rp_rstar, ar_semimaj=ar_semimaj,inclination=inclination,
+  model = mandel_agol(params0, t=ph, flux=fluxarr, err=errarr, p_orbit=p_orbit, mjd_start=mjd_start, mjd_transit=mjd_transit ,savefilename = savefilename);, overplot = overplot);, rp_rstar=rp_rstar, ar_semimaj=ar_semimaj,inclination=inclination,
 
 
 return, 0
