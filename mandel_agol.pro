@@ -61,10 +61,8 @@ alpha = ABS(phi_orbit-!dpi)
 ;testing
 phase_curve = params0[4]*sin(alpha + params0[5])
 
-rel_flux = (1-lambda_star) + params0[0] * (1-lambda_planet) ;* phase_curve
+rel_flux = (1-lambda_star) + params0[0] * (1-lambda_planet) * phase_curve
 ;rel_flux = (1-lambda_star) + fp_fstar0 * (1-lambda_planet) * phase_curve
-
-
 
 
 model = rel_flux
@@ -72,7 +70,7 @@ model = (flux - model) / err
 
 
 if keyword_set(overplot) then begin
-   test = plot(phase, rel_flux, color = 'Sky Blue', thick = 4, /overplot)
+   test = plot(phase, rel_flux, color = 'Sky Blue', thick = 4, /overplot )
    openw, outlun, '/Users/jkrick/irac_warm/pcrs_planets/WASP-52b/jk_model.txt',/GET_LUN
    for nm = 0, n_elements(phase) - 1 do printf, outlun, phase(nm), rel_flux(nm)
    close, outlun
