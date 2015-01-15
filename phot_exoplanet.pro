@@ -115,7 +115,7 @@ for a =startaor, stopaor do begin
    print, 'working on ',aorname(a)
    dir = dirname+ string(aorname(a) ) 
    CD, dir                      ; change directories to the correct AOR directory
-   command  = strcompress( 'find ch'+chname+"/bcd -name 'SPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
+   command  = strcompress( 'find ch'+chname+"/bcd -name 'sdcorrSPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
 ;   print, 'command', command
    spawn, command
    command2 =  strcompress('find ch'+chname+"/bcd -name '*bunc.fits' > "+dirname + 'bunclist.txt')
@@ -437,7 +437,7 @@ for a =startaor, stopaor do begin
 ;      phase = temporary(phase)+0.5
 ;   endif 
    
-print, 'testing phase', phase[0:200]
+;print, 'testing phase', phase[0:200]
 print, 'end phase', phase[n_elements(phase) - 1]
 ;--------------------------------
 ;fill in that hash of hases
