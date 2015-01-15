@@ -19,7 +19,7 @@ pro curveofgrowth, planetname, chname, corrflux = corrflux, selfcal=selfcal
      dirloc =dirname +string(aorname(a) ) 
      print, 'dirloc', dirloc
      cd, dirloc
-     command  = strcompress( 'find ch'+chname+"/bcd -name '*_bcd.fits' > "+dirname+'bcdlist.txt')
+     command  = strcompress( 'find ch'+chname+"/bcd -name 'sdcorr*_bcd.fits' > "+dirname+'bcdlist.txt')
      spawn, command
      command2 =  strcompress('find ch'+chname+"/bcd -name '*bunc.fits' > "+dirname + 'bunclist.txt')
      spawn, command2
