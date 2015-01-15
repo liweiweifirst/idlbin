@@ -110,13 +110,13 @@ if keyword_set(make_plot) then begin
                          bigfluxerrarr(an)/median(bigcorrfluxarr(an)), '1s', sym_size = 0.5, ERRORBAR_COLOR = colorarr(n),$
                          sym_filled = 1, ytitle = 'Corrected Flux',color = colorarr(n), overplot = p,$
                          yrange = [0.85,1.15], XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = 'months', $
-                         title = 'Ch' + string(ch), xrange = [min(bigtimearr),max(bigtimearr)])
+                         title = 'Ch' + string(ch), xrange = [min(bigtimearr),max(bigtimearr)],/buffer)
 
            pz = errorplot(bigtimearr(an) , bigfluxarr(an)/median(bigfluxarr(an)), $
                          bigfluxerrarr(an)/median(bigfluxarr(an)), '1s', sym_size = 0.5, ERRORBAR_COLOR = colorarr(n),$
                          sym_filled = 1, ytitle = 'Flux',color = colorarr(n), overplot = pz,$
                          yrange = [0.85,1.15], XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = 'months', $
-                          title = 'Ch' + string(ch), xrange = [min(bigtimearr),max(bigtimearr)])
+                          title = 'Ch' + string(ch), xrange = [min(bigtimearr),max(bigtimearr)],/buffer)
 
           ;-----------------
 
@@ -164,7 +164,7 @@ if keyword_set(make_plot) then begin
                              bin_fluxerrarr/median(bin_corrflux), '1s', sym_size = 0.5, ERRORBAR_COLOR = colorarr(n),$
                              sym_filled = 1, ytitle = 'Binned Corrected Flux',color = colorarr(n), overplot = pb,$
                              yrange = [0.95,1.05], xrange = [min(bigtimearr),max(bigtimearr)], xtickunits = 'months', $
-                             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', title = 'Ch' + string(ch)) ;- bigtimearr(0))/60./60./ 24.
+                             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', title = 'Ch' + string(ch),/buffer) ;- bigtimearr(0))/60./60./ 24.
               pbl = plot(bin_time, intarr(n_elements(bin_time)) + 1.0, overplot = pb)
            endif   ;if keyword set binning
            
