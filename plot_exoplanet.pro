@@ -1,71 +1,71 @@
-pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phaseplot, sclkplot = sclkplot, timeplot = timeplot, Dsweet = dsweet, selfcal=selfcal, centerpixplot = centerpixplot, errorbars = errorbars, unbinned_xplot = unbinned_xplot, unbinned_yplot = unbinned_yplot, unbinned_fluxplot=unbinned_fluxplot, unbinned_npplot = unbinned_npplot, unbinned_bkgplot = unbinned_bkgplot, Position_plot = position_plot, DN_plot = DN_plot, unbinned_xyfwhm = unbinned_xyfwhm
+pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phaseplot, sclkplot = sclkplot, timeplot = timeplot, Dsweet = dsweet, selfcal=selfcal, centerpixplot = centerpixplot, errorbars = errorbars, unbinned_xplot = unbinned_xplot, unbinned_yplot = unbinned_yplot, unbinned_fluxplot=unbinned_fluxplot, unbinned_npplot = unbinned_npplot, unbinned_bkgplot = unbinned_bkgplot, Position_plot = position_plot, DN_plot = DN_plot, unbinned_xyfwhm = unbinned_xyfwhm, line_fit = line_fit, montecarlo = montecarlo, function_fit = function_fit
 ;example call plot_exoplanet, 'wasp15', 2*63L
 
-COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm
+  COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm
 
- colorarr = ['blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ,'blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ,'blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua']
+  colorarr = ['blue', 'red','green','black','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple',  'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','green','black','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ,'blue', 'red','black','green','black','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ,'blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua']
 ;
 
 
 ;run code to read in all the input planet parameters
- planetinfo = create_planetinfo()
- if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
- basedir = planetinfo[planetname, 'basedir']
- period =  planetinfo[planetname, 'period']
- stareaor = planetinfo[planetname, 'stareaor']
- print, 'stareaor', stareaor
- exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
- exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
-
   planetinfo = create_planetinfo()
   if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
   basedir = planetinfo[planetname, 'basedir']
   period =  planetinfo[planetname, 'period']
   stareaor = planetinfo[planetname, 'stareaor']
   print, 'stareaor', stareaor
-exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
-exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
+  exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
+  exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
+  
+  planetinfo = create_planetinfo()
+  if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
+  basedir = planetinfo[planetname, 'basedir']
+  period =  planetinfo[planetname, 'period']
+  stareaor = planetinfo[planetname, 'stareaor']
+  exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
+  exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
 ;exosystem = planetname
-if planetname eq 'WASP-13b' then exosystem = 'WASP-13 b'
-if planetname eq 'WASP-15b' then exosystem = 'WASP-15 b'
-if planetname eq 'WASP-16b' then exosystem = 'WASP-16 b'
-if planetname eq 'WASP-38b' then exosystem = 'WASP-38 b'
-if planetname eq 'WASP-62b' then exosystem = 'WASP-62 b'
-if planetname eq 'WASP-52b' then exosystem = 'WASP-52 b'
-if planetname eq 'HAT-P-22' then exosystem = 'HAT-P-22 b'
-if planetname eq 'GJ1214' then exosystem = 'GJ 1214 b'
-if planetname eq '55Cnc' then exosystem = '55 Cnc e'
-
-print, exosystem, 'exosystem'
-if planetname eq 'WASP-52b' then teq_p = 1315
-if planetname eq 'HD 7924 b' then begin
-   inclination = 85.
-   rp_rstar = 0.001
-endif
-
-if chname eq '2' then lambdaname  = '4.5'
-if chname eq '1' then lambdaname  = '3.6'
-get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
-                       TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
-                       INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
-                       DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose
-if ra lt 400 then begin  ; that means get_exoplanet_data actually found the target
+  if planetname eq 'WASP-13b' then exosystem = 'WASP-13 b'
+  if planetname eq 'WASP-14b' then exosystem = 'WASP-14 b'
+  if planetname eq 'WASP-15b' then exosystem = 'WASP-15 b'
+  if planetname eq 'WASP-16b' then exosystem = 'WASP-16 b'
+  if planetname eq 'WASP-38b' then exosystem = 'WASP-38 b'
+  if planetname eq 'WASP-62b' then exosystem = 'WASP-62 b'
+  if planetname eq 'WASP-52b' then exosystem = 'WASP-52 b'
+  if planetname eq 'HAT-P-22' then exosystem = 'HAT-P-22 b'
+  if planetname eq 'GJ1214' then exosystem = 'GJ 1214 b'
+  if planetname eq '55Cnc' then exosystem = '55 Cnc e'
+  
+  print, exosystem, 'exosystem'
+  if planetname eq 'WASP-52b' then teq_p = 1315
+  if planetname eq 'HD 7924 b' then begin
+     inclination = 85.
+     rp_rstar = 0.001
+  endif
+  
+  if chname eq '2' then lambdaname  = '4.5'
+  if chname eq '1' then lambdaname  = '3.6'
+  get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
+                     TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
+                     INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
+                     DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose
+  if ra lt 400 then begin       ; that means get_exoplanet_data actually found the target
 ;   ra_ref = ra*15.       ; comes in hours!;
 ;   dec_ref = dec
-   utmjd_center = mjd_transit
-   period = p_orbit
-endif else begin
-   
-   ;warning these could be junk as well
+     utmjd_center = mjd_transit
+     period = p_orbit
+  endif else begin
+     
+                                ;warning these could be junk as well
 ;   ra_ref = planetinfo[planetname, 'ra']
 ;   dec_ref = planetinfo[planetname, 'dec']
-   utmjd_center = planetinfo[planetname, 'utmjd_center']
-   period = planetinfo[planetname, 'period']
-endelse
+     utmjd_center = planetinfo[planetname, 'utmjd_center']
+     period = planetinfo[planetname, 'period']
+  endelse
 ;---------------
   
-  dirname = strcompress(basedir + planetname +'/');+'/hybrid_pmap_nn/')
-  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all);
+  dirname = strcompress(basedir + planetname +'/')                                                            ;+'/hybrid_pmap_nn/')
+  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all) ;
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)
@@ -79,25 +79,25 @@ endelse
  
 
 ;for debugging: skip some AORs
-startaor =  0;  n_elements(aorname) -29
-stopaor =   n_elements(aorname) - 1
+  startaor =  5                 ;  n_elements(aorname) -29
+  stopaor =   n_elements(aorname) - 1
 
 
- xsweet = 15.12
- ysweet = 15.00
+  xsweet = 15.12
+  ysweet = 15.00
  
 ;-------------------------------------------------------
 ;make a bunch of plots before binning
 ;-------------------------------------------------------
 
 ;this one overlays the positions on the pmap contours
-if keyword_set(position_plot) then begin
-   fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_121120.fits', pmapdata, pmapheader
+  if keyword_set(position_plot) then begin
+     fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_121120.fits', pmapdata, pmapheader
 ;  fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120409.fits', pmapdata, pmapheader
-   c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [0,500], yrange = [0,500])
+     c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [0,500], yrange = [0,500])
 
 ;  print, 'naor', n_elements(aorname)
-   for a = startaor ,  stopaor  do begin
+     for a = startaor ,  stopaor  do begin
 ;     print, 'testing aors', a, colorarr[a]
 ;      if planethash[aorname(a),'exptime'] gt 0.2 then begin
          ;scolor = 'blue'
@@ -109,11 +109,11 @@ if keyword_set(position_plot) then begin
 ;      endif
 ;      if planethash[aorname(a),'exptime'] gt 0.2 then begin
          ;scolor = 'blue'
-         scolor = 'red'
+        scolor = 'red'
 
-         xcen500 = 500.* ((planethash[aorname(a),'xcen']) - 14.5)
-         ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
-         an = plot(xcen500, ycen500, '1s', sym_size = 0.1,   sym_filled = 1, color = scolor,/overplot)
+        xcen500 = 500.* ((planethash[aorname(a),'xcen']) - 14.5)
+        ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
+        an = plot(xcen500, ycen500, '1s', sym_size = 0.1,   sym_filled = 1, color = scolor,/overplot)
 ;      endif
 
 ;     npmax = [4.8, 37., 4.5]
@@ -129,12 +129,12 @@ if keyword_set(position_plot) then begin
       
 ; ;    print, 'xcen500', xcen500
 ; ;    print, 'ycen500', ycen500
-   endfor
-   xs = 500.*(xsweet - 14.5)
-   ys = 500.*(ysweet - 14.5)
+     endfor
+     xs = 500.*(xsweet - 14.5)
+     ys = 500.*(ysweet - 14.5)
 ;   an = text(xs, ys, 'X', /data, alignment = 0.5, vertical_alignment = 0.5)
 ;   an.save, dirname+'position_ch'+chname+'.png'
-endif 
+  endif 
 ;GOTO, Jumpend
 
 ;-----
@@ -307,6 +307,28 @@ endif
      ;divide plots by exposure time
      ;if planethash[aorname(a),'exptime'] lt 0.2 then scolor = 'blue' else scolor = 'red'
 
+     ;----------------------
+     ;make a correction for flux degradation over time
+     if chname eq '2' then begin
+                                ;0.05% per year or 0.0005*(time in
+                                ;years since start of observation)
+        deltatime = planethash[aorname(a),'timearr'] - time_0 ; in seconds
+        deltatime = deltatime / 60./60./24./365.
+        degrade = .0005*deltatime
+        planethash[aorname(a),'corrflux'] =  planethash[aorname(a),'corrflux'] + (planethash[aorname(a),'corrflux'] * degrade)
+     endif
+     if chname eq '1' then begin
+                                ;0.05% per year or 0.0005*(time in
+                                ;years since start of observation)
+        deltatime = planethash[aorname(a),'timearr'] - time_0 ; in seconds
+        deltatime = deltatime / 60./60./24./365.
+        degrade = .001*deltatime
+        planethash[aorname(a),'corrflux'] =  planethash[aorname(a),'corrflux'] + (planethash[aorname(a),'corrflux'] * degrade)
+     endif
+
+     ;----------------------
+
+
      ;check if I should be using pmap corr or not
      ncorr = where(finite([ planethash[aorname(a),'corrflux']]) gt 0, corrcount,/L64)
      ;if 20% of the values are correctable than go with the pmap corr 
@@ -324,6 +346,7 @@ endif
 ;     print, 'testing x', bin_xcen[0:10]
 ;     print, 'testing y', bin_ycen[0:10]
 ;     print, 'testing npcent', bin_npcent[0:10]
+     print, 'testing error bars', colorarr[a], bin_corrfluxerrp
 ;------------------------------------------------------
      ;possible comparison statistic
      ;what is the distribution of standard deviations among the corrfluxes?
@@ -331,6 +354,23 @@ endif
      meanclip_jk, planethash[aorname(a),'corrflux'] , mean_corrflux, stddev_corrflux
      stddev_corrfluxarr[a - startaor] = stddev_corrflux
 ;------------------------------------------------------
+     ;save some variables for later
+     if a eq startaor then begin
+        bin_all_phasep = bin_phasep
+        bin_all_corrfluxp = bin_corrfluxp
+        bin_all_fluxerrp = bin_fluxerrp
+        bin_all_corrfluxerrp = bin_corrfluxerrp
+        bin_all_time = bin_timearr
+     endif else begin
+        bin_all_phasep = [bin_all_phasep, bin_phasep]
+        bin_all_corrfluxp = [bin_all_corrfluxp, bin_corrfluxp]
+        bin_all_corrfluxerrp = [bin_all_corrfluxerrp, bin_corrfluxerrp]
+        bin_all_fluxerrp = [bin_all_fluxerrp, bin_fluxerrp]
+        bin_all_time = [bin_all_time,bin_timearr]
+
+     endelse
+
+
 ;now try plotting
 
      if keyword_set(dsweet) then begin
@@ -405,27 +445,29 @@ endif
 
 ;------------------------------------------------------
      ;make plot symbold based on the size of the AOR
-     if n_elements([planethash[aorname(a),'flux']])  lt 1000 then plotsym = 's' else plotsym = '*'
-
+;     if n_elements([planethash[aorname(a),'flux']])  lt 1000 then plotsym = 's' else plotsym = '*'
+     plotsym = 's'
      if keyword_set(phaseplot) then begin ;make the plot as a function of phase
 ;        print, ' phase', (planethash[aorname(a),'phase'])
         setxrange = [-0.5, 0.5];[0.43, 0.56]; 
         corrnormoffset =  0; 0.02
-        corroffset = 0;0.001
+        if planetname eq 'WASP14-b' then corroffset = 0.0015
+        if planetname eq 'HD209458' then corroffset = 0.001
+       
         setynormfluxrange = [0.96, 1.02];[0.97, 1.005]
 
-        cphase = where(bin_phase lt 0)
-        bin_phase(cphase) = bin_phase(cphase) + 1.0
+ ;       cphase = where(bin_phase lt 0)
+ ;       bin_phase(cphase) = bin_phase(cphase) + 1.0
 
 
         if a eq startaor then begin    ; for the first AOR
                                 ;set the normalization values from the
                                 ;medians of the first AOR...is close enough
-           print, 'beginning AOR bin phase', bin_phase
-           print, 'beginning AOR bin xcen', bin_xcen
-           print, 'beginning AOR bin ycen', bin_ycen
+;           print, 'beginning AOR bin phase', bin_phasep
+;           print, 'beginning AOR bin xcen', bin_xcen
+;           print, 'beginning AOR bin ycen', bin_ycen
            plot_norm = median(bin_flux)  ; only happens for the first AOR
-           plot_corrnorm = mean(bin_corrfluxp,/nan)  ; only if a eq 0
+           plot_corrnorm = mean(bin_all_corrfluxp,/nan)  ; only if a eq 0
            print, 'plot_corrnorm', plot_corrnorm, bin_corrfluxp[0]
            pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1, title = planetname, $
                      color = colorarr[a], xtitle = 'Orbital Phase', ytitle = 'X position', $
@@ -480,9 +522,20 @@ endif
            if n_elements(aorname) gt 10 and pmapcorr eq 1 then begin
 ;              pu = errorplot(bin_phase, (bin_flux/plot_norm) + corroffset, bin_fluxerr/plot_norm,  sym_size = 0.7,  $
 ;                        symbol = plotsym, sym_filled = 1,color =scolor ,xtitle = 'Orbital Phase', errorbar_color =  scolor, $
-;                        title = planetname, ytitle = 'Flux',  yrange = [0.995, 1.02], xrange = setxrange) ;
-              pu = errorplot(bin_phase, (bin_corrfluxp/plot_corrnorm) + corroffset, bin_corrfluxerrp/plot_corrnorm,  sym_size = 0.7,  $
-                        symbol = plotsym, sym_filled = 1,color =colorarr[a] ,xtitle = 'Orbital Phase', errorbar_color =  scolor, $
+;                        title = planetname, ytitle = 'Flux',  yrange
+;                        = [0.995, 1.02], xrange = setxrange) ;
+              if a le stareaor then begin
+                 scolor = 'gray' 
+                 if planetname eq 'WASP-14b' then corroffset = 0.0015    
+                 if planetname eq 'HD158460' then corroffset = 0.0
+              endif else begin
+                 scolor = colorarr[a]
+                 if planetname eq 'WASP-14b' then corroffset = 0.0015
+                 if planetname eq 'HD209458' then corroffset = 0.001
+              endelse
+              print, 'corroffset', corroffset
+              pu = errorplot(bin_phasep, (bin_corrfluxp/plot_corrnorm) + corroffset, bin_corrfluxerrp/plot_corrnorm,  '1s', sym_size = 0.7,  $
+                        symbol = plotsym, sym_filled = 1,color =scolor ,xtitle = 'Orbital Phase', errorbar_color =  scolor, $
                         title = planetname, ytitle = 'Pmap Corrected Flux',  yrange = [0.989, 1.005], xrange = setxrange) ;
            endif
 
@@ -491,8 +544,10 @@ endif
       ;  test_med(a) = median(bin_corrfluxp)
         print,'median bin_corrfluxp ',  median(bin_corrfluxp), median(bin_flux)
         print, 'a', a
+;-------------------------------------
         if (a gt 0) and (a lt stareaor) then begin
-           print, 'inside a gt 0 a le stareaor', a
+           if planetname eq 'WASP-14b' then corroffset = 0.0015
+           print, 'inside a gt 0 a le stareaor', a, corroffset
            pp.window.SetCurrent
            pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],  /overplot,/current)
            pq.window.SetCurrent
@@ -516,21 +571,26 @@ endif
            if pmapcorr eq 1 then begin
               pu.window.SetCurrent
 ;              pu =  errorplot(bin_phase, (bin_flux/plot_norm) + corroffset, bin_fluxerr/plot_norm, sym_size = 0.7,  $
-;                              symbol = plotsym, sym_filled = 1,color = scolor, errorbar_color =  scolor, /overplot, /current)
-              pu =  errorplot(bin_phase, (bin_corrfluxp/plot_corrnorm) + corroffset, bin_corrfluxerrp/plot_corrnorm, sym_size = 0.7,  $
-                              symbol = plotsym, sym_filled = 1,color = scolor, errorbar_color =  scolor, /overplot, /current)
+;                              symbol = plotsym, sym_filled = 1,color
+;                              = scolor, errorbar_color =  scolor,
+;                              /overplot, /current)
+             
+              pu = errorplot(bin_phasep, (bin_corrfluxp/plot_corrnorm) +corroffset , bin_corrfluxerrp/plot_corrnorm,$
+                             '1s', sym_size = 0.7, symbol = plotsym, sym_filled = 1,color ='gray', $
+                             errorbar_color = 'gray', overplot = pu) ;
            endif
 
            pxf = plot(bin_phase, bin_xfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pxf)
 
            pyf = plot(bin_phase, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pyf)
 
-        endif
+        endif  ; a gt 0 a lt stareor
 
 
 
         if a gt stareaor then begin
-           print, 'inside a gt stareaor', a
+           if planetname eq 'WASP-14b' then corroffset = 0.0015
+           print, 'inside a ge stareaor', a, corroffset
            pp.window.SetCurrent
            pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],$
                      /overplot,/current)
@@ -565,9 +625,9 @@ endif
           ;setup a plot for just the snaps
                if n_elements(aorname) gt 10 then begin
                   
-                  pu.window.SetCurrent
-                  pu = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm) + corroffset, '1s', $, bin_corrfluxerrp/plot_corrnorm
-                            sym_size = 0.2,   sym_filled = 1, color = colorarr[a],overplot = pu,/current)
+                  pu = errorplot(bin_phasep, (bin_corrfluxp/plot_corrnorm) + corroffset , bin_corrfluxerrp/plot_corrnorm, '1s', $
+                                 sym_size = 0.7, symbol = plotsym, sym_filled = 1,color =colorarr[a] , $
+                                 errorbar_color = colorarr[a], overplot = pu ) ;
                endif
             endif
            
@@ -585,6 +645,7 @@ endif
 
         endif
 
+
 ;        ps.save, dirname +'binnp_phase_ch'+chname+'.png'
 ;        pt.save, dirname +'binbkg_phase_ch'+chname+'.png'
  ;       pu.save, dirname + 'binsnaps_phase_ch'+chname+'.png'
@@ -601,7 +662,8 @@ endif
 
 
 
-        if a eq n_elements(aorname) - 1 and planetname eq 'hd209458' then begin
+        if a eq 0 and planetname eq 'HD209458' then begin
+           print, 'plotting Lewis curve'
            ;plot curves from Lewis
            restore, '/Users/jkrick/irac_warm/hd209458/hd209_ch2_for_jessica.sav'
            ;need to get time in phase
@@ -632,9 +694,10 @@ endif
            bin_time = bin_time[0:c-1]
            bin_corr_flux = bin_corr_flux[0:c-1]
 
-           pr.window.SetCurrent
-           pk = plot(bin_time, bin_corr_flux - 0.017, '1s', sym_size =  0.3, sym_filled = 1, color = colorarr[a], /overplot, /current)
+           ;pr.window.SetCurrent
+           pu = plot(bin_time, bin_corr_flux , '1s', sym_size =  0.3, sym_filled = 1, color ='grey', overplot = pu)
         endif
+
         
 
      endif 
@@ -642,16 +705,17 @@ endif
 ;------------------------------------------------------
      print, 'n_elements time', n_elements(bin_timearr), n_elements(bin_xcen), n_elements(bin_phase)
      if keyword_set(timeplot) then begin ;make the plot as a function of time
+
+        corroffset = 0.0005
         print, 'making plot as a function of time'
         corrnormoffset = 0;0.02
-        corroffset = 0.0
         setynormfluxrange = [0.98, 1.01];[0.97, 1.005]
-        if a eq startaor then begin    ; for the first AOR
+        if a eq startaor then begin ; for the first AOR
                                 ;set the normalization values from the
                                 ;medians of the first AOR...is close enough
+           plot_corrnorm = median(bin_corrfluxp)
+           print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp,/nan), corroffset
            plot_norm = median(bin_flux)
-           plot_corrnorm = mean(bin_corrfluxp,/nan)
-           print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp,/nan)
            pp = plot((bin_timearr - time_0)/60./60., bin_xcen, '1s', sym_size = 0.3,   sym_filled = 1, $;title = planetname, $
                      color = colorarr[a], xtitle = 'Time(hrs)', ytitle = 'X position', aspect_ratio = 0.0, margin = 0.2);, $
                      ;xrange = setxrange)
@@ -707,13 +771,10 @@ endif
               help, bin_timearr
               help, time_0
               pu = errorplot(((bin_timearr - time_0)/60./60.) , (bin_corrfluxp/plot_corrnorm) + corroffset,$ ;- 5.E3)/24.
-                             bin_corrfluxerrp/plot_norm,  sym_size = 2.0,  $
-                             symbol = plotsym, sym_filled = 1,color =colorarr(a) ,xtitle = 'Time (Hours)', errorbar_color =  scolor, $
-                             title = planetname, ytitle = 'Pmap Corrected Flux',  yrange = [0.995, 1.005], xrange = [0, 10]) ;
+                             bin_corrfluxerrp/plot_corrnorm,  sym_size = 0.7,  $
+                             symbol = plotsym, sym_filled = 1,color =colorarr[a] ,xtitle = 'Time (Hours)', errorbar_color =  colorarr[a], $
+                             title = planetname, ytitle = 'Pmap Corrected Flux',  yrange = [0.997, 1.003], xrange = [-5, 190]) ;
 
-;              pu = errorplot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm) + corroffset, bin_corrfluxerrp/plot_corrnorm,  sym_size = 0.7,  $
-;                             symbol = plotsym, sym_filled = 1,color =scolor ,xtitle = 'Time(hrs)', errorbar_color =  scolor, $
-;                             title = planetname, ytitle = 'Pmap Corrected Flux',  yrange = [0.995, 1.02], xrange = [-100, 16000]) ;
            endif
 
 
@@ -747,8 +808,8 @@ endif
 ;                                  overplot = pu, /current)
               print, 'time, corrflux', (((bin_timearr - time_0)/60./60.) - 5.5E3)/24., (bin_corrfluxp/plot_corrnorm) + corroffset
               pu =  errorplot(((bin_timearr - time_0)/60./60.) , (bin_corrfluxp/plot_corrnorm) + corroffset, $ ;- 5.5E3)/24.
-                              bin_corrfluxerrp/plot_corrnorm, sym_size = 2.0,  $
-                              symbol = plotsym, sym_filled = 1,color = colorarr(a), errorbar_color =  scolor, overplot = pu, /current)
+                              bin_corrfluxerrp/plot_corrnorm, sym_size = 0.7,  $
+                              symbol = plotsym, sym_filled = 1,color = colorarr[a], errorbar_color =  colorarr[a], overplot = pu, /current)
 ;              pu =  errorplot((bin_timearr - time_0)/60./60., (bin_flux/plot_norm) + corroffset, bin_fluxerr/plot_norm, sym_size = 0.7,  $
 ;                                                 symbol = plotsym, sym_filled = 1,color = scolor, errorbar_color =  scolor, overplot = pu, /current)
 ;              pu =  errorplot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm) + corroffset, $
@@ -799,8 +860,8 @@ endif
 ;                              sym_size = 0.7, symbol = plotsym, sym_filled = 1,color = scolor, errorbar_color =  scolor, $
 ;                              overplot = pu, /current)
                   pu =  errorplot(((bin_timearr - time_0)/60./60.) , (bin_corrfluxp/plot_corrnorm) + corroffset, $ ;- 5.5E3)/24.
-                                  bin_corrfluxerrp/plot_corrnorm, sym_size = 2.0,  $
-                                  symbol = plotsym, sym_filled = 1,color = colorarr(a), errorbar_color =  scolor, overplot = pu, /current)
+                                  bin_corrfluxerrp/plot_corrnorm, sym_size = 0.7,  $
+                                  symbol = plotsym, sym_filled = 1,color = colorarr[a], errorbar_color =  colorarr[a], overplot = pu)
 
 ;              pu =  errorplot((bin_timearr - time_0)/60./60., (bin_flux/plot_norm) + corroffset, bin_fluxerr/plot_norm, sym_size = 0.7,  $
 ;                              symbol = plotsym, sym_filled = 1,color = scolor, errorbar_color =  scolor, overplot = pu, /current)
@@ -845,6 +906,96 @@ endif
 ;    bin_corrfluxerrfinal(a) = bin_corrfluxerrp / plot_corrnorm
 
   endfor                        ;binning for each AOR
+
+
+  if keyword_set(line_fit) then begin
+     
+     ;reset time to hours starting at the first observation
+     bin_all_time = (bin_all_time - time_0)/60./60.
+
+     ;need to do some sigma clipping rejection
+     meanclip, bin_all_corrfluxp, meanval, sigmaval, subs = goodnum
+     print, 'n', n_elements(bin_all_corrfluxp), n_elements(goodnum)
+     bin_all_time = bin_all_time(goodnum)
+     bin_all_corrfluxp = bin_all_corrfluxp(goodnum)
+     bin_all_corrfluxerrp = bin_all_corrfluxerrp(goodnum)
+     bin_all_fluxerrp = bin_all_fluxerrp(goodnum)
+
+     start = [-1E-3,median(bin_all_corrfluxp)]
+     startflat = [1.0]
+     result= MPFITFUN('linear',bin_all_time, bin_all_corrfluxp/median(bin_all_corrfluxp), bin_all_corrfluxerrp/median(bin_all_corrfluxp), $
+                      start, perror = perror, bestnorm = bestnorm)    
+        
+     pu = plot(bin_all_time, result(0)*(bin_all_time) + result(1),  color = 'black', overplot = pu, thick = 3)
+        
+     DOF     = N_ELEMENTS(bin_all_time) - N_ELEMENTS(result) ; deg of freedom
+     PCERROR = PERROR * SQRT(BESTNORM / DOF)                 ; scaled uncertainties
+     print, 'linear result', result, 'pcerror', pcerror, ' perror', perror, 'bestnorm', bestnorm, 'dof', DOF, sqrt(bestnorm/dof)
+     t1 = text(0.2, 1.001, sigfig(result(0), 3, /scientific) + '    ' + sigfig(bestnorm/DOF, 5), /data, color = 'black', font_style = 'bold', target = pu) ;pcerror(0)
+     
+     result2 = MPFITFUN('flatline',bin_all_time,bin_all_corrfluxp/median(bin_all_corrfluxp), bin_all_corrfluxerrp/median(bin_all_corrfluxp), $
+                        startflat, perror = perror, bestnorm = bestnorm)    
+     pu = plot(bin_all_time, 0*bin_all_time + result2(0),  color = 'blue', overplot = pu, thick = 3, linestyle = 2)
+     tt1 = text(0.2, 1.0015, '0    ' + sigfig(bestnorm/DOF, 5), /data, color = 'blue', font_style = 'bold', target = pu)
+     
+     
+  endif
+
+;----------------------------------------------------
+;Monte Carlo
+;randomize the time variables, re-measure the slopes.  
+; What is the distribution of slopes measured from S such randomizations?
+  
+     if keyword_set(montecarlo) then begin
+        MC = 1000               ; how many implementations should I use?
+        slopearr = dindgen(MC)
+        for m = 0, MC - 1 do begin
+;use Fisher-Yates shuffle to randomize the time array
+           sbin_all_time = fisher_yates_shuffle(bin_all_time)
+           
+;re-fit
+           l_result= MPFITFUN('linear',sbin_all_time, bin_all_corrfluxp/median(bin_all_corrfluxp), $
+                              bin_all_corrfluxerrp/median(bin_all_corrfluxp), $
+                              start, perror = perror, bestnorm = bestnorm,/quiet)    
+           f_result= MPFITFUN('flatline',sbin_all_time,bin_all_corrfluxp/median(bin_all_corrfluxp), $
+                              bin_all_corrfluxerrp/median(bin_all_corrfluxp), $
+                              startflat, perror = perror, bestnorm = bestnorm,/quiet) 
+           
+;keep an array of slopes
+           slopearr[m] = l_result(0)
+        endfor
+        
+;now plot a distribution of the slopes
+        plothist, slopearr, xhist, yhist,  bin=1E-7, /noprint,/noplot
+        titlename = string(MC) + ' Monte Carlo realizations'
+        ph = barplot(xhist, yhist,  xtitle = 'Slope', ytitle = 'Number', fill_color = 'sky blue' , title = titlename, $
+                     xrange = [-2.5E-6, 2.5E-6], yrange = [0, 60])
+        ph = plot(intarr(200) + result(0), indgen(200), linestyle = 2, thick = 2, overplot = ph)
+        
+        
+;XXXtake this one step further, what fraction of the slopes are closer to the mean?
+;fit a gaussian
+        start = [0.000, 1E-6, MC]
+        junkerr = fltarr(n_elements(xhist)) + 1.0
+        g_result= MPFITFUN('mygauss',xhist, yhist,junkerr, start, perror = perror, bestnorm = bestnorm)    
+        ;ph = plot(xhist, g_result(2)/sqrt(2.*!Pi) * exp(-0.5*((xhist - g_result(0))/g_result(1))^2.), color = 'black', overplot = ph)
+        ph = plot(intarr(200) - g_result(1) , indgen(200), thick = 2, overplot = ph)
+        g = where(slopearr lt -1*(result(0)) and slopearr gt result(0), gcount) ; this works because the mean is zero slope
+        print, 'fraction with slopes closer to zero',100*(gcount / float(MC)), gcount
+     endif
+
+;------------------------------------
+;fit a mandel and agol function and overplot it
+     if keyword_set(function_fit) then begin
+        modelfilename = strcompress(dirname + planetname +'_model_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
+;        z = function_fit_lightcurve('WASP-14b', bin_all_phasep, bin_all_corrfluxp, bin_all_corrfluxerrp,modelfilename)
+        
+        restore, modelfilename
+        test = plot(phase, rel_flux, color = 'Sky Blue', thick = 4, overplot = pu)
+        print, 'rel_flux', rel_flux
+     endif
+
+
 
 ;what is the distrubition of standard deviations in the corrfluxes?
 ;plothist, stddev_corrfluxarr, xhist, yhist, /autobin, /noplot,/nan
