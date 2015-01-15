@@ -63,7 +63,6 @@ function binning_function, a,bin_level, pmapcorr
      phasearrp = phase[goodpmap]
      nparrp = np[goodpmap]
      npcentarrp = npcentroids[goodpmap]
-     phasearrp = phase[goodpmap]
      xfwhmp = xfwhmarr[goodpmap]
      yfwhmp = yfwhmarr[goodpmap]
 
@@ -164,9 +163,16 @@ function binning_function, a,bin_level, pmapcorr
            
           ; meanclip, phasearr[ri[ri[j]:ri[j+1]-1]], meanphasearr, sigmaphasearr
            meanphasearr = mean( phasearr[ri[ri[j]:ri[j+1]-1]],/nan)
+           ;having trouble with the boundary between 0.5 and -0.5
+;           if a eq 0 then print, 'diff', meanphasearr - bin_phase[c-1]
+;           if meanphasearr - bin_phase[c-1] lt -0.1 and meanphasearr - bin_phase[c-1] gt -0.5 then meanphasearr = mean(abs(phasearr[ri[ri[j]:ri[j+1]-1]]),/nan)
            bin_phase[c]= meanphasearr
 
-  
+;           if a eq 0 then begin
+;              print, 'phase', phasearr[ri[ri[j]:ri[j+1]-1]]
+;              print, 'meanphase', meanphasearr, mean(abs(phasearr[ri[ri[j]:ri[j+1]-1]]),/nan), abs(meanphasearr - bin_phase[c-1])
+;           endif
+
            meanbmjdarr = mean( bmjdarr[ri[ri[j]:ri[j+1]-1]],/nan)
            bin_bmjdarr[c]= meanbmjdarr
 
@@ -260,18 +266,15 @@ function binning_function, a,bin_level, pmapcorr
 
            junk = where(finite(corrfluxp[rip[rip[j]:rip[j+1]-1]]) gt 0,ngood)
            bin_ncorrp[cp] = ngood
-           ;can only compute means if there are values in there
-           if pmapcorr eq 1 then begin
-              meanclip, corrfluxp[rip[rip[j]:rip[j+1]-1]], meancorrflux, sigmacorrflux
-;              meancorrflux = mean(corrflux[rip[rip[j]:rip[j+1]-1]],/nan)
-              bin_corrfluxp[cp] = meancorrflux
-           endif
 
            meanclip, timearrp[rip[rip[j]:rip[j+1]-1]], meantimearr, sigmatimearr
            bin_timearrp[cp]=meantimearr
            
 ;           meanclip, phasearrp[rip[rip[j]:rip[j+1]-1]], meanphasearr, sigmabmjdarr
            meanphasearr = mean(phasearrp[rip[rip[j]:rip[j+1]-1]],/nan)
+;           if a eq 24 then print, meanphasearr, bin_phasep[cp-1],  meanphasearr - bin_phasep[cp-1], phasearrp[rip[rip[j]:rip[j+1]-1]]
+           if bin_phasep[cp-1] gt 0.48 and (meanphasearr - bin_phasep[cp-1]) lt -0.1 and (meanphasearr - bin_phasep[cp-1]) gt -0.9 then meanphasearr = mean(abs(phasearrp[rip[rip[j]:rip[j+1]-1]]),/nan)
+;           if a eq 24 then print, 'final meanphase', meanphasearr
            bin_phasep[cp]= meanphasearr
 
            meanbmjdarr = mean( bmjdarrp[rip[rip[j]:rip[j+1]-1]],/nan)
@@ -280,7 +283,18 @@ function binning_function, a,bin_level, pmapcorr
            ;xxxx this could change
            ;ripght now it is just the scatter in the bins
            icorrdataerr = corrfluxerrp[rip[rip[j]:rip[j+1]-1]]
-           bin_corrfluxerrp[cp] =   sqrt(total(icorrdataerr^2))/ (n_elements(icorrdataerr))
+           icorrdata = corrfluxp[rip[rip[j]:rip[j+1]-1]]
+           bin_corrfluxerrp[cp] =  sqrt(total(icorrdataerr^2))/ (n_elements(icorrdataerr))
+           
+
+           ;can only compute means if there are values in there
+           if pmapcorr eq 1 then begin
+              meanclip, corrfluxp[rip[rip[j]:rip[j+1]-1]], meancorrflux, sigmacorrflux
+;              meancorrflux = mean(corrflux[rip[rip[j]:rip[j+1]-1]],/nan)
+              bin_corrfluxp[cp] = meancorrflux
+              ;bin_corrfluxerrp[cp] = sigmacorrflux
+           endif
+
            idataerr = fluxerrp[rip[rip[j]:rip[j+1]-1]]
            bin_fluxerrp[cp] =   sqrt(total(idataerr^2))/ (n_elements(idataerr))
 
