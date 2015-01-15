@@ -20,7 +20,7 @@ pro fit_exoplanet_light_curve, planetname, bin_level, apradius, chname, snapshot
 
 
   planetinfo = create_planetinfo()
-  aorname = planetinfo[planetname, 'aorname']
+  if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
   stareaor = planetinfo[planetname, 'stareaor']
   snapaor = stareaor + 1        ; the first AOR in the list which is snapshots
   basedir = planetinfo[planetname, 'basedir']
@@ -32,18 +32,17 @@ pro fit_exoplanet_light_curve, planetname, bin_level, apradius, chname, snapshot
 ;  filename = '/Users/jkrick/irac_warm/pcrs_planets/wasp-14b/hybrid_pmap_nn/wasp14_phot_ch2_2.50000.sav'
      print, 'inside fit+exopl', savefilename
      restore, savefilename
-     
      for a = snapaor, n_elements(aorname) -1 do begin
                                 ; plothist, planethash[aorname(a),'corrflux'], xhist, yhist, bin = 0.0005, /noplot,/nan
                                 ; ap = plot(xhist, yhist)
         meanclip, planethash[aorname(a),'corrflux'], meancorr, sigmacorr, clipsig = 2.5 ;,/verbose
         meanclip, planethash[aorname(a),'corrfluxerr'], meancorrerr, sigmacorrerr, clipsig = 2.5
                                 ; meanerr, planethash[aorname(a),'corrflux'], planethash[aorname(a),'corrfluxerr'], meancorr2, sigmam, sigmad
-                                ;meancorrerr = meancorrerr / 3.0 ; XXXXX need real error bars
+        meancorrerr = meancorrerr / 6.;sqrt(n_elements(planethash[aorname(a),'corrflux'])) ;
                                 ;print, 'compare mean & error', meancorr, meancorrerr, meancorr2, sigmam, sigmad
         if a eq snapaor then phasearr = [median(planethash[aorname(a),'phase'])] else phasearr = [phasearr, median(planethash[aorname(a),'phase'])]
         if a eq snapaor then fluxarr = [meancorr] else fluxarr = [fluxarr, meancorr]
-        if a eq snapaor then errarr = [sigmacorr] else errarr = [errarr, sigmacorr]
+        if a eq snapaor then errarr = [meancorrerr] else errarr = [errarr, meancorrerr]
      endfor
 ;now sort the arrays since they are taken at random phase
      sp = sort(phasearr)
@@ -74,11 +73,16 @@ pro fit_exoplanet_light_curve, planetname, bin_level, apradius, chname, snapshot
  ;normalize for more understandable plots
  normcorr = mean(fluxarr)
  fluxarr = fluxarr / normcorr
+ fluxarr = fluxarr + 0.001
  errarr = errarr / normcorr
  testplot = errorplot(phasearr, fluxarr, errarr, '1s', yrange = [0.985, 1.005])
+
 ;Initial guess, start with those from the literature
-  params0 = [fp_fstar0, rp_rstar, ar_semimaj, inclination]
-  parinfo = replicate({value:0.D, fixed:0, limited:[0,0], limits:[0.D,0.D]}, n_elements(params0))
+ amplitude = .001               ; messing around with amplitude of the phase curve.
+ phase_offset = 1.
+ params0 = [fp_fstar0, rp_rstar, ar_semimaj, inclination, amplitude, phase_offset]
+;  params0 = [fp_fstar0, rp_rstar, ar_semimaj, inclination]
+ parinfo = replicate({value:0.D, fixed:0, limited:[0,0], limits:[0.D,0.D]}, n_elements(params0))
 ; ;limit fp_f_star0 to be positive and less than 1.
   parinfo[0].limited[0] = 1
   parinfo[0].limits[0] = 0.0 ;;
@@ -98,7 +102,9 @@ pro fit_exoplanet_light_curve, planetname, bin_level, apradius, chname, snapshot
   parinfo[3].limits[0] = 0.0 ;;
 
 ;do the fitting
-  afargs = {t:phasearr, flux:fluxarr, err:errarr, p_orbit:p_orbit, mjd_start:mjd_start, mjd_transit:mjd_transit, savefilename:savefilename};, rp_rstar:rp_rstar ar_semimaj:ar_semimaj,,inclination:inclination}
+  modelfilename = strcompress(dirname + planetname +'_model_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
+
+  afargs = {t:phasearr, flux:fluxarr, err:errarr, p_orbit:p_orbit, mjd_start:mjd_start, mjd_transit:mjd_transit, savefilename:modelfilename};, rp_rstar:rp_rstar ar_semimaj:ar_semimaj,,inclination:inclination}
   pa = mpfit('mandel_agol', params0, FUNCTARGS=afargs, PERROR=spa, BESTNORM=achi, DOF=adof, COVAR = COV, status = status, errmsg = errmsg, parinfo = parinfo);, savefilename = savefilename)
 
   print, 'status', status
@@ -109,7 +115,7 @@ pro fit_exoplanet_light_curve, planetname, bin_level, apradius, chname, snapshot
 ;want to overplot the fitted curve
   params0 = pa  ; just give it the answer, and run with overplot
   ph = findgen(100) / 100. - 0.5   ; give it a nice set of phases for a nice plot
-  model = mandel_agol(params0, t=ph, flux=fluxarr, err=errarr, p_orbit=p_orbit, mjd_start=mjd_start, mjd_transit=mjd_transit ,savefilename = savefilename, /overplot);, rp_rstar=rp_rstar, ar_semimaj=ar_semimaj,inclination=inclination,
+  model = mandel_agol(params0, t=ph, flux=fluxarr, err=errarr, p_orbit=p_orbit, mjd_start=mjd_start, mjd_transit=mjd_transit ,savefilename = modelfilename, /overplot);, rp_rstar=rp_rstar, ar_semimaj=ar_semimaj,inclination=inclination,
 end
 
 
