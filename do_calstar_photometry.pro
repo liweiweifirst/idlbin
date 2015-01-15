@@ -85,9 +85,9 @@ function do_calstar_photometry, ch, dirname
                                 ;choose the requested pixel aperture =
                                 ;3.0 pixels to match
                                 ;pixphasecorrectgauss
-           abcdflux = f[*,4]      
+           abcdflux = f[*,3]      
 ;           print, 'flux', x3, y3, abcdflux
-           fs = fs[*,4]
+           fs = fs[*,3]
                                 ; 3-7 pixel background
            back = b[*,0]
            backerr = bs[*,0]
