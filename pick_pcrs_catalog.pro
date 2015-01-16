@@ -20,6 +20,7 @@
 ;  pos_epoch = the epoch which describes the ra and dec inputs (most
 ;    likely 2000)
 ;  obs_epoch = the planned observing epoch in years eg. 2015.6
+;  dirloc = full path to the location of the catalog
 ;
 ; OUTPUTS:
 ;  -RA
@@ -35,17 +36,18 @@
 ;  http://proceedings.spiedigitallibrary.org/proceeding.aspx?articleid=847055
 ;
 ; EXAMPLE:
-;  pick_pcrs_catalog, 330.79488375, 18.884310, 0.029, -0.019, 2000, 2015.5
+;  pick_pcrs_catalog, 330.79488375, 18.884310, 0.029, -0.019, 2000,
+;  2015.5,  '~/external/irac_warm/pcrs_catalog/pubdb_pcrs.unl'
 ;
 ; MODIFICATION HISTORY:
 ;  January 2015 Original Version  JK
 ;-
-pro pick_pcrs_catalog, ra_deg, dec_deg, pm_ra, pm_dec, pos_epoch, obs_epoch
-
+pro pick_pcrs_catalog, ra_deg, dec_deg, pm_ra, pm_dec, pos_epoch, obs_epoch, dirloc
+  t = systime(1)
   ;;do some error checking on the inputs
-  if (N_params() lt 6) then begin
+  if (N_params() lt 7) then begin
      print,'Wrong number of inputs - ' + $
-           'PICK_PCRS_CATALOG, ra_deg, dec_deg, pm_ra, pm_dec, pos_epoch, obs_epoch'
+           'PICK_PCRS_CATALOG, ra_deg, dec_deg, pm_ra, pm_dec, pos_epoch, obs_epoch, dirloc'
      return
   endif 
   if size(ra_deg,/TYPE) gt 5 then begin
@@ -72,6 +74,10 @@ pro pick_pcrs_catalog, ra_deg, dec_deg, pm_ra, pm_dec, pos_epoch, obs_epoch
      print, 'Observing Epoch must be an INTeger or FLOAT with units of degrees'
      return
   endif
+  if size(dirloc,/TYPE) ne 7 then begin
+     print, 'Directory Location must be a string'
+     return
+  endif
 
  
   ;;precess from J2000 to the current location of the target
@@ -94,7 +100,14 @@ pro pick_pcrs_catalog, ra_deg, dec_deg, pm_ra, pm_dec, pos_epoch, obs_epoch
   endelse
 
   ;;read in the pcrs_catalog
-  readcol, '~/external/irac_warm/pcrs_catalog/pcrsguidestarcatalog.txt', star_id, junk, junk, Validity, Q, posEr, pErWk,  vMag, rightAscensn,  declination, prpMtnRA, prpMtnDc,  parllx, magEr,  raErr, declEr, mKER, mKED, plxEr, dOjbE, bkgEr, bstEr, P, M, X,/silent
+;  readcol, '~/external/irac_warm/pcrs_catalog/pcrsguidestarcatalog.txt', star_id, junk, junk, Validity, Q, posEr, pErWk,  vMag, rightAscensn,  declination, prpMtnRA, prpMtnDc,  parllx, magEr,  raErr, declEr, mKER, mKED, plxEr, dOjbE, bkgEr, bstEr, P, M, X,/silent
+
+  readcol, dirloc, star_id, Validity, Q, posEr, pErWk,  vMag, rightAscensn,  declination, prpMtnRA, prpMtnDc,  parllx, magEr,  raErr, declEr, mKER, mKED, plxEr, dOjbE, bkgEr, bstEr, P, M, L, epoch, x, y, z, spt_ind, CNTR, delimiter = '|',/silent
+  
+  ;;need to precess the catalog coordinates from 2004.5 to the
+  ;;obs_epoch
+  ra_orig = rightAscensn & dec_orig = declination ; keep the 2004.5 epoch originals for output
+  precess, rightAscensn, declination ,2004.5, obs_epoch   
 
   ;;calculate the angular distance of the whole catalog from the target
   ;;cos(A) = sin(d1)sin(d2) + cos(d1)cos(d2)cos(ra1-ra2)  spherical trig
@@ -108,8 +121,8 @@ pro pick_pcrs_catalog, ra_deg, dec_deg, pm_ra, pm_dec, pos_epoch, obs_epoch
   sort_angle = angle[sortangle]
   sort_id = star_id[sortangle]
   sort_M = M[sortangle]
-  sort_ra = rightAscensn[sortangle]
-  sort_dec = declination[sortangle]
+  sort_ra = ra_orig[sortangle]
+  sort_dec = dec_orig[sortangle]
   sort_pm_ra = prpMtnRA[sortangle]
   sort_pm_dec = prpMtnDc[sortangle]
   sort_raerr = raErr[sortangle]
@@ -122,23 +135,16 @@ pro pick_pcrs_catalog, ra_deg, dec_deg, pm_ra, pm_dec, pos_epoch, obs_epoch
   if n_angle eq 0 then print, 'No catalog stars found'
   for i = 0, n_angle - 1 do begin
      if sort_angle[i] le 1.0 then begin
-        if i eq 0 then print, 'RA              DEC              PM_RA +-  unc       PM_DEC +- unc      POS_ERR   V_mag   ANG_Dist  SRC'
-        e = sixty(sort_ra[i]/15.)
-        f = sixty(sort_dec[i],/TrailSign)
-        ;;make pretty-er output
-        print_ra = strmid(strtrim(string(e[0]),1),0,2) + 'h' + strmid(strtrim(string(e[1]), 1),0,2) + 'm' + $
-                   strmid(strtrim(string(e[2]), 1),0,5) + 's' 
-        if f[0] gt 0 then print_dec = strmid(strtrim(string(f[0]),1),0,2) + 'd' + strmid(strtrim(string(f[1]), 1),0,2) +  $
-                                      'm' + strmid(strtrim(string(f[2]), 1),0,5) + 's' $
-        else print_dec = strmid(strtrim(string(f[0]),1),0,3) + 'd' + strmid(strtrim(string(f[1]), 1),0,2) + 'm' +  $
-                         strmid(strtrim(string(f[2]), 1),0,5) + 's'
+        if i eq 0 then print, '   RA            DEC     EPOCH       PM_RA +-  unc       PM_DEC +- unc      POS_ERR   V_mag   ANG_Dist  SRC'
         if sort_m[i] eq 0 then name = 'HIP' else name = 'TYC'
 
-        print, print_ra, print_dec, sort_pm_ra[i], sort_raerr[i], sort_pm_dec[i], sort_decerr[i], $
+        print, adstring(sort_ra[i], sort_dec[i]), '2004.5', sort_pm_ra[i], sort_raerr[i], sort_pm_dec[i], sort_decerr[i], $
                sort_poserr[i], sort_vmag[i], sort_angle[i], name, $
                format = '(A, TR3, A, F10.1, F10.1,  F10.1, F10.1, F10.1, F10.2, F10.4, TR3, A)'
      endif
 
   endfor
-
+print, 'time check', systime(1) - t
 end
+
+
