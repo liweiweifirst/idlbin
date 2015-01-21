@@ -8,9 +8,15 @@
 ;  actually larger for the current epoch.  Brighter stars are more
 ;  desirable because then the peakup integration time will be shorter,
 ;  although all brightnesses are feasible.  Only catalog stars with
-;  angular distances less than half a degree are shown as viable
+;  angular distances less than ~half a degree are shown as viable
 ;  catalog stars.  The best star to choose is some combination of
-;  position error, V_mag and angular distance.
+;  position error, V_mag and angular distance.  If this tool shows a
+;  star which is not listed in SPOT, and it is your choice for the
+;  best catalog star, you can always enter it manually as a PCRS
+;  peakup star.  The catalog used here is exactly the same as that
+;  used in SPOT; it is however unclear what epoch SPOT uses for
+;  precession and proper motion calculation.  This code uses the
+;  observed epoch input by the user.
 ;
 ; INPUTS:
 ;  ra_deg = ra(J2000) in degrees
@@ -99,11 +105,9 @@ pro pick_pcrs_catalog, ra_deg, dec_deg, pm_ra, pm_dec, pos_epoch, obs_epoch, dir
      dec = outdec
   endelse
 
-  ;;read in the pcrs_catalog
-;  readcol, '~/external/irac_warm/pcrs_catalog/pcrsguidestarcatalog.txt', star_id, junk, junk, Validity, Q, posEr, pErWk,  vMag, rightAscensn,  declination, prpMtnRA, prpMtnDc,  parllx, magEr,  raErr, declEr, mKER, mKED, plxEr, dOjbE, bkgEr, bstEr, P, M, X,/silent
+  ;;read in the pcrs_catalog  
+  read_pcrs_catalog, dirloc, star_id, Validity, Q, posEr, pErWk,  vMag, rightAscensn,  declination, prpMtnRA, prpMtnDc,  parllx, magEr,  raErr, declEr, mKER, mKED, plxEr, dOjbE, bkgEr, bstEr, P, M, L, epoch, x, y, z, spt_ind, CNTR
 
-  readcol, dirloc, star_id, Validity, Q, posEr, pErWk,  vMag, rightAscensn,  declination, prpMtnRA, prpMtnDc,  parllx, magEr,  raErr, declEr, mKER, mKED, plxEr, dOjbE, bkgEr, bstEr, P, M, L, epoch, x, y, z, spt_ind, CNTR, delimiter = '|',/silent
-  
   ;;need to precess the catalog coordinates from 2004.5 to the
   ;;obs_epoch
   ra_orig = rightAscensn & dec_orig = declination ; keep the 2004.5 epoch originals for output
