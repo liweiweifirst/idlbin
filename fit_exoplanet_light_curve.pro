@@ -38,7 +38,7 @@ pro fit_exoplanet_light_curve, planetname, bin_level, apradius, chname, snapshot
         meanclip, planethash[aorname(a),'corrflux'], meancorr, sigmacorr, clipsig = 2.5 ;,/verbose
         meanclip, planethash[aorname(a),'corrfluxerr'], meancorrerr, sigmacorrerr, clipsig = 2.5
                                 ; meanerr, planethash[aorname(a),'corrflux'], planethash[aorname(a),'corrfluxerr'], meancorr2, sigmam, sigmad
-        meancorrerr = meancorrerr / 6.;sqrt(n_elements(planethash[aorname(a),'corrflux'])) ;
+        meancorrerr = meancorrerr / 7.;sqrt(n_elements(planethash[aorname(a),'corrflux'])) ;
                                 ;print, 'compare mean & error', meancorr, meancorrerr, meancorr2, sigmam, sigmad
         if a eq snapaor then phasearr = [median(planethash[aorname(a),'phase'])] else phasearr = [phasearr, median(planethash[aorname(a),'phase'])]
         if a eq snapaor then fluxarr = [meancorr] else fluxarr = [fluxarr, meancorr]
@@ -75,18 +75,29 @@ pro fit_exoplanet_light_curve, planetname, bin_level, apradius, chname, snapshot
  fluxarr = fluxarr / normcorr
  fluxarr = fluxarr + 0.001
  errarr = errarr / normcorr
- testplot = errorplot(phasearr, fluxarr, errarr, '1s', yrange = [0.985, 1.005])
+
+;what happens if I intentionally offset the minimum of the sin curve
+ low = where(phasearr lt -0.05 and phasearr gt -0.3)
+; fluxarr(low) = fluxarr(low) - 0.001
+
+
+ testplot = errorplot(phasearr, fluxarr, errarr, '1s', yrange = [0.991, 1.005])
 
 ;Initial guess, start with those from the literature
  amplitude = .001               ; messing around with amplitude of the phase curve.
  phase_offset = 1.
- params0 = [fp_fstar0, rp_rstar, ar_semimaj, inclination, amplitude, phase_offset]
+ c1 = -.04
+ c2 = .04
+ c3 = 1.0
+ c4 = 1.0
+; params0 = [fp_fstar0, rp_rstar, ar_semimaj, inclination, amplitude, phase_offset]
+ params0 = [fp_fstar0, rp_rstar, ar_semimaj, inclination, c1, c2];, c3, c4]
 ;  params0 = [fp_fstar0, rp_rstar, ar_semimaj, inclination]
  parinfo = replicate({value:0.D, fixed:0, limited:[0,0], limits:[0.D,0.D]}, n_elements(params0))
 ; ;limit fp_f_star0 to be positive and less than 1.
   parinfo[0].limited[0] = 1
-  parinfo[0].limits[0] = 0.0 ;;
-  parinfo[0].limited[1] = 1
+  parinfo[0].limits[0] = 0. ;;
+  Parinfo[0].limited[1] = 1
   parinfo[0].limits[1] = 1.0
 ;  parinfo[0].fixed = 1
 ; ;limit rp/rf_star to be positive and less than 1.
@@ -100,6 +111,15 @@ pro fit_exoplanet_light_curve, planetname, bin_level, apradius, chname, snapshot
 ; limit inclination to be positive 
   parinfo[3].limited[0] = 1
   parinfo[3].limits[0] = 0.0 ;;
+ ;limit c1 and c2 to be gt -1 and lt 1
+;  parinfo[4].limited[0] = 1
+;  parinfo[4].limits[0] = -1
+;  parinfo[4].limited[1] = 1
+;  parinfo[4].limits[1] = 1
+;  parinfo[5].limited[0] = 1
+;  parinfo[5].limits[0] = -1
+;  parinfo[5].limited[1] = 1
+;  parinfo[5].limits[1] =1
 
 ;do the fitting
   modelfilename = strcompress(dirname + planetname +'_model_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
