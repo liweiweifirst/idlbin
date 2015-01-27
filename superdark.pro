@@ -3,9 +3,9 @@ pro superdark
                                 ;files to make one superdark for the
                                 ;warm mission 
   expname = ['s0p1s','s0p4s', 's2s']
-  chname = '2'
+  chname = '1'
 
-  for e = 2, 2 do begin         ; n_elements(expname) -1 do begin
+  for e = 1, 1 do begin         ; n_elements(expname) -1 do begin
 ;for now exptime can be 's0p1s' or 's2s'
      case expname(e) OF
         's0p1s': exptime_d = 0.1

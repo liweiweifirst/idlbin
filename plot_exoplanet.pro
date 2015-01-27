@@ -79,7 +79,7 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
  
 
 ;for debugging: skip some AORs
-  startaor =  5                 ;  n_elements(aorname) -29
+  startaor =  5;0                 ;  n_elements(aorname) -29
   stopaor =   n_elements(aorname) - 1
 
 
@@ -589,7 +589,7 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
 
 
         if a gt stareaor then begin
-           if planetname eq 'WASP-14b' then corroffset = 0.0015
+           if planetname eq 'WASP-14b' then corroffset = 0.001
            print, 'inside a ge stareaor', a, corroffset
            pp.window.SetCurrent
            pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],$
