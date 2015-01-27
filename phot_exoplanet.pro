@@ -219,7 +219,12 @@ for a =startaor, stopaor do begin
       ;apply mask file if necessary
       if planetname eq 'hd189733' then  im[13:16, 4:7, *] = !Values.F_NAN ;mask region with nan set for bad regions
       if planetname eq 'WASP-14b' then  begin
-         im[4:7, 13:16, *] = !Values.F_NAN ;mask region with nan set for bad regions      
+         ra_off = 218.27718
+         dec_off = 21.89808
+         adxy, h, ra_off, dec_off, x_off, y_off
+         x_off = round(x_off)
+         y_off = round(y_off)
+         im[(x_off-2):(x_off + 2), (y_off - 2):(y_off+2), *] = !Values.F_NAN ;mask region with nan set for bad regions      
       endif
 
       if planetname eq 'HAT-P-22' and chname eq '2' then  im[19:25, 9:15, *] = !Values.F_NAN                              ;mask region with nan set for bad regions
