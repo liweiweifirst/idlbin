@@ -6,7 +6,8 @@ l = file_lines(dirloc)
 a = strarr(l)
 openr,unit,dirloc,/get_lun
 readf,unit,a
-close,unit
+;close,unit
+free_lun, unit
 asplit = strsplit(a[1:*],'|',/extract)
 asplit2 = asplit.ToArray()
 star_id = asplit2[*,0]
