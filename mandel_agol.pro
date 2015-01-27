@@ -56,10 +56,13 @@ IF n3 NE 0 THEN lambda_planet[i3] = 1.0
 
 ;now add in a phase curve
 alpha = ABS(phi_orbit-!dpi)
+
 ;phase_curve = (sin(alpha) + (!dpi-alpha)*cos(alpha))/!dpi  ;; Phase curve for a Lambert sphere from Seager book 
 
+phase_curve = 1+ params0[0] + params0[4]*cos(2*!dpi*tdiff/p_orbit) + params0[5]*sin(2*!dpi*tdiff/p_orbit);+ params0[6]*cos(4*!dpi*tdiff/p_orbit) + params0[7]*sin(4*!dpi*tdiff/p_orbit)
+
 ;testing
-phase_curve = params0[4]*sin(alpha + params0[5])
+;phase_curve = params0[4]*sin(alpha + params0[5])
 
 rel_flux = (1-lambda_star) + params0[0] * (1-lambda_planet) * phase_curve
 ;rel_flux = (1-lambda_star) + fp_fstar0 * (1-lambda_planet) * phase_curve
