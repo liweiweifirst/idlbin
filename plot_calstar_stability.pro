@@ -136,8 +136,8 @@ pro plot_calstar_stability, chname, binperstar = binperstar, fit_slope = fit_slo
 ;     bin_all_fluxerr = bin_all_fluxerr(good)
      pb2 = errorplot(bin_all_time, bin_all_corrflux, bin_all_fluxerr,$
                      '1s', sym_size = 0.2,   sym_filled = 1, color = 'black', yrange = [0.99, 1.02],$
-                     xtitle = 'Time (Years)', ytitle = 'Normalized Flux', title = 'Ch '+ chname+ ' Primary Calibrators', $
-                     axis_style = 1 ,MARGIN = [0.15, 0.15, 0.20, 0.15], overplot = pb2)
+                     xtitle = 'Time (Years)', ytitle = 'Normalized Flux', $;title = 'Ch '+ chname+ ' Primary Calibrators', $
+                   MARGIN = [0.15, 0.15, 0.20, 0.15], overplot = pb2) ;  axis_style = 1 
      
 ;----------------------------------------------------
 ;and now what about fitting the best fit slope?
@@ -184,12 +184,12 @@ pro plot_calstar_stability, chname, binperstar = binperstar, fit_slope = fit_slo
 ;     if m eq 0 then for cs = 0, n_elements(crsclk) - 1 do print, crsclk_days(cs), month(cs), year(cs)
 
      if m eq 1 then begin
-        pcr = plot(crsclk_days, cr , '1*', color = 'green',  axis_style = 0, /current, /data, $
-                   MARGIN = [0.15, 0.15, 0.20, 0.15], yrange = [-5,8], xrange = pb2.xrange)
+;        pcr = plot(crsclk_days, cr , '1*', color = 'green',  axis_style = 0, /current, /data, $
+;                   MARGIN = [0.15, 0.15, 0.20, 0.15], yrange = [-5,8], xrange = pb2.xrange)
         
 ;add other axes
-        a_psx = axis('y', target = pcr, LOCATION = [max(pb2.xrange),0,0], textpos = 1, title = 'CR', color = 'green')
-        xaxis = axis('x', target = pb2, LOCATION = [0, max(pb2.yrange)], showtext = 0, tickdir = 1)
+;        a_psx = axis('y', target = pcr, LOCATION = [max(pb2.xrange),0,0], textpos = 1, title = 'CR', color = 'green')
+;        xaxis = axis('x', target = pb2, LOCATION = [0, max(pb2.yrange)], showtext = 0, tickdir = 1)
      endif
 
 ;--------------
