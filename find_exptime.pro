@@ -1,4 +1,10 @@
 Function find_exptime, source_mJy, ch
+  ;;this function takes the flux density
+  ;;of a source in mJy as well as the
+  ;;channel and makes an estimate of which exposure time is
+  ;;appropriate for that source.  The goal was to stay below 2/3 full
+  ;;well and above 10-15% full well.
+
   ;;based on warm mission saturation limits on IRAC website
   ;;http://irsa.ipac.caltech.edu/data/SPITZER/docs/irac/warmimgcharacteristics/
   if ch eq '1' then begin
