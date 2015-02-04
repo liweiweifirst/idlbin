@@ -3,7 +3,9 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
 
 COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm
 
- colorarr = ['blue', 'red','black','green','grey','purple', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ]
+ colorarr = ['gray', 'gray','gray','gray','gray','burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']
+
+;colorarr = ['blue', 'red','black','green','grey','purple', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ]
 ;
 
 
@@ -14,8 +16,8 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
   period =  planetinfo[planetname, 'period']
   stareaor = planetinfo[planetname, 'stareaor']
 ;for debugging: skip some AORs
-  startaor = 1                  ;5
-  stopaor =  1;n_elements(aorname) - 1
+  startaor = 5                  ;5
+  stopaor =  n_elements(aorname) - 1
   print, 'stopaor', stopaor
 ;  plot_norm= planetinfo[planetname, 'plot_norm']
 ;  plot_corrnorm = planetinfo[planetname, 'plot_corrnorm']
@@ -76,12 +78,18 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
      xcen = planethash[aorname(a),'xcen']
      ycen = planethash[aorname(a),'ycen']
      flux = planethash[aorname(a),'flux']
-     print, 'first', xcen[350:360], ycen[350:360], flux[350:360]
-     print, 'second', xcen[6395:6405], ycen[6395:6405], flux[6395:6405]
+;     print, 'first', xcen[350:360], ycen[350:360], flux[350:360]
+;     print, 'second', xcen[6395:6405], ycen[6395:6405], flux[6395:6405]
 ;------------------------------------------------------
      print, 'n_elements time', n_elements(bin_timearr), n_elements(bin_xcen), n_elements(bin_phase)
      if keyword_set(timeplot) then begin ;make the plot as a function of time
         print, 'making plot as a function of time'
+        plotx = (bin_timearr-  time_0)/60./60.
+     endif else begin
+        plotx = bin_phase
+     endelse
+
+     
         extra={xthick: 2, ythick:2, margin: 0.2, sym_size: 0.2,   sym_filled: 1, xstyle:1}
         corrnormoffset = 0;0.02
         corroffset = 0.001
@@ -97,88 +105,64 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
            print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
 
            
-           pp = plot((bin_timearr-  time_0)/60./60., bin_xcen, '1s',  $;title = planetname, $
-                     color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 0.5, $
+           pp = plot(plotx, bin_xcen, '1s',  $;title = planetname, $
+                     color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 0.3, $
                      xshowtext = 0, ytickformat = '(F10.1)', dimensions = [600, 900], _extra = extra, yminor = 0) ;, $, ymajor = 4
  
           ;turn off refreshing to make this quicker hopefully
 ;           pp.Refresh, /Disable
 
            
-           pq= plot((bin_timearr - time_0)/60./60., bin_ycen, '1s',  color = colorarr[a], $
-                     ytitle = 'Y position',  position = [0.2, 0.64, 0.9, 0.77],/current,  ytickinterval = 1.0,$
-                    xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, yminor = 0);, yrange = [15.5, 17.5]) ;, $, title = planetname , ymajor = 4
+           pq= plot(plotx, bin_ycen, '1s',  color = colorarr[a], $
+                    ytitle = 'Y position',  position = [0.2, 0.64, 0.9, 0.77],/current,  ytickinterval = 0.3,$
+                    xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, yminor = 0) ;, yrange = [15.5, 17.5]) ;, $, title = planetname , ymajor = 4
                      ;xrange = setxrange)
 
 
-           if keyword_set(errorbars) then begin
-              pr= errorplot((bin_timearr - time_0)/60./60., bin_flux/plot_norm,bin_fluxerr/plot_norm,  '1s',  color =colorarr[a], $
-                             ytitle = 'Normalized Flux' , yminor = 5, $ ;, title = planetname,,yrange = setynormfluxrange
-                             xrange = setxrange ,  position = [0.2,0.08, 0.9, 0.21],/current, ymajor = 4, _extra = extra)
-           endif else begin
-              pr = plot((bin_timearr - time_0)/60./60., bin_flux/plot_norm, '1s',  $
-                        color = colorarr[a],   ytitle = 'Norm. Flux', xtitle = 'Time(hrs)',$ 
-                         position = [0.2,0.08, 0.9, 0.21], /current, _extra = extra, ytickinterval = 0.02, yminor = 0);, yrange = [0.98, 1.02]
-           endelse  ;/errorbars
-          if pmapcorr eq 1 then begin
-              print, 'inside pmapcorr eq 1', median( (bin_corrfluxp/plot_corrnorm) ), median(bin_flux)
-              if keyword_set(errorbars) then begin
-                 pr = errorplot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm) -corrnormoffset,  $
-                        bin_corrfluxerrp/plot_corrnorm ,/overplot, '1s', sym_size = 0.2, $
-                        sym_filled = 1, color = colorarr[a])
-              endif else begin
-                 pr = plot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm) -corrnormoffset ,/overplot, '1s', $
-                           sym_size = 0.2,   sym_filled = 1, color = colorarr[a])
-              endelse           ;/errorbars
-
-           endif  ;enough pmap corrections
-
+           pr = plot(plotx, bin_flux/plot_norm, '1s',  $
+                     color = colorarr[a],   ytitle = 'Norm. Flux', xtitle = 'Time(hrs)',$ 
+                     position = [0.2,0.08, 0.9, 0.21], /current, _extra = extra, ytickinterval = 0.01, yminor = 0) ;, yrange = [0.98, 1.02]
  
-           ps= plot((bin_timearr - time_0)/60./60., bin_npcent, '1s', color = colorarr[a], $
-                     ytitle = 'Noise Pixel',  position = [0.2, 0.36, 0.9, 0.49], /current, $
-                    xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, ytickinterval = 1.0, yminor = 0, yrange = [2.5, 8.0]) ;,$ title = planetname,, ymajor = 4
-                    ;xrange = setxrange)
+ 
+           ps= plot(plotx, bin_npcent, '1s', color = colorarr[a], $
+                    ytitle = 'Noise Pixel',  position = [0.2, 0.36, 0.9, 0.49], /current, $
+                    xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, ytickinterval = 1.0, yminor = 0, yrange = [3.5, 7.0]) ;,$ title = planetname,, ymajor = 4;xrange = setxrange)
 
-           pt = plot((bin_timearr - time_0)/60./60., bin_bkgd/ bkgd_norm, '1s' , color = colorarr[a], $
+           pt = plot(plotx, bin_bkgd/ bkgd_norm, '1s' , color = colorarr[a], $
                      ytitle = 'Norm. Bkgd',  margin = 0.2, position = [0.2, 0.22, 0.9, 0.35], /current, xshowtext = 0,$
-                    ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.5, yminor = 0, yrange = [0.5, 1.8])           ;, $ title = planetname,ymajor = 4,
+                     ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.2, yminor = 0, yrange = [0.8, 1.2]) ;, $ title = planetname,ymajor = 4,
 
-           pxy = plot((bin_timearr - time_0)/60./60., bin_xfwhm, '1s', color = 'blue', $
-                     ytitle = 'X & Y FWHM',  position = [0.2, 0.50, 0.9, 0.63], /current, $
-                    xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.5, yminor = 0) ;
-           pxy = plot((bin_timearr - time_0)/60./60., bin_yfwhm, '1s', color = 'black', $
-                     overplot = pxy, _extra = extra) ;
+           pxy = plot(plotx, bin_xfwhm, '1s', color = 'blue', $
+                      ytitle = 'X & Y FWHM',  position = [0.2, 0.50, 0.9, 0.63], /current, $
+                      xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.1, yminor = 0) ;
+           pxy = plot(plotx, bin_yfwhm, '1s', color = 'black', $
+                      overplot = pxy, _extra = extra) ;
 
-           ;setup a plot for just the snaps
- ;          if n_elements(aorname) gt 10 then begin
- ;             pu = plot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm) + corroffset, xtitle = 'Time(hrs)', $
- ;                       title = planetname, ytitle = 'Normalized Flux',  yrange = [0.989, 1.005], aspect_ratio = 0.0, margin = 0.2);, xrange = setxrange, /nodata) ;
- ;          endif
 
-        endif                   ; if a = 0
+        endif                   ; if a = startaor
 
       ;  test_med(a) = median(bin_corrfluxp)
         print,'median bin_corrfluxp ',  median(bin_corrfluxp), median(bin_flux)
         if (a gt 0) and (a le stareaor) then begin
            print, 'inside a gt 0 a le stareaor', a
 ;           pp.window.SetCurrent
-           pp = plot((bin_timearr - time_0)/60./60., bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],  overplot = pp,/current)
+           pp = plot(plotx, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],  overplot = pp,/current)
 ;           pq.window.SetCurrent
-           pq = plot((bin_timearr - time_0)/60./60., bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = pq,/current)
+           pq = plot(plotx, bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = pq,/current)
 ;           pr.window.SetCurrent
-           pr = plot((bin_timearr - time_0)/60./60., bin_flux/plot_norm , '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pr,/current)
+           pr = plot(plotx, bin_flux/plot_norm , '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pr,/current)
  ;          if pmapcorr eq 1 then begin
 ;              pr = plot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm)-corrnormoffset, /overplot, 's1', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/current,overplot = pr)
 ;           endif
 
 ;           ps.window.SetCurrent
-           ps = plot((bin_timearr - time_0)/60./60., bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = ps,/current) ;, xtitle = 'Time(hrs)', ytitle = 'Normalized Flux',) 
+           ps = plot(plotx, bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = ps,/current) ;, xtitle = 'Time(hrs)', ytitle = 'Normalized Flux',) 
 
 ;           pt.window.SetCurrent
-           pt = plot((bin_timearr - time_0)/60./60., bin_bkgd/ bkgd_norm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pt,/current) 
+           pt = plot(plotx, bin_bkgd/ bkgd_norm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pt,/current) 
 
-           pxy = plot((bin_timearr - time_0)/60./60., bin_xfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pxy,/current)
-           pxy = plot((bin_timearr - time_0)/60./60., bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pxy,/current)
+           pxy = plot(plotx, bin_xfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = 'blue', overplot = pxy,/current)
+           pxy = plot(plotx, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = 'black', overplot = pxy,/current)
 
 
         endif
@@ -187,49 +171,24 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
 
         if a gt stareaor then begin
            print, 'inside a gt stareaor', a
-           pp.window.SetCurrent
-           pp = plot((bin_timearr - time_0)/60./60., bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],$
-                     overplot = pp,/current, layout = [1,5,1])
+           pp = plot(plotx, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],$
+                     overplot = pp, layout = [1,5,1])
 
-           pp.window.SetCurrent
-           pp = plot((bin_timearr - time_0)/60./60., bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],$
-                     /overplot,/current, layout = [1,5,2])
+           pq = plot(plotx, bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],$
+                     overplot = pq, layout = [1,5,2])
 
-           pp.window.SetCurrent
-           if keyword_set(errorbars) then begin
-              pp= errorplot((bin_timearr - time_0)/60./60., bin_flux/(plot_norm) , bin_fluxerr/plot_norm, '1s', $
-                        sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], /overplot,/current, layout = [1,5,3]) 
-           endif else begin
-              pp = plot((bin_timearr - time_0)/60./60., bin_flux/(plot_norm) , '1s', sym_size = 0.2,   sym_filled = 1,  $
-                        color = colorarr[a], /overplot,/current,/nodata, layout = [1,5,3])
-           endelse
+           pr = plot(plotx, bin_flux/(plot_norm) , '1s', sym_size = 0.2,   sym_filled = 1,  $
+                        color = colorarr[a], overplot = pr)
+ 
 
+           ps = plot(plotx, bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a],$
+                     overplot = ps) 
 
-           if pmapcorr eq 1 then begin
-              print, 'inside pmapcorr eq 1, a gt stareaor', median( (bin_corrfluxp/plot_corrnorm) +corroffset)
+           pt = plot(plotx, bin_bkgd/bkgd_norm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
+                     overplot = pt) 
+           pxy = plot(plotx, bin_xfwhm, '1s',  sym_size = 0.2,   sym_filled = 1, color = 'blue', overplot = pxy)  ;
+           pxy = plot(plotx, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1, color = 'black', overplot = pxy) ;
 
-               if keyword_set(errorbars) then begin
-                  pr = errorplot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm)- corrnormoffset,$
-                            bin_corrfluxerrp/ plot_corrnorm, '1s', sym_size = 0.2,   $
-                            sym_filled = 1, color = colorarr[a],/overplot,/current)
-               endif else begin
-                  pr = plot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm) - corrnormoffset, '1s', $
-                            sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot,/current)
-               endelse
-               if n_elements(aorname) gt 10 then begin
-                  pu.window.SetCurrent
-                  pu = plot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm) + corroffset, '1s', $
-                            sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot,/current)
-               endif
-            endif
-
-           pp.window.SetCurrent
-           pp = plot((bin_timearr - time_0)/60./60., bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a],$
-                     /overplot,/current, layout = [1,5,4]) 
-
-           pp.window.SetCurrent
-           pp = plot((bin_timearr - time_0)/60./60., bin_bkgd, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
-                     /overplot,/current, layout = [1,5,5]) 
 
         endif
 
@@ -240,11 +199,10 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
 ;        ps.save, dirname + 'binnp_time_ch'+chname+'.eps'
 ;        pr.save, dirname + 'binflux_time_ch'+chname+'.eps'
 
-        pp.save, dirname +'multiplot_time_ch'+chname+'.eps'
-     endif
+;       
 
  
   endfor                        ;binning for each AOR
-
+  pp.save, dirname +'multiplot_ch'+chname+'.eps'
 end
 
