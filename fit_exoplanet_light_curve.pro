@@ -35,7 +35,7 @@ pro fit_exoplanet_light_curve, planetname, bin_level, apradius, chname, snapshot
      for a = snapaor, n_elements(aorname) -1 do begin
                                 ; plothist, planethash[aorname(a),'corrflux'], xhist, yhist, bin = 0.0005, /noplot,/nan
                                 ; ap = plot(xhist, yhist)
-        meanclip, planethash[aorname(a),'corrflux'], meancorr, sigmacorr, clipsig = 2.5 ;,/verbose
+        meanclip, planethash[aorname(a),'corrflux_d'], meancorr, sigmacorr, clipsig = 2.5 ;,/verbose
         meanclip, planethash[aorname(a),'corrfluxerr'], meancorrerr, sigmacorrerr, clipsig = 2.5
                                 ; meanerr, planethash[aorname(a),'corrflux'], planethash[aorname(a),'corrfluxerr'], meancorr2, sigmam, sigmad
         meancorrerr = meancorrerr / 7.;sqrt(n_elements(planethash[aorname(a),'corrflux'])) ;
