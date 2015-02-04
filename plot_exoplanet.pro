@@ -1,7 +1,7 @@
-pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phaseplot, sclkplot = sclkplot, timeplot = timeplot, Dsweet = dsweet, selfcal=selfcal, centerpixplot = centerpixplot, errorbars = errorbars, unbinned_xplot = unbinned_xplot, unbinned_yplot = unbinned_yplot, unbinned_fluxplot=unbinned_fluxplot, unbinned_npplot = unbinned_npplot, unbinned_bkgplot = unbinned_bkgplot, Position_plot = position_plot, DN_plot = DN_plot, unbinned_xyfwhm = unbinned_xyfwhm, line_fit = line_fit, montecarlo = montecarlo, function_fit = function_fit
+pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phaseplot, sclkplot = sclkplot, timeplot = timeplot, Dsweet = dsweet, selfcal=selfcal, centerpixplot = centerpixplot, errorbars = errorbars, unbinned_xplot = unbinned_xplot, unbinned_yplot = unbinned_yplot, unbinned_fluxplot=unbinned_fluxplot, unbinned_npplot = unbinned_npplot, unbinned_bkgplot = unbinned_bkgplot, Position_plot = position_plot, DN_plot = DN_plot, unbinned_xyfwhm = unbinned_xyfwhm, line_fit = line_fit, montecarlo = montecarlo, function_fit = function_fit, set_nbins = set_nbins
 ;example call plot_exoplanet, 'wasp15', 2*63L
 
-  COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm
+  COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm,  bin_corrflux_dp
 
   colorarr = ['gray', 'gray','gray','gray','gray','burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']
 
@@ -82,7 +82,7 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
  
 
 ;for debugging: skip some AORs
-  startaor =  5;0                 ;  n_elements(aorname) -29
+  startaor =  0;0                 ;  n_elements(aorname) -29
   stopaor =   n_elements(aorname) - 1
 
 
@@ -304,34 +304,17 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
   stddev_corrfluxarr = mean_corrfluxarr
   stddev_dsweetarr = mean_corrfluxarr
  
+
+;pick the normalization
+  plot_corrnorm =  mean((planethash[aorname(1),'corrflux']),/nan)
+
   for a = startaor,stopaor do begin
      print, '------------------------------------------------------'
      print, 'working on AOR', a, '   ', aorname(a), startaor
      ;divide plots by exposure time
      ;if planethash[aorname(a),'exptime'] lt 0.2 then scolor = 'blue' else scolor = 'red'
 
-     ;----------------------
-     ;make a correction for flux degradation over time
-     if chname eq '2' then begin
-                                ;0.05% per year or 0.0005*(time in
-                                ;years since start of observation)
-        deltatime = planethash[aorname(a),'timearr'] - time_0 ; in seconds
-        deltatime = deltatime / 60./60./24./365.
-        degrade = .0005*deltatime
-        planethash[aorname(a),'corrflux'] =  planethash[aorname(a),'corrflux'] + (planethash[aorname(a),'corrflux'] * degrade)
-     endif
-     if chname eq '1' then begin
-                                ;0.05% per year or 0.0005*(time in
-                                ;years since start of observation)
-        deltatime = planethash[aorname(a),'timearr'] - time_0 ; in seconds
-        deltatime = deltatime / 60./60./24./365.
-        degrade = .001*deltatime
-        planethash[aorname(a),'corrflux'] =  planethash[aorname(a),'corrflux'] + (planethash[aorname(a),'corrflux'] * degrade)
-     endif
-
-     ;----------------------
-
-
+ 
      ;check if I should be using pmap corr or not
      ncorr = where(finite([ planethash[aorname(a),'corrflux']]) gt 0, corrcount,/L64)
      ;if 20% of the values are correctable than go with the pmap corr 
@@ -344,12 +327,28 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
      
      ;make one data point per AOR
 ;     bin_level = n_elements([planethash[aorname(a),'flux']]) 
-     junkpar = binning_function(a, bin_level, pmapcorr)
+
+     if keyword_set(set_nbins) then begin
+        if a ge stareaor then begin
+           ;;variable binning
+           junkpar = binning_function(a, bin_level, pmapcorr,chname, /set_nbins, n_nbins = 4)
+        endif else begin
+           
+           junkpar = binning_function(a, bin_level, pmapcorr,chname, /set_nbins, n_nbins = 95)
+        endelse
+     endif else begin 
+        junkpar = binning_function(a, bin_level, pmapcorr,chname)
+     endelse
+
+     ;use time degraded corrfluxes
+     bin_corrfluxp = bin_corrflux_dp
+
+
 ;     print, 'testing phase', (planethash[aorname(a),'phase'] )[0:10], (planethash[aorname(a),'phase'] )[600:610]
 ;     print, 'testing x', bin_xcen[0:10]
 ;     print, 'testing y', bin_ycen[0:10]
 ;     print, 'testing npcent', bin_npcent[0:10]
-     print, 'testing error bars', colorarr[a], bin_corrfluxerrp
+;     print, 'testing error bars', colorarr[a], bin_corrfluxerrp
 ;------------------------------------------------------
      ;possible comparison statistic
      ;what is the distribution of standard deviations among the corrfluxes?
@@ -454,7 +453,7 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
 ;        print, ' phase', (planethash[aorname(a),'phase'])
         setxrange = [-0.5, 0.5];[0.43, 0.56]; 
         corrnormoffset =  0; 0.02
-        if planetname eq 'WASP14-b' then corroffset = 0.0015
+        if planetname eq 'WASP14-b' then corroffset =  0.0015
         if planetname eq 'HD209458' then corroffset = 0.001
        
         setynormfluxrange = [0.96, 1.02];[0.97, 1.005]
@@ -470,7 +469,6 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
 ;           print, 'beginning AOR bin xcen', bin_xcen
 ;           print, 'beginning AOR bin ycen', bin_ycen
            plot_norm = median(bin_flux)  ; only happens for the first AOR
-           plot_corrnorm = mean(bin_all_corrfluxp,/nan)  ; only if a eq 0
            print, 'plot_corrnorm', plot_corrnorm, bin_corrfluxp[0]
            pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1, title = planetname, $
                      color = colorarr[a], xtitle = 'Orbital Phase', ytitle = 'X position', $
@@ -529,11 +527,11 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
 ;                        = [0.995, 1.02], xrange = setxrange) ;
               if a le stareaor then begin
                  scolor = 'gray' 
-                 if planetname eq 'WASP-14b' then corroffset = 0.0015    
+                 if planetname eq 'WASP-14b' then corroffset =  0.0015    
                  if planetname eq 'HD158460' then corroffset = 0.0
               endif else begin
                  scolor = colorarr[a]
-                 if planetname eq 'WASP-14b' then corroffset = 0.0015
+                 if planetname eq 'WASP-14b' then corroffset =  0.0015
                  if planetname eq 'HD209458' then corroffset = 0.001
               endelse
               print, 'corroffset', corroffset
@@ -546,10 +544,10 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
 
       ;  test_med(a) = median(bin_corrfluxp)
         print,'median bin_corrfluxp ',  median(bin_corrfluxp), median(bin_flux)
-        print, 'a', a
+;        print, 'a', a
 ;-------------------------------------
         if (a gt 0) and (a lt stareaor) then begin
-           if planetname eq 'WASP-14b' then corroffset = 0.0015
+           if planetname eq 'WASP-14b' then corroffset =  0.0015
            print, 'inside a gt 0 a le stareaor', a, corroffset
            pp.window.SetCurrent
            pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],  /overplot,/current)
@@ -592,7 +590,7 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
 
 
         if a gt stareaor then begin
-           if planetname eq 'WASP-14b' then corroffset = 0.001
+           if planetname eq 'WASP-14b' then corroffset =  0.0040
            print, 'inside a ge stareaor', a, corroffset
            pp.window.SetCurrent
            pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],$
@@ -706,7 +704,7 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
      endif 
 
 ;------------------------------------------------------
-     print, 'n_elements time', n_elements(bin_timearr), n_elements(bin_xcen), n_elements(bin_phase)
+;     print, 'n_elements time', n_elements(bin_timearr), n_elements(bin_xcen), n_elements(bin_phase)
      if keyword_set(timeplot) then begin ;make the plot as a function of time
 
         corroffset = 0.0005
