@@ -15,10 +15,11 @@
 ; INPUTS:
 ;  - Kmag = Magnitude in the 2MASS K band
 ;  - sp_type = spectral type.  Options are ('A0', 'A5','F0','F5','G0','G5', 'K0','K5','M0','M2','M5')
-;  - transit_depth in percentage of the stellar signal
 ;  - ch = the name of the channel for observations and in which
 ;         source_mJy is given.  Can be either the string '1' or '2' corresponding to 3.6
 ;         and 4.5 microns
+;  - transit_depth in percentage of the stellar signal
+;  - bin_scale = time on which to bin in minutes (can be int, float, etc.)
 ;
 ; OUTPUTS:
 ;  SNR = Signal to Noise Ratio
@@ -34,18 +35,17 @@
 ; MODIFICATION HISTORY:
 ;  January 2015 Original Version  JK
 ;-
-Function exoplanet_SNR, Kmag, sp_type, ch, transit_depth, eclipse = eclipse, AB = AB, Rp = Rp, Rs = Rs, semi_maj = semi_maj
+Function exoplanet_SNR, Kmag, sp_type, ch, transit_depth, bin_scale, eclipse = eclipse, AB = AB, Rp = Rp, Rs = Rs, semi_maj = semi_maj
 
   ;;error checking
   if ch ne '1' and ch ne '2' and ch ne 1 and ch ne 2 then begin
      print, 'ch should be either "1" or "2" where "1" is 3.6microns and "2" is 4.5 microns'
      return, 0
   endif
+  if bin_scale gt 90 then print, 'Are you sure you want to bin on a', bin_scale, ' Minute timescale'
 
   ;;estimate eclipse depth or transit depth SNR?
   if keyword_set(eclipse) then begin
-
- 
 
      ;;would need AB, Rp, Rs, semi_maj as inputs
      eclipse_depth = (AB/4)*((Rp/Rs)^2)*((Rs/semi_maj)^2)
@@ -62,8 +62,8 @@ Function exoplanet_SNR, Kmag, sp_type, ch, transit_depth, eclipse = eclipse, AB 
   ;;need to calculate frame time best suited for this target
   exptime = find_exptime(source_mJy, ch)
 
-  ;;given frame time; how many frames = binning scale of 20min.
-  n_frames = fix(20.*60./exptime) 
+  ;;given frame time; how many frames = input binning scale 
+  n_frames = fix(bin_scale*60./exptime) 
 
   ;;basics of the detector
       pixel_scale = 1.22
