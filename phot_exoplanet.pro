@@ -70,7 +70,7 @@ if planetname eq 'HD209458' then exosystem = 'HD 209458 b'
 if planetname eq 'Kepler-5' then exosystem = 'Kepler-5 b'
 if planetname eq 'Kepler-17' then exosystem = 'Kepler-17 b'
 
-print, exosystem, 'exosystem'
+;print, exosystem, 'exosystem'
 if planetname eq 'WASP-52b' then teq_p = 1315
 if planetname eq 'HD 7924 b' then begin
    inclination = 85.
@@ -109,7 +109,7 @@ planethash = hash()
 if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_120827_occthresh.fits'$
 else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
 fits_read,occ_filename, occdata, occheader
-startaor =0
+startaor = 0
 stopaor =n_elements(aorname) - 1
 for a =startaor, stopaor do begin
    print, 'working on ',aorname(a)
@@ -156,8 +156,12 @@ for a =startaor, stopaor do begin
      endif
 
       if ch eq '2' and frametime eq 2 then ronoise = 12.1
-      if i eq startfits then print, 'ronoise', ronoise, gain, fluxconv, exptime, ra_ref, dec_ref
-      if i eq startfits then sclk_0 = sclk_obs
+      if i eq startfits then begin
+         print, 'ronoise', ronoise, gain, fluxconv, exptime, ra_ref, dec_ref
+         sclk_0 = sclk_obs
+      endif
+
+
 
       if i eq startfits and naxis eq 3 then begin
          xarr = fltarr(63*(n_elements(fitsname)))
@@ -408,15 +412,16 @@ for a =startaor, stopaor do begin
          piarr[*,*,i] = pi
       endif
 
+      if a eq startaor and i eq startfits then begin
+         time_0 = bmjdarr(0)
+      endif
+
    endfor; for each fits file in the AOR
 
 
-;    p1 = plot(xarr, yarr, '1.')
-;    p2 = plot(timearr - timearr(0), yarr, '1.')
-;    p3 = plot(timearr- timearr(0), corrfluxarr, '1.')
-; print, 'fluxarr', fluxarr[0:10]
    
-   
+   ;---------------------------------
+
 ;   print, 'testing bmjd, utmjd', bmjd(0), ' ' ,bmjd(20), ' ' ,bmjd(60), ' ' ,bmjd(100) , format = '(A, D0, A, D0, A, D0, A, D0)'
 ;get phasing out of the way here
    bmjd_dist = bmjd - utmjd_center ; how many UTC away from the transit center
@@ -443,7 +448,23 @@ for a =startaor, stopaor do begin
 ;   endif 
    
 ;print, 'testing phase', phase[0:200]
-print, 'end phase', phase[n_elements(phase) - 1]
+;   print, 'end phase', phase[n_elements(phase) - 1]
+
+  ;---------------------------------
+
+   ;; make a correction for flux degradation as a function of time
+   ;;since the beginning of this targets AORs.
+
+
+   if chname eq '2' then factor = 0.0005
+   if chname eq '1' then factor = 0.0010
+   ;;0.05% per year or 0.0005*(time in
+   ;;years since start of observation)
+   deltatime = bmjd - time_0 ; in days
+   deltatime = deltatime /365. ; in years
+   degrade = factor*deltatime
+   corrflux_d =  corrfluxarr +(corrfluxarr* degrade)
+   
 ;--------------------------------
 ;fill in that hash of hases
 ;--------------------------------
@@ -455,8 +476,8 @@ print, 'end phase', phase[n_elements(phase) - 1]
       values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, centerpixarr1, centerpixarr2, centerpixarr3, centerpixarr4, centerpixarr5, centerpixarr6, sigmapixarr1, sigmapixarr2, sigmapixarr3, sigmapixarr4, sigmapixarr5, sigmapixarr6, phase)
       planethash[aorname(a)] = HASH(keys, values)
    endif else begin
-      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase', 'npcentroids','exptime','xfwhm', 'yfwhm','peakpixDN', 'framedly','pixvals']
-      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, peakpixDNarr, fdarr,piarr)
+      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase', 'npcentroids','exptime','xfwhm', 'yfwhm','peakpixDN', 'framedly','pixvals','corrflux_d']
+      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, peakpixDNarr, fdarr,piarr, corrflux_d)
       planethash[aorname(a)] = HASH(keys, values)
    endelse
 
@@ -496,8 +517,6 @@ print, 'time check', systime(1) - t1
 
 
 end
-
-
 
 
 ;function to calcluate noise pixel
