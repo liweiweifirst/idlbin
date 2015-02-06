@@ -1,4 +1,4 @@
-pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_plot, unbinned_bkgplot=unbinned_bkgplot, normalize = normalize
+pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_plot, unbinned_bkgplot=unbinned_bkgplot, normalize = normalize, wong_model = wong_model
 
   COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm, bin_corrflux_dp
 
@@ -220,6 +220,15 @@ endif ; time_plot
      plothist, normval, xhist, yhist, bin = 0.0001, /noplot
 ;     print, 'xhist', xhist
      pn = barplot(xhist, yhist, fill_color = 'green', xrange = [0.056, 0.06]) 
+
+endif
+
+if keyword_set(wong_model) then begin
+   readcol, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/wong/ch2.dat', phase, model
+   pw = plot(phase, model, xrange = [-0.7, 0.7])
+   pw = plot(findgen(10)/ 5 - 1.0, fltarr(10) + 1.00, overplot = pw)
+   pw = plot(findgen(10)/ 5 - 1.0, fltarr(10) + .9985, overplot = pw)
+   pw = plot(findgen(10)/ 5 - 1.0, fltarr(10) + 1.0005, overplot = pw)
 
 endif
 
