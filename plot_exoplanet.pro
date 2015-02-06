@@ -82,7 +82,7 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
  
 
 ;for debugging: skip some AORs
-  startaor =  0;0                 ;  n_elements(aorname) -29
+  startaor =  5;0                 ;  n_elements(aorname) -29
   stopaor =   n_elements(aorname) - 1
 
 
@@ -326,7 +326,7 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
 ;     print, 'corrflux before binning', junk[0:100]
      
      ;make one data point per AOR
-;     bin_level = n_elements([planethash[aorname(a),'flux']]) 
+     bin_level = n_elements([planethash[aorname(a),'flux']]) 
 
      if keyword_set(set_nbins) then begin
         if a ge stareaor then begin
@@ -992,8 +992,13 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
 ;        z = function_fit_lightcurve('WASP-14b', bin_all_phasep, bin_all_corrfluxp, bin_all_corrfluxerrp,modelfilename)
         
         restore, modelfilename
-        test = plot(phase, rel_flux, color = 'Sky Blue', thick = 4, overplot = pu)
+        pu = plot(phase, rel_flux, color = 'Sky Blue', thick = 4, overplot = pu)
         print, 'rel_flux', rel_flux
+
+        ;overplot the Wong et al. fit to the staring mode data
+        readcol, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/wong/ch2.dat', phase, model
+        pu = plot(phase, model + 0.0016, thick = 4, overplot = pu, color = 'green')
+
      endif
 
 
