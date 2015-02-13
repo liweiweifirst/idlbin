@@ -120,6 +120,7 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ; Fourth background annulus
 	back4 = [5., 10.]
         back5 = [7., 15.]
+        back6 = [3., 15.]
 ; Number of apertures
 	napers = n_elements(aps1) ;+ 2
 ; Number of background annuli
@@ -353,6 +354,7 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ; Find centroid for each image plane
 	for i = 0, ns-1 do begin
            slice = cube[*, *, i]
+;           bslice = bkgd[*,i]
 ; Uncertainty image calculated from Poisson plus readnoise
            sigma2 = sig[*, *, i] * sig[*, *, i]
 ; SSC provided uncertainty image		
@@ -452,19 +454,24 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ;			xh[i] = tx & yh[i] = ty
 		
 ; Convert image to electrons
-                if (bcdflag ne 0) then eim = slice * sbtoe else eim = slice
+                if (bcdflag ne 0) then begin
+                   eim = slice * sbtoe 
+                endif else begin
+                   eim = slice
+                endelse
 
 
 ;manually find the background in the images
 ;mask the top and bottom row
-                eim[*,0] = !VALUES.D_NAN &  eim[*,31] = !VALUES.D_NAN
-
+;                eim[*,0] = !VALUES.D_NAN &  eim[*,31] = !VALUES.D_NAN
+;                ebslice = calc_bkgd (eim, h, ra, dec)
 
 ; 1st set of apertures
 ;;			aper, eim, x5[i], y5[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
+;;                aper, eim, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
                 aper, eim, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
-                      badpix, /FLUX, /EXACT, /SILENT, /NAN, /MEANBACK,$
-                      READNOISE=readnoise[nch-1, findex]
+                      badpix, /FLUX, /EXACT, /NAN, /SILENT, /MEANBACK,$
+                      READNOISE=readnoise[nch-1, findex];, SETSKYVAL = ebslice
                 f[i, 0:(naps1-1)] = xf / sbtoe
                 b[i, 0] = xb
                 bs[i, 0] = xbs
