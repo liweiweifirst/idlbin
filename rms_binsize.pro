@@ -79,23 +79,24 @@ pro rms_binsize
            ;; make a model light curve with the same phase as the
            ;; snapshot data
            for im = 0, n_elements(bin_corrflux) -1 do begin
-              mp = where(bin_phasearr(im) gt (model_phase - 5E-5) and bin_phasearr(im) lt (model_phase + 5E-5),num_mp)
-              if num_mp eq 0 then begin
-                 print, 'hmmm no phase matches'
-                 print, 'n corr', n_elements(corrflux)
-                 print, bin_phasearr(im)
-                 ;;ok but I should be able to find the nearest in
-                 ;;phase and use that, the gaps aren't that big
-
-                 ;;use function closest - do this for all of these in
-                 ;;                       fact....
-;                 index = closest(
-              endif
-              
-              if num_mp eq 1 then bin_modelarr[im] = model_flux(mp)
-              if num_mp gt 1 then begin
-                 bin_modelarr[im] = mean(model_flux(mp))
-              endif
+                  index = closest(model_phase, bin_phasearr(im))
+                  bin_modelarr[im] = model_flux(index)
+;             mp = where(bin_phasearr(im) gt (model_phase - 5E-5) and bin_phasearr(im) lt (model_phase + 5E-5),num_mp)
+;              if num_mp eq 0 then begin
+;                 print, 'hmmm no phase matches'
+;                 print, 'n corr', n_elements(corrflux)
+;                 print, bin_phasearr(im)
+;                 ;;ok but I should be able to find the nearest in
+;                 ;;phase and use that, the gaps aren't that big;;
+;
+;                 ;;use function closest - do this for all of these in
+;                 ;;                       fact....
+;              endif
+;              
+;              if num_mp eq 1 then bin_modelarr[im] = model_flux(mp)
+;              if num_mp gt 1 then begin
+;                 bin_modelarr[im] = mean(model_flux(mp))
+;              endif
               
            endfor
            
@@ -108,8 +109,11 @@ pro rms_binsize
         
         
         p2 = plot(findgen(n_elements(rmsarr)), rmsarr/ rmsarr(1),/xlog, /ylog, overplot = p2, $
-                  color = colorarr(a), yrange = [1E-3,3], xrange =[1, 200], xtitle = 'Number of frames',$
-                  ytitle = 'Normalized residual RMS')
+                  color = colorarr(a), yrange = [1E-2,1], xrange =[1, 200], xtitle = 'Number of frames',$
+                  axis_style = 1, ytitle = 'Normalized Residual RMS')
+        xaxis = axis('x', location = [0,max(p2.yrange)], coord_transform = [0, .0337],target = p2, textpos = 1, title = 'Binning Scale (Min.)')
+        xaxis = axis('y', location = [max(p2.xrange),0], target = p2, tickdir = 0, textpos = 0, showtext = 0)
+
      endif  ; on the sweet spot
 
   endfor ; for all AORs
@@ -117,12 +121,12 @@ pro rms_binsize
 ;------------------------
 ;now add straight root N
      
-     source_mjy = 68.29         ;mJy  from Star-pet
-     exptime = 2.
+  source_mjy = 68.29            ;mJy  from Star-pet
+  exptime = 2.
      
 ;ch2
-     gain = 3.71
-     pixel_scale = 1.22
+  gain = 3.71
+  pixel_scale = 1.22
   flux_conv = .1469
   xmax = max(p2.xrange)
   bin_scale = findgen(xmax) + 1
@@ -131,10 +135,20 @@ pro rms_binsize
   sigma_poisson = sqrt(source_electrons)
   y =  (sigma_poisson / root_n) / source_electrons
   
-  p2 = plot( bin_scale, y/y(0), thick = 3, linestyle = 2, overplot = p2)
+  p2 = plot( bin_scale, y/y(0), thick = 3,  overplot = p2)
 ;now add root2 * root N
   y2 =  1.5 * y/y(0)
 ;  p2 = plot( bin_scale, y2, thick = 3, linestyle = 2, color = 'grey', overplot = p2)
   
+
+
+;------------------------
+;add WOng et al. 4.5 micron plot
+  xw = [1.018, 1.414, 8.061, 23.332, 56.334, 69.524, 84.906, 106.094, 131.287, 160.696, 198.176, 383.034, 473.986, 587.036, 737.974, 923.027, 1.161e3, 1.455e3, 1.846e3]
+
+  yw = [3.866e-3, 3.280e-3, 1.378e-3, 8.197e-4, 5.484e-4, 4.971e-4, 4.452e-4, 4.047e-4, 3.668e-4, 3.300e-4, 2.996e-4, 2.278e-4, 2.091e-4, 1.920e-4, 1.799e-4, 1.684e-4, 1.541e-4, 1.433e-4, 1.341e-4]
+
+  p2 = plot(xw, yw/ yw(0), thick = 3, linestyle = 2, overplot = p2)
+
 end
 
