@@ -6,7 +6,8 @@ pro plot_calstar_stability, chname, binperstar = binperstar, fit_slope = fit_slo
 ;     names = [ '1812095', 'KF08T3_', 'KF06T2_', 'KF06T1_',  'NPM1p67','NPM1p60']
      names = [ '1812095', 'KF08T3_', 'KF06T2_', 'KF06T1_', 'KF09T1_',  'NPM1p67','NPM1p60'];, 'NPM1p68'] ;, 'HD16545']
      normvals = fltarr(n_elements(names))
-  
+  for chan = 1, 2 do begin
+     chname = strtrim(chan,1)
   for m = 0, 1 do begin         ; for cryo and warm
      
      if m eq 1 then filename = strcompress('/Users/jkrick/irac_warm/calstars/allch'+chname +'phot.sav',/remove_all)
@@ -124,8 +125,14 @@ pro plot_calstar_stability, chname, binperstar = binperstar, fit_slope = fit_slo
      bin_all_fluxerr = bin_all_fluxerr[0:c-1]
      bin_all_time = bin_all_time[0:c-1]
      
-;   print, 'bin_all_time', bin_all_time
-;   print, 'bin_all_corrflux', bin_all_corrflux
+ ;print out some output
+     openw, outlun, strcompress('/Users/jkrick/irac_warm/calstars/stability_ch'+chname+ '.txt',/remove_all), /get_lun,/append
+     for count = 0, n_elements(bin_all_time) - 1 do begin
+        printf, outlun, bin_all_time(count), bin_all_corrflux(count) / median(bin_all_corrflux), bin_all_fluxerr(count) / median(bin_all_corrflux)
+     endfor
+     free_lun, outlun
+
+
      
 ;----------------------------------------------------
 ;and some binned plotting
@@ -134,11 +141,27 @@ pro plot_calstar_stability, chname, binperstar = binperstar, fit_slope = fit_slo
 ;     bin_all_time = bin_all_time(good)
 ;     bin_all_corrflux = bin_all_corrflux(good)
 ;     bin_all_fluxerr = bin_all_fluxerr(good)
-     pb2 = errorplot(bin_all_time, bin_all_corrflux, bin_all_fluxerr,$
-                     '1s', sym_size = 0.2,   sym_filled = 1, color = 'black', yrange = [0.99, 1.02],$
-                     xtitle = 'Time (Years)', ytitle = 'Normalized Flux', $;title = 'Ch '+ chname+ ' Primary Calibrators', $
-                   MARGIN = [0.15, 0.15, 0.20, 0.15], overplot = pb2) ;  axis_style = 1 
+     print, 'chname', chan
+     if chname eq '1' then begin
+        print, 'plotting chname 1'
+        help, chname
+        pch1 = errorplot(bin_all_time, bin_all_corrflux, bin_all_fluxerr,$
+                        '1s', sym_size = 0.2,   sym_filled = 1, color = 'black', yrange = [0.99, 1.02],$
+                        xtitle = 'Time (Years)',$; ytitle = 'Normalized Flux', $ ;title = 'Ch '+ chname+ ' Primary Calibrators', $
+                         overplot = pch1, dimensions = [700,400],$ ;MARGIN = [0.15, 0.15, 0.20, 0.15],
+                        position = [0.2,0.5,0.9,0.8] ,   xshowtext = 0   )                       ;  axis_style = 1 
+     endif else begin
+        print, 'plotting chname 2'
+        pch2 = errorplot(bin_all_time, bin_all_corrflux, bin_all_fluxerr, yrange = [0.99, 1.02],$
+                        xtitle = 'Time Since Launch (Years)', $;ytitle = 'Normalized Flux',$
+                        '1s', sym_size = 0.2,   sym_filled = 1, color = 'black',  overplot = pch2,$
+                        position = [0.2, 0.2, 0.9, 0.5],/current) ;  axis_style = 1 
+     endelse
      
+     pt1 = text(0.3, 0.7, 'Ch1')
+     pt2 = text(0.3, 0.4, 'Ch2')
+     pty = text(0.1, 0.35, 'Normalized Flux', baseline = [0, 1.0, 0], updir = [-1.0,0,0])
+
 ;----------------------------------------------------
 ;and now what about fitting the best fit slope?
 ;fit with a liner function.
@@ -258,6 +281,7 @@ pro plot_calstar_stability, chname, binperstar = binperstar, fit_slope = fit_slo
      endif
      
   endfor                        ; for each mission
+endfor    ; for each channel
 end
 
 
@@ -317,6 +341,8 @@ function binperstar, timeb, fluxb, corrfluxb, fluxerrb, starnameb, binning_ch1, 
   bin_time = bin_time[0:c-1]
   bin_starname = bin_starname[0:c-1]
   
+ 
+
 ;----------------------------------------------------
 ;and some binned plotting
   btime = (bin_time); - min(bin_time))
