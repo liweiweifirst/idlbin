@@ -1,4 +1,4 @@
-pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_plot, unbinned_bkgplot=unbinned_bkgplot, normalize = normalize, wong_model = wong_model
+pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_plot, unbinned_bkgplot=unbinned_bkgplot, normalize = normalize, wong_model = wong_model, secondary = secondary
 
   COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm, bin_corrflux_dp
 
@@ -23,128 +23,217 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
                      DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose
 
   dirname = strcompress(basedir + planetname +'/')                                                            ;+'/hybrid_pmap_nn/')
-  savefilename = strcompress(dirname + planetname +'_phot_ch2_2.25000.sav',/remove_all) ;
+  savefilename = strcompress(dirname + planetname +'_phot_ch2_2.25000_3_15_mb.sav',/remove_all) ;
   restore, savefilename
 
   startaor =  0;0                 ;  n_elements(aorname) -29
-  stopaor =   n_elements(aorname) - 1
+  stopaor =     n_elements(aorname) - 1
   time_0 = (planethash[aorname(startaor),'timearr']) 
   time_0 = time_0(0)
   stareaor = 5
 
-  if keyword_set(time_plot) then begin
-  for a = 0, stopaor do begin
-     print, '------------------------------------------------------'
-     print, 'working on AOR', a, '   ', aorname(a), startaor, colorarr[a]
-     ;check if I should be using pmap corr or not
-     ncorr = where(finite([ planethash[aorname(a),'corrflux']]) gt 0, corrcount,/L64)
-     ;if 20% of the values are correctable than go with the pmap corr 
-     print, '0.2nflux, ncorr, ', 0.2*n_elements([planethash[aorname(a),'flux']]), corrcount
-     if corrcount gt 0.2*n_elements([planethash[aorname(a),'flux']]) then pmapcorr = 1 else pmapcorr = 0
-     print, 'pmapcorr', pmapcorr
-
-     if a ge stareaor then begin
-        ;;variable binning
-        junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 4)
-     endif else begin
-        
-        junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 95)
-     endelse
-
-     corroffset = 0.002
-     snapcorroffset = 0.002
-
-
-     ;use the time degraded corrfluxes
-     bin_corrfluxp = bin_corrflux_dp
-
-                                ;save some arrays for later
-     CASE 1 of 
-        ;;take the  stare AORs and make one array of phase and corrflux
-        ;;and corrfluxerr
-        
-        (a eq 0):BEGIN
-           stare_phasearr = bin_phasep
-           stare_corrfluxarr = bin_corrfluxp
-           stare_corrfluxerrarr = bin_corrfluxerrp
-           stare_colorarr = 'gray'
-        END
-        
-        (a gt 0) and (a lt stareaor): BEGIN
-           stare_phasearr = [stare_phasearr,bin_phasep]
-           stare_corrfluxarr = [stare_corrfluxarr,bin_corrfluxp]
-           stare_corrfluxerrarr = [stare_corrfluxerrarr,bin_corrfluxerrp]
-           stare_colorarr = [stare_colorarr, 'gray']
-        end
-
-        (a eq stareaor):BEGIN
-
-           ;;make stare_phasearr all positive
-           stare_phasearr = stare_phasearr + 1.0
- 
-           ;;then duplicate that array with phasexN          
-           ;;there are 170 periods in 1 years
-           n_phases = 170
-           ext_phasearr = fltarr(n_elements(stare_phasearr) *n_phases)
-           ext_corrfluxarr = ext_phasearr
-           ext_corrfluxerrarr = ext_phasearr
-           for i = 1, n_phases  do begin
-              ext_phasearr[(i - 1)*n_elements(stare_phasearr):(i*n_elements(stare_phasearr)) - 1] = stare_phasearr + (i-1)
-              ext_corrfluxarr[(i - 1)*n_elements(stare_phasearr):(i*n_elements(stare_phasearr)) - 1] = stare_corrfluxarr
-              ext_corrfluxerrarr[(i - 1)*n_elements(stare_phasearr):(i*n_elements(stare_phasearr)) - 1] = stare_corrfluxerrarr
-           endfor
-           stare_norm = mean(planethash[aorname(0),'corrflux'],/nan)
-           pt = plot(ext_phasearr, ext_corrfluxarr/stare_norm + corroffset, '1s', sym_size = 0.2,   sym_filled = 1, color = 'grey', yrange = [0.989, 1.005], xrange = [0,10])
-           
-
-           ;;need a new phasing for the snapshots
-           ;;phase =( bmjd_dist / period )
-           snap_phasearr = ( (bin_bmjdarr-mjd_transit) / p_orbit )
-           snap_corrfluxarr = bin_corrfluxp
-           snap_corrfluxerrarr = bin_corrfluxerrp
-           snap_colorarr = colorarr(a)
-
-           ;;overplot the snaps
-           snap_norm =  stare_norm
-           pt = plot(snap_phasearr - 763.0, snap_corrfluxarr/snap_norm + snapcorroffset, '1s', sym_size = 0.5,   sym_filled = 1, color = colorarr[a], overplot = pt, xtitle = 'Number of Periods', ytitle = 'Normalized Corrected Flux')
-
-
-        end
+  if keyword_set(secondary) then begin
+     ;;make a plot of a zoom in on the secondary eclipse region with
+     ;;stares, snaps, and a model from blecic et al to compare
+     ;;measured depths.
      
-        (a gt stareaor):BEGIN
+     for a = 0, stopaor do begin
+        print, '------------------------------------------------------'
+        print, 'working on AOR', a, '   ', aorname(a), startaor, colorarr[a]
+        ;;check if I should be using pmap corr or not
+        ncorr = where(finite([ planethash[aorname(a),'corrflux']]) gt 0, corrcount,/L64)
+        ;;if 20% of the values are correctable than go with the pmap corr 
+        if corrcount gt 0.2*n_elements([planethash[aorname(a),'flux']]) then pmapcorr = 1 else pmapcorr = 0
+        print, '0.2nflux, ncorr, ', 0.2*n_elements([planethash[aorname(a),'flux']]), corrcount, pmapcorr
 
-           snap_phasearr = [snap_phasearr,( (bin_bmjdarr-mjd_transit) / p_orbit )]
+        if a ge stareaor then begin
+           ;;variable binning
+           junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 4*3)
+        endif else begin
+           
+           junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 95*3)
+        endelse
+     ;;use the time degraded corrfluxes
+        if a eq 0 then begin
+           ;;normalize the out of eclipse level
+           oe = where(bin_phasep gt 0.42 and bin_phasep lt 0.45 or bin_phasep gt 0.52 and bin_phasep lt 0.55)
+           normcorr = median(bin_corrflux_dp(oe))
+        endif
 
-           pt = plot(( (bin_bmjdarr-mjd_transit) / p_orbit )- 763.0, bin_corrfluxp/snap_norm+ snapcorroffset, '1s', sym_size = 0.5,   sym_filled = 1, color = colorarr[a], overplot = pt)
+        if a le stareaor then begin
+           corroffset = 0.00 
+           ss = 0.5
+        endif else begin
+           corroffset = 0.0022
+           ss = 0.7
+        endelse
 
-           snap_corrfluxarr = [snap_corrfluxarr,bin_corrfluxp]
-           snap_corrfluxerrarr = [snap_corrfluxerrarr,bin_corrfluxerrp]
-           snap_colorarr = [snap_colorarr, colorarr(a)]
-        end
-     endcase
-  endfor
-endif ; time_plot
+        psec = errorplot(bin_phasep, bin_corrflux_dp/normcorr + corroffset, bin_corrfluxerrp/normcorr, '1s', $
+                    sym_size = ss, sym_filled = 1, errorbar_color =colorarr[a],$
+                    color = colorarr[a], yrange = [0.994, 1.004], xrange = [0.4, 0.6], overplot = psec, $
+                        xtitle = 'Orbital Phase', ytitle = 'Normalized Corrected Flux')
+        ;;unwrap the negative ones
+        psec = errorplot(bin_phasep + 1.0, bin_corrflux_dp/normcorr + corroffset, bin_corrfluxerrp/normcorr,$
+                    '1s', sym_size = ss, sym_filled = 1, errorbar_color =colorarr[a],$
+                    color = colorarr[a], overplot = psec)
 
+
+        if a eq startaor then begin
+        ;;line for the second secondary depth as measured in the literature
+
+        xp = [0.47, 0.51]
+        yw1 = 1. - ([0.22, 0.22] / 100.)
+        yw2 = 1. - ([0.24, 0.24] / 100.)
+        yb1 = 1. - ([0.2249, 0.224] / 100.)
+        psec = plot(xp, yw1, color = 'gray', thick = 3, overplot = psec)
+        psec = plot(xp, yw2, color = 'gray', thick = 3, overplot = psec)
+        psec = plot(xp, yb1, color = 'black', thick = 3, overplot = psec, linestyle = 2)
+;        psec = plot([0.4, 0.6], [1.0, 1.0], color = 'gray', thick = 2, overplot = psec)
+        
+        ;;try arrows instead of lines
+;        a1 = arrow([0.50, 0.5], [1.0,1. - (0.1997 / 100.)] , color = 'black', /data, thick = 2, /current)
+;        a1 = arrow([0.47, 0.47], [1.0,1. - (0.2249 / 100.)] , color = 'black', /data, thick = 2, /current)
+
+        ;;an unbinnned version
+        phase = planethash[aorname(a),'phase']
+        corrflux = planethash[aorname(a),'corrflux_d']
+        corrfluxerr = planethash[aorname(a),'corrfluxerr']
+        good = where(finite(corrflux) gt 0)
+        phase = phase(good)
+        corrflux = corrflux(good)
+        corrfluxerr = corrfluxerr(good)
+
+        neg = where(phase lt 0)
+        phase(neg) = phase(neg) + 1.0
+
+;        psec = plot(phase, corrflux/normcorr + corroffset, '1s', sym_size = 0.5, sym_filled = 1, color = colorarr[a], $
+;                 yrange = [0.980, 1.02], xrange = [0.4, 0.6], overplot = psec)
+     endif
+
+     endfor  ; for each AOR
+
+
+  endif
+
+
+
+  if keyword_set(time_plot) then begin
+     for a = 0, stopaor do begin
+        print, '------------------------------------------------------'
+        print, 'working on AOR', a, '   ', aorname(a), startaor, colorarr[a]
+                                ;check if I should be using pmap corr or not
+        ncorr = where(finite([ planethash[aorname(a),'corrflux']]) gt 0, corrcount,/L64)
+                                ;if 20% of the values are correctable than go with the pmap corr 
+        print, '0.2nflux, ncorr, ', 0.2*n_elements([planethash[aorname(a),'flux']]), corrcount
+        if corrcount gt 0.2*n_elements([planethash[aorname(a),'flux']]) then pmapcorr = 1 else pmapcorr = 0
+        print, 'pmapcorr', pmapcorr
+        
+        if a ge stareaor then begin
+           ;;variable binning
+           junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 4)
+        endif else begin
+           
+           junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 95)
+        endelse
+        
+        corroffset = 0.002
+        snapcorroffset = 0.002
+        
+
+                                ;use the time degraded corrfluxes
+        bin_corrfluxp = bin_corrflux_dp
+        
+                                ;save some arrays for later
+        CASE 1 of 
+           ;;take the  stare AORs and make one array of phase and corrflux
+           ;;and corrfluxerr
+           
+           (a eq 0):BEGIN
+              stare_phasearr = bin_phasep
+              stare_corrfluxarr = bin_corrfluxp
+              stare_corrfluxerrarr = bin_corrfluxerrp
+              stare_colorarr = 'gray'
+           END
+           
+           (a gt 0) and (a lt stareaor): BEGIN
+              stare_phasearr = [stare_phasearr,bin_phasep]
+              stare_corrfluxarr = [stare_corrfluxarr,bin_corrfluxp]
+              stare_corrfluxerrarr = [stare_corrfluxerrarr,bin_corrfluxerrp]
+              stare_colorarr = [stare_colorarr, 'gray']
+           end
+           
+           (a eq stareaor):BEGIN
+              
+              ;;make stare_phasearr all positive
+              stare_phasearr = stare_phasearr + 1.0
+              
+              ;;then duplicate that array with phasexN          
+              ;;there are 170 periods in 1 years
+              n_phases = 170
+              ext_phasearr = fltarr(n_elements(stare_phasearr) *n_phases)
+              ext_corrfluxarr = ext_phasearr
+              ext_corrfluxerrarr = ext_phasearr
+              for i = 1, n_phases  do begin
+                 ext_phasearr[(i - 1)*n_elements(stare_phasearr):(i*n_elements(stare_phasearr)) - 1] = stare_phasearr + (i-1)
+                 ext_corrfluxarr[(i - 1)*n_elements(stare_phasearr):(i*n_elements(stare_phasearr)) - 1] = stare_corrfluxarr
+                 ext_corrfluxerrarr[(i - 1)*n_elements(stare_phasearr):(i*n_elements(stare_phasearr)) - 1] = stare_corrfluxerrarr
+              endfor
+              stare_norm = mean(planethash[aorname(0),'corrflux'],/nan)
+              pt = plot(ext_phasearr, ext_corrfluxarr/stare_norm + corroffset, '1s', sym_size = 0.2,   $
+                        sym_filled = 1, color = 'grey', yrange = [0.989, 1.005], xrange = [0,10])
+              
+              
+              ;;need a new phasing for the snapshots
+              ;;phase =( bmjd_dist / period )
+              snap_phasearr = ( (bin_bmjdarr-mjd_transit) / p_orbit )
+              snap_corrfluxarr = bin_corrfluxp
+              snap_corrfluxerrarr = bin_corrfluxerrp
+              snap_colorarr = colorarr(a)
+              
+              ;;overplot the snaps
+              snap_norm =  stare_norm
+              pt = plot(snap_phasearr - 763.0, snap_corrfluxarr/snap_norm + snapcorroffset, '1s', $
+                        sym_size = 0.5,   sym_filled = 1, color = colorarr[a], overplot = pt,$
+                        xtitle = 'Number of Periods', ytitle = 'Normalized Corrected Flux')
+              
+              
+           end
+           
+           (a gt stareaor):BEGIN
+              
+              snap_phasearr = [snap_phasearr,( (bin_bmjdarr-mjd_transit) / p_orbit )]
+              
+              pt = plot(( (bin_bmjdarr-mjd_transit) / p_orbit )- 763.0, bin_corrfluxp/snap_norm+ snapcorroffset,$
+                        '1s', sym_size = 0.5,   sym_filled = 1, color = colorarr[a], overplot = pt)
+              
+              snap_corrfluxarr = [snap_corrfluxarr,bin_corrfluxp]
+              snap_corrfluxerrarr = [snap_corrfluxerrarr,bin_corrfluxerrp]
+              snap_colorarr = [snap_colorarr, colorarr(a)]
+           end
+        endcase
+     endfor
+  endif                         ; time_plot
+  
 ;;-------------------------------------------------
-
-
+  
+  
 ;print out some simple facts for others to play with.
 ;  openw, outlun, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/wasp14_data.txt', /GET_LUN
 ;  for a = 0, stopaor do begin
 ;     for i = 0, n_elements(planethash[aorname(a),'xcen']) - 1 do begin
 ;        printf, outlun, (planethash[aorname(a),'bmjdarr'])(i), (planethash[aorname(a),'phase'])(i), (planethash[aorname(a),'corrflux'])(i), (planethash[aorname(a),'corrflux'])(i), format = '(D, F10.3, F10.4, F10.4)'
 ;     endfor
-
+  
 ;  endfor
 ;  free_lun, outlun
-
+  
 ;;-------------------------------------------------
-
-
+  
+  
   if keyword_set(position_plot) then begin
      fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_121120.fits', pmapdata, pmapheader
-     c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [0,500], yrange = [0,500])
-
+     c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, axis_style = 0, aspect_ratio = 1, xrange = [0,500], yrange = [0,500])
+     
      for a = stareaor ,  stopaor  do begin
         xcen500 = 500.* ((planethash[aorname(a),'xcen']) - 14.5)
         ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
