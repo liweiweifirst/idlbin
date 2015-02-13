@@ -110,12 +110,13 @@ if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pm
 else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
 fits_read,occ_filename, occdata, occheader
 startaor = 0
-stopaor =n_elements(aorname) - 1
+stopaor =  n_elements(aorname) - 1
 for a =startaor, stopaor do begin
    print, 'working on ',aorname(a)
    dir = dirname+ string(aorname(a) ) 
    CD, dir                      ; change directories to the correct AOR directory
    command  = strcompress( 'find ch'+chname+"/bcd -name 'sdcorrSPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
+;   command  = strcompress( 'find ch'+chname+"/bcd -name 'SPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
 ;   print, 'command', command
    spawn, command
    command2 =  strcompress('find ch'+chname+"/bcd -name '*bunc.fits' > "+dirname + 'bunclist.txt')
@@ -234,13 +235,17 @@ for a =startaor, stopaor do begin
       if planetname eq 'HAT-P-22' and chname eq '2' then  im[19:25, 9:15, *] = !Values.F_NAN                              ;mask region with nan set for bad regions
       if planetname eq 'HAT-P-22' and chname eq '1' then  im[5:11, 11:17, *] = !Values.F_NAN                              ;mask region with nan set for bad regions
 
-      if planetname eq 'HD93385' then im[17:21, 21:27, *] = !Values.F_NAN ;mask region with nan set for bad regions                         
+      if planetname eq 'HD93385' then im[17:21, 21:27, *] = !Values.F_NAN ;mask region with nan set for bad regions                      
+      
+      ;;calculate a background manually
+ ;     bkgd = calc_bkgd(im, h, ra_ref, dec_ref)
+
       ;run the centroiding and photometry
       get_centroids_for_calstar_jk,im, h, unc, ra_ref, dec_ref,  t, dt, hjd, xft, x3, y3, $
                                    x5, y5, x7, y7, xg, yg, xh, yh, f, b, x3s, y3s, x5s, y5s, $
                                    x7s, y7s, fs, bs, xp3, yp3, xp5, yp5, xp7, yp7, xp3s, yp3s, $
                                    xp5s, yp5s, xp7s, yp7s, fp, fps, np, flag, ns, sf, $
-                                   xfwhm, yfwhm, /WARM
+                                   xfwhm, yfwhm,  /WARM
       nanfound = where(FINITE(np) lt 1, nancount)
       if nancount gt 0 then print, 'NAN: ', fitsname(i), nanfound
       
