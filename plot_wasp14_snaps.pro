@@ -1,4 +1,4 @@
-pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_plot, unbinned_bkgplot=unbinned_bkgplot, normalize = normalize, wong_model = wong_model, secondary = secondary
+pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_plot, unbinned_bkgplot=unbinned_bkgplot, normalize = normalize, wong_model = wong_model, secondary = secondary, transit = transit
 
   COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm, bin_corrflux_dp
 
@@ -23,7 +23,7 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
                      DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose
 
   dirname = strcompress(basedir + planetname +'/')                                                            ;+'/hybrid_pmap_nn/')
-  savefilename = strcompress(dirname + planetname +'_phot_ch2_2.25000_3_15_mb.sav',/remove_all) ;
+  savefilename = strcompress(dirname + planetname +'_phot_ch2_2.25000.sav',/remove_all) ;
   restore, savefilename
 
   startaor =  0;0                 ;  n_elements(aorname) -29
@@ -31,6 +31,8 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
   time_0 = (planethash[aorname(startaor),'timearr']) 
   time_0 = time_0(0)
   stareaor = 5
+
+;;------------------------------------------------------------------------
 
   if keyword_set(secondary) then begin
      ;;make a plot of a zoom in on the secondary eclipse region with
@@ -116,6 +118,74 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
   endif
 
 
+;;------------------------------------------------------------------------
+
+  if keyword_set(transit) then begin
+     ;;make a plot of a zoom in on the transit  region with
+     ;;stares, snaps, and a model from blecic et al to compare
+     ;;measured depths.
+     
+     for a = 0, stopaor do begin
+        print, '------------------------------------------------------'
+        print, 'working on AOR', a, '   ', aorname(a), startaor, colorarr[a]
+        ;;check if I should be using pmap corr or not
+        ncorr = where(finite([ planethash[aorname(a),'corrflux']]) gt 0, corrcount,/L64)
+        ;;if 20% of the values are correctable than go with the pmap corr 
+        if corrcount gt 0.2*n_elements([planethash[aorname(a),'flux']]) then pmapcorr = 1 else pmapcorr = 0
+        print, '0.2nflux, ncorr, ', 0.2*n_elements([planethash[aorname(a),'flux']]), corrcount, pmapcorr
+
+        if a ge stareaor then begin
+           ;;variable binning
+           junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 4*3)
+        endif else begin
+           
+           junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 95*3)
+        endelse
+     ;;use the time degraded corrfluxes
+        if a eq 0 then begin
+           ;;normalize the out of eclipse level
+           oe = where(bin_phasep gt 0.42 and bin_phasep lt 0.45 or bin_phasep gt 0.52 and bin_phasep lt 0.55)
+           normcorr = median(bin_corrflux_dp)
+;           normcorr = median(bin_corrflux_dp(oe))
+        endif
+
+        if a le stareaor then begin
+           corroffset = 0.00 
+           ss = 0.5
+        endif else begin
+           corroffset = 0.0022
+           ss = 0.7
+        endelse
+
+        psec = errorplot(bin_phasep, bin_corrflux_dp/normcorr + corroffset, bin_corrfluxerrp/normcorr, '1s', $
+                    sym_size = ss, sym_filled = 1, errorbar_color =colorarr[a],$
+                    color = colorarr[a], yrange = [0.990, 1.004], xrange = [-0.15, 0.15], overplot = psec, $
+                        xtitle = 'Orbital Phase', ytitle = 'Normalized Corrected Flux')
+        ;;unwrap the negative ones
+        psec = errorplot(bin_phasep + 1.0, bin_corrflux_dp/normcorr + corroffset, bin_corrfluxerrp/normcorr,$
+                    '1s', sym_size = ss, sym_filled = 1, errorbar_color =colorarr[a],$
+                    color = colorarr[a], overplot = psec)
+
+
+        if a eq startaor then begin
+        ;;line for the second secondary depth as measured in the literature
+
+           xp = [0.47, 0.51]
+           yw1 = 1. - ([0.22, 0.22] / 100.)
+           yw2 = 1. - ([0.24, 0.24] / 100.)
+           yb1 = 1. - ([0.2249, 0.224] / 100.)
+           psec = plot(xp, yw1, color = 'gray', thick = 3, overplot = psec)
+           psec = plot(xp, yw2, color = 'gray', thick = 3, overplot = psec)
+           psec = plot(xp, yb1, color = 'black', thick = 3, overplot = psec, linestyle = 2)
+        
+        endif
+
+     endfor                     ; for each AOR
+
+
+  endif
+
+;;------------------------------------------------------------------------
 
   if keyword_set(time_plot) then begin
      for a = 0, stopaor do begin
