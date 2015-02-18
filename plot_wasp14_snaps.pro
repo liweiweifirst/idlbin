@@ -86,10 +86,12 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
         xp = [0.47, 0.51]
         yw1 = 1. - ([0.22, 0.22] / 100.)
         yw2 = 1. - ([0.24, 0.24] / 100.)
-        yb1 = 1. - ([0.2249, 0.224] / 100.)
+        yb1 = 1. - ([0.224, 0.224] / 100.)
         psec = plot(xp, yw1, color = 'gray', thick = 3, overplot = psec)
         psec = plot(xp, yw2, color = 'gray', thick = 3, overplot = psec)
-        psec = plot(xp, yb1, color = 'black', thick = 3, overplot = psec, linestyle = 2)
+        psec = errorplot([0.46], [0.99776],[0.00018], '1D', color = 'black', overplot = psec, $
+                         sym_filled = 1, sym_size = 1.5)
+        stext = text(.41, .99776, 'Blecic et al. 13',/data, vertical_alignment = 0.5, font_style = 'Bold')
 ;        psec = plot([0.4, 0.6], [1.0, 1.0], color = 'gray', thick = 2, overplot = psec)
         
         ;;try arrows instead of lines
@@ -145,39 +147,39 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
         if a eq 0 then begin
            ;;normalize the out of eclipse level
            oe = where(bin_phasep gt 0.42 and bin_phasep lt 0.45 or bin_phasep gt 0.52 and bin_phasep lt 0.55)
-           normcorr = median(bin_corrflux_dp)
-;           normcorr = median(bin_corrflux_dp(oe))
+;           normcorr = median(bin_corrflux_dp)
+           normcorr = median(bin_corrflux_dp(oe))
         endif
 
         if a le stareaor then begin
-           corroffset = 0.00 
+           corroffset = 0.0015 
            ss = 0.5
         endif else begin
-           corroffset = 0.0022
+           corroffset = 0.0037
            ss = 0.7
         endelse
 
-        psec = errorplot(bin_phasep, bin_corrflux_dp/normcorr + corroffset, bin_corrfluxerrp/normcorr, '1s', $
+        ptran = errorplot(bin_phasep, bin_corrflux_dp/normcorr + corroffset, bin_corrfluxerrp/normcorr, '1s', $
                     sym_size = ss, sym_filled = 1, errorbar_color =colorarr[a],$
-                    color = colorarr[a], yrange = [0.990, 1.004], xrange = [-0.15, 0.15], overplot = psec, $
+                    color = colorarr[a], yrange = [0.986, 1.004], xrange = [-0.1, 0.1], overplot = ptran, $
                         xtitle = 'Orbital Phase', ytitle = 'Normalized Corrected Flux')
         ;;unwrap the negative ones
-        psec = errorplot(bin_phasep + 1.0, bin_corrflux_dp/normcorr + corroffset, bin_corrfluxerrp/normcorr,$
+        ptran = errorplot(bin_phasep + 1.0, bin_corrflux_dp/normcorr + corroffset, bin_corrfluxerrp/normcorr,$
                     '1s', sym_size = ss, sym_filled = 1, errorbar_color =colorarr[a],$
-                    color = colorarr[a], overplot = psec)
+                    color = colorarr[a], overplot = ptran)
 
 
-        if a eq startaor then begin
+        if a eq stopaor then begin
         ;;line for the second secondary depth as measured in the literature
 
-           xp = [0.47, 0.51]
-           yw1 = 1. - ([0.22, 0.22] / 100.)
-           yw2 = 1. - ([0.24, 0.24] / 100.)
-           yb1 = 1. - ([0.2249, 0.224] / 100.)
-           psec = plot(xp, yw1, color = 'gray', thick = 3, overplot = psec)
-           psec = plot(xp, yw2, color = 'gray', thick = 3, overplot = psec)
-           psec = plot(xp, yb1, color = 'black', thick = 3, overplot = psec, linestyle = 2)
-        
+           xp = [-0.015, 0.02]
+           yw1 = 1. - [0.00887, 0.00887] 
+           yj1 = 1. - [0.0102, 0.0102] 
+           ptran = plot(xp, yw1, color = 'gray', thick = 3, overplot = ptran)
+           ;ptran = plot(xp, yj1, color = 'black', thick = 3, overplot = ptran, linestyle = 2)
+           ptran = errorplot([-0.02], [0.9898], [.00119], '1D', color = 'black',  overplot = ptran, $
+                            sym_filled = 1.0, sym_size = 1.5)
+           ttext = text(-.07, .9898, 'Joshi et al. 09',/data, vertical_alignment = 0.5, font_style = 'Bold')
         endif
 
      endfor                     ; for each AOR
