@@ -19,7 +19,11 @@
 ;         source_mJy is given.  Can be either the string '1' or '2' corresponding to 3.6
 ;         and 4.5 microns
 ;  - transit_depth in percentage of the stellar signal
-;  - bin_scale = time on which to bin in minutes (can be int, float, etc.)
+;  - bin_scale = time on which to bin in minutes (can be int, float,
+;    etc.)
+;
+; OPTIONAL INPUTS
+;  - eclipse
 ;
 ; OUTPUTS:
 ;  SNR = Signal to Noise Ratio
