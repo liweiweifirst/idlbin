@@ -84,132 +84,132 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
      print, 'n_elements time', n_elements(bin_timearr), n_elements(bin_xcen), n_elements(bin_phase)
      if keyword_set(timeplot) then begin ;make the plot as a function of time
         print, 'making plot as a function of time'
-        plotx = (bin_timearr-  time_0)/60./60.
+        plotx = (bin_timearr-  time_0)/60./60./24.
         print, 'plotx', plotx(0)
-        if plotx(0) gt 2000. then begin
+        if plotx(0) gt 300. then begin
            print, 'large plotx', plotx(0)
-           plotx = plotx - 7800.
-           setxrange = [0, 900]
+           plotx = plotx - (7800./24.)
+           setxrange = [0, 900/24.]
         endif
         ending = 'time'
-
+        
      endif else begin
         plotx = bin_phase
         setxrange = [-0.5,0.5]
         ending = 'phase'
      endelse
-
      
-        extra={xthick: 2, ythick:2, margin: 0.2, sym_size: 0.2,   sym_filled: 1, xstyle:1}
-        corrnormoffset = 0;0.02
-        corroffset = 0.001
-        setynormfluxrange = [0.98, 1.01];[0.97, 1.005]
-       
-        if a eq startaor then begin    ; for the first AOR
+     
+     extra={xthick: 2, ythick:2, margin: 0.2, sym_size: 0.2,   sym_filled: 1, xstyle:1}
+     corrnormoffset = 0         ;0.02
+     corroffset = 0.001
+     setynormfluxrange = [0.98, 1.01] ;[0.97, 1.005]
+     
+     if a eq startaor then begin ; for the first AOR
                                 ;set the normalization values from the
                                 ;medians of the first AOR...is close enough
-           plot_norm = median(bin_flux)
-           plot_corrnorm = mean(bin_corrfluxp,/nan)
-           bkgd_norm = mean(bin_bkgd,/nan)
+        plot_norm =  median(bin_flux)
+        plot_corrnorm = mean(bin_corrfluxp,/nan)
+        bkgd_norm =  mean(bin_bkgd,/nan)
 ;           print, 'bin_xcen', bin_xcen
-           print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
-
-           
-           pp = plot(plotx, bin_xcen, '1s',  $;title = planetname, $
-                     color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 0.3, $
-                     xshowtext = 0, ytickformat = '(F10.1)', dimensions = [600, 900], _extra = extra, yminor = 0,$
-                    xrange = setxrange)           ;, $, ymajor = 4
- 
-          ;turn off refreshing to make this quicker hopefully
+        print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
+        
+        
+        pp = plot(plotx, bin_xcen, '1s',  $ ;title = planetname, $
+                  color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 0.3, $
+                  xshowtext = 0, ytickformat = '(F10.1)', dimensions = [600, 900], _extra = extra, yminor = 0,$
+                  xrange = setxrange) ;, $, ymajor = 4
+        
+                                ;turn off refreshing to make this quicker hopefully
 ;           pp.Refresh, /Disable
-
-           
-           pq= plot(plotx, bin_ycen, '1s',  color = colorarr[a], $
-                    ytitle = 'Y position',  position = [0.2, 0.64, 0.9, 0.77],/current,  ytickinterval = 0.3,$
-                    xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, yminor = 0,$
-                    xrange = setxrange) ;, yrange = [15.5, 17.5]) ;, $, title = planetname , ymajor = 4
-                     ;xrange = setxrange)
-
-
-           pr = plot(plotx, bin_flux/plot_norm, '1s',  $
-                     color = colorarr[a],   ytitle = 'Norm. Flux', xtitle = 'Time(hours)',$ 
-                     position = [0.2,0.08, 0.9, 0.21], /current, _extra = extra, ytickinterval = 0.01, yminor = 0,$
-                    xrange = setxrange) ;, yrange = [0.98, 1.02]
- 
- 
-           ps= plot(plotx, bin_npcent, '1s', color = colorarr[a], $
-                    ytitle = 'Noise Pixel',  position = [0.2, 0.36, 0.9, 0.49], /current, $
-                    xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, ytickinterval = 1.0, yminor = 0, yrange = [3.5, 7.0],$
-                    xrange = setxrange) ;,$ title = planetname,, ymajor = 4;xrange = setxrange)
-
-           pt = plot(plotx, bin_bkgd/ bkgd_norm, '1s' , color = colorarr[a], $
-                     ytitle = 'Norm. Bkgd',  margin = 0.2, position = [0.2, 0.22, 0.9, 0.35], /current, xshowtext = 0,$
-                     ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.2, yminor = 0, yrange = [0.8, 1.2],$
-                    xrange = setxrange) ;, $ title = planetname,ymajor = 4,
-
-           pxy = plot(plotx, bin_xfwhm, '1s', color = 'blue', $
-                      ytitle = 'X & Y FWHM',  position = [0.2, 0.50, 0.9, 0.63], /current, $
-                      xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.1, yminor = 0,$
-                    xrange = setxrange) ;
-           pxy = plot(plotx, bin_yfwhm, '1s', color = 'black', $
-                      overplot = pxy, _extra = extra,$
-                    xrange = setxrange) ;
-
-
-        endif                   ; if a = startaor
-
-      ;  test_med(a) = median(bin_corrfluxp)
-        print,'median bin_corrfluxp ',  median(bin_corrfluxp), median(bin_flux)
-        if (a gt 0) and (a le stareaor) then begin
-           print, 'inside a gt 0 a le stareaor', a
+        
+        
+        pq= plot(plotx, bin_ycen, '1s',  color = colorarr[a], $
+                 ytitle = 'Y position',  position = [0.2, 0.64, 0.9, 0.77],/current,  ytickinterval = 0.3,$
+                 xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, yminor = 0,$
+                 xrange = setxrange) ;, yrange = [15.5, 17.5]) ;, $, title = planetname , ymajor = 4
+                                ;xrange = setxrange)
+        
+        
+        pr = plot(plotx, bin_flux/plot_norm, '1s',  $
+                  color = colorarr[a],   ytitle = 'Norm. Flux', xtitle = 'Phase',$ 
+                  position = [0.2,0.08, 0.9, 0.21], /current, _extra = extra, ytickinterval = 0.01, yminor = 0,$
+                  xrange = setxrange) ;, yrange = [0.98, 1.02]
+        
+        
+        ps= plot(plotx, bin_npcent, '1s', color = colorarr[a], $
+                 ytitle = 'Noise Pixel',  position = [0.2, 0.36, 0.9, 0.49], /current, $
+                 xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, ytickinterval = 1.0, yminor = 0, yrange = [4.0, 7.0],$
+                 xrange = setxrange) ;,$ title = planetname,, ymajor = 4;xrange = setxrange)
+        
+        pt = plot(plotx, bin_bkgd/ bkgd_norm, '1s' , color = colorarr[a], $
+                  ytitle = 'Norm. Bkgd',  margin = 0.2, position = [0.2, 0.22, 0.9, 0.35], /current, xshowtext = 0,$
+                  ytickformat = '(F10.2)', _extra = extra, ytickinterval = 2E-1, yminor = 0,$ ; yrange = [0.8, 1.1],$
+                  xrange = setxrange)                                                         ;, $ title = planetname,ymajor = 4,
+        
+        pxy = plot(plotx, bin_xfwhm, '1s', color = 'blue', $
+                   ytitle = 'X & Y FWHM',  position = [0.2, 0.50, 0.9, 0.63], /current, $
+                   xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.1, yminor = 0,$
+                   xrange = setxrange) ;
+        pxy = plot(plotx, bin_yfwhm, '1s', color = 'black', $
+                   overplot = pxy, _extra = extra,$
+                   xrange = setxrange) ;
+        
+        
+     endif                      ; if a = startaor
+     
+                                ;  test_med(a) = median(bin_corrfluxp)
+     print,'median bin_corrfluxp ',  median(bin_corrfluxp), median(bin_flux)
+     if (a gt 0) and (a le stareaor) then begin
+        print, 'inside a gt 0 a le stareaor', a
 ;           pp.window.SetCurrent
-           pp = plot(plotx, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],  overplot = pp,/current)
+        pp = plot(plotx, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],  overplot = pp,/current)
 ;           pq.window.SetCurrent
-           pq = plot(plotx, bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = pq,/current)
+        pq = plot(plotx, bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = pq,/current)
 ;           pr.window.SetCurrent
-           pr = plot(plotx, bin_flux/plot_norm , '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pr,/current)
- ;          if pmapcorr eq 1 then begin
+        pr = plot(plotx, bin_flux/plot_norm , '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pr,/current)
+                                ;          if pmapcorr eq 1 then begin
 ;              pr = plot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm)-corrnormoffset, /overplot, 's1', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/current,overplot = pr)
 ;           endif
-
+        
 ;           ps.window.SetCurrent
-           ps = plot(plotx, bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = ps,/current) ;, xtitle = 'Time(hrs)', ytitle = 'Normalized Flux',) 
-
+        ps = plot(plotx, bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = ps,/current) ;, xtitle = 'Time(hrs)', ytitle = 'Normalized Flux',) 
+        
 ;           pt.window.SetCurrent
-           pt = plot(plotx, bin_bkgd/ bkgd_norm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pt,/current) 
-
-           pxy = plot(plotx, bin_xfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = 'blue', overplot = pxy,/current)
-           pxy = plot(plotx, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = 'black', overplot = pxy,/current)
-
-
-        endif
-
-
-
-        if a gt stareaor then begin
-           print, 'inside a gt stareaor', a
-           pp = plot(plotx, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],$
-                     overplot = pp, layout = [1,5,1])
-
-           
-           pq = plot(plotx, bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],$
-                     overplot = pq, layout = [1,5,2])
-
-           pr = plot(plotx, bin_flux/(plot_norm) , '1s', sym_size = 0.2,   sym_filled = 1,  $
-                        color = colorarr[a], overplot = pr)
- 
-
-           ps = plot(plotx, bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a],$
-                     overplot = ps) 
-
-           pt = plot(plotx, bin_bkgd/bkgd_norm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
-                     overplot = pt) 
-           pxy = plot(plotx, bin_xfwhm, '1s',  sym_size = 0.2,   sym_filled = 1, color = 'blue', overplot = pxy)  ;
-           pxy = plot(plotx, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1, color = 'black', overplot = pxy) ;
-
-
-        endif
-
+        pt = plot(plotx, bin_bkgd/ bkgd_norm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pt,/current) 
+        
+        pxy = plot(plotx, bin_xfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = 'blue', overplot = pxy,/current)
+        pxy = plot(plotx, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = 'black', overplot = pxy,/current)
+        
+        
+     endif
+     
+     
+     
+     if a gt stareaor then begin
+        print, 'inside a gt stareaor', a
+        pp = plot(plotx, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],$
+                  overplot = pp, layout = [1,5,1])
+        
+        
+        pq = plot(plotx, bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],$
+                  overplot = pq, layout = [1,5,2])
+        
+        pr = plot(plotx, bin_flux/(plot_norm) , '1s', sym_size = 0.2,   sym_filled = 1,  $
+                  color = colorarr[a], overplot = pr)
+        
+        
+        ps = plot(plotx, bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a],$
+                  overplot = ps) 
+        
+        pt = plot(plotx, bin_bkgd/bkgd_norm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
+                  overplot = pt) 
+        pxy = plot(plotx, bin_xfwhm, '1s',  sym_size = 0.2,   sym_filled = 1, color = 'blue', overplot = pxy)    ;
+        pxy = plot(plotx, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1, color = 'black', overplot = pxy)    ;
+        
+        
+     endif
+     
 ;        pp.Refresh
 ;        pp.save, dirname +'binxcen_time_ch'+chname+'.eps'
 ;        pq.save, dirname +'binycen_time_ch'+chname+'.eps'
@@ -221,19 +221,24 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
 
  
   endfor                        ;binning for each AOR
-  pp.xrange = [0, 800]
-  pq.xrange = [0, 800]
-  pt.xrange = [0, 800]
-  ps.xrange = [0, 800]
-  pr.xrange = [0, 800]
-  pxy.xrange = [0, 800]
 
-  pp = plot([550, 520], [min(pp.yrange), max(pp.yrange)], linestyle = 4, overplot = pp)
-  pq = plot([550, 520], [min(pq.yrange), max(pq.yrange)], linestyle = 4, overplot = pq)
-  pt = plot([550, 520], [min(pt.yrange), max(pt.yrange)], linestyle = 4, overplot = pt)
-  ps = plot([550, 520], [min(ps.yrange), max(ps.yrange)], linestyle = 4, overplot = ps)
-  pr = plot([550, 520], [min(pr.yrange), max(pr.yrange)], linestyle = 4, overplot = pr)
-  pxy = plot([550, 520], [min(pxy.yrange), max(pxy.yrange)], linestyle = 4, overplot = pxy)
+  if keyword_set(timeplot) then begin
+     pp.xrange = [0, 800/24.]
+     pq.xrange = [0, 800/24.]
+     pt.xrange = [0, 800/24.]
+     ps.xrange = [0, 800/24.]
+     pr.xrange = [0, 800/24.]
+     pxy.xrange = [0, 800/24.]
+     pr.xtitle = 'Time(Days)'
+     pp = plot([550/24., 520/24.], [min(pp.yrange), max(pp.yrange)], linestyle = 4, overplot = pp)
+     pq = plot([550/24., 520/24.], [min(pq.yrange), max(pq.yrange)], linestyle = 4, overplot = pq)
+     pt = plot([550/24., 520/24.], [min(pt.yrange), max(pt.yrange)], linestyle = 4, overplot = pt)
+     ps = plot([550/24., 520/24.], [min(ps.yrange), max(ps.yrange)], linestyle = 4, overplot = ps)
+     pr = plot([550/24., 520/24.], [min(pr.yrange), max(pr.yrange)], linestyle = 4, overplot = pr)
+     pxy = plot([550/24., 520/24.], [min(pxy.yrange), max(pxy.yrange)], linestyle = 4, overplot = pxy)
+     pr.xtickname = ['0', '5', '10', '15','20', '350', '355']  ; account for the time shifting
+
+  endif
 
   pp.save, dirname +'multiplot_ch'+chname+'_'+ending+'.eps'
 end
