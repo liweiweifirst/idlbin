@@ -29,11 +29,12 @@
 ; OUTPUTS:
 ;  -RA J2000
 ;  -DEC J2000
+;  -EPOCH 
 ;  -PM RA +/- uncertainty(mas/yr)
 ;  -PM DEC +/- uncertainty(mas/yr)
 ;  -Total position error from the PCRS catalog in mas  (mainly pm errors)
-;  -Angular distance from target in degrees
 ;  -Vmag
+;  -Angular distance from target in degrees
 ;  -Source of the position errors = TYCho or HIPpparcos
 ; 
 ; *See catalog documentation for how these quantities are derived
@@ -45,6 +46,8 @@
 ;
 ; MODIFICATION HISTORY:
 ;  January 2015 Original Version  JK
+;  February 2015 changed from addpm to calcpos in order to calculate
+;  the proper motions of the science target JK
 ;-
 pro pick_pcrs_catalog,ra_deg, dec_deg, pm_ra, pm_dec, pos_epoch, obs_epoch, dirloc
 ;  t = systime(1)
@@ -63,19 +66,19 @@ pro pick_pcrs_catalog,ra_deg, dec_deg, pm_ra, pm_dec, pos_epoch, obs_epoch, dirl
      return
   endif
   if size(pm_ra,/TYPE) gt 5 then begin
-     print, 'Proper Motion RA must be a FLOAT with units of degrees'
+     print, 'Proper Motion RA must be a FLOAT with units of arcseconds per year'
      return
   endif
   if size(dec_ra,/TYPE) gt 5 then begin
-     print, 'Proper Motion DEC must be a FLOAT with units of degrees'
+     print, 'Proper Motion DEC must be a FLOAT with units of arcseconds per year'
      return
   endif
   if size(pos_epoch,/TYPE) gt 5 then begin
-     print, 'Position Epoch must be an INTeger or FLOAT with units of degrees'
+     print, 'Position Epoch must be an INTeger or FLOAT with units of years'
      return
   endif
   if size(obs_epoch,/TYPE) gt 5 then begin
-     print, 'Observing Epoch must be an INTeger or FLOAT with units of degrees'
+     print, 'Observing Epoch must be an INTeger or FLOAT with units of years'
      return
   endif
   if size(dirloc,/TYPE) ne 7 then begin
@@ -106,10 +109,7 @@ pro pick_pcrs_catalog,ra_deg, dec_deg, pm_ra, pm_dec, pos_epoch, obs_epoch, dirl
      delta_cat = obs_epoch - 2004.5
 
      ;;work on the target star proper motion conversion
-     ;;unit conversion between as/yr and arcsec/century
-     pm_ra = pm_ra * 100.
-     pm_dec = pm_dec * 100.
-     ADDPM,ra_deg,dec_deg,pm_ra,pm_dec,0,0,delta_t,outra,outdec
+     calcpos, ra_deg,dec_deg,pm_ra,pm_dec, 0, 0, 2000.0, 2000.0 , pos_epoch, obs_epoch, pos_epoch, 'Y', 'N', outra, outdec
      ra = outra
      dec = outdec
      
