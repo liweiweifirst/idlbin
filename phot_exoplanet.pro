@@ -10,31 +10,27 @@ pro phot_exoplanet, planetname, apradius,chname, columntrack = columntrack, brea
 case apradius of
 ;[ 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25]
    1.5: apval = 0
-   1.75: begin
-      apval = 0
-      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r1p75_s3_7_0p1s_x4_140314.sav'
-      if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r1p75_s3_7_0p4s_140314.sav'
-   end
    2.0: begin
-      apval = 1
-      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p00_s3_7_0p1s_x4_140314.sav'
+      apval = 0
+      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_sdark_150223.sav'
+;      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p00_s3_7_0p1s_x4_140314.sav'
       if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p00_s3_7_0p4s_140314.sav'
    end
    2.25: begin
-      apval = 2
-;      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140716.sav'
-;      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_0p1s_x4_140314.sav'
+      apval = 1
+;      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_sdark_150223.sav'
       if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_sd_0p1s_x4_sdark_141209.sav'
       if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p25_s3_7_0p4s_140716.sav'
    end
    2.5: begin
-      apval = 3
-      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p50_s3_7_sd_0p1s_x4_sdark_150127.sav'
+      apval = 2
+      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_sdark_150223.sav'
+;      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p50_s3_7_sd_0p1s_x4_sdark_150127.sav'
       if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p50_s3_7_0p4s_140314.sav'
    end
-   2.75: apval = 5
-   3.25: apval = 7
-   3: apval = 6
+   2.75: apval = 2
+   3.25: apval = 2
+   3: apval = 3
 
    Else: apval = 2              ; if no decision, then choose an apradius = 2.5 pixels
 endcase
@@ -110,8 +106,8 @@ if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pm
 else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
 fits_read,occ_filename, occdata, occheader
 startaor = 0
-stopaor =  n_elements(aorname) - 1
-for a =startaor, stopaor do begin
+stopaor =   n_elements(aorname) - 1
+for a =startaor,  stopaor do begin
    print, 'working on ',aorname(a)
    dir = dirname+ string(aorname(a) ) 
    CD, dir                      ; change directories to the correct AOR directory
@@ -134,7 +130,7 @@ for a =startaor, stopaor do begin
    startfits = 0L
 
 
-   for i =startfits,  n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
+   for i =startfits, n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
 ;       print, 'working on ', fitsname(i)         
       header = headfits(fitsname(i)) ;
       sclk_obs= sxpar(header, 'SCLK_OBS')
@@ -224,12 +220,16 @@ for a =startaor, stopaor do begin
       ;apply mask file if necessary
       if planetname eq 'hd189733' then  im[13:16, 4:7, *] = !Values.F_NAN ;mask region with nan set for bad regions
       if planetname eq 'WASP-14b' then  begin
-         ra_off = 218.27718
-         dec_off = 21.89808
+         ra_off = 218.27655; 218.27718
+         dec_off = 21.897652; 21.89808
          adxy, h, ra_off, dec_off, x_off, y_off
          x_off = round(x_off)
          y_off = round(y_off)
-         im[(x_off-2):(x_off + 2), (y_off - 2):(y_off+2), *] = !Values.F_NAN ;mask region with nan set for bad regions      
+         im[(x_off-3):(x_off + 3), (y_off - 3):(y_off+3), *] = !Values.F_NAN ;mask region with nan set for bad regions
+;         one = strmid(fitsname(i), 0,8)
+;         three = strmid(fitsname(i), 8)
+;         newname = strcompress( one + 'test' + three, /remove_all)
+;         fits_write, newname, im, h
       endif
 
       if planetname eq 'HAT-P-22' and chname eq '2' then  im[19:25, 9:15, *] = !Values.F_NAN                              ;mask region with nan set for bad regions
@@ -345,7 +345,7 @@ for a =startaor, stopaor do begin
          corrflux = pmap_correct(x_center,y_center,abcdflux,$
                                   ch,xfwhm,yfwhm,NP = npcentroids,$
                                   FUNC=fs,CORR_UNC=corrfluxerr,$
-                                  DATAFILE=pmapfile,NNEAREST=nn)
+                                  DATAFILE=pmapfile,NNEAREST=nn);, R_USE = apradius)
 ;         print, 'corrflux', corrflux[0:10]
          ;corrflux = pmap_correct(x_center,y_center,abcdflux,ch,npcentroids,occdata, corr_unc = corrfluxerr, func = fs,$
          ;                       datafile =pmapfile,/threshold_occ,/use_np) 
@@ -492,7 +492,8 @@ endfor                          ;for each AOR
 if keyword_set(breatheap) then begin
    savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav')
 endif else begin
-   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
+   pmapname = strmid(pmapfile, 9, 6,/reverse_offset)
+   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_141209' + pmapname + '.sav',/remove_all)
 endelse
 
 save, planethash, filename=savename
