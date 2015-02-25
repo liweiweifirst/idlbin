@@ -5,8 +5,8 @@ pro snap_darkcorr, planetname, frametime, chname
 ;assumes subarray - aka naxis = 3
   
 
-;  basedir = '/Users/jkrick/irac_warm/'+planetname + '/'
-  basedir = '/Users/jkrick/irac_warm/pcrs_planets/'+planetname + '/'
+  basedir = '/Users/jkrick/irac_warm/'+planetname + '/'
+;  basedir = '/Users/jkrick/irac_warm/pcrs_planets/'+planetname + '/'
 
  
 ; the superdark
@@ -20,14 +20,17 @@ pro snap_darkcorr, planetname, frametime, chname
   if planetname eq 'WASP-14b' then aorname = ['r45842688', 'r45844224', 'r45844992', 'r45845760', 'r45846528'] ; aorname =  [ 'r45428992', 'r45428736', 'r45428480', 'r45428224', 'r45426688','r45838592', 'r45840128', 'r45841408', 'r45842176', 'r45842944', 'r45844480', 'r45845248', 'r45846016', 'r45846784', 'r45839104', 'r45840896', 'r45841664', 'r45842432', 'r45843200', 'r45844736', 'r45845504', 'r45846272', 'r45847040', 'r45839616', 'r45841152', 'r45841920','r45843968','r45843712','r45843456','r45840640','r45840384','r45839872','r45839360','r45838848','r45838336','r48688384','r48688128','r48687872','r48687616','r48683776','r48683264', 'r48682752','r48682240','r48681472','r48681216','r48680704']  ; ch2 stares and snaps  s2s
   
 
-  if planetname eq 'HD209458' then aorname = ['r45188864','r45189120','r45189376','r45189632','r45189888','r45190144','r45190400','r45190656','r45190912','r45191168','r45191424','r45191680','r45191936','r45192192','r45192704','r45195264','r45192960','r45193216','r45193472','r45193984','r45193728','r45195520','r45194240','r45194496','r45194752','r45195008','r45196288','r45195776','r45197312','r45196032','r45196544','r45196800','r45197056','r45197568','r45197824','r45198080','r45192448'] ; just snaps sp4s
-  prefluxarr = fltarr(n_elements(aorname) * 500* 64)  ;just guesses at size for now
+  if planetname eq 'HD209458' then aorname =  ['r38704128','r38704384','r38701312','r38703360','r38703616'] ;'r38703872',
+;['r45188864','r45189120','r45189376','r4518963
+2','r45189888','r45190144','r45190400','r45190656','r45190912','r45191168','r45191424','r45191680','r45191936','r45192192','r45192704','r45195264','r45192960','r45193216','r45193472','r45193984','r45193728','r45195520','r45194240','r45194496','r45194752','r45195008','r45196288','r45195776','r45197312','r45196032','r45196544','r45196800','r45197056','r45197568','r45197824','r45198080','r45192448'] ; just snaps sp4s
+  prefluxarr = fltarr(n_elements(aorname) * 3200* 64)  ;just guesses at size for now
   superfluxarr = prefluxarr
   c = 0L
 
   for a = 0,   n_elements(aorname) - 1 do begin
      print, 'working on ',aorname(a)
      dir = basedir + string(aorname(a) ) 
+     print, 'dir', dir
      CD, dir                    ; change directories to the correct AOR directory
      command  = strcompress( 'find ch'+chname+"/bcd -name 'SPITZER*_bcd.fits' > "+dir+'bcdlist.txt')
      spawn, command
@@ -56,12 +59,12 @@ pro snap_darkcorr, planetname, frametime, chname
         dec_ref = sxpar(header, 'DEC_RQST')
 
         ; do some baseline aperture photometry
-        get_centroids_for_calstar_jk,data, header, unc, ra_ref, dec_ref,  t, dt, hjd, xft, x3, y3, $
-                                     x5, y5, x7, y7, xg, yg, xh, yh, f, b, x3s, y3s, x5s, y5s, $
-                                     x7s, y7s, fs, bs, xp3, yp3, xp5, yp5, xp7, yp7, xp3s, yp3s, $
-                                     xp5s, yp5s, xp7s, yp7s, fp, fps, np, flag, ns, sf, $
-                                     xfwhm, yfwhm, /WARM
-        prefluxarr(c) = f[*,1]      
+;        get_centroids_for_calstar_jk,data, header, unc, ra_ref, dec_ref,  t, dt, hjd, xft, x3, y3, $
+;                                     x5, y5, x7, y7, xg, yg, xh, yh, f, b, x3s, y3s, x5s, y5s, $
+;                                     x7s, y7s, fs, bs, xp3, yp3, xp5, yp5, xp7, yp7, xp3s, yp3s, $
+;                                     xp5s, yp5s, xp7s, yp7s, fp, fps, np, flag, ns, sf, $
+;                                     xfwhm, yfwhm, /WARM
+;        prefluxarr(c) = f[*,1]      
         
                                 ;back out the flux conversion
         fluxconv = sxpar(header, 'FLUXCONV')
@@ -104,26 +107,26 @@ pro snap_darkcorr, planetname, frametime, chname
         
 
         ;do some aperture photometry after changing the dark
-        get_centroids_for_calstar_jk,data, header, unc, ra_ref, dec_ref,  t, dt, hjd, xft, x3, y3, $
-                                     x5, y5, x7, y7, xg, yg, xh, yh, f, b, x3s, y3s, x5s, y5s, $
-                                     x7s, y7s, fs, bs, xp3, yp3, xp5, yp5, xp7, yp7, xp3s, yp3s, $
-                                     xp5s, yp5s, xp7s, yp7s, fp, fps, np, flag, ns, sf, $
-                                     xfwhm, yfwhm, /WARM
-        superfluxarr(c) = f[*,1]      
-        c = c + 63
+;        get_centroids_for_calstar_jk,data, header, unc, ra_ref, dec_ref,  t, dt, hjd, xft, x3, y3, $
+;                                     x5, y5, x7, y7, xg, yg, xh, yh, f, b, x3s, y3s, x5s, y5s, $
+;                                     x7s, y7s, fs, bs, xp3, yp3, xp5, yp5, xp7, yp7, xp3s, yp3s, $
+;                                     xp5s, yp5s, xp7s, yp7s, fp, fps, np, flag, ns, sf, $
+;                                     xfwhm, yfwhm, /WARM
+;        superfluxarr(c) = f[*,1]      
+;        c = c + 63
 
      endfor                     ; for each image
   endfor                        ; for each AOR
 
-  prefluxarr = prefluxarr[0:c-63]
-  superfluxarr = superfluxarr[0:c-63]
-  plothist, prefluxarr, prexhist, preyhist, /noplot, bin = 0.0001
-  h = plot(prexhist, preyhist, thick = 2, xtitle = 'Aperture flux', ytitle = 'Number', title = 'WASP-14b', $
-           color = 'Navy', name = 'campaign dark', xrange = [0.057, 0.0595])
+;  prefluxarr = prefluxarr[0:c-63]
+;  superfluxarr = superfluxarr[0:c-63]
+;  plothist, prefluxarr, prexhist, preyhist, /noplot, bin = 0.0001
+;  h = plot(prexhist, preyhist, thick = 2, xtitle = 'Aperture flux', ytitle = 'Number', title = 'WASP-14b', $
+;           color = 'Navy', name = 'campaign dark', xrange = [0.057, 0.0595])
   
-  plothist, superfluxarr, superxhist, superyhist, /noplot, bin = 0.0001
-  h2 =  plot(superxhist, superyhist, thick = 2, /overplot, color = 'red', name = 'superdark')
+;  plothist, superfluxarr, superxhist, superyhist, /noplot, bin = 0.0001
+;  h2 =  plot(superxhist, superyhist, thick = 2, /overplot, color = 'red', name = 'superdark')
 
-  l = legend(target = [h, h2], position = [0.0595, 1000], /data, /auto_text_color)
+;  l = legend(target = [h, h2], position = [0.0595, 1000], /data, /auto_text_color)
 
 end
