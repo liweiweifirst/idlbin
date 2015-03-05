@@ -12,14 +12,14 @@ case apradius of
    1.5: apval = 0
    2.0: begin
       apval = 0
-      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_sdark_150223.sav'
+      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_150226.sav'
 ;      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p00_s3_7_0p1s_x4_140314.sav'
       if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p00_s3_7_0p4s_140314.sav'
    end
    2.25: begin
       apval = 1
-;      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_sdark_150223.sav'
-      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_sd_0p1s_x4_sdark_141209.sav'
+      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_150226.sav'
+;      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_sd_0p1s_x4_sdark_141209.sav'
       if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p25_s3_7_0p4s_140716.sav'
    end
    2.5: begin
@@ -111,8 +111,8 @@ for a =startaor,  stopaor do begin
    print, 'working on ',aorname(a)
    dir = dirname+ string(aorname(a) ) 
    CD, dir                      ; change directories to the correct AOR directory
-   command  = strcompress( 'find ch'+chname+"/bcd -name 'sdcorrSPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
-;   command  = strcompress( 'find ch'+chname+"/bcd -name 'SPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
+;   command  = strcompress( 'find ch'+chname+"/bcd -name 'sdcorrSPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
+   command  = strcompress( 'find ch'+chname+"/bcd -name 'SPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
 ;   print, 'command', command
    spawn, command
    command2 =  strcompress('find ch'+chname+"/bcd -name '*bunc.fits' > "+dirname + 'bunclist.txt')
@@ -345,7 +345,7 @@ for a =startaor,  stopaor do begin
          corrflux = pmap_correct(x_center,y_center,abcdflux,$
                                   ch,xfwhm,yfwhm,NP = npcentroids,$
                                   FUNC=fs,CORR_UNC=corrfluxerr,$
-                                  DATAFILE=pmapfile,NNEAREST=nn);, R_USE = apradius)
+                                  DATAFILE=pmapfile,NNEAREST=nn, R_USE = apradius)
 ;         print, 'corrflux', corrflux[0:10]
          ;corrflux = pmap_correct(x_center,y_center,abcdflux,ch,npcentroids,occdata, corr_unc = corrfluxerr, func = fs,$
          ;                       datafile =pmapfile,/threshold_occ,/use_np) 
@@ -493,7 +493,7 @@ if keyword_set(breatheap) then begin
    savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav')
 endif else begin
    pmapname = strmid(pmapfile, 9, 6,/reverse_offset)
-   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_141209' + pmapname + '.sav',/remove_all)
+   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_' + pmapname + '_bcdnosdcorr.sav',/remove_all)
 endelse
 
 save, planethash, filename=savename

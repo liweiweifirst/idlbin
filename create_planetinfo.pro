@@ -76,7 +76,7 @@ chname = 0
   period = 3.52474859           ;days intended_phase = 0.0
   exptime = 0.4
   intended_phase = 0
-  stareaor = 6
+  stareaor = 5
   plot_norm = 0.46
   plot_corrnorm = 0.498
 
