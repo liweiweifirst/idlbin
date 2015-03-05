@@ -3,9 +3,9 @@ pro superdark
                                 ;files to make one superdark for the
                                 ;warm mission 
   expname = ['s0p1s','s0p4s', 's2s']
-  chname = '1'
+  chname = '2'
 
-  for e = 1, 1 do begin         ; n_elements(expname) -1 do begin
+  for e = 2, 2 do begin         ; n_elements(expname) -1 do begin
 ;for now exptime can be 's0p1s' or 's2s'
      case expname(e) OF
         's0p1s': exptime_d = 0.1
@@ -58,67 +58,73 @@ pro superdark
            ch = sxpar(header, 'CHNLNUM')
            framtime = sxpar(header, 'FRAMTIME')
            naxis = sxpar(header, 'NAXIS')
+           mjd_obs = sxpar(header, 'MJD_OBS')
+           mjd2date, mjd_obs, year, month, day  ; figure out when the observations were taken
+
+           if month ge 4 and month le 6 then begin
+
  ;          print, 'ch, naxis, exptime', ch, chname, naxis, framtime, exptime_d
-           if chname eq ch and naxis eq 3 and framtime eq exptime_d then begin
-              fits_read, fitsname(i), data, header
+              if chname eq ch and naxis eq 3 and framtime eq exptime_d then begin
+                 fits_read, fitsname(i), data, header
         
                                 ;back out the flux conversion
-              fluxconv = sxpar(header, 'FLUXCONV')
-              exptime = sxpar(header, 'EXPTIME')
-              data = data / fluxconv ; now in DN/s
-              data = data* exptime   ; now in DN
+                 fluxconv = sxpar(header, 'FLUXCONV')
+                 exptime = sxpar(header, 'EXPTIME')
+                 data = data / fluxconv ; now in DN/s
+                 data = data* exptime   ; now in DN
                                 ; flip the image
-              data = reverse(data, 2)
-        
+                 data = reverse(data, 2)
+                 
                                 ;remove the flat
-              data = data * flat64
-        
-              darkname = sxpar(header, 'SKDKRKEY')
-              darkepid = sxpar(header, 'SDRKEPID')
-              framedelay = sxpar(header, 'FRAMEDLY')
-              aorkey = sxpar(header, 'AORKEY')
-
+                 data = data * flat64
+                 
+                 darkname = sxpar(header, 'SKDKRKEY')
+                 darkepid = sxpar(header, 'SDRKEPID')
+                 framedelay = sxpar(header, 'FRAMEDLY')
+                 aorkey = sxpar(header, 'AORKEY')
+                 
                                 ;remove the dark that was already used in the image
-              fits_read, strcompress('../cal/SPITZER_I'+chname+'_'+string(darkname)+ '_0000_*_C'+string(darkepid)+'_sdark.fits',/remove_all), darkdata, darkheader
-              data = data + darkdata
+                 fits_read, strcompress('../cal/SPITZER_I'+chname+'_'+string(darkname)+ '_0000_*_C'+string(darkepid)+'_sdark.fits',/remove_all), darkdata, darkheader
+                 data = data + darkdata
+                 
+                                ;and put it together with the others tomake the superdark
+                 bigim(0, 0, 0, count) = data
+                 testpix[count] = data[11,11]
+                 count = count + 1
+              endif             ; if the correct darks
+           endif ; right season
 
-              ;and put it together with the others tomake the superdark
-              bigim(0, 0, 0, count) = data
-              testpix[count] = data[11,11]
-              count = count + 1
-           endif   ; if the correct darks
-
-           endfor  ; for each fitsname
-        endfor  ; for each AOR
-     print, 'final count', count, n_elements(aorname) * 18, ntotdarks
-     bigim= bigim[*,*,*,0:count-1]
-     
-     
+           endfor               ; for each fitsname
+        endfor                  ; for each AOR
+        print, 'final count', count, n_elements(aorname) * 18, ntotdarks
+        bigim= bigim[*,*,*,0:count-1]
+        
+        
 ;now make a median
-     superdark = median(bigim, dimension = 4)
-     fits_write, strcompress(dirname+ 'superdark_ch'+ chname +'_'+expname(e)+'.fits',/remove_all), superdark, header ; just use the last header
+        superdark = median(bigim, dimension = 4)
+        fits_write, strcompress(dirname+ 'superdark_ch'+ chname +'_'+expname(e)+'_may.fits',/remove_all), superdark, header ; just use the last header
      
      ;print, 'testpix', n_elements(testpix), testpix
-     plothist, testpix, xhist, yhist, /noprint,/noplot
-     ph = barplot(xhist, yhist,  xtitle = 'Single pixel value', ytitle = 'Number', fill_color = 'sky blue')
-     ph = plot(intarr(300) + median(testpix), indgen(300), linestyle = 4, thick = 2, overplot = ph)
-
+;        plothist, testpix, xhist, yhist, /noprint,/noplot
+;        ph = barplot(xhist, yhist,  xtitle = 'Single pixel value', ytitle = 'Number', fill_color = 'sky blue')
+;        ph = plot(intarr(300) + median(testpix), indgen(300), linestyle = 4, thick = 2, overplot = ph)
+        
 ;and what would a meanclip look like.
-     meanclip, testpix, meanout, sigmaout
-     ph = plot(intarr(300) + meanout, indgen(300), linestyle = 1, thick = 2, overplot = ph)
-
-
+;        meanclip, testpix, meanout, sigmaout
+;        ph = plot(intarr(300) + meanout, indgen(300), linestyle = 1, thick = 2, overplot = ph)
+        
+        
 ;a plot of the difference between a mean and a median for all
 ;pixels
-     superdark_mean = mean(bigim, dimension = 4,/double, /nan)
-
-     delta = superdark - superdark_mean
-     plothist, delta, xhist, yhist, bin = 0.05, /noprint, /noplot
-     phd = barplot(xhist, yhist,  xtitle = 'Median - Mean', ytitle = 'Number', fill_color = 'orange', xrange = [-0.5, 0.5])
-
+;        superdark_mean = mean(bigim, dimension = 4,/double, /nan)
+        
+;        delta = superdark - superdark_mean
+;        plothist, delta, xhist, yhist, bin = 0.05, /noprint, /noplot
+;        phd = barplot(xhist, yhist,  xtitle = 'Median - Mean', ytitle = 'Number', fill_color = 'orange', xrange = [-0.5, 0.5])
+        
 ;------------------------------------------------
-    
-  endfor                        ; for each expname
+
+     endfor                     ; for each expname
 
 end
   
