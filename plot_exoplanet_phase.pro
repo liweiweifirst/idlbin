@@ -77,7 +77,7 @@ pro plot_exoplanet_phase, planetname, bin_level, apradius, chname, function_fit 
 ;---------------
   ;;read in the photometry save file
   dirname = strcompress(basedir + planetname +'/')                                                 
-  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_141209.sav',/remove_all) ;
+  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150226_bcdnosdcorr.sav',/remove_all) ;
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)
@@ -108,6 +108,19 @@ pro plot_exoplanet_phase, planetname, bin_level, apradius, chname, function_fit 
   se = where(phase0 gt 0.47 and phase0 lt 0.51)
   plot_corrnorm =  mean(corrflux0(se),/nan)
   plot_norm = mean(flux0(se), /nan) 
+
+  if n_elements(aorname) gt stareaor + 1 then begin
+     ;pick a different normalization for the snapshots
+     count = 0
+     for a = startaor, stopaor do begin
+        phase = planethash[aorname(a),'phase']
+        if mean(phase,/nan) gt 0.45 and mean(phase,/nan) lt 0.51 and count eq 0 then sec_corrflux = [planethash[aorname(a),'corrflux_d']]
+        if mean(phase,/nan) gt 0.45 and mean(phase,/nan) lt 0.51 and count gt 0 then sec_corrflux = [sec_corrflux, planethash[aorname(a),'corrflux_d']]
+     endfor
+     snap_corrnorm = mean(sec_corrflux, /nan)
+  endif
+
+
 ;--------------------------------------------
 
 
@@ -161,111 +174,49 @@ pro plot_exoplanet_phase, planetname, bin_level, apradius, chname, function_fit 
 ;------------------------------------------------------
 ;now try plotting
 ;------------------------------------------------------
-     setyrange = [0.989, 1.005]
+     setyrange = [0.990, 1.005]
      if planetname eq 'HD158460' then setyrange = [0.997, 1.003];[0.999, 1.001]
+     setynormfluxrange = [0.98, 1.05] ;[0.97, 1.005]
      setxrange =  [-0.5, 0.5]   ;[0.43, 0.56];
      extra={ sym_size: 0.2, sym_filled: 1, xrange: setxrange, color: colorarr[a], title:planetname}
-     setynormfluxrange = [0.98, 1.05] ;[0.97, 1.005]
-     if a le stareaor then begin
-        scolor = 'gray' 
-     endif else begin
-        scolor = colorarr[a]
-     endelse
 
+     if keyword_set(all_plots) then begin
+        pp = plot(bin_phase, bin_xcen, '1s', xtitle = 'Orbital Phase', ytitle = 'X position', _extra = extra, overplot = pp)          
+        pq = plot(bin_phase, bin_ycen, '1s', xtitle = 'Orbital Phase', ytitle = 'Y position', _extra = extra, overplot = pq)
+        ps= plot(bin_phase, bin_npcent, '1s',xtitle = 'Orbital Phase', ytitle = 'Noise Pixel', _extra = extra, overplot = ps)
+        pt = plot(bin_phase, bin_bkgd, '1s', xtitle = 'Orbital Phase', ytitle = 'Background', _extra = extra, overplot = pt)
+        pxf = plot(bin_phase, bin_xfwhm, '1s', xtitle = 'Orbital Phase', ytitle = 'XFWHM', _extra = extra, $
+                   yrange = [1.9, 2.3], overplot = pxf)
+        pyf = plot(bin_phase, bin_yfwhm, '1s',xtitle = 'Orbital Phase', ytitle = 'YFWHM', _extra = extra, $
+                   yrange = [1.9, 2.3], overplot = pyf)
+        
+        
+     endif   ;;keyword all_plots
+     pr = errorplot(bin_phase, bin_flux/plot_norm, bin_fluxerr/plot_norm,  '1s', xtitle = 'Orbital Phase', $
+                    ytitle = 'Normalized Flux', yrange = setynormfluxrange, sym_size = 0.7, sym_filled = 1, $
+                    xrange = setxrange, color = colorarr[a], errorbar_color = colorarr[a], overplot = pr)
+
+     ;;work on the corrflux snap normalization being different than
+     ;;the stare normalization
+
+     if a gt stareaor then plot_corrnorm = snap_corrnorm
+
+     if pmapcorr eq 1 then begin
+        pu = errorplot(bin_phasep, bin_corrfluxp/plot_corrnorm, $
+                       bin_corrfluxerrp/plot_corrnorm,  '1s', sym_size = 0.7,  $
+                       symbol = plotsym, sym_filled = 1,color =colorarr[a] ,xtitle = 'Orbital Phase',$
+                       errorbar_color =  colorarr[a], title = planetname, ytitle = 'Pmap Corrected Flux', $
+                       yrange = setyrange, xrange = setxrange, overplot =pu) 
+        if keyword_set(function_fit) then begin
+           pu.xshowtext = 0
+           pu.position =  [0.2,0.35,0.9,0.9]
+        endif
+        
+     endif
      
-     if a eq startaor then begin        ; for the first AOR
-        if keyword_set(all_plots) then begin
-           pp = plot(bin_phase, bin_xcen, '1s', xtitle = 'Orbital Phase', ytitle = 'X position', _extra = extra)          
-           pq = plot(bin_phase, bin_ycen, '1s', xtitle = 'Orbital Phase', ytitle = 'Y position', _extra = extra)
-           ps= plot(bin_phase, bin_npcent, '1s',xtitle = 'Orbital Phase', ytitle = 'Noise Pixel', _extra = extra)
-           pt = plot(bin_phase, bin_bkgd, '1s', xtitle = 'Orbital Phase', ytitle = 'Background', _extra = extra)
-           pxf = plot(bin_phase, bin_xfwhm, '1s', xtitle = 'Orbital Phase', ytitle = 'XFWHM', _extra = extra, yrange = [1.9, 2.3])
-           pyf = plot(bin_phase, bin_yfwhm, '1s',xtitle = 'Orbital Phase', ytitle = 'YFWHM', _extra = extra, yrange = [1.9, 2.3])
-
-             
-        endif   ;;keyword all_plots
-        pr = errorplot(bin_phase, bin_flux/plot_norm, bin_fluxerr/plot_norm,  '1s', xtitle = 'Orbital Phase', $
-                       ytitle = 'Normalized Flux', yrange = setynormfluxrange, sym_size = 0.7, sym_filled = 1, $
-                       xrange = setxrange, color = colorarr[a], errorbar_color = colorarr[a])
-                                
-        if pmapcorr eq 1 then begin
-            pu = errorplot(bin_phasep, bin_corrfluxp/plot_corrnorm, $
-                          bin_corrfluxerrp/plot_corrnorm,  '1s', sym_size = 0.7,  $
-                          symbol = plotsym, sym_filled = 1,color =scolor ,xtitle = 'Orbital Phase',$
-                          errorbar_color =  scolor, title = planetname, ytitle = 'Pmap Corrected Flux', $
-                          yrange = setyrange, xrange = setxrange) 
-           if keyword_set(function_fit) then begin
-              pu.xshowtext = 0
-              pu.position =  [0.2,0.35,0.9,0.9]
-           endif
-           
-        endif
-        
-     endif ;else begin           ; if a = startaor
      
- ;-------------------------------------
-     if (a gt 0) and (a lt stareaor) then begin                 ;want to work on the staring aors
-        print, 'inside a gt 0 a le stareaor', a
-        
-        if keyword_set(all_plots) then begin
-           pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a], overplot = pp)
-           pq = plot(bin_phase, bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = pq)
-           ps = plot(bin_phase, bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = ps) 
-           pt = plot(bin_phase, bin_bkgd, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a],overplot = pt) 
-           pxf = plot(bin_phase, bin_xfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pxf)             
-           pyf = plot(bin_phase, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pyf)
-           if planetname eq 'WASP-15b' then begin
-                                ;get a quick calculation of depth of eclipse
-              ec = where(bin_phase ge 0.49 and bin_phase le 0.51)
-              ef = where(bin_phase ge 0.525 or bin_phase le 0.47)
-              delta = 1 - (mean(bin_corrfluxp(ec))) / (mean(bin_corrfluxp(ef)))
-              print, 'estimated depth', delta, mean(bin_corrfluxp(ef)), mean(bin_corrfluxp(ec))
-           endif
-        endif
-        pr = errorplot(bin_phase, bin_flux/plot_norm, bin_fluxerr/plot_norm,  '1s',sym_size = 0.7,   $
-                       sym_filled = 1,  color =colorarr[a], errorbar_color = colorarr[a], overplot = pr )
- 
-
-        if pmapcorr eq 1 then begin           
-           pu = errorplot(bin_phasep, bin_corrfluxp/plot_corrnorm, bin_corrfluxerrp/plot_corrnorm,$
-                          '1s', sym_size = 0.7, symbol = plotsym, sym_filled = 1,color =colorarr[a], $
-                          errorbar_color = colorarr[a], overplot = pu) ;
-        endif
-        
-     endif                      ; a gt 0 a lt stareor
-        
- ;-------------------------------------
-     if a gt stareaor then begin
-        print, 'inside a ge stareaor', a
-        if keyword_set(all_plots) then begin
-           pp = plot(bin_phase, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a], overplot = pp)
-           pq = plot(bin_phase, bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = pq)
-           ps = plot(bin_phase, bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = ps) 
-           pt = plot(bin_phase, bin_bkgd, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a],overplot = pt) 
-           pxf = plot(bin_phase, bin_xfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pxf)             
-           pyf = plot(bin_phase, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pyf)
-           pr = errorplot(bin_phase, bin_flux/plot_norm, bin_fluxerr/plot_norm,  '1s', sym_size = 0.7,   $
-                          sym_filled = 1,  color = colorarr[a], overplot = pr )
-        endif
-        pr = errorplot(bin_phase, bin_flux/plot_norm, bin_fluxerr/plot_norm,  '1s',sym_size = 0.7,   $
-                       sym_filled = 1,  color =colorarr[a], errorbar_color = colorarr[a], overplot = pr )
- 
-
-        if pmapcorr eq 1 then begin
-           print, 'inside pmapcorr eq 1', median( bin_corrfluxp/plot_corrnorm)
-           if n_elements(aorname) gt 10 then begin
-              
-              pu = errorplot(bin_phasep, bin_corrfluxp/plot_corrnorm , bin_corrfluxerrp/plot_corrnorm, '1s', $
-                             sym_size = 0.7, symbol = plotsym, sym_filled = 1,color =colorarr[a] , $
-                             errorbar_color = colorarr[a], overplot = pu ) ;
-           endif
-        endif
-        
-        
-     endif                      ; if a gt stareaor
-        
- ;-------------------------------------
-
+;-------------------------------------
+     
      if a eq 0 and planetname eq 'HD209458' then begin
         print, 'plotting Lewis curve'
                                 ;plot curves from Lewis
