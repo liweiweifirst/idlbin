@@ -5,7 +5,7 @@ pro superdark
   expname = ['s0p1s','s0p4s', 's2s']
   chname = '2'
 
-  for e = 2, 2 do begin         ; n_elements(expname) -1 do begin
+  for e = 0, 0 do begin         ; n_elements(expname) -1 do begin
 ;for now exptime can be 's0p1s' or 's2s'
      case expname(e) OF
         's0p1s': exptime_d = 0.1
@@ -59,9 +59,12 @@ pro superdark
            framtime = sxpar(header, 'FRAMTIME')
            naxis = sxpar(header, 'NAXIS')
            mjd_obs = sxpar(header, 'MJD_OBS')
+           creator = sxpar(header, 'CREATOR')
            mjd2date, mjd_obs, year, month, day  ; figure out when the observations were taken
 
-           if month ge 4 and month le 6 then begin
+           ;;remove early darks, this is not because of the
+           ;;processing, but is a good proxy for early vs. late times
+           if creator eq 'S19.1.0 ' then begin 
 
  ;          print, 'ch, naxis, exptime', ch, chname, naxis, framtime, exptime_d
               if chname eq ch and naxis eq 3 and framtime eq exptime_d then begin
@@ -102,7 +105,7 @@ pro superdark
         
 ;now make a median
         superdark = median(bigim, dimension = 4)
-        fits_write, strcompress(dirname+ 'superdark_ch'+ chname +'_'+expname(e)+'_may.fits',/remove_all), superdark, header ; just use the last header
+        fits_write, strcompress(dirname+ 'superdark_ch'+ chname +'_'+expname(e)+'_S19.fits',/remove_all), superdark, header ; just use the last header
      
      ;print, 'testpix', n_elements(testpix), testpix
 ;        plothist, testpix, xhist, yhist, /noprint,/noplot
