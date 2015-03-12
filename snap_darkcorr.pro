@@ -13,13 +13,11 @@ pro snap_darkcorr, planetname, frametime, chname
   if frametime eq 2 then frametimename = 's2s'
   if frametime eq 0.1 then frametimename = 's0p1s'
   if frametime eq 0.4 then frametimename = 's0p4s'
-  fits_read,strcompress( '/Users/jkrick/external/irac_warm/darks/superdarks/superdark_ch'+chname+'_'+frametimename +'.fits',/remove_all), superdark, superheader
+  fits_read,strcompress( '/Users/jkrick/external/irac_warm/darks/superdarks/superdark_ch'+chname+'_'+frametimename +'_S19.fits',/remove_all), superdark, superheader
 
-  if planetname eq 'HD158460' then aorname = ['r45184512']
+  if planetname eq 'HD158460' then aorname = [ 'r45184256','r45184512','r45184768','r45185024','r45185280','r45185536','r45185792','r45186048','r45186304','r45186560','r45186816','r45187072','r45187328','r45187584','r45187840','r45188096','r45188352','r45188608'] ;0,1s snaps ch2
 
-;  aorname = [ 'r45184256','r45184512','r45184768','r45185024','r45185280','r45185536','r45185792','r45186048','r45186304','r45186560','r45186816','r45187072','r45187328','r45187584','r45187840','r45188096','r45188352','r45188608']  ; ch2 0.1s snaps
-
-  if planetname eq 'WASP-14b' then aorname = ['r45842688', 'r45844224', 'r45844992', 'r45845760', 'r45846528'] ; aorname =  [ 'r45428992', 'r45428736', 'r45428480', 'r45428224', 'r45426688','r45838592', 'r45840128', 'r45841408', 'r45842176', 'r45842944', 'r45844480', 'r45845248', 'r45846016', 'r45846784', 'r45839104', 'r45840896', 'r45841664', 'r45842432', 'r45843200', 'r45844736', 'r45845504', 'r45846272', 'r45847040', 'r45839616', 'r45841152', 'r45841920','r45843968','r45843712','r45843456','r45840640','r45840384','r45839872','r45839360','r45838848','r45838336','r48688384','r48688128','r48687872','r48687616','r48683776','r48683264', 'r48682752','r48682240','r48681472','r48681216','r48680704']  ; ch2 stares and snaps  s2s
+  if planetname eq 'WASP-14b' then aorname = ['r45428992', 'r45428736', 'r45428480', 'r45428224', 'r45426688','r45840128','r45839616','r45839104','r45838592','r45847040','r45846784','r45846528','r45846272','r45846016','r45843200','r45842944','r45842688','r45842432','r45842176','r45841920','r45841664','r45841408','r45845504','r45840896','r45845760','r45845504','r45845248','r45844992','r45844736','r45844480','r45844224','r45843968','r45843712','r45843456','r45840640','r45840384','r45839872','r45839360','r45838848','r45838336','r48688384','r48688128','r48687872','r48687616','r48683776','r48683264','r48682752','r48682240','r48681472','r48681216','r48680704']  ; ch2 stares and snaps  s2s
   
 
   if planetname eq 'HD209458' then aorname =  ['r38704128','r38704384','r38701312','r38703360','r38703616'] ;'r38703872',
@@ -105,7 +103,7 @@ pro snap_darkcorr, planetname, frametime, chname
         
                                 ;write out the new fits file
         outfilename =strmid(fitsname(i),0, 8) + 'sdcorr' + strmid(fitsname(i), 8)
-;        fits_write, outfilename, data, header
+        fits_write, outfilename, data, header
         
 
         ;do some aperture photometry after changing the dark

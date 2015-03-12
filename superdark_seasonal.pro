@@ -98,7 +98,7 @@ pro superdark_seasonal
                  ;;ok instead of month now sort on year
                  CASE 1 of
                     ;;(month ge 1) and  (month le 3): begin
-                    (year eq 2010): begin
+                    (year eq 2014): begin
                        bigim_feb(0, 0, 0, count_feb) = data 
                        count_feb = count_feb + 1
                     end
@@ -117,7 +117,7 @@ pro superdark_seasonal
                        bigim_nov(0, 0, 0, count_nov) = data 
                        count_nov = count_nov + 1
                     end
-                    else: print, 'year', year
+                    else: asdf = 1
                  ENDCASE
 
 ;                 testpix[count] = data[11,11]
@@ -137,7 +137,7 @@ pro superdark_seasonal
         superdark_may = median(bigim_may, dimension = 4)
         superdark_aug = median(bigim_aug, dimension = 4)
         superdark_nov = median(bigim_nov, dimension = 4)
-        fits_write, strcompress(dirname+ 'superdark_ch'+ chname +'_'+expname(e)+'_2010.fits',/remove_all), superdark_feb, header 
+        fits_write, strcompress(dirname+ 'superdark_ch'+ chname +'_'+expname(e)+'_2014.fits',/remove_all), superdark_feb, header 
         fits_write, strcompress(dirname+ 'superdark_ch'+ chname +'_'+expname(e)+'_2011.fits',/remove_all), superdark_may, header 
         fits_write, strcompress(dirname+ 'superdark_ch'+ chname +'_'+expname(e)+'_2012.fits',/remove_all), superdark_aug, header 
         fits_write, strcompress(dirname+ 'superdark_ch'+ chname +'_'+expname(e)+'_2013.fits',/remove_all), superdark_nov, header 
@@ -151,14 +151,14 @@ pro superdark_seasonal
 
 ;make some difference images
 
-        fits_read,  strcompress(dirname+ 'superdark_ch'+ chname +'_'+expname(e)+'.fits',/remove_all), superdark, header 
+        fits_read,  strcompress(dirname+ 'superdark_ch'+ chname +'_'+expname(e)+'_S19.fits',/remove_all), superdark, header 
 
         diff_feb = superdark - superdark_feb
         diff_may = superdark - superdark_may
         diff_aug = superdark - superdark_aug
         diff_nov = superdark - superdark_nov
 
-        fits_write, strcompress(dirname+ 'diffdark_ch'+ chname +'_'+expname(e)+'_2010.fits',/remove_all), diff_feb, header 
+        fits_write, strcompress(dirname+ 'diffdark_ch'+ chname +'_'+expname(e)+'_2014.fits',/remove_all), diff_feb, header 
         fits_write, strcompress(dirname+ 'diffdark_ch'+ chname +'_'+expname(e)+'_2011.fits',/remove_all), diff_may, header 
         fits_write, strcompress(dirname+ 'diffdark_ch'+ chname +'_'+expname(e)+'_2012.fits',/remove_all), diff_aug, header 
         fits_write, strcompress(dirname+ 'diffdark_ch'+ chname +'_'+expname(e)+'_2013.fits',/remove_all), diff_nov, header 
