@@ -77,7 +77,7 @@ pro plot_exoplanet_time, planetname, bin_level, apradius, chname, line_fit = lin
 ;---------------
   ;;read in the photometry save file
   dirname = strcompress(basedir + planetname +'/')                                                 
-  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150226_bcdsdcorr.sav',/remove_all) ;
+  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150309_bcdsdcorr_imainLD.sav',/remove_all) ;
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)
@@ -126,6 +126,9 @@ pro plot_exoplanet_time, planetname, bin_level, apradius, chname, line_fit = lin
         if mean(phase,/nan) gt 0.45 and mean(phase,/nan) lt 0.51 and count gt 0 then sec_corrflux = [sec_corrflux, planethash[aorname(a),'corrflux_d']]
      endfor
      snap_corrnorm = mean(sec_corrflux, /nan)
+     ;if planetname eq 'WASP-14b' then 
+     snap_addoffset = (plot_corrnorm - snap_corrnorm) / plot_corrnorm
+
   endif
 
 
@@ -207,10 +210,13 @@ pro plot_exoplanet_time, planetname, bin_level, apradius, chname, line_fit = lin
      ;;work on the corrflux snap normalization being different than
      ;;the stare normalization
 
-     if a gt stareaor then plot_corrnorm = snap_corrnorm
+     if a gt stareaor then begin
+        ;plot_corrnorm = snap_corrnorm
+        addoffset = snap_addoffset
+     endif
 
      if pmapcorr eq 1 then begin
-        pu = errorplot(xarr, bin_corrfluxp/plot_corrnorm, $
+        pu = errorplot(xarr, bin_corrfluxp/plot_corrnorm + snap_addoffset, $
                        bin_corrfluxerrp/plot_corrnorm,  '1s', sym_size = 0.7,  $
                        symbol = plotsym, sym_filled = 1,color =colorarr[a] ,xtitle = 'Time(Hours)',$
                        errorbar_color =  colorarr[a], title = planetname, ytitle = 'Pmap Corrected Flux', $

@@ -32,7 +32,34 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
   stopaor =     n_elements(aorname) - 1
   time_0 = (planethash[aorname(startaor),'timearr']) 
   time_0 = time_0(0)
-  stareaor = 5
+;  stareaor = 5
+
+;--------------------------------------------
+;pick the normalization
+;--------------------------------------------
+  phase0 = planethash[aorname(0),'phase']
+  corrflux0 = planethash[aorname(0),'corrflux_d']
+  flux0 = planethash[aorname(0),'flux']
+  se = where(phase0 gt 0.47 and phase0 lt 0.51)
+  plot_corrnorm =  mean(corrflux0(se),/nan)
+  plot_norm = mean(flux0(se), /nan) 
+  addoffset = 0.0
+
+  if n_elements(aorname) gt stareaor + 1 then begin
+     ;pick a different normalization for the snapshots
+     count = 0
+     for a = startaor, stopaor do begin
+        phase = planethash[aorname(a),'phase']
+        if mean(phase,/nan) gt 0.45 and mean(phase,/nan) lt 0.51 and count eq 0 then sec_corrflux = [planethash[aorname(a),'corrflux_d']]
+        if mean(phase,/nan) gt 0.45 and mean(phase,/nan) lt 0.51 and count gt 0 then sec_corrflux = [sec_corrflux, planethash[aorname(a),'corrflux_d']]
+     endfor
+     snap_corrnorm = mean(sec_corrflux, /nan)
+
+
+     ;;except I think it is additive since I think it is a latent
+     ;;issue, and not multiplicative
+     snap_addoffset = (plot_corrnorm - snap_corrnorm) / plot_corrnorm
+  endif
 
 ;;------------------------------------------------------------------------
 
@@ -53,33 +80,21 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
         if a ge stareaor then begin
            ;;variable binning
            junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 4*3)
-        endif else begin
-           
-           junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 95*3)
-        endelse
-     ;;use the time degraded corrfluxes
-        if a eq 0 then begin
-           ;;normalize the in of eclipse level
-           oe = where(bin_phasep gt 0.47 and bin_phasep lt 0.51 )
-
- ;          oe = where(bin_phasep gt 0.42 and bin_phasep lt 0.45 or bin_phasep gt 0.52 and bin_phasep lt 0.55)
-           normcorr = median(bin_corrflux_dp(oe))
-        endif
-
-        if a le stareaor then begin
-           corroffset = 0.00 
-           ss = 0.5
-        endif else begin
-           corroffset = 0.0022
+           addoffset = snap_addoffset
            ss = 0.7
+        endif else begin
+           junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 95*3)
+           ss = 0.5
         endelse
+     
+
         print, 'mean bin_corrflux_dp', mean(bin_corrflux_dp)
-        psec = errorplot(bin_phasep, bin_corrflux_dp/normcorr + corroffset, bin_corrfluxerrp/normcorr, '1s', $
+        psec = errorplot(bin_phasep, bin_corrflux_dp/plot_corrnorm + addoffset, bin_corrfluxerrp/plot_corrnorm, '1s', $
                     sym_size = ss, sym_filled = 1, errorbar_color =colorarr[a],$
                     color = colorarr[a], yrange = [0.990, 1.008], xrange = [0.4, 0.6], overplot = psec, $
                         xtitle = 'Orbital Phase', ytitle = 'Normalized Corrected Flux')
         ;;unwrap the negative ones
-        psec = errorplot(bin_phasep + 1.0, bin_corrflux_dp/normcorr + corroffset, bin_corrfluxerrp/normcorr,$
+        psec = errorplot(bin_phasep + 1.0, bin_corrflux_dp/plot_corrnorm + addoffset, bin_corrfluxerrp/plot_corrnorm,$
                     '1s', sym_size = ss, sym_filled = 1, errorbar_color =colorarr[a],$
                     color = colorarr[a], overplot = psec)
 
@@ -143,33 +158,19 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
         if a ge stareaor then begin
            ;;variable binning
            junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 4*3)
+           addoffset = snap_addoffset
+           ss = 0.7
         endif else begin
-           
+           ss = 0.5
            junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 95*3)
         endelse
-     ;;use the time degraded corrfluxes
-        if a eq 0 then begin
-           ;;normalize the in eclipse level
-           oe = where(bin_phasep gt 0.47 and bin_phasep lt 0.51 )
-;           oe = where(bin_phasep gt 0.42 and bin_phasep lt 0.45 or bin_phasep gt 0.52 and bin_phasep lt 0.55)
-;           normcorr = median(bin_corrflux_dp)
-           normcorr = median(bin_corrflux_dp(oe))
-        endif
 
-        if a le stareaor then begin
-           corroffset = 0.0015 
-           ss = 0.5
-        endif else begin
-           corroffset = 0.0037
-           ss = 0.7
-        endelse
-
-        ptran = errorplot(bin_phasep, bin_corrflux_dp/normcorr + corroffset, bin_corrfluxerrp/normcorr, '1s', $
+        ptran = errorplot(bin_phasep, bin_corrflux_dp/plot_corrnorm + addoffset, bin_corrfluxerrp/plot_corrnorm, '1s', $
                     sym_size = ss, sym_filled = 1, errorbar_color =colorarr[a],$
                     color = colorarr[a], yrange = [0.990, 1.008], xrange = [-0.1, 0.1], overplot = ptran, $
                         xtitle = 'Orbital Phase', ytitle = 'Normalized Corrected Flux')
         ;;unwrap the negative ones
-        ptran = errorplot(bin_phasep + 1.0, bin_corrflux_dp/normcorr + corroffset, bin_corrfluxerrp/normcorr,$
+        ptran = errorplot(bin_phasep + 1.0, bin_corrflux_dp/plot_corrnorm + addoffset, bin_corrfluxerrp/plot_corrnorm,$
                     '1s', sym_size = ss, sym_filled = 1, errorbar_color =colorarr[a],$
                     color = colorarr[a], overplot = ptran)
 
@@ -205,22 +206,20 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
         if corrcount gt 0.2*n_elements([planethash[aorname(a),'flux']]) then pmapcorr = 1 else pmapcorr = 0
         print, 'pmapcorr', pmapcorr
         
-        if a ge stareaor then begin
+        if a gt stareaor then begin
            ;;variable binning
-           junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 4)
+           junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 4*3)
+           addoffset = snap_addoffset
+           ss = 0.7
         endif else begin
-           
-           junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 95)
+           ss = 0.5
+           junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 95*3)
+           addoffset = 0.0
         endelse
-        
-        corroffset = 0.002
-        snapcorroffset = 0.002
-        
-
-                                ;use the time degraded corrfluxes
+        ;;use the time degraded corrfluxes
         bin_corrfluxp = bin_corrflux_dp
         
-                                ;save some arrays for later
+        ;;save some arrays for later
         CASE 1 of 
            ;;take the  stare AORs and make one array of phase and corrflux
            ;;and corrfluxerr
@@ -255,8 +254,8 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
                  ext_corrfluxarr[(i - 1)*n_elements(stare_phasearr):(i*n_elements(stare_phasearr)) - 1] = stare_corrfluxarr
                  ext_corrfluxerrarr[(i - 1)*n_elements(stare_phasearr):(i*n_elements(stare_phasearr)) - 1] = stare_corrfluxerrarr
               endfor
-              stare_norm = mean(planethash[aorname(0),'corrflux'],/nan)
-              pt = plot(ext_phasearr, ext_corrfluxarr/stare_norm + corroffset, '1s', sym_size = 0.2,   $
+              ;stare_norm = mean(planethash[aorname(0),'corrflux'],/nan)
+              pt = plot(ext_phasearr, ext_corrfluxarr/plot_corrnorm + addoffset, '1s', sym_size = 0.2,   $
                         sym_filled = 1, color = 'grey', yrange = [0.989, 1.005], xrange = [0,10])
               
               
@@ -268,8 +267,8 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
               snap_colorarr = colorarr(a)
               
               ;;overplot the snaps
-              snap_norm =  stare_norm
-              pt = plot(snap_phasearr - 763.0, snap_corrfluxarr/snap_norm + snapcorroffset, '1s', $
+;              snap_norm =  stare_norm
+              pt = plot(snap_phasearr - 763.0, snap_corrfluxarr/plot_corrnorm + addoffset, '1s', $
                         sym_size = 0.5,   sym_filled = 1, color = colorarr[a], overplot = pt,$
                         xtitle = 'Number of Periods', ytitle = 'Normalized Corrected Flux')
               
@@ -280,7 +279,7 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
               
               snap_phasearr = [snap_phasearr,( (bin_bmjdarr-mjd_transit) / p_orbit )]
               
-              pt = plot(( (bin_bmjdarr-mjd_transit) / p_orbit )- 763.0, bin_corrfluxp/snap_norm+ snapcorroffset,$
+              pt = plot(( (bin_bmjdarr-mjd_transit) / p_orbit )- 763.0, bin_corrfluxp/plot_corrnorm + addoffset,$
                         '1s', sym_size = 0.5,   sym_filled = 1, color = colorarr[a], overplot = pt)
               
               snap_corrfluxarr = [snap_corrfluxarr,bin_corrfluxp]
