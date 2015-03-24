@@ -1,4 +1,4 @@
-pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_plot, unbinned_bkgplot=unbinned_bkgplot, normalize = normalize, wong_model = wong_model, secondary = secondary, transit = transit
+pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_plot, unbinned_bkgplot=unbinned_bkgplot, normalize = normalize, wong_model = wong_model, secondary = secondary, transit = transit, printout = printout
 
   COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm, bin_corrflux_dp
 
@@ -25,11 +25,20 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
 
 
   dirname = strcompress(basedir + planetname +'/')                                                            ;+'/hybrid_pmap_nn/')
-  savefilename = strcompress(dirname + planetname +'_phot_ch2_2.25000.sav',/remove_all) ;
+  savefilename = strcompress(dirname + planetname +'_phot_ch2_2.25000_150226_bcdsdcorr.sav',/remove_all) ;
   restore, savefilename
 
+ 
+  ;;ok, but actually use the Wong et al. updated parameters
+  p_orbit = 2.24376543          ;days
+  mjd_transit = 2456034.21290 - 2400000.5
+  ecc = 0.0828
+  omega = 252.11                ;degrees
+  
+
+
   startaor =  0;0                 ;  n_elements(aorname) -29
-  stopaor =     n_elements(aorname) - 1
+  stopaor =   n_elements(aorname) - 1
   time_0 = (planethash[aorname(startaor),'timearr']) 
   time_0 = time_0(0)
 ;  stareaor = 5
@@ -196,6 +205,7 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
 ;;------------------------------------------------------------------------
 
   if keyword_set(time_plot) then begin
+     nphasesub = 63. ; 763.0 number of phases between MJD and the snaps
      for a = 0, stopaor do begin
         print, '------------------------------------------------------'
         print, 'working on AOR', a, '   ', aorname(a), startaor, colorarr[a]
@@ -208,12 +218,12 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
         
         if a gt stareaor then begin
            ;;variable binning
-           junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 4*3)
+           junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 4)
            addoffset = snap_addoffset
            ss = 0.7
         endif else begin
            ss = 0.5
-           junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 95*3)
+           junkpar = binning_function(a, bin_level, pmapcorr,/set_nbins, n_nbins = 95)
            addoffset = 0.0
         endelse
         ;;use the time degraded corrfluxes
@@ -256,7 +266,7 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
               endfor
               ;stare_norm = mean(planethash[aorname(0),'corrflux'],/nan)
               pt = plot(ext_phasearr, ext_corrfluxarr/plot_corrnorm + addoffset, '1s', sym_size = 0.2,   $
-                        sym_filled = 1, color = 'grey', yrange = [0.989, 1.005], xrange = [0,10])
+                        sym_filled = 1, color = 'grey', yrange = [0.989, 1.005], xrange = [0,10]);[157,169]
               
               
               ;;need a new phasing for the snapshots
@@ -268,7 +278,7 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
               
               ;;overplot the snaps
 ;              snap_norm =  stare_norm
-              pt = plot(snap_phasearr - 763.0, snap_corrfluxarr/plot_corrnorm + addoffset, '1s', $
+              pt = plot(snap_phasearr - nphasesub, snap_corrfluxarr/plot_corrnorm + addoffset, '1s', $
                         sym_size = 0.5,   sym_filled = 1, color = colorarr[a], overplot = pt,$
                         xtitle = 'Number of Periods', ytitle = 'Normalized Corrected Flux')
               
@@ -278,8 +288,8 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
            (a gt stareaor):BEGIN
               
               snap_phasearr = [snap_phasearr,( (bin_bmjdarr-mjd_transit) / p_orbit )]
-              
-              pt = plot(( (bin_bmjdarr-mjd_transit) / p_orbit )- 763.0, bin_corrfluxp/plot_corrnorm + addoffset,$
+                            
+              pt = plot(( (bin_bmjdarr-mjd_transit) / p_orbit )- nphasesub, bin_corrfluxp/plot_corrnorm + addoffset,$
                         '1s', sym_size = 0.5,   sym_filled = 1, color = colorarr[a], overplot = pt)
               
               snap_corrfluxarr = [snap_corrfluxarr,bin_corrfluxp]
@@ -288,21 +298,27 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
            end
         endcase
      endfor
+     pt.save,'/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/snaps_paper/allfluxes_period_ch2_zoom1.eps'
   endif                         ; time_plot
   
 ;;-------------------------------------------------
   
+  if keyword_set(printout) then begin
   
-;print out some simple facts for others to play with.
-;  openw, outlun, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/wasp14_data.txt', /GET_LUN
-;  for a = 0, stopaor do begin
-;     for i = 0, n_elements(planethash[aorname(a),'xcen']) - 1 do begin
-;        printf, outlun, (planethash[aorname(a),'bmjdarr'])(i), (planethash[aorname(a),'phase'])(i), (planethash[aorname(a),'corrflux'])(i), (planethash[aorname(a),'corrflux'])(i), format = '(D, F10.3, F10.4, F10.4)'
-;     endfor
+     ;;print out some simple facts for others to play with.
+     openw, outlun, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/wasp14_snap_150226.txt', /GET_LUN
+     for a = 5, n_elements(aorname) - 1 do begin
+        for i = 0, n_elements(planethash[aorname(a),'phase']) - 1 do begin
+           printf, outlun, (planethash[aorname(a),'bmjdarr'])(i), (planethash[aorname(a),'phase'])(i), $
+                   (planethash[aorname(a),'corrflux_d'])(i), $
+                   format = '(D, F10.3, F10.4)'
+        endfor
   
-;  endfor
-;  free_lun, outlun
+     endfor
+     free_lun, outlun
   
+endif
+
 ;;-------------------------------------------------
   
   
