@@ -4,11 +4,10 @@ pro rms_binsize
   planetinfo = create_planetinfo()
   aorname= planetinfo['WASP-14b', 'aorname_ch2'] 
 
-  restore, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/WASP-14b_phot_ch2_2.25000.sav'
-
+  restore, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/WASP-14b_phot_ch2_2.25000_150226_bcdsdcorr.sav'
   readcol, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/wong/ch2.dat', model_phase, model_flux
 
-  for a =5, n_elements(aorname) -1 do begin
+  for a =0, 5 do begin; n_elements(aorname) -1 do begin
      corrflux =planethash[aorname(a),'corrflux_d']
      corrfluxerr =planethash[aorname(a),'corrfluxerr']
      phasearr = planethash[aorname(a),'phase']
@@ -19,53 +18,65 @@ pro rms_binsize
      ;;only consider those AORs with more than 20% of their data in
      ;;the sweet spot.
      if good gt 0.2*n_elements(corrflux) then begin
-        print, 'a', a, good, colorarr(a), mean(corrflux, /nan)
+        print, 'a', a, good, 0.2*n_elements(corrflux), ' ', colorarr(a), mean(corrflux, /nan)
 
         corrflux = corrflux(b)
         corrfluxerr = corrfluxerr(b)
         phasearr = phasearr(b)
- 
- 
+
+        ;; make a model light curve with the same *unbinned* phase as the
+        ;; snapshot data
+        modelarr = fltarr(n_elements(corrflux)
+        for im = 0, n_elements(corrflux) -1 do begin
+           index = closest(model_phase, phasearr(im))
+           modelarr[im] = model_flux(index)
+        endfor
+
+        ;;subtract model from the snapshot corrfluxes
+        delta = corrflux - modelarr
+
         bin_scale = 189         ; largest bin_scale = 1/3 of the number of data points
         rmsarr = fltarr(bin_scale + 1 )
         numberarr = findgen(n_elements(corrflux))
      
         for n = 1, bin_scale  do begin
+
            ;;bin up the snapshot data
            h = histogram(numberarr, OMIN=om, binsize = n, reverse_indices = ri)
-        
+           ;;setup some arrays
            bin_corrflux = dblarr(n_elements(h))
            bin_corrfluxerr = bin_corrflux
            bin_timearr = bin_corrflux
            bin_phasearr = bin_corrflux
            bin_modelarr = bin_corrflux
            
-           if n eq 1 then begin
+           ;; make a model light curve with the same phase as the
+           ;; snapshot data
+;           for im = 0, n_elements(bin_corrflux) -1 do begin
+;                  index = closest(model_phase, bin_phasearr(im))
+;                  bin_modelarr[im] = model_flux(index)
+;           endfor
+
+
+           if n eq 1 then begin  ; no binning
               bin_timearr = numberarr
-              bin_corrflux = corrflux
+              bin_corrflux = corrflux 
               bin_corrfluxerr = corrfluxerr
               bin_phasearr = phasearr
-              ;;only fit the function for n = 1, t`hen for the other
-              ;;binnings, re-scale
-              start = [1E-7,mean(corrflux, /nan)]
-              result= MPFITFUN('linear',bin_timearr,bin_corrflux, bin_corrfluxerr, start,/Quiet) 
-              
-           endif else begin
+               
+           endif else begin  ; for the binning scales
               c = 0
               for j = 0L, n_elements(h) - 1 do begin
                  
                  if (ri[j+1] gt ri[j] + 1)  then begin ;require 2 elements in the bin
+                    ;;what is the mean flux in each bin
                     meanclip, corrflux[ri[ri[j]:ri[j+1]-1]], meanflux, sigmaflux
                     bin_corrflux[c] = meanflux
                     bin_corrfluxerr[c] = sigmaflux
                     meantimearr = mean(numberarr[ri[ri[j]:ri[j+1]-1]])
                     bin_timearr[c] = meantimearr
                     meanphasearr = mean(phasearr[ri[ri[j]:ri[j+1]-1]])
-                    bin_phasearr[c] = meanphasearr
-;              icorrdataerr = corrfluxerrp[rip[rip[j]:rip[j+1]-1]]
-;              icorrdata = corrfluxp[rip[rip[j]:rip[j+1]-1]]
-;              bin_corrfluxerrp[cp] =  sqrt(total(icorrdataerr^2))/ (n_elements(icorrdataerr))
-                    
+                    bin_phasearr[c] = meanphasearr                    
                     c = c + 1
                  endif
               endfor
@@ -75,41 +86,19 @@ pro rms_binsize
               bin_phasearr = bin_phasearr[0:c-1]
               
            endelse
-           
-           ;; make a model light curve with the same phase as the
-           ;; snapshot data
-           for im = 0, n_elements(bin_corrflux) -1 do begin
-                  index = closest(model_phase, bin_phasearr(im))
-                  bin_modelarr[im] = model_flux(index)
-;             mp = where(bin_phasearr(im) gt (model_phase - 5E-5) and bin_phasearr(im) lt (model_phase + 5E-5),num_mp)
-;              if num_mp eq 0 then begin
-;                 print, 'hmmm no phase matches'
-;                 print, 'n corr', n_elements(corrflux)
-;                 print, bin_phasearr(im)
-;                 ;;ok but I should be able to find the nearest in
-;                 ;;phase and use that, the gaps aren't that big;;
-;
-;                 ;;use function closest - do this for all of these in
-;                 ;;                       fact....
-;              endif
-;              
-;              if num_mp eq 1 then bin_modelarr[im] = model_flux(mp)
-;              if num_mp gt 1 then begin
-;                 bin_modelarr[im] = mean(model_flux(mp))
-;              endif
-              
-           endfor
+
            
            
-           residual = bin_corrflux -  bin_modelarr
-           ;;residual = bin_corrflux -  (result(0)*bin_timearr +result(1)
-           ;;                          + 0.01)  ;linear fit to the snapshots
-           rmsarr(n) = stddev(residual)
+           ;;now subtract the model from the binned snapshot data
+;           residual = bin_corrflux -  bin_modelarr
+;           rmsarr(n) =  stddev(residual)
+
+
         endfor
-        
-        
-        p2 = plot(findgen(n_elements(rmsarr)), rmsarr/ rmsarr(1),/xlog, /ylog, overplot = p2, $
-                  color = colorarr(a), yrange = [1E-2,1], xrange =[1, 200], xtitle = 'Number of frames',$
+ 
+
+        p2 = plot(findgen(n_elements(rmsarr)), rmsarr, /xlog, /ylog, overplot = p2, $   ;/ rmsarr(1)
+                  color = colorarr(a),  xrange =[1, 200], xtitle = 'Number of frames',$  ;yrange = [1E-2,1],
                   axis_style = 1, ytitle = 'Normalized Residual RMS')
         xaxis = axis('x', location = [0,max(p2.yrange)], coord_transform = [0, .0337],target = p2, textpos = 1, title = 'Binning Scale (Min.)')
         xaxis = axis('y', location = [max(p2.xrange),0], target = p2, tickdir = 0, textpos = 0, showtext = 0)
@@ -135,7 +124,7 @@ pro rms_binsize
   sigma_poisson = sqrt(source_electrons)
   y =  (sigma_poisson / root_n) / source_electrons
   
-  p2 = plot( bin_scale, y/y(0), thick = 3,  overplot = p2)
+  p2 = plot( bin_scale, y, thick = 3,  overplot = p2)  ;/y(0)
 ;now add root2 * root N
   y2 =  1.5 * y/y(0)
 ;  p2 = plot( bin_scale, y2, thick = 3, linestyle = 2, color = 'grey', overplot = p2)
@@ -148,7 +137,30 @@ pro rms_binsize
 
   yw = [3.866e-3, 3.280e-3, 1.378e-3, 8.197e-4, 5.484e-4, 4.971e-4, 4.452e-4, 4.047e-4, 3.668e-4, 3.300e-4, 2.996e-4, 2.278e-4, 2.091e-4, 1.920e-4, 1.799e-4, 1.684e-4, 1.541e-4, 1.433e-4, 1.341e-4]
 
-  p2 = plot(xw, yw/ yw(0), thick = 3, linestyle = 2, overplot = p2)
+  p2 = plot(xw, yw, thick = 3, linestyle = 2, overplot = p2) ;/ yw(0)
 
 end
 
+
+       
+;             mp = where(bin_phasearr(im) gt (model_phase - 5E-5) and bin_phasearr(im) lt (model_phase + 5E-5),num_mp)
+;              if num_mp eq 0 then begin
+;                 print, 'hmmm no phase matches'
+;                 print, 'n corr', n_elements(corrflux)
+;                 print, bin_phasearr(im)
+;                 ;;ok but I should be able to find the nearest in
+;                 ;;phase and use that, the gaps aren't that big;;
+;
+;                 ;;use function closest - do this for all of these in
+;                 ;;                       fact....
+;              endif
+;              
+;              if num_mp eq 1 then bin_modelarr[im] = model_flux(mp)
+;              if num_mp gt 1 then begin
+;                 bin_modelarr[im] = mean(model_flux(mp))
+;              endif
+              
+             ;;only fit the function for n = 1, t`hen for the other
+              ;;binnings, re-scale
+;              start = [1E-7,mean(corrflux, /nan)]
+;              result= MPFITFUN('linear',bin_timearr,bin_corrflux, bin_corrfluxerr, start,/Quiet) 
