@@ -52,8 +52,10 @@ pro noise_levels
 
   p = plot( bin_scale, sigma_poisson / root_n, thick = 3, xtitle = 'Binning Scale (N frames)', ytitle = 'Noise (Electrons)', axis_style = 1,/xlog,/ylog, xrange = [1, 1000], margin = 0.2, yrange = [1.0, 20000.])
   t = text(3., 200., 'Source Poisson', color = 'black', /current,/data)
-  xaxis = axis('x', location = [0, 4.25], coord_transform = [0, 2/60.],target = p, textpos = 1, title = 'Binning Scale (Min.)')
-  xaxis = axis('y', location = [2.9699,0], coord_transform = [0, 1.],target = p, tickdir = 0, textpos = 0, showtext = 0)
+  xaxis = axis('x', location = [1, 18100.], coord_transform = [0, 2/60.],target = p, textpos = 1, title = 'Binning Scale (Min.)')
+  xaxis = axis('y', location = [925.,1.], coord_transform = [0, 1.],target = p, tickdir = 0, textpos = 0, showtext = 0)
+;  xaxis = axis('x', location = [0, 4.25], coord_transform = [0, 2/60.],target = p, textpos = 1, title = 'Binning Scale (Min.)')
+;  xaxis = axis('y', location = [2.9699,0], coord_transform = [0, 1.],target = p, tickdir = 0, textpos = 0, showtext = 0)
 
 ;-----------------
 ;readnoise
@@ -89,16 +91,16 @@ pro noise_levels
   
   bias_pattern = fltarr(n_elements(bin_scale)) + bias_pattern
   p = plot(bin_scale, bias_pattern, thick = 3, linestyle = 2, color = 'slate grey',/overplot, axis_style = 1)
-  t = text(80., 150., 'Bias Pattern', color = 'slate grey', /current,/data)
+  ;t = text(80., 177., 'Bias Pattern', color = 'slate grey', /current,/data)
 
 ;-----------------
 ;latent build-up, or left over from previous observation?
 ;from aperture photometry on staring mode darks diff imaging 
-  latent = 300                    ; worse of the two examples we have (ch1) electrons
+  latent = 175                   ; worse of the two examples we have (ch1) electrons
   print, 'latent signal', latent
   latent = fltarr(n_elements(bin_scale)) + latent
   p = plot(bin_scale, latent, thick = 3, linestyle = 2, color = 'slate grey',/overplot, axis_style = 1)
-  t = text(80., 300., 'latent', color = 'slate grey', /current,/data)
+  t = text(50., 200., 'Latent & Bias Pattern', color = 'slate grey', /current,/data)
 
 ;-----------------
 ;pixel phase effect - sawtooth
