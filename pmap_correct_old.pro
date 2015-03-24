@@ -1,57 +1,3 @@
-;+
-; NAME: PMAP_CORRECT.PRO
-;
-; PURPOSE:  Correct IRAC observed aperture photometry-derived fluxes from the post-cryogenic, or warm mission (IRACPC) for the intra-pixel response, using the gain map dataset of the 3.6 micron (channel 1) and 4.5 micron (channel 2) subarray “sweet spots”. This is different from iracpc_pmap_corr in that it does not use interpolation to make a map of the gain variation across the chip, which should improve accuracy.  Instead, for each data point with independent values x, y, NP, XFWHM, YFWHM, it finds the nearest neighbors in the gain map dataset, and uses those neighbors to generate a correction to the photometry.  The definition of nearest neighbor is chosen by the user to be those data points nearest in (X,Y) position, or nearest in the combination of (X,Y, and NP).
-;
-; CATEGORY:  Photometry, corrections
-;
-; CALLING SEQUENCE:  corrected_flux = PMAP_CORRECT ( X, Y, $
-;          OBSERVED_FLUX, CHANNEL, XFWHM, YFWHM, /POSITION_ONLY, $
-;          NP = np, FUNC = func, CORR_UNC = corr_unc, /FULL, DATAFILE = datafile, NNEAREST = nnearest, $
-;          MAX_DIST = max_dist, /VERBOSE, OCC_MIN = occ_min, OCCUPATION = occupation)
-;
-; INPUTS:
-;
-;
-; OPTIONAL INPUTS:
-;
-;
-;
-; KEYWORD PARAMETERS:
-;
-;
-;
-; OUTPUTS:
-;
-;
-;
-; OPTIONAL OUTPUTS:
-;
-;
-;
-; COMMON BLOCKS:
-;
-;
-;
-; SIDE EFFECTS:
-;
-;
-;
-; RESTRICTIONS:
-;
-;
-;
-; PROCEDURE:
-;
-;
-;
-; EXAMPLE:
-;
-;
-;
-; MODIFICATION HISTORY:
-;
-;-
 PRO pmap_correct_interpolate_single,x,y,ch,func,f_interp,f_interp_unc,xfwhm,yfwhm,NNEAREST=nnearest,POSITION_ONLY=position_only,MAX_DIST=max_dist,$
                                     NP=np,OCC_MIN=occ_min,OCCUPATION=occupation
    COMMON pmap_data,x_pmap,y_pmap,f_pmap,np_pmap,xfwhm_pmap,yfwhm_pmap,func_pmap,scale,sigscale
@@ -122,7 +68,7 @@ RETURN
 END
 FUNCTION pmap_correct,x,y,f,ch,xfwhm,yfwhm,POSITION_ONLY=position_only,NP=NP,FUNC=func,CORR_UNC=corr_unc,$
                       FULL=full,DATAFILE=datafile,NNEAREST=nnearest,MAX_DIST=max_dist,Verbose=verbose,$
-                      OCC_MIN=occ_min,OCCUPATION=occupation
+                      OCC_MIN=occ_min,OCCUPATION=occupation,USE_PMAP=use_pmap,R_USE=r_use
 ;;  Correct photometric data using the pmap measurements, with independent variables (X,Y,XFWHM,YFWHM)
 ;;  Set NNEAREST= the number of nearest neighbors to use in the multidimensional space when computing the correction.  Default is 50.                        
 ;;  Use "NP=" keyword and input the values of noise pixels to use (X,Y,NP) to determine correction, instead of (X,Y,XFWHM,YFWHM)
@@ -133,6 +79,8 @@ FUNCTION pmap_correct,x,y,f,ch,xfwhm,yfwhm,POSITION_ONLY=position_only,NP=NP,FUN
 ;;  Set OCC_MIN = the minimum (spatial) occupation number to be obtained by the NNEAREST points.  This is a further constraint on the proximity
 ;;                of pmap data points. Default is 20.  Setting keyword OCCUPATION will return the array of occupation values.  Set to 0 to 
 ;;                turn off this constraint.
+;;  Set R_USE = the radius of the photometric aperture used on the dataset.  This will pick out an aperture in the pmap dataset 
+;;               (if multiple apertures exist).  
 ;;
 ;;; Common block for pmap data set:
    COMMON pmap_data,x_pmap,y_pmap,f_pmap,np_pmap,xfwhm_pmap,yfwhm_pmap,func_pmap,scale,sigscale
@@ -150,6 +98,31 @@ FUNCTION pmap_correct,x,y,f,ch,xfwhm,yfwhm,POSITION_ONLY=position_only,NP=NP,FUN
       IF keyword_set(VERBOSE) THEN print,'Using pmap data file '+use_file 
    ENDIF ELSE use_file = datafile
    RESTORE,use_file
+   n_aper_pmap = N_ELEMENTS(r_aper)
+   IF KEYWORD_SET(R_USE) THEN BEGIN
+      iaper_pmap = WHERE(r_use[0] EQ r_aper,/NULL)
+      IF ~N_ELEMENTS(iaper_pmap) THEN BEGIN
+         PRINT,'Aperture '+STRING(r_use[0],format='(f4.2)')+' px not found in pmap dataset.  Exiting.'
+         RETURN,!NULL
+      ENDIF
+      iaper_pmap = iaper_pmap[0]
+   ENDIF ELSE BEGIN
+      iaper_pmap = 0
+   ENDELSE
+   IF N_ELEMENTS(USE_PMAP) NE 0 THEN BEGIN
+      x_pmap = x_pmap[use_pmap]
+      y_pmap = y_pmap[use_pmap]
+      f_pmap = f_pmap[use_pmap,iaper_pmap[0]]
+      np_pmap = np_pmap[use_pmap]
+      xfwhm_pmap = xfwhm_pmap[use_pmap]
+      yfwhm_pmap = yfwhm_pmap[use_pmap]
+      func_pmap = func_pmap[use_pmap,iaper_pmap[0]]
+      scale = scale[iaper_pmap[0]]
+   ENDIF ELSE BEGIN
+      f_pmap = f_pmap[*,iaper_pmap]
+      func_pmap = func_pmap[*,iaper_pmap]
+      scale = scale[iaper_pmap]
+   ENDELSE
    
    ndata = N_ELEMENTS(f)
    sz = SIZE(f)
@@ -176,10 +149,9 @@ FUNCTION pmap_correct,x,y,f,ch,xfwhm,yfwhm,POSITION_ONLY=position_only,NP=NP,FUN
    corr_unc = MAKE_ARRAY(SIZE=sz,VALUE=!VALUES.F_NAN)
    f_pmap_interp = DBLARR(ndata)
    f_pmap_interp_unc = DBLARR(ndata)
-  
+   
 ;;; Loop through the input data
    igood = WHERE(FINITE(F) AND FINITE(x) AND FINITE(y),ngood)
-
    IF keyword_set(verbose) THEN Print,'Attempting to correct '+STRN(ngood)+' out of '+STRN(ndata)+' data points'
    CASE 1 OF 
       KEYWORD_SET(POSITION_ONLY): BEGIN
@@ -193,7 +165,7 @@ FUNCTION pmap_correct,x,y,f,ch,xfwhm,yfwhm,POSITION_ONLY=position_only,NP=NP,FUN
          ENDFOR
       END
       N_ELEMENTS(NP) EQ ndata: BEGIN
-         FOR i = 0,ngood-1 DO BEGIN ;JK changed this from ndata to ngood
+         FOR i = 0,ngood-1 DO BEGIN
             IF KEYWORD_SET(verbose) THEN Iterwait,i,100,1000,Text='Completed '
             pmap_correct_interpolate_single,x[igood[i]]-xfov,y[igood[i]]-yfov,channel[igood[i]],func[igood[i]],fi,fiu,NP=np[igood[i]],$
                                             NNEAREST=nnearest,MAX_DIST=max_dist,OCCUPATION=occi,OCC_MIN=occ_min
@@ -203,7 +175,7 @@ FUNCTION pmap_correct,x,y,f,ch,xfwhm,yfwhm,POSITION_ONLY=position_only,NP=NP,FUN
          ENDFOR
       END
       ELSE: BEGIN
-         FOR i = 0,ngood-1 DO BEGIN   ;JK changed this from ndata to ngood
+         FOR i = 0,ngood-1 DO BEGIN
             IF KEYWORD_SET(verbose) THEN Iterwait,i,100,1000,Text='Completed '
             pmap_correct_interpolate_single,x[igood[i]]-xfov,y[igood[i]]-yfov,channel[igood[i]],func[igood[i]],fi,fiu,xfwhm[igood[i]],yfwhm[igood[i]],$
                                             NNEAREST=nnearest,MAX_DIST=max_dist,OCCUPATION=occi,OCC_MIN=occ_min

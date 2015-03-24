@@ -81,6 +81,7 @@ FUNCTION pmap_correct,x,y,f,ch,xfwhm,yfwhm,POSITION_ONLY=position_only,NP=NP,FUN
 ;;                turn off this constraint.
 ;;  Set R_USE = the radius of the photometric aperture used on the dataset.  This will pick out an aperture in the pmap dataset 
 ;;               (if multiple apertures exist).  
+;;  Set USE_PMAP = the indices to the pmap dataset that you would like to use to correct the data.
 ;;
 ;;; Common block for pmap data set:
    COMMON pmap_data,x_pmap,y_pmap,f_pmap,np_pmap,xfwhm_pmap,yfwhm_pmap,func_pmap,scale,sigscale
