@@ -77,7 +77,7 @@ pro plot_exoplanet_phase, planetname, bin_level, apradius, chname, function_fit 
 ;---------------
   ;;read in the photometry save file
   dirname = strcompress(basedir + planetname +'/')                                                 
-  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150309_bcdsdcorr_imainLD.sav',/remove_all) ;
+  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150226_bcdsdcorr.sav',/remove_all) ;
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)
@@ -92,7 +92,7 @@ pro plot_exoplanet_phase, planetname, bin_level, apradius, chname, function_fit 
   bin_corrfluxerrfinal = fltarr(n_elements(aorname))
 
  ;for debugging: skip some AORs
-  startaor =  0                 ;  n_elements(aorname) -29
+  startaor =  5; 0                 ;  n_elements(aorname) -29
   stopaor =   n_elements(aorname) - 1
   mean_corrfluxarr = fltarr(stopaor - startaor + 1,/nozero)
   mean_dsweetarr = mean_corrfluxarr
@@ -126,7 +126,7 @@ pro plot_exoplanet_phase, planetname, bin_level, apradius, chname, function_fit 
      ;;if planetname eq 'WASP-14b' then 
      snap_addoffset = (plot_corrnorm - snap_corrnorm) / plot_corrnorm
   endif
-
+print, 'snap_addoffset', snap_addoffset
 
 ;--------------------------------------------
 
@@ -278,7 +278,8 @@ pro plot_exoplanet_phase, planetname, bin_level, apradius, chname, function_fit 
 
         ;overplot the Wong et al. fit to the staring mode data
         readcol, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/wong/ch2.dat', w_phase, w_model
-        pu = plot(w_phase, w_model + 0.0016, thick = 4, overplot = pu, color = 'green')
+        w_model = w_model + 0.0016
+        pu = plot(w_phase, w_model , thick = 4, overplot = pu, color = 'green') ;+ 0.0016
 
         ;;make some residual plots
         ;;wong model
@@ -287,7 +288,7 @@ pro plot_exoplanet_phase, planetname, bin_level, apradius, chname, function_fit 
            wong_close[nbp] = closest(w_phase, bin_all_phasep(nbp))
         endfor
         wmodel_snaps = w_model(wong_close)
-        resid_wong = ((bin_all_corrfluxp/plot_corrnorm)) - wmodel_snaps + 0.0025
+        resid_wong = ((bin_all_corrfluxp/plot_corrnorm)) - wmodel_snaps + 0.0018  ; .0025
         pun = plot(bin_all_phasep, resid_wong, '1s', sym_size = 0.5,   sym_filled = 1, $
                    color = 'green', yrange = [-0.004, 0.004],xtitle = 'Orbital Phase',$
                   position = [0.2, 0.15, 0.9, 0.35],/current, ytitle = 'Residuals', $
@@ -299,7 +300,7 @@ pro plot_exoplanet_phase, planetname, bin_level, apradius, chname, function_fit 
            ca08_close[nbp] = closest(phase, bin_all_phasep(nbp))
         endfor
         model_snaps = rel_flux(ca08_close)
-        resid_ca08 = ((bin_all_corrfluxp/plot_corrnorm)) - model_snaps +0.004
+        resid_ca08 = ((bin_all_corrfluxp/plot_corrnorm)) - model_snaps + 0.0018; 0.004
         pun = plot(bin_all_phasep, resid_ca08, '1s', sym_size = 0.5,   sym_filled = 1, $
                    color = 'sky blue',  overplot = pun)
 
