@@ -2,7 +2,7 @@ pro medcombine
 
 ;quick code to median combine a stack of images
 
-cd, '/Users/jkrick/Downloads/aorkey-45957376-1-selected_AORs/r45957376/ch2/bcd/'
+cd, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/latent/r48724480/ch2/bcd/'
 command  = strcompress( 'ls SPITZER*_bcd.fits > bcdlist.txt')
 spawn, command
 readcol,'bcdlist.txt',fitsname, format = 'A', /silent
@@ -20,6 +20,6 @@ endfor
 ;medcombine = median(bigim, dimension = 4)
 medcombine = median(bigim, dimension = 3)
 help, bigim
-fits_write, '/Users/jkrick/Downloads/aorkey-45957376-1-selected_AORs/r45957376/ch2/medcombine.fits', medcombine, header
+fits_write, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/latent/r48724480/ch2/medcombine.fits', medcombine, header
 
 end

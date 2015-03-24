@@ -499,6 +499,24 @@ chname = 0
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
+  planetname = 'upsandb'
+  ra_ref = 24.199343
+  dec_ref = 41.405457
+  aorname_ch2= ['r50986240',	'r50985728',	'r50985472',	'r50984960',	'r50984448',	'r50983936',	'r50983424',	'r50982656',	'r50982400',	'r50981632',	'r50981376',	'r50981120',	'r50980864',	'r50980608',	'r50980352',	'r50980096',	'r50982144',	'r50981888',	'r50979840',	'r50979584',	'r50989568',	'r50989312',	'r50989056',	'r50988288',	'r50988544',	'r50988800',	'r50988032',	'r50987776',	'r50987520',	'r50987264',	'r50987008',	'r50986752',	'r50986496']
+
+  basedir = '~/external/irac_warm/' 
+  utmjd_center = 0.   ; doesn't transit, so this isn't defined
+  transit_duration = 0.; doesn't transit, so this isn't defined
+  period = 4.61711
+  intended_phase = 0.5
+  exptime = .02
+  stareaor = 0
+  plot_norm = 1.
+  Plot = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
   planetname = 'HAT-P-8'
   ra_ref = 343.0414
   dec_ref = 35.447403

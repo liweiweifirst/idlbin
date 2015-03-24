@@ -23,6 +23,7 @@ pro pipeline_version
     darkname = sxpar(header, 'SKDKRKEY')
     darkepid = sxpar(header, 'SDRKEPID')
     campaign = sxpar(header, 'CAMPAIGN')
+    print, campaign, '  ', aorname(a)
 
     if file_test(strcompress('/Volumes/iracdata/flight/IWIC/S19repro/darks/' + campaign + '/cal/',/remove_all)) gt 0 then begin
        ;;compare this dark from the SHA to the S19.1 dark on iracdata

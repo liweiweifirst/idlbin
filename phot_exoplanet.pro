@@ -18,8 +18,11 @@ case apradius of
    end
    2.25: begin
       apval = 1
-      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_150309.sav'
-;      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_r2p25_s3_7_sd_0p1s_x4_sdark_141209.sav'
+      if chname eq '2' then begin
+         pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_150226.sav'
+         ;restore, '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_indices_150309.sav'
+      endif
+
       if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p25_s3_7_0p4s_140716.sav'
    end
    2.5: begin
@@ -65,12 +68,18 @@ if planetname eq '55Cnc' then exosystem = '55 Cnc e'
 if planetname eq 'HD209458' then exosystem = 'HD 209458 b'
 if planetname eq 'Kepler-5' then exosystem = 'Kepler-5 b'
 if planetname eq 'Kepler-17' then exosystem = 'Kepler-17 b'
+if planetname eq 'upsandb' then exosystem = 'upsilon And b'
 
 ;print, exosystem, 'exosystem'
 if planetname eq 'WASP-52b' then teq_p = 1315
 if planetname eq 'HD 7924 b' then begin
    inclination = 85.
    rp_rstar = 0.001
+endif
+if planetname eq 'upsandb' then begin
+   inclination = 90.
+   rp_rstar = 0.001  ;made up
+   mjd_transit = 0.
 endif
 
 if chname eq '2' then lambdaname  = '4.5'
@@ -95,6 +104,13 @@ endif else begin
    utmjd_center = planetinfo[planetname, 'utmjd_center']
    period = planetinfo[planetname, 'period']
 endelse
+
+if planetname eq 'upsandb' then begin
+   ;proper motions must be the problem, this is the easy fix
+    ra_ref = 24.198512
+   dec_ref = 41.404099
+endif
+
 ;---------------
 
 ;print, 'ut_mjd',utmjd_center
@@ -112,7 +128,7 @@ for a =startaor,  stopaor do begin
    dir = dirname+ string(aorname(a) ) 
    CD, dir                      ; change directories to the correct AOR directory
 ;   command  = strcompress( 'find ch'+chname+"/bcd -name 'sdcorrSPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
-   command  = strcompress( 'find ch'+chname+"/bcd -name 'sdcorrSPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
+   command  = strcompress( 'find ch'+chname+"/bcd -name 'SPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
 ;   print, 'command', command
    spawn, command
    command2 =  strcompress('find ch'+chname+"/bcd -name '*bunc.fits' > "+dirname + 'bunclist.txt')
@@ -341,10 +357,14 @@ for a =startaor,  stopaor do begin
 ;correction based on those neighbors.  
       if keyword_set(hybrid) then begin
                                 ;use hybrid technique with pmap dataset and nn techniques
-;         print, 'starting corrflux', x_center[0], y_center[0], abcdflux[0], ch, xfwhm[0], yfwhm[0], npcentroids[0]
+;         print, 'starting corrflux', x_center[0], y_center[0],
+;         abcdflux[0], ch, xfwhm[0], yfwhm[0], npcentroids[0]
+         ;;read in a list of indices for rejecting some of the pmap
+         ;;data points
+
          corrflux = pmap_correct(x_center,y_center,abcdflux,ch,xfwhm,yfwhm,NP = npcentroids,$
                                  FUNC=fs,CORR_UNC=corrfluxerr, DATAFILE=pmapfile,NNEAREST=nn, $
-                                 R_USE = apradius, USE_PMAP = IZERO)
+                                 R_USE = apradius, USE_PMAP = IMAIN) ;,/VERBOSE
 ;         print, 'corrflux', corrflux[0:10]
          ;corrflux = pmap_correct(x_center,y_center,abcdflux,ch,npcentroids,occdata, corr_unc = corrfluxerr, func = fs,$
          ;                       datafile =pmapfile,/threshold_occ,/use_np) 
@@ -492,7 +512,7 @@ if keyword_set(breatheap) then begin
    savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav')
 endif else begin
    pmapname = strmid(pmapfile, 9, 6,/reverse_offset)
-   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_' + pmapname + '_bcdsdcorr_izeroLD.sav',/remove_all)
+   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_' + pmapname + '.sav',/remove_all)
 endelse
 
 save, planethash, filename=savename

@@ -3,19 +3,15 @@ pro peakpix
   ;aorname = ['r40269056', 'r40269312'] ;ch2  ;wasp18
 ;  aorname = ['r45426688',  'r45428224',  'r45428480',  'r45428736',  'r45428992'] ;ch2 wasp14
 ; aorname = [ 'r45428992', 'r45428736', 'r45428480', 'r45428224', 'r45426688', 'r45838592', 'r45840128', 'r45841408', 'r45842176', 'r45842944', 'r45844480', 'r45845248', 'r45846016', 'r45846784', 'r45839104', 'r45840896', 'r45841664', 'r45842432', 'r45843200', 'r45844736', 'r45845504', 'r45846272', 'r45847040', 'r45839616', 'r45841152', 'r45841920', 'r45842688', 'r45844224', 'r45844992', 'r45845760', 'r45846528']  ;snapshots and first 5 are ch2 stares
-  aorname = ['r42046720'] ;one of the GJ1214 AORs.
+  aorname = ['r50986240'] ;one of the GJ1214 AORs.
 
   for a = 0, n_elements(aorname) - 1 do begin
      print, 'working on ',aorname(a)
-     dir = '/Users/jkrick/irac_warm/pcrs_planets/GJ1214/'+ string(aorname(a) ) 
+     dir = '/Users/jkrick/external/irac_warm/upsandb/'+ string(aorname(a) ) 
      CD, dir                    ; change directories to the correct AOR directory
-     command  =  "find ch2/raw -name '*_dce.fits' > /Users/jkrick/irac_warm/pcrs_planets/GJ1214/rawlist.txt"
+     command  =  "find ch2/raw -name '*_dce.fits' > /Users/jkrick/external/irac_warm/upsandb/rawlist.txt"
      spawn, command
-;     command2 =  "find  ch2/bcd -name '*bunc.fits' > /Users/jkrick/irac_warm/wasp18/bunclist.txt"
-;     spawn, command2
-
-     readcol,'/Users/jkrick/irac_warm/pcrs_planets/GJ1214/rawlist.txt',fitsname, format = 'A', /silent
-     ;readcol,'/Users/jkrick/irac_warm/pcrs_planets/wasp14/bunclist.txt',buncname, format = 'A', /silent
+     readcol,'/Users/jkrick/external/irac_warm/upsandb/rawlist.txt',fitsname, format = 'A', /silent
      peakpixarr = fltarr(n_elements(fitsname))
      j = 0
 
@@ -39,7 +35,7 @@ pro peakpix
      endfor
   peakpixarr = peakpixarr[0:j-1]
   print, mean(peakpixarr), median(peakpixarr)
-;  plothist, peakpixarr, xhist, yhist, bin = 10,/fill, xrange = [1000, 4000],/noplot
-;  p = plot(xhist, yhist)
+  plothist, peakpixarr, xhist, yhist, bin = 100,/noplot,/norprint
+  p = barplot(xhist, yhist, fill_color = 'sky blue')
   endfor
   end
