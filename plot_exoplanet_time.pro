@@ -77,7 +77,7 @@ pro plot_exoplanet_time, planetname, bin_level, apradius, chname, line_fit = lin
 ;---------------
   ;;read in the photometry save file
   dirname = strcompress(basedir + planetname +'/')                                                 
-  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150309_bcdsdcorr_imainLD.sav',/remove_all) ;
+  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150226_bcdsdcorr.sav',/remove_all) ;
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)
@@ -133,6 +133,22 @@ pro plot_exoplanet_time, planetname, bin_level, apradius, chname, line_fit = lin
 
 
 ;--------------------------------------------
+;setup plot for calstar
+  for a = startaor,stopaor do begin
+     ncorr = where(finite([ planethash[aorname(a),'corrflux']]) gt 0, corrcount,/L64)
+     if corrcount gt 0.2*n_elements([planethash[aorname(a),'flux']]) then pmapcorr = 1 else pmapcorr = 0
+     if pmapcorr gt 0 then begin
+        timea = planethash[aorname(a),'timearr']
+        if a eq startaor then timeazero = timea(0)
+        timea = (timea - timeazero)/60./60.
+        corrfluxa = planethash[aorname(a),'corrflux_d']
+        
+        pu = plot(timea, corrfluxa + 0.011,  '1s', sym_size = 0.2,  $
+                  symbol = plotsym, sym_filled = 1,color =colorarr[a] ,xtitle = 'Time(Hours)',$
+                  title = planetname, ytitle = 'Pmap Corrected Flux', $
+                  yrange = [0.98, 1.02], overplot =pu) 
+     endif
+  endfor
 
 
   for a = startaor,stopaor do begin
@@ -200,12 +216,12 @@ pro plot_exoplanet_time, planetname, bin_level, apradius, chname, line_fit = lin
                    yrange = [1.9, 2.3], overplot = pxf)
         pyf = plot(xarr, bin_yfwhm, '1s',xtitle = 'Time(Hours)', ytitle = 'YFWHM', _extra = extra, $
                    yrange = [1.9, 2.3], overplot = pyf)
-        
+        pr = errorplot(xarr, bin_flux/plot_norm, bin_fluxerr/plot_norm,  '1s', xtitle = 'Time(Hours)', $
+                       ytitle = 'Normalized Flux', yrange = setynormfluxrange, sym_size = 0.7, sym_filled = 1, $
+                       color = colorarr[a], errorbar_color = colorarr[a], overplot = pr)
+
         
      endif   ;;keyword all_plots
-     pr = errorplot(xarr, bin_flux/plot_norm, bin_fluxerr/plot_norm,  '1s', xtitle = 'Time(Hours)', $
-                    ytitle = 'Normalized Flux', yrange = setynormfluxrange, sym_size = 0.7, sym_filled = 1, $
-                    color = colorarr[a], errorbar_color = colorarr[a], overplot = pr)
 
      ;;work on the corrflux snap normalization being different than
      ;;the stare normalization
@@ -216,11 +232,24 @@ pro plot_exoplanet_time, planetname, bin_level, apradius, chname, line_fit = lin
      endif
 
      if pmapcorr eq 1 then begin
-        pu = errorplot(xarr, bin_corrfluxp/plot_corrnorm + snap_addoffset, $
-                       bin_corrfluxerrp/plot_corrnorm,  '1s', sym_size = 0.7,  $
-                       symbol = plotsym, sym_filled = 1,color =colorarr[a] ,xtitle = 'Time(Hours)',$
-                       errorbar_color =  colorarr[a], title = planetname, ytitle = 'Pmap Corrected Flux', $
-                       yrange = setyrange, overplot =pu) 
+        timea = planethash[aorname(a),'timearr']
+        if a eq startaor then timeazero = timea(0)
+        timea = (timea - timeazero)/60./60.
+        corrfluxa = planethash[aorname(a),'corrflux_d']
+
+;        pu = plot(timea, corrfluxa + 0.01,  '1s', sym_size = 0.2,  $
+;                       symbol = plotsym, sym_filled = 1,color =colorarr[a] ,xtitle = 'Time(Hours)',$
+;                        title = planetname, ytitle = 'Pmap Corrected Flux', $
+;                       yrange = [0.98, 1.02], overplot =pu) 
+        pu = plot(xarr, bin_corrfluxp/plot_corrnorm + snap_addoffset, $
+                         '1s', sym_size = 1.0,  $
+                       symbol = plotsym, sym_filled = 1,color = 'black',$
+                       errorbar_color =  'black', overplot =pu) 
+;        pu = errorplot(xarr, bin_corrfluxp/plot_corrnorm + snap_addoffset, $
+;                       bin_corrfluxerrp/plot_corrnorm,  '1s', sym_size = 0.7,  $
+;                       symbol = plotsym, sym_filled = 1,color =colorarr[a] ,$
+;                       errorbar_color =  colorarr[a], title = planetname,  $
+;                       yrange = setyrange, overplot =pu) 
         
      endif
           
