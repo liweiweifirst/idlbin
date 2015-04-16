@@ -1,12 +1,17 @@
 pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot = timeplot
 ;example call plot_exoplanet, 'wasp15', 2*63L
 
-COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm
+  COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm
 
- colorarr = ['gray', 'gray','gray','gray','gray','burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']
+  if planetname eq 'WASP-14b' then begin
+     colorarr = ['gray', 'gray','gray','gray','gray','burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']
+   
+  endif else begin
+     colorarr = ['burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']
 
 ;colorarr = ['blue', 'red','black','green','grey','purple', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ]
 ;
+  endelse
 
 
 ;run code to read in all the input planet parameters
@@ -23,7 +28,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
 ;  plot_corrnorm = planetinfo[planetname, 'plot_corrnorm']
   
   dirname = strcompress(basedir + planetname +'/');+'/hybrid_pmap_nn/')
-  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
+  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150226.sav',/remove_all)
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)
@@ -95,7 +100,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
         
      endif else begin
         plotx = bin_phase
-        setxrange = [-0.5,0.5]
+        setxrange = [0.,1.]; [-0.5,0.5]
         ending = 'phase'
      endelse
      
@@ -104,7 +109,7 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
      corrnormoffset = 0         ;0.02
      corroffset = 0.001
      setynormfluxrange = [0.98, 1.01] ;[0.97, 1.005]
-     
+;     setxrange = [-1, 18]
      if a eq startaor then begin ; for the first AOR
                                 ;set the normalization values from the
                                 ;medians of the first AOR...is close enough
@@ -113,7 +118,6 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
         bkgd_norm =  mean(bin_bkgd,/nan)
 ;           print, 'bin_xcen', bin_xcen
         print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
-        
         
         pp = plot(plotx, bin_xcen, '1s',  $ ;title = planetname, $
                   color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 0.3, $
@@ -223,20 +227,23 @@ COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, b
   endfor                        ;binning for each AOR
 
   if keyword_set(timeplot) then begin
-     pp.xrange = [0, 800/24.]
-     pq.xrange = [0, 800/24.]
-     pt.xrange = [0, 800/24.]
-     ps.xrange = [0, 800/24.]
-     pr.xrange = [0, 800/24.]
-     pxy.xrange = [0, 800/24.]
+     if planetname eq 'WASP-14b' then begin
+        pp.xrange = [0, 800/24.]
+        pq.xrange = [0, 800/24.]
+        pt.xrange = [0, 800/24.]
+        ps.xrange = [0, 800/24.]
+        pr.xrange = [0, 800/24.]
+        pxy.xrange = [0, 800/24.]
+        pp = plot([550/24., 520/24.], [min(pp.yrange), max(pp.yrange)], linestyle = 4, overplot = pp)
+        pq = plot([550/24., 520/24.], [min(pq.yrange), max(pq.yrange)], linestyle = 4, overplot = pq)
+        pt = plot([550/24., 520/24.], [min(pt.yrange), max(pt.yrange)], linestyle = 4, overplot = pt)
+        ps = plot([550/24., 520/24.], [min(ps.yrange), max(ps.yrange)], linestyle = 4, overplot = ps)
+        pr = plot([550/24., 520/24.], [min(pr.yrange), max(pr.yrange)], linestyle = 4, overplot = pr)
+        pxy = plot([550/24., 520/24.], [min(pxy.yrange), max(pxy.yrange)], linestyle = 4, overplot = pxy)
+        pr.xtickname = ['0', '5', '10', '15','20', '350', '355'] ; account for the time shifting
+     endif
+     
      pr.xtitle = 'Time(Days)'
-     pp = plot([550/24., 520/24.], [min(pp.yrange), max(pp.yrange)], linestyle = 4, overplot = pp)
-     pq = plot([550/24., 520/24.], [min(pq.yrange), max(pq.yrange)], linestyle = 4, overplot = pq)
-     pt = plot([550/24., 520/24.], [min(pt.yrange), max(pt.yrange)], linestyle = 4, overplot = pt)
-     ps = plot([550/24., 520/24.], [min(ps.yrange), max(ps.yrange)], linestyle = 4, overplot = ps)
-     pr = plot([550/24., 520/24.], [min(pr.yrange), max(pr.yrange)], linestyle = 4, overplot = pr)
-     pxy = plot([550/24., 520/24.], [min(pxy.yrange), max(pxy.yrange)], linestyle = 4, overplot = pxy)
-     pr.xtickname = ['0', '5', '10', '15','20', '350', '355']  ; account for the time shifting
 
   endif
 
