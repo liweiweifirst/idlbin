@@ -5,7 +5,7 @@ pro plot_exoplanet_phase, planetname, bin_level, apradius, chname, function_fit 
   if planetname eq 'WASP-14b' or planetname eq 'HD209458' then begin
      colorarr = ['gray', 'gray','gray','gray','gray','burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']
   endif else begin
-   
+; colorarr = ['burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']  
      colorarr = ['blue', 'red','green','black','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple',  'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','green','black','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ,'blue', 'red','black','green','black','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo']
 ;
   endelse
@@ -77,7 +77,7 @@ pro plot_exoplanet_phase, planetname, bin_level, apradius, chname, function_fit 
 ;---------------
   ;;read in the photometry save file
   dirname = strcompress(basedir + planetname +'/')                                                 
-  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150226_bcdsdcorr.sav',/remove_all) ;
+  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150226.sav',/remove_all) ;
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)
@@ -92,7 +92,7 @@ pro plot_exoplanet_phase, planetname, bin_level, apradius, chname, function_fit 
   bin_corrfluxerrfinal = fltarr(n_elements(aorname))
 
  ;for debugging: skip some AORs
-  startaor =  5; 0                 ;  n_elements(aorname) -29
+  startaor =  0                 ;  n_elements(aorname) -29
   stopaor =   n_elements(aorname) - 1
   mean_corrfluxarr = fltarr(stopaor - startaor + 1,/nozero)
   mean_dsweetarr = mean_corrfluxarr
@@ -109,8 +109,8 @@ pro plot_exoplanet_phase, planetname, bin_level, apradius, chname, function_fit 
   plot_corrnorm =  mean(corrflux0(se),/nan)
   plot_norm = mean(flux0(se), /nan) 
   addoffset = 0.0
-
-  if n_elements(aorname) gt stareaor + 1 then begin
+  snap_addoffset = 0.0
+  if n_elements(aorname) gt stareaor + 2 then begin
      ;pick a different normalization for the snapshots
      count = 0
      for a = startaor, stopaor do begin
@@ -170,24 +170,29 @@ print, 'snap_addoffset', snap_addoffset
         bin_all_fluxerrp = bin_fluxerrp
         bin_all_corrfluxerrp = bin_corrfluxerrp
         bin_all_time = bin_timearr
+        bin_all_xcen = bin_xcen
+        bin_all_ycen = bin_ycen
      endif else begin
         bin_all_phasep = [bin_all_phasep, bin_phasep]
         bin_all_corrfluxp = [bin_all_corrfluxp, bin_corrfluxp]
         bin_all_corrfluxerrp = [bin_all_corrfluxerrp, bin_corrfluxerrp]
         bin_all_fluxerrp = [bin_all_fluxerrp, bin_fluxerrp]
         bin_all_time = [bin_all_time,bin_timearr]
+        bin_all_xcen = [bin_all_xcen, bin_xcen]
+        bin_all_ycen = [bin_all_ycen, bin_ycen]
      endelse
 
 ;------------------------------------------------------
 ;now try plotting
 ;------------------------------------------------------
-     setyrange = [0.990, 1.005]
+     setyrange = [0.996, 1.004]; [0.990, 1.005]
      if planetname eq 'HD158460' then setyrange = [0.997, 1.003];[0.999, 1.001]
-     setynormfluxrange = [0.98, 1.05] ;[0.97, 1.005]
-     setxrange =  [-0.5, 0.5]   ;[0.43, 0.56];
+     setynormfluxrange = [0.996, 1.01] ;[0.97, 1.005]
+     setxrange =  [-0.02, 0.02];[0., 1.]   ;[0.43, 0.56];
      extra={ sym_size: 0.2, sym_filled: 1, xrange: setxrange, color: colorarr[a], title:planetname}
 
      if keyword_set(all_plots) then begin
+        print, 'min, max phase', min(bin_phase), max(bin_phase)
         pp = plot(bin_phase, bin_xcen, '1s', xtitle = 'Orbital Phase', ytitle = 'X position', _extra = extra, overplot = pp)          
         pq = plot(bin_phase, bin_ycen, '1s', xtitle = 'Orbital Phase', ytitle = 'Y position', _extra = extra, overplot = pq)
         ps= plot(bin_phase, bin_npcent, '1s',xtitle = 'Orbital Phase', ytitle = 'Noise Pixel', _extra = extra, overplot = ps)
@@ -263,7 +268,10 @@ print, 'snap_addoffset', snap_addoffset
       
   endfor                        ;binning for each AOR
   
-  
+  ;;print out the median x and y centers
+  print, 'bin_all xcen', median(bin_all_xcen), mean(bin_all_xcen, /nan)
+  print, 'bin_all ycen', median(bin_all_ycen), mean(bin_all_ycen, /nan)
+
   
 ;------------------------------------
 ;fit a mandel and agol function and overplot it
