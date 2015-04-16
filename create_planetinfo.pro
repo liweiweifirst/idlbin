@@ -508,8 +508,44 @@ chname = 0
   utmjd_center = 0.   ; doesn't transit, so this isn't defined
   transit_duration = 0.; doesn't transit, so this isn't defined
   period = 4.61711
-  intended_phase = 0.5
+  intended_phase = 0.0
   exptime = .02
+  stareaor = 0
+  plot_norm = 1.
+  Plot = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'epic201367065b'
+  ra_ref = 172.33545
+  dec_ref = -1.45494
+  aorname_ch2= ['r53521920', 'r53522176']
+
+  basedir = '~/external/irac_warm/' 
+  utmjd_center = 2456813.4189 -2400000.5  
+  transit_duration = 2.54 * 60. ;minutes
+  period = 10.05403
+  intended_phase = 0.0
+  exptime = 2.0
+  stareaor = 0
+  plot_norm = 1.
+  Plot = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'epic201367065d'
+  ra_ref = 172.33545
+  dec_ref = -1.45494
+  aorname_ch2= [ 'r53522432', 'r53522688']
+
+  basedir = '~/external/irac_warm/' 
+  utmjd_center = 2456826.2239 -2400000.5  
+  transit_duration = 3.93 * 60. ;minutes
+  period = 44.5619
+  intended_phase = 0.0
+  exptime = 2.0
   stareaor = 0
   plot_norm = 1.
   Plot = 1.
