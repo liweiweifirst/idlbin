@@ -17,8 +17,6 @@ pro phot_S19_2, chname, normalize = normalize
   S192params = {DELTAF_X:[0.045065252D,0.019332239D], DELTAF_Y:[0.051759456D,0.013922875D], X0:[0.13051077D,0.061947404D], Y0:[0.043896764D,0.11991437D], SIGMA_X:[0.17571139D,0.17625694D], SIGMA_Y:[0.15926883D,0.15129765D], F0:[0.95961049D,0.98622255D], THETA:[0.,0.]}
 
 
-;;and for subarray??
-
 ;;set bin_sizes up front
   bsize = 1E-2
 
@@ -27,7 +25,12 @@ pro phot_S19_2, chname, normalize = normalize
 ;  spawn, command
   readcol, 'aorlist.txt', aorname, format = 'A', /silent
   count19_2 = 0
+  medarr = fltarr(n_elements(aorname))
+  starname = strarr(n_elements(aorname))
 
+  ;;aperture correction for [3,3-7] from Jim
+  aper_corr = [1.1233D,1.1336D]
+  counta = 0
   for a = 0, n_elements(aorname) -1 do begin
      undefine, fitsname
      undefine, buncname
@@ -50,9 +53,8 @@ pro phot_S19_2, chname, normalize = normalize
         chnlnum = sxpar(header, 'CHNLNUM')
         naxis = sxpar(header, 'NAXIS')
         
-        if strmid(AORLABEL, 0, 12) eq 'IRAC_calstar' and NAXIS lt 3 then begin 
-           print, 'inside calstar'
-
+        if strmid(AORLABEL, 0, 12) eq 'IRAC_calstar' then begin ;and NAXIS lt 3 then begin 
+           print, 'inside calstar', strmid(AORLABEL, 13, 7)
            ;;find truth fluxes
            ;;taken from Jim's evernote note "How to Correct for
            ;;Position Dependent Effects"
@@ -72,7 +74,12 @@ pro phot_S19_2, chname, normalize = normalize
            ENDCASE
 
            ;;setup arrays to save data
-           fluxarr = fltarr(bcdcount)
+           if NAXIS lt 3 then begin
+              fluxarr = fltarr(bcdcount)
+           endif else begin
+              fluxarr = fltarr(bcdcount*64)
+           endelse
+
            c = 0
            for i = 0, n_elements(fitsname) - 1 do begin
               ;;make sure it is on the frame
@@ -88,31 +95,47 @@ pro phot_S19_2, chname, normalize = normalize
                                               x7s, y7s, fs, bs, xp3, yp3, xp5, yp5, xp7, yp7, xp3s, yp3s, $
                                               xp5s, yp5s, xp7s, yp7s, fp, fps, np, flag, ns, sf, $
                                               xfwhm, yfwhm, /WARM,/silent
-                 bcdflux = f[3]
+                 bcdflux = f[*,3]      ; I think this is [3,3-7]
                  ;;make a correction for pixel phase 
-                 corrflux = pixel_phase_correct_gauss(f[3],x3,y3,chnlnum, '3_3_7',params = S192params)
+                 print, 'n fluxes', n_elements(f[*,3]), n_elements(x3), n_elements(y3)
+                 corrflux = pixel_phase_correct_gauss(f[*,3],x3,y3,chnlnum, '3_3_7',params = S192params)
 
                  ;;apply array dependent correction
-                 if chnlnum eq '1' then arraycorr = photcor_ch1_s192(x3, y3) else arraycorr = photcor_ch2_s192(x3, y3)
+;                 arraycorr = fltarr(n_elements(x3))
+;                 for ipc = 0, n_elements(x3) - 1 do begin
+;                    print, 'chnlnum', ipc, chnlnum, x3(ipc), y3(ipc)
+;                    if chnlnum eq '1' then arraycorr[ipc] = photcor_ch1_s192(x3(ipc), y3(ipc)) else $
+;                       arraycorr[ipc] = photcor_ch2_s192(x3(ipc), y3(ipc))
+;                 endfor
+                 if chnlnum(0) eq '1' then arraycorr = photcor_ch1_s192[x3, y3] else arraycorr = photcor_ch2_s192[x3, y3]
                  corrflux= corrflux * arraycorr
                  ;;save them
                  ;;consider normalizing by truth fluxes
-;              xcenarr[c]  = x3 &  ycenarr[c] = y3 & fluxerrarr[c] = fs[0] & backarr[c]= b[0] 
+;              xcenarr[c]  = x3 &  ycenarr[c] = y3 & fluxerrarr[c] =
+;              fs[0] & backarr[c]= b[0] 
                  fluxarr[c] =  corrflux ;bcdflux;
-                 c = c + 1
-                 
+
+                 if NAXIS lt 3 then begin
+                    c = c + 1
+                 endif else begin
+                    c = c + 64
+                 endelse
+
               endif             ;if the star is on the frame
            endfor               ; for each fits image
            ;;remove known nans = off the frame
            fluxarr = fluxarr[0:c-1]
 
+           ;;apply aperture correction
+           fluxarr = fluxarr*aper_corr(startnum)
+
            ;;normalize
             if keyword_set(normalize) then begin
                ;;normfactor = mean(fluxarr, /nan)
                normfactor = truth(chnlnum - 1)/ 1E3
-               print, 'before', fluxarr, 'norm', normfactor
+;               print, 'before', fluxarr, 'norm', normfactor
                fluxarr = fluxarr / normfactor
-               print, 'after', fluxarr
+;               print, 'after', fluxarr
             endif
 
            ;;fill an array of all calstars in this channel
@@ -121,6 +144,11 @@ pro phot_S19_2, chname, normalize = normalize
            endif else begin
               allfluxarr = [allfluxarr, fluxarr]
            endelse
+
+           ;;plot median normalized value of each individual star
+           medarr[counta] = median(fluxarr)
+           starname[counta] = strmid(AORLABEL, 13, 7)
+           counta = counta + 1
 
         endif                   ; if aorlabel eq irac_calstar
 
@@ -147,6 +175,19 @@ pro phot_S19_2, chname, normalize = normalize
   ;;find the mean/median/mode and plot that too
   p1 = plot([median(allfluxarr), median(allfluxarr)], [20,25], color = 'purple', thick=2, overplot = p1)
 
+  medarr = medarr[0:counta -1]
+  starname = starname[0:counta -1]
+  xint = indgen(n_elements(medarr))
+  pcompare = plot(xint, medarr, '1s', xtitle = 'star', ytitle = 'Median(Flux/Truth)', title = chname, $
+                  xminor = 0, sym_filled = 1, yrange = [0.95,1.05] , xtickname = starname, $
+                  xtext_orientation = 45, xrange = [0, n_elements(medarr) - 1])
+  bad = where(medarr lt 0.9)
+  medarr[bad] = alog10(-1)
+  meanval = mean(medarr, /nan)
+  pcompare = plot(findgen(20), fltarr(20) + meanval, thick = 2, color = 'gold', overplot = pcompare)
+  pcompare = plot(findgen(20), fltarr(20) + 1.0, thick = 2, color = 'grey', overplot = pcompare)
+
+  for ic = 0, counta - 1 do print, starname[ic], medarr[ic]
 ;;---------------------------------------------------------------------------------------------
 ;;---------------------------------------------------------------------------------------------
   ;;do photometry on the S19.1 stuff
