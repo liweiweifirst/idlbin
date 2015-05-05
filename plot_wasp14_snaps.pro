@@ -310,8 +310,19 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
      for a = 5, n_elements(aorname) - 1 do begin
         for i = 0, n_elements(planethash[aorname(a),'phase']) - 1 do begin
            printf, outlun, (planethash[aorname(a),'bmjdarr'])(i), (planethash[aorname(a),'phase'])(i), $
-                   (planethash[aorname(a),'corrflux_d'])(i), $
-                   format = '(D, F10.3, F10.4)'
+                   (planethash[aorname(a),'corrflux_d'])(i), (planethash[aorname(a),'corrfluxerr'])(i),$
+                   format = '(D, F10.5, F10.6,F10.6)'
+        endfor
+  
+     endfor
+     free_lun, outlun
+;----
+     openw, outlun, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/wasp14_stare_150226.txt', /GET_LUN
+     for a = 0, 4 do begin
+        for i = 0, n_elements(planethash[aorname(a),'phase']) - 1 do begin
+           printf, outlun, (planethash[aorname(a),'bmjdarr'])(i), (planethash[aorname(a),'phase'])(i), $
+                   (planethash[aorname(a),'corrflux_d'])(i), (planethash[aorname(a),'corrfluxerr'])(i),$
+                   format = '(D, F10.5, F10.6,F10.6)'
         endfor
   
      endfor
