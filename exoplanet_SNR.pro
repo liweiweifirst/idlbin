@@ -1,6 +1,6 @@
 ; PURPOSE:
 ;  This code calculates the predicted SNR of a transit given the 2MASS
-;  K band magnitud of the source, the spectral type of the source, the
+;  K band magnitude of the source, the spectral type of the source, the
 ;  IRAC channel of interest, and the depth of the transit. The code
 ;  assumes a relation for how the noise of the source decreases with
 ;  increasing number of frames which is based on an empiracle relation
@@ -65,7 +65,7 @@ Function exoplanet_SNR, Kmag, sp_type, ch, transit_depth, bin_scale, eclipse = e
 
   ;;need to calculate frame time best suited for this target
   exptime = find_exptime(source_mJy, ch)
-
+;  print, 'exptime', exptime
   ;;given frame time; how many frames = input binning scale 
   n_frames = fix(bin_scale*60./exptime) 
 

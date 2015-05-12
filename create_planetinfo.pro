@@ -520,7 +520,7 @@ chname = 0
   planetname = 'epic201367065b'
   ra_ref = 172.33545
   dec_ref = -1.45494
-  aorname_ch2= ['r53521920', 'r53522176']
+  aorname_ch2= ['r53521920', 'r53522176','r53521152', 'r53521664']
 
   basedir = '~/external/irac_warm/' 
   utmjd_center = 2456813.4189 -2400000.5  
@@ -534,6 +534,25 @@ chname = 0
 
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'epic201367065c'
+  ra_ref = 172.33545
+  dec_ref = -1.45494
+  aorname_ch2= [ 'r53522944', 'r53523200']
+
+  basedir = '~/external/irac_warm/' 
+  utmjd_center = 2456812.2786 -2400000.5  
+  transit_duration = 3.53 * 60. ;minutes
+  period = 24.6454
+  intended_phase = 0.0
+  exptime = 2.0
+  stareaor = 0
+  plot_norm = 1.
+  Plot = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
 ;---
   planetname = 'epic201367065d'
   ra_ref = 172.33545
