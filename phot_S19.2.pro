@@ -97,7 +97,7 @@ pro phot_S19_2, chname, normalize = normalize
                                               xfwhm, yfwhm, /WARM,/silent
                  bcdflux = f[*,3]      ; I think this is [3,3-7]
                  ;;make a correction for pixel phase 
-                 print, 'n fluxes', n_elements(f[*,3]), n_elements(x3), n_elements(y3)
+;                 print, 'n fluxes', n_elements(f[*,3]), n_elements(x3), n_elements(y3)
                  corrflux = pixel_phase_correct_gauss(f[*,3],x3,y3,chnlnum, '3_3_7',params = S192params)
 
                  ;;apply array dependent correction
