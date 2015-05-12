@@ -132,7 +132,7 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
         xcen500 = 500.* ((planethash[aorname(a),'xcen']) - 14.5)
         ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
         limit = where(indgen(n_elements(planethash[aorname(a),'xcen'])) mod 100 eq 0) 
-        an = plot(xcen500(limit), ycen500(limit), '1s', sym_size = 0.1,   sym_filled = 1, color = colorarr[a],/overplot)
+        an = plot(xcen500(limit), ycen500(limit), '1s', sym_size = 0.3,   sym_filled = 1, color = colorarr[a],/overplot)
 ;      endif
 
 ;     npmax = [4.8, 37., 4.5]

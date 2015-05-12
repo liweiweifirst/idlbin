@@ -105,12 +105,13 @@ pro plot_exoplanet_phase, planetname, bin_level, apradius, chname, function_fit 
   phase0 = planethash[aorname(0),'phase']
   corrflux0 = planethash[aorname(0),'corrflux_d']
   flux0 = planethash[aorname(0),'flux']
-  se = where(phase0 gt 0.47 and phase0 lt 0.51)
+  se = where(phase0 lt -.012 );and phase0 lt 0.51)
+;  se = where(phase0 gt 0.47 and phase0 lt 0.51)
   plot_corrnorm =  mean(corrflux0(se),/nan)
   plot_norm = mean(flux0(se), /nan) 
   addoffset = 0.0
   snap_addoffset = 0.0
-  if n_elements(aorname) gt stareaor + 2 then begin
+  if n_elements(aorname) gt stareaor + 4 then begin
      ;pick a different normalization for the snapshots
      count = 0
      for a = startaor, stopaor do begin
@@ -188,7 +189,7 @@ print, 'snap_addoffset', snap_addoffset
      setyrange = [0.996, 1.004]; [0.990, 1.005]
      if planetname eq 'HD158460' then setyrange = [0.997, 1.003];[0.999, 1.001]
      setynormfluxrange = [0.996, 1.01] ;[0.97, 1.005]
-     setxrange =  [-0.02, 0.02];[0., 1.]   ;[0.43, 0.56];
+     setxrange =  [-0.03, 0.02];[0., 1.]   ;[0.43, 0.56];
      extra={ sym_size: 0.2, sym_filled: 1, xrange: setxrange, color: colorarr[a], title:planetname}
 
      if keyword_set(all_plots) then begin
@@ -216,7 +217,16 @@ print, 'snap_addoffset', snap_addoffset
         addoffset = snap_addoffset
      endif
 
+     if a eq 3 then begin
+        corrflux3 = planethash[aorname(a),'corrflux_d']
+        phase3 = planethash[aorname(a),'phase']
+        goodt = where(phase3 lt -.012)
+        plot_corrnorm = mean(corrflux3(goodt),/nan)
+     endif
+
      if pmapcorr eq 1 then begin
+        print, 'plot_corrnorm', plot_corrnorm
+        print, 'corrflux', bin_corrfluxp
         pu = errorplot(bin_phasep, bin_corrfluxp/plot_corrnorm + addoffset, $
                        bin_corrfluxerrp/plot_corrnorm,  '1s', sym_size = 0.7,  $
                        symbol = plotsym, sym_filled = 1,color =colorarr[a] ,xtitle = 'Orbital Phase',$

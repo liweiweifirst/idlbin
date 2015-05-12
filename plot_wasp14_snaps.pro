@@ -306,13 +306,30 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
   if keyword_set(printout) then begin
   
      ;;print out some simple facts for others to play with.
-     openw, outlun, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/wasp14_snap_150226.txt', /GET_LUN
+     openw, outlun, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/wasp14_snap_latenterr_150226.txt', /GET_LUN
      for a = 5, n_elements(aorname) - 1 do begin
-        for i = 0, n_elements(planethash[aorname(a),'phase']) - 1 do begin
-           printf, outlun, (planethash[aorname(a),'bmjdarr'])(i), (planethash[aorname(a),'phase'])(i), $
-                   (planethash[aorname(a),'corrflux_d'])(i), (planethash[aorname(a),'corrfluxerr'])(i),$
-                   format = '(D, F10.5, F10.6,F10.6)'
-        endfor
+        aphase = planethash[aorname(a),'phase']
+        cde = (planethash[aorname(a),'corrfluxerr'])
+
+        if (aphase(0) lt 0.03) and (aphase(0) gt -0.03) then begin
+           print, 'adding error', a, ' ',  aphase(0), colorarr(a)
+           cde = cde + 0.001  ; add error due to likely latent where we know the latent as an effect
+        endif
+
+        if (aphase(0) lt -.455) then begin; and ((planethash[aorname(a),'corrflux_d'])(0) gt .0030) then begin
+           print,' adding error', a, ' ', aphase(0), colorarr(a), (planethash[aorname(a),'corrflux_d'])(0) 
+           cde = cde + 0.001  ; add error due to likely latent where we know the latent as an effect
+        endif
+
+           for i = 0, n_elements(aphase) - 1 do begin
+              printf, outlun, (planethash[aorname(a),'bmjdarr'])(i), (planethash[aorname(a),'phase'])(i), $
+                      (planethash[aorname(a),'corrflux_d'])(i), cde(i),$
+                      format = '(D, F10.6, F10.6,F10.6)'
+;              printf, outlun, (planethash[aorname(a),'bmjdarr'])(i), (planethash[aorname(a),'phase'])(i), $
+;                      (planethash[aorname(a),'corrflux_d'])(i), (planethash[aorname(a),'corrfluxerr'])(i),$
+;                      format = '(D, F10.6, F10.6,F10.6)'
+           endfor
+
   
      endfor
      free_lun, outlun
