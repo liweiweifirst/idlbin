@@ -19,6 +19,8 @@ function convert_Kmag_IRAC, Kmag, ch, sp_type
         'K5': color = 0.08
         'M0': color = 0.12
         'M2': color = 0.15
+        'M3': color = 0.15 ;;me extrapolating
+        'M4': color = 0.16;;me extrapolating
         'M5': color = 0.16
      endcase
   endif
@@ -35,6 +37,8 @@ function convert_Kmag_IRAC, Kmag, ch, sp_type
         'K5': color = -0.07
         'M0': color = 0.01
         'M2': color = 0.04
+        'M3': color = 0.053;;me extrapolating
+        'M4': color = 0.066;;me extrapolating
         'M5': color = 0.08
      endcase
   endif
