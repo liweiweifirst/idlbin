@@ -1,4 +1,4 @@
-pro phot_exoplanet, planetname, apradius,chname, columntrack = columntrack, breatheap = breatheap, hybrid = hybrid
+pro phot_exoplanet, planetname, apradius,chname, columntrack = columntrack, breatheap = breatheap, hybrid = hybrid, rawfile = rawfile
 ;do photometry on any IRAC staring mode exoplanet data
 ;now with hashes of hashes!
 ;print, 'waiting'
@@ -109,6 +109,11 @@ if planetname eq 'upsandb' then begin
    ;proper motions must be the problem, this is the easy fix
     ra_ref = 24.198512
    dec_ref = 41.404099
+endif
+
+if planetname eq '55Cnc' then begin
+   ra_ref = 133.14771
+   dec_ref = 28.33032
 endif
 
 ;---------------
@@ -288,31 +293,33 @@ for a =startaor,  stopaor do begin
          backerr = abcdflux
       endif 
       
+      if keyword_set(rawfile) then begin
 ;read in the raw data file and get the DN level of the peakpixel      
-        fits_read, rawname(i), rawdata, rawheader
+         fits_read, rawname(i), rawdata, rawheader
         
-        barrel = fxpar(rawheader, 'A0741D00')
-        fowlnum = fxpar(rawheader, 'A0614D00')
-        pedsig = fxpar(rawheader, 'A0742D00')
-        ichan = fxpar (rawheader, 'CHNLNUM')
+         barrel = fxpar(rawheader, 'A0741D00')
+         fowlnum = fxpar(rawheader, 'A0614D00')
+         pedsig = fxpar(rawheader, 'A0742D00')
+         ichan = fxpar (rawheader, 'CHNLNUM')
               
-                                ;use Bill's code to conver to DN
-        dewrap2, rawdata, ichan, barrel, fowlnum, pedsig, 0, rawdata
+         ;;use Bill's code to conver to DN
+         dewrap2, rawdata, ichan, barrel, fowlnum, pedsig, 0, rawdata
      
-                                ;or use Jim's code to convert to DN
-;            rawdata = irac_raw2dn(rawdata,ichan,barrel,fowlnum)
-        rawdata = reform(rawdata, 32, 32, 64)
-        peakpixDN = abcdflux  ; set up the array to be the same size as abcdflux
-        if naxis eq 3 then begin
-           for pp = 0, 63 do begin
+         ;;or use Jim's code to convert to DN
+         ;;rawdata = irac_raw2dn(rawdata,ichan,barrel,fowlnum)
+         rawdata = reform(rawdata, 32, 32, 64)
+         peakpixDN = abcdflux   ; set up the array to be the same size as abcdflux
+         if naxis eq 3 then begin
+            for pp = 0, 63 do begin
                peakpixDN[pp] = max(rawdata[13:16,13:16,pp])
-           endfor
-        endif
+            endfor
+         endif
+      endif
 
 ;track the values of the 7x7 pixel box around the centroid
 ;        pi = track_box(im, x_center, y_center)   ; tb now a 25 x 64 element array
-        if naxis eq 3 then pi = im[12:18, 12:18,*]  ; now a 7x7x64 element array
-        if naxis eq 2 then pi = im[(fix(x_center) - 3):(fix(x_center+3)), (fix(y_center) - 3):(fix(y_center+3))]  ; now a 7x7x64 element array
+         if naxis eq 3 then pi = im[12:18, 12:18,*] ; now a 7x7x64 element array
+         if naxis eq 2 then pi = im[(fix(x_center) - 3):(fix(x_center+3)), (fix(y_center) - 3):(fix(y_center+3))] ; now a 7x7x64 element array
 
 ;track the value of a column
       if keyword_set(columntrack) then begin 
@@ -398,7 +405,7 @@ for a =startaor,  stopaor do begin
          npcentroidsarr[i*63] = npcentroids[1:*]
          xfwhmarr[i*63] = xfwhm[1:*]
          yfwhmarr[i*63] = yfwhm[1:*]
-         peakpixDNarr[i*63] = peakpixDN[1:*]
+         if keyword_set(rawfile) then peakpixDNarr[i*63] = peakpixDN[1:*]
          piarr[i*63] = pi[*,*,1:*]
  ;        help, bmjd
          if keyword_set(columntrack) then begin 
@@ -432,7 +439,7 @@ for a =startaor,  stopaor do begin
          npcentroidsarr[i] = npcentroids
          xfwhmarr[i] = xfwhm
          yfwhmarr[i] = yfwhm
-         peakpixDNarr[i] = peakpixDN
+         if keyword_set(rawfile) then peakpixDNarr[i] = peakpixDN
          piarr[*,*,i] = pi
       endif
 
@@ -500,8 +507,11 @@ for a =startaor,  stopaor do begin
       values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, centerpixarr1, centerpixarr2, centerpixarr3, centerpixarr4, centerpixarr5, centerpixarr6, sigmapixarr1, sigmapixarr2, sigmapixarr3, sigmapixarr4, sigmapixarr5, sigmapixarr6, phase)
       planethash[aorname(a)] = HASH(keys, values)
    endif else begin
-      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase', 'npcentroids','exptime','xfwhm', 'yfwhm','peakpixDN', 'framedly','pixvals','corrflux_d']
-      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, peakpixDNarr, fdarr,piarr, corrflux_d)
+      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','pixvals','corrflux_d']
+      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr,piarr, corrflux_d)
+      planethash[aorname(a)] = HASH(keys, values)
+;      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase', 'npcentroids','exptime','xfwhm', 'yfwhm','peakpixDN', 'framedly','pixvals','corrflux_d']
+;      values=list(ra_ref,  dec_ref, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, peakpixDNarr, fdarr,piarr, corrflux_d)
       planethash[aorname(a)] = HASH(keys, values)
    endelse
 
