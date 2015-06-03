@@ -4,10 +4,12 @@ function binning_function, a,bin_level, pmapcorr, ch, set_nbins = set_nbins, n_n
   ;-------------------------------------------------------------------------
   ;;setup
 
+  print, 'starting binning', ch
+
   timearr = [planethash[aorname(a),'timearr']]
   fluxarr = [planethash[aorname(a),'flux']]
   fluxerrarr = [planethash[aorname(a),'fluxerr']]
-  corrfluxarr = [planethash[aorname(a),'corrflux']]
+  corrfluxarr=[planethash[aorname(a),'corrflux']]
   corrflux_darr = [planethash[aorname(a),'corrflux_d']]
   corrfluxerrarr = [planethash[aorname(a),'corrfluxerr']]
   xarr = [planethash[aorname(a),'xcen']]
