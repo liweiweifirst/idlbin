@@ -100,7 +100,7 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         
      endif else begin
         plotx = bin_phase
-        setxrange = [0.,1.]; [-0.5,0.5]
+        setxrange = [0.5, 0.65]; [0.,1.]; [-0.5,0.5]
         ending = 'phase'
      endelse
      
@@ -110,17 +110,23 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
      corroffset = 0.001
      setynormfluxrange = [0.98, 1.01] ;[0.97, 1.005]
 ;     setxrange = [-1, 18]
+
+     ;;normalize each AOR seperately
+     plot_norm =  median(bin_flux)
+     plot_corrnorm = mean(bin_corrfluxp,/nan)
+     bkgd_norm =  mean(bin_bkgd,/nan)
+
      if a eq startaor then begin ; for the first AOR
                                 ;set the normalization values from the
                                 ;medians of the first AOR...is close enough
-        plot_norm =  median(bin_flux)
-        plot_corrnorm = mean(bin_corrfluxp,/nan)
-        bkgd_norm =  mean(bin_bkgd,/nan)
+;;        plot_norm =  median(bin_flux)
+;;        plot_corrnorm = mean(bin_corrfluxp,/nan)
+;;        bkgd_norm =  mean(bin_bkgd,/nan)
 ;           print, 'bin_xcen', bin_xcen
         print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
         
         pp = plot(plotx, bin_xcen, '1s',  $ ;title = planetname, $
-                  color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 0.3, $
+                  color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 0.1, $
                   xshowtext = 0, ytickformat = '(F10.1)', dimensions = [600, 900], _extra = extra, yminor = 0,$
                   xrange = setxrange) ;, $, ymajor = 4
         
@@ -129,7 +135,7 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         
         
         pq= plot(plotx, bin_ycen, '1s',  color = colorarr[a], $
-                 ytitle = 'Y position',  position = [0.2, 0.64, 0.9, 0.77],/current,  ytickinterval = 0.3,$
+                 ytitle = 'Y position',  position = [0.2, 0.64, 0.9, 0.77],/current,  ytickinterval = 0.2,$
                  xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, yminor = 0,$
                  xrange = setxrange) ;, yrange = [15.5, 17.5]) ;, $, title = planetname , ymajor = 4
                                 ;xrange = setxrange)
