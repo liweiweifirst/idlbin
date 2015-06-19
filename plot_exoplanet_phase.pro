@@ -175,6 +175,7 @@ print, 'snap_addoffset', snap_addoffset
 
 ;------------------------------------------------------
      ;;put all the variables together and save them for later
+     print, 'bin_phasep', bin_phasep
      if a eq startaor then begin
         bin_all_phasep = bin_phasep
         bin_all_corrfluxp = bin_corrfluxp
@@ -339,7 +340,23 @@ print, 'snap_addoffset', snap_addoffset
 
      endif
 
-
+     ;;print out some simple facts for others to play with.
+     outfilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150226.txt',/remove_all)
+     openw, outlun, outfilename, /GET_LUN
+     for a = 0, n_elements(aorname) - 1 do begin
+        aphase = planethash[aorname(a),'phase']
+        cde = (planethash[aorname(a),'corrfluxerr'])
+        
+        for i = 0, n_elements(aphase) - 1 do begin
+           printf, outlun, (planethash[aorname(a),'bmjdarr'])(i), (planethash[aorname(a),'phase'])(i), $
+                   (planethash[aorname(a),'corrflux_d'])(i), cde(i),$
+                   format = '(D, F10.6, F10.6,F10.6)'
+        endfor
+        
+        
+     endfor
+     free_lun, outlun
+     
 end
 
 

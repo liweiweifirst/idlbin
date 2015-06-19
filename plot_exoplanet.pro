@@ -79,7 +79,7 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
   endif
 
 
-
+print, 'using UTMJD', utmjd_center
 ;---------------
   
   dirname = strcompress(basedir + planetname +'/')                                                            ;+'/hybrid_pmap_nn/')

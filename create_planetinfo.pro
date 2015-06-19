@@ -520,10 +520,10 @@ chname = 0
   planetname = 'epic201367065b'
   ra_ref = 172.33545
   dec_ref = -1.45494
-  aorname_ch2= ['r53521920', 'r53522176','r53521152', 'r53521664']
+  aorname_ch2= ['r53522176','r53521920', 'r53521152', 'r53521664']
 
-  basedir = '~/external/irac_warm/' 
-  utmjd_center = 2456813.4189 -2400000.5  
+  basedir = '~/irac_warm/' 
+  utmjd_center = double(56813.4189)
   transit_duration = 2.54 * 60. ;minutes
   period = 10.05403
   intended_phase = 0.0

@@ -1,34 +1,35 @@
-function binning_function, a,bin_level, pmapcorr, ch, set_nbins = set_nbins, n_nbins = n_nbins
+function binning_function_id, a,bin_level, pmapcorr, ch, set_nbins = set_nbins, n_nbins = n_nbins
 
   common bin_block
   ;-------------------------------------------------------------------------
   ;;setup
 
-  print, 'starting binning', ch
+;;  print, 'starting binning', ch
+;;keys =['ra', 'dec', 'pid', 'campaign', 'ch','xcen', 'ycen', 'timearr', 'aor', 'bmjdarr','exptime']
 
   timearr = [planethash[aorname(a),'timearr']]
-  fluxarr = [planethash[aorname(a),'flux']]
-  fluxerrarr = [planethash[aorname(a),'fluxerr']]
-  corrfluxarr=[planethash[aorname(a),'corrflux']]
-  corrflux_darr = [planethash[aorname(a),'corrflux_d']]
-  corrfluxerrarr = [planethash[aorname(a),'corrfluxerr']]
+;;  fluxarr = [planethash[aorname(a),'flux']]
+;;  fluxerrarr = [planethash[aorname(a),'fluxerr']]
+;;  corrfluxarr=[planethash[aorname(a),'corrflux']]
+;;  corrflux_darr = [planethash[aorname(a),'corrflux_d']]
+;;  corrfluxerrarr = [planethash[aorname(a),'corrfluxerr']]
   xarr = [planethash[aorname(a),'xcen']]
   yarr = [planethash[aorname(a),'ycen']]
-  bkgd = [planethash[aorname(a),'bkgd']]
+;;  bkgd = [planethash[aorname(a),'bkgd']]
   bmjd = [planethash[aorname(a),'bmjdarr']]
-  np = [planethash[aorname(a),'np']]
-  npcentroids = planethash[aorname(a),'npcentroids']
-  phase = [planethash[aorname(a),'phase']]
+;;  np = [planethash[aorname(a),'np']]
+;;  npcentroids = planethash[aorname(a),'npcentroids']
+;;  phase = [planethash[aorname(a),'phase']]
   ;;fix a small bug
-  bp = where(phase gt 1.0, bpcount)
-  if bpcount gt 0 then phase(bp) = phase(bp) - 1.
-  xfwhmarr = [planethash[aorname(a),'xfwhm']]
-  yfwhmarr = [planethash[aorname(a),'yfwhm']]
+;;  bp = where(phase gt 1.0, bpcount)
+;;  if bpcount gt 0 then phase(bp) = phase(bp) - 1.
+;;  xfwhmarr = [planethash[aorname(a),'xfwhm']]
+;;  yfwhmarr = [planethash[aorname(a),'yfwhm']]
 
   ;-------------------------------------------------------------------------
   ;;remove outliers 
   ;;are there non-nan corrfluxes aka sweet spot
-  goodpmap = where(xarr lt mean(xarr,/nan) + 2.5*stddev(xarr,/nan) and xarr gt mean(xarr,/nan) -2.5*stddev(xarr,/nan) and xarr lt mean(xarr,/nan) +3.0*stddev(yarr,/nan) and yarr gt mean(yarr,/nan) - 3.0*stddev(yarr,/nan) and finite(corrfluxarr) gt 0  ,ngood_pmap, complement=badpmap) 
+  goodpmap = where(xarr lt mean(xarr,/nan) + 2.5*stddev(xarr,/nan) and xarr gt mean(xarr,/nan) -2.5*stddev(xarr,/nan) and xarr lt mean(xarr,/nan) +3.0*stddev(yarr,/nan) and yarr gt mean(yarr,/nan) - 3.0*stddev(yarr,/nan)   ,ngood_pmap, complement=badpmap) ;and finite(corrfluxarr) gt 0
   ;;just care if it made the pixel
   good = where(xarr lt mean(xarr,/nan) + 2.5*stddev(xarr,/nan) and xarr gt mean(xarr,/nan) -2.5*stddev(xarr,/nan) and xarr lt mean(xarr,/nan) +3.0*stddev(yarr,/nan) and yarr gt mean(yarr,/nan) - 3.0*stddev(yarr,/nan) ,ngood, complement=bad)
      
@@ -38,35 +39,35 @@ function binning_function, a,bin_level, pmapcorr, ch, set_nbins = set_nbins, n_n
   xarr = xarr[good]
   yarr = yarr[good]
   timearr = timearr[good]
-  flux = fluxarr[good]
-  fluxerr = fluxerrarr[good]
-  corrflux = corrfluxarr[good]
-  corrflux_d = corrflux_darr[good]
-  corrfluxerr = corrfluxerrarr[good]
+;;  flux = fluxarr[good]
+;;  fluxerr = fluxerrarr[good]
+;;  corrflux = corrfluxarr[good]
+;;  corrflux_d = corrflux_darr[good]
+;;  corrfluxerr = corrfluxerrarr[good]
   bmjdarr = bmjd[good]
-  bkgdarr = bkgd[good]
-  phasearr = phase[good]
-  nparr = np[good]
-  npcentarr = npcentroids[good]
-  xfwhm = xfwhmarr[good]
-  yfwhm = yfwhmarr[good]
+;;  bkgdarr = bkgd[good]
+;;  phasearr = phase[good]
+;;  nparr = np[good]
+;;  npcentarr = npcentroids[good]
+ ;; xfwhm = xfwhmarr[good]
+ ;; yfwhm = yfwhmarr[good]
   
   ;;and a second set for those that are in the sweet spot
   xarrp = xarr[goodpmap]
   yarrp = yarr[goodpmap]
   timearrp = timearr[goodpmap]
-  fluxp = fluxarr[goodpmap]
-  fluxerrp= fluxerrarr[goodpmap]
-  corrfluxp = corrfluxarr[goodpmap]
-  corrflux_dp = corrflux_darr[goodpmap]
-  corrfluxerrp = corrfluxerrarr[goodpmap]
+;;  fluxp = fluxarr[goodpmap]
+;;  fluxerrp= fluxerrarr[goodpmap]
+;;  corrfluxp = corrfluxarr[goodpmap]
+;;  corrflux_dp = corrflux_darr[goodpmap]
+;;  corrfluxerrp = corrfluxerrarr[goodpmap]
   bmjdarrp = bmjd[goodpmap]
-  bkgdarrp = bkgd[goodpmap]
-  phasearrp = phase[goodpmap]
-  nparrp = np[goodpmap]
-  npcentarrp = npcentroids[goodpmap]
-  xfwhmp = xfwhmarr[goodpmap]
-  yfwhmp = yfwhmarr[goodpmap]
+;;  bkgdarrp = bkgd[goodpmap]
+;;  phasearrp = phase[goodpmap]
+;;  nparrp = np[goodpmap]
+;;  npcentarrp = npcentroids[goodpmap]
+;;  xfwhmp = xfwhmarr[goodpmap]
+;;  yfwhmp = yfwhmarr[goodpmap]
   
   
   ;-------------------------------------------------------------------------
@@ -141,42 +142,42 @@ function binning_function, a,bin_level, pmapcorr, ch, set_nbins = set_nbins, n_n
         meanclip, yarr[ri[ri[j]:ri[j+1]-1]], meany, sigmay
         bin_ycen[c] = meany     ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
         
-        meanclip, xfwhm[ri[ri[j]:ri[j+1]-1]], meanxfwhm, sigmaxfwhm
-        bin_xfwhm[c] = meanxfwhm ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+;;        meanclip, xfwhm[ri[ri[j]:ri[j+1]-1]], meanxfwhm, sigmaxfwhm
+;;        bin_xfwhm[c] = meanxfwhm ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
         
-        meanclip, yfwhm[ri[ri[j]:ri[j+1]-1]], meanyfwhm, sigmayfwhm
-        bin_yfwhm[c] = meanyfwhm ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+;;        meanclip, yfwhm[ri[ri[j]:ri[j+1]-1]], meanyfwhm, sigmayfwhm
+;;        bin_yfwhm[c] = meanyfwhm ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
         
-        meanclip, bkgdarr[ri[ri[j]:ri[j+1]-1]], meansky, sigmasky
-        bin_bkgd[c] = meansky   ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+;;        meanclip, bkgdarr[ri[ri[j]:ri[j+1]-1]], meansky, sigmasky
+;;        bin_bkgd[c] = meansky   ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
         
-        meanclip, flux[ri[ri[j]:ri[j+1]-1]], meanflux, sigmaflux
-        bin_flux[c] = meanflux  ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+;;        meanclip, flux[ri[ri[j]:ri[j+1]-1]], meanflux, sigmaflux
+;;        bin_flux[c] = meanflux  ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
         
-        idataerr = fluxerr[ri[ri[j]:ri[j+1]-1]]
-        bin_fluxerr[c] =   sqrt(total(idataerr^2))/ (n_elements(idataerr))
+;;        idataerr = fluxerr[ri[ri[j]:ri[j+1]-1]]
+;;        bin_fluxerr[c] =   sqrt(total(idataerr^2))/ (n_elements(idataerr))
         ;;meanclip, fluxerr[ri[ri[j]:ri[j+1]-1]], meanfluxerr, sigmafluxerr
         ;;bin_fluxerr[c] = sigmafluxerr
         
-        meanclip, nparr[ri[ri[j]:ri[j+1]-1]], meannp, sigmanp
-        bin_np[c] = meannp      ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+;;        meanclip, nparr[ri[ri[j]:ri[j+1]-1]], meannp, sigmanp
+;;        bin_np[c] = meannp      ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
         
-        meanclip, npcentarr[ri[ri[j]:ri[j+1]-1]], meannpcent, sigmanpcent
-        bin_npcent[c] =  meannpcent ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
+;;        meanclip, npcentarr[ri[ri[j]:ri[j+1]-1]], meannpcent, sigmanpcent
+;;        bin_npcent[c] =  meannpcent ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
         
-        junk = where(finite(corrflux[ri[ri[j]:ri[j+1]-1]]) gt 0,ngood)
-        bin_ncorr[c] = ngood
+;;        junk = where(finite(corrflux[ri[ri[j]:ri[j+1]-1]]) gt 0,ngood)
+;;        bin_ncorr[c] = ngood
         
         ;;meanclip, timearr[ri[ri[j]:ri[j+1]-1]], meantimearr, sigmatimearr
         meantimearr = median(timearr[ri[ri[j]:ri[j+1]-1]])
         bin_timearr[c]=meantimearr
         
         ;; meanclip, phasearr[ri[ri[j]:ri[j+1]-1]], meanphasearr, sigmaphasearr
-        meanphasearr = mean( phasearr[ri[ri[j]:ri[j+1]-1]],/nan)
+;;        meanphasearr = mean( phasearr[ri[ri[j]:ri[j+1]-1]],/nan)
         ;;having trouble with the boundary between 0.5 and -0.5
         ;;if a eq 0 then print, 'diff', meanphasearr - bin_phase[c-1]
         ;;if meanphasearr - bin_phase[c-1] lt -0.1 and meanphasearr - bin_phase[c-1] gt -0.5 then meanphasearr = mean(abs(phasearr[ri[ri[j]:ri[j+1]-1]]),/nan)
-        bin_phase[c]= meanphasearr
+;;        bin_phase[c]= meanphasearr
         
 ;           if a eq 0 then begin
 ;              print, 'phase', phasearr[ri[ri[j]:ri[j+1]-1]]
@@ -193,19 +194,19 @@ function binning_function, a,bin_level, pmapcorr, ch, set_nbins = set_nbins, n_n
   
   bin_xcen = bin_xcen[0:c-1]
   bin_ycen = bin_ycen[0:c-1]
-  bin_bkgd = bin_bkgd[0:c-1]
-  bin_flux = bin_flux[0:c-1]
-  bin_fluxerr = bin_fluxerr[0:c-1]
+;;  bin_bkgd = bin_bkgd[0:c-1]
+;;  bin_flux = bin_flux[0:c-1]
+;;  bin_fluxerr = bin_fluxerr[0:c-1]
   ;;bin_corrflux = bin_corrflux[0:c-1]
   bin_timearr = bin_timearr[0:c-1]
   bin_bmjdarr = bin_bmjdarr[0:c-1]
   ;;bin_corrfluxerr = bin_corrfluxerr[0:c-1]
-  bin_phase = bin_phase[0:c-1]
-  bin_ncorr = bin_ncorr[0:c-1]
-  bin_np = bin_np[0:c-1]
-  bin_npcent = bin_npcent[0:c-1]
-  bin_xfwhm = bin_xfwhm[0:c-1]
-  bin_yfwhm = bin_yfwhm[0:c-1]
+;;  bin_phase = bin_phase[0:c-1]
+;;  bin_ncorr = bin_ncorr[0:c-1]
+;;  bin_np = bin_np[0:c-1]
+;;  bin_npcent = bin_npcent[0:c-1]
+;;  bin_xfwhm = bin_xfwhm[0:c-1]
+;;  bin_yfwhm = bin_yfwhm[0:c-1]
   
   ;;bin_centerpix = bin_centerpix[0:c-1]
   ;;print, 'bin_xcen', bin_xcen
@@ -228,63 +229,63 @@ function binning_function, a,bin_level, pmapcorr, ch, set_nbins = set_nbins, n_n
         meanclip, yarrp[rip[rip[j]:rip[j+1]-1]], meany, sigmay
         bin_ycenp[cp] = meany   ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
         
-        meanclip, xfwhmp[rip[rip[j]:rip[j+1]-1]], meanxfwhm, sigmaxfwhm
-        bin_xfwhmp[cp] = meanxfwhm ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
+;;        meanclip, xfwhmp[rip[rip[j]:rip[j+1]-1]], meanxfwhm, sigmaxfwhm
+;;        bin_xfwhmp[cp] = meanxfwhm ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
         
-        meanclip, yfwhmp[rip[rip[j]:rip[j+1]-1]], meanyfwhm, sigmayfwhm
-        bin_yfwhmp[cp] = meanyfwhm ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
+;;        meanclip, yfwhmp[rip[rip[j]:rip[j+1]-1]], meanyfwhm, sigmayfwhm
+;;        bin_yfwhmp[cp] = meanyfwhm ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
         
         ;;meanclip, centerpixarrp[ri[ri[j]:ri[j+1]-1]], meancenterpix, sigmacenterpix
         ;;bin_centerpixp[cp]= meancenterpix
         
-        meanclip, bkgdarrp[rip[rip[j]:rip[j+1]-1]], meansky, sigmasky
-        bin_bkgdp[cp] = meansky ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
+;;        meanclip, bkgdarrp[rip[rip[j]:rip[j+1]-1]], meansky, sigmasky
+;;        bin_bkgdp[cp] = meansky ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
         
-        meanclip, fluxp[rip[rip[j]:rip[j+1]-1]], meanflux, sigmaflux1
-        bin_fluxp[cp] = meanflux ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
+;;        meanclip, fluxp[rip[rip[j]:rip[j+1]-1]], meanflux, sigmaflux1
+;;        bin_fluxp[cp] = meanflux ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
         
-        meanclip, nparrp[rip[rip[j]:rip[j+1]-1]], meannp, sigmanp
-        bin_nparrp[cp] = meannp ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
+;;        meanclip, nparrp[rip[rip[j]:rip[j+1]-1]], meannp, sigmanp
+;;        bin_nparrp[cp] = meannp ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
         
-        meanclip, npcentarrp[rip[rip[j]:rip[j+1]-1]], meannpcent, sigmanpcent
-        bin_npcentarrp[cp] = meannpcent ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
+;;        meanclip, npcentarrp[rip[rip[j]:rip[j+1]-1]], meannpcent, sigmanpcent
+;;        bin_npcentarrp[cp] = meannpcent ; mean(fluxarr[rip[rip[j]:rip[j+1]-1]])
         
-        junk = where(finite(corrfluxp[rip[rip[j]:rip[j+1]-1]]) gt 0,ngood)
-        bin_ncorrp[cp] = ngood
+;;        junk = where(finite(corrfluxp[rip[rip[j]:rip[j+1]-1]]) gt 0,ngood)
+ ;;       bin_ncorrp[cp] = ngood
         
         meanclip, timearrp[rip[rip[j]:rip[j+1]-1]], meantimearr, sigmatimearr
         bin_timearrp[cp]=meantimearr
         
 ;           meanclip, phasearrp[rip[rip[j]:rip[j+1]-1]], meanphasearr, sigmabmjdarr
-        meanphasearr = mean(phasearrp[rip[rip[j]:rip[j+1]-1]],/nan)
+;;        meanphasearr = mean(phasearrp[rip[rip[j]:rip[j+1]-1]],/nan)
 ;           if a eq 24 then print, meanphasearr, bin_phasep[cp-1],  meanphasearr - bin_phasep[cp-1], phasearrp[rip[rip[j]:rip[j+1]-1]]
-        if bin_phasep[cp-1] gt 0.48 and (meanphasearr - bin_phasep[cp-1]) lt -0.1 $
-           and (meanphasearr - bin_phasep[cp-1]) gt -0.9 then meanphasearr = mean(abs(phasearrp[rip[rip[j]:rip[j+1]-1]]),/nan)
+;;        if bin_phasep[cp-1] gt 0.48 and (meanphasearr - bin_phasep[cp-1]) lt -0.1 $
+;;           and (meanphasearr - bin_phasep[cp-1]) gt -0.9 then meanphasearr = mean(abs(phasearrp[rip[rip[j]:rip[j+1]-1]]),/nan)
 ;           if a eq 24 then print, 'final meanphase', meanphasearr
-        bin_phasep[cp]= meanphasearr
+;;        bin_phasep[cp]= meanphasearr
         
         meanbmjdarr = mean( bmjdarrp[rip[rip[j]:rip[j+1]-1]],/nan)
         bin_bmjdarrp[cp]= meanbmjdarr
         
                                 ;xxxx this could change
                                 ;ripght now it is just the scatter in the bins
-        icorrdataerr = corrfluxerrp[rip[rip[j]:rip[j+1]-1]]
-        icorrdata = corrfluxp[rip[rip[j]:rip[j+1]-1]]
-        bin_corrfluxerrp[cp] =  sqrt(total(icorrdataerr^2))/ (n_elements(icorrdataerr))
+;;        icorrdataerr = corrfluxerrp[rip[rip[j]:rip[j+1]-1]]
+;;        icorrdata = corrfluxp[rip[rip[j]:rip[j+1]-1]]
+;;        bin_corrfluxerrp[cp] =  sqrt(total(icorrdataerr^2))/ (n_elements(icorrdataerr))
         
         
                                 ;can only compute means if there are values in there
-        if pmapcorr eq 1 then begin
-           meanclip, corrfluxp[rip[rip[j]:rip[j+1]-1]], meancorrflux, sigmacorrflux
+;;        if pmapcorr eq 1 then begin
+;;           meanclip, corrfluxp[rip[rip[j]:rip[j+1]-1]], meancorrflux, sigmacorrflux
 ;              meancorrflux = mean(corrflux[rip[rip[j]:rip[j+1]-1]],/nan)
-           bin_corrfluxp[cp] = meancorrflux
+;;           bin_corrfluxp[cp] = meancorrflux
                                 ;bin_corrfluxerrp[cp] = sigmacorrflux
-           meanclip, corrflux_dp[rip[rip[j]:rip[j+1]-1]], meancorrflux_d, sigmacorrflux_d
-           bin_corrflux_dp[cp] = meancorrflux_d
-        endif
+;;           meanclip, corrflux_dp[rip[rip[j]:rip[j+1]-1]], meancorrflux_d, sigmacorrflux_d
+;;           bin_corrflux_dp[cp] = meancorrflux_d
+;;        endif
         
-        idataerr = fluxerrp[rip[rip[j]:rip[j+1]-1]]
-        bin_fluxerrp[cp] =   sqrt(total(idataerr^2))/ (n_elements(idataerr))
+;;        idataerr = fluxerrp[rip[rip[j]:rip[j+1]-1]]
+;;        bin_fluxerrp[cp] =   sqrt(total(idataerr^2))/ (n_elements(idataerr))
         
 ;           meanclip, corrfluxerrp[rip[rip[j]:rip[j+1]-1]], meancorrfluxerr, sigmacorrfluxerr
 ;           bin_corrfluxerrp[cp] = sigmacorrfluxerr
@@ -301,20 +302,20 @@ function binning_function, a,bin_level, pmapcorr, ch, set_nbins = set_nbins, n_n
   
   bin_xcenp = bin_xcenp[0:cp-1]
   bin_ycenp = bin_ycenp[0:cp-1]
-  bin_bkgdp = bin_bkgdp[0:cp-1]
-  bin_fluxp = bin_fluxp[0:cp-1]
-  bin_fluxerrp = bin_fluxerrp[0:cp-1]
-  bin_corrfluxp = bin_corrfluxp[0:cp-1]
-  bin_corrflux_dp = bin_corrflux_dp[0:cp-1]
+;;  bin_bkgdp = bin_bkgdp[0:cp-1]
+;;  bin_fluxp = bin_fluxp[0:cp-1]
+;;  bin_fluxerrp = bin_fluxerrp[0:cp-1]
+;;  bin_corrfluxp = bin_corrfluxp[0:cp-1]
+;;  bin_corrflux_dp = bin_corrflux_dp[0:cp-1]
   bin_timearrp = bin_timearrp[0:cp-1]
   bin_bmjdarrp = bin_bmjdarrp[0:cp-1]
-  bin_corrfluxerrp = bin_corrfluxerrp[0:cp-1]
-  bin_phasep = bin_phasep[0:cp-1]
-  bin_ncorrp = bin_ncorrp[0:cp-1]
-  bin_nparrp = bin_nparrp[0:cp-1]
-  bin_npcentarrp = bin_npcentarrp[0:cp-1]
-  bin_xfwhmp = bin_xfwhmp[0:cp-1]
-  bin_yfwhmp = bin_yfwhmp[0:cp-1]
+;;  bin_corrfluxerrp = bin_corrfluxerrp[0:cp-1]
+;;  bin_phasep = bin_phasep[0:cp-1]
+;;  bin_ncorrp = bin_ncorrp[0:cp-1]
+;;  bin_nparrp = bin_nparrp[0:cp-1]
+;;  bin_npcentarrp = bin_npcentarrp[0:cp-1]
+;;  bin_xfwhmp = bin_xfwhmp[0:cp-1]
+;;  bin_yfwhmp = bin_yfwhmp[0:cp-1]
 ;
 ;     bin_centerpixp = bin_centerpixp[0:cp-1]
 ;  bin_bkgderrp = bin_bkgderrp[0:cp-1]
