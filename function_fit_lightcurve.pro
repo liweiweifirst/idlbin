@@ -4,6 +4,8 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
   exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
   exosystem = strmid(planetname, 0, 7) + ' b' ;'HD 209458 b' ;
   if planetname eq 'WASP-52b' then teq_p = 1315
+  if planetname eq 'WASP-14b' then exosystem = 'WASP-14 b'
+  if planetname eq 'XO3' then exosystem = 'XO-3 b' 
 
   get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
                        TEQ_P=teq_p,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA='4.5',$
@@ -22,7 +24,7 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
 
  ;actually want the bottom of eclipse to be at 1.0
  ;fake this for now  XXX
- fluxarr = fluxarr + 0.0015
+ ;;fluxarr = fluxarr + 0.0015
 
 ;and sort them into phase-order
  sp = sort(phasearr)
@@ -85,7 +87,7 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
 ;want to overplot the fitted curve
   params0 = pa  ; just give it the answer, and run with overplot
   ph = findgen(100) / 100. - 0.5   ; give it a nice set of phases for a nice plot
-  model = mandel_agol(params0, t=ph, flux=fluxarr, err=errarr, p_orbit=p_orbit, mjd_start=mjd_start, mjd_transit=mjd_transit ,savefilename = savefilename);, overplot = overplot);, rp_rstar=rp_rstar, ar_semimaj=ar_semimaj,inclination=inclination,
+  model = mandel_agol(params0, t=phasearr, flux=fluxarr, err=errarr, p_orbit=p_orbit, mjd_start=mjd_start, mjd_transit=mjd_transit ,savefilename = savefilename);, overplot = overplot);, rp_rstar=rp_rstar, ar_semimaj=ar_semimaj,inclination=inclination,
 
 
 return, 0
