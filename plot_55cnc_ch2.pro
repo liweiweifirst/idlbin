@@ -2,14 +2,16 @@ pro plot_55cnc_ch2,binning = binning
   colorarr = ['red', 'orange', 'green', 'blue', 'deep_pink', 'magenta', 'medium_purple', 'hot_pink', 'light_pink', 'rosy_brown', 'chocolate', 'saddle_brown', 'maroon', 'orange_red', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki','black', 'light_cyan', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green']
 
      fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_121120.fits', pmapdata, pmapheader
-     c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [-300,800], yrange = [-700,500], axis_style = 0)
+     c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [0,500], yrange = [0,500], axis_style = 0)
 
 ; c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', aspect_ratio = 1, xrange = [0,500], yrange = [0,500])
 
 
-  restore, '/Users/jkrick/irac_warm/pcrs_planets/55cnc/55cnc_phot_ch2_2.25000.sav'
+;  restore, '/Users/jkrick/irac_warm/pcrs_planets/55cnc/55cnc_phot_ch2_2.25000.sav'
+  restore, '/Users/jkrick/external/irac_warm/XO3/XO3_phot_ch2_2.25000_150226.sav'
  ; aorname_55cnc = ['r43981312','r43981568','r43981824','r43981056'] ;ch2
-  aorname = ['r48069888','r48070144','r48070400','r48070656','r48070912','r48071168','r48071424','r48071680','r48071936','r48072192','r48072448','r48072704','r48072960','r48073216','r48073472','r48073728'] 
+;  aorname = ['r48069888','r48070144','r48070400','r48070656','r48070912','r48071168','r48071424','r48071680','r48071936','r48072192','r48072448','r48072704','r48072960','r48073216','r48073472','r48073728'] 
+  aorname = ['r24291328', 'r46466816', 'r46468096', 'r46469376', 'r46470656', 'r46484224', 'r46486784','r31618816', 'r46467072', 'r46468352', 'r46469632', 'r46470912', 'r46484992', 'r46487040','r39117312', 'r46467328', 'r46468608', 'r46469888', 'r46471168', 'r46485504', 'r46487296','r39117568', 'r46467584', 'r46468864', 'r46470144', 'r46471424', 'r46486016', 'r46487552','r39117824', 'r46467840', 'r46469120', 'r46470400', 'r46471680',  'r46486528']
   
   ;utmjd_center = [double(55947.20505),double(55949.41467), double(55957.51661),double(55944.25889)]  
   utmjd_center = [double(55944.25889), double(55947.20505),double(55949.41467), double(55957.51661)]  
@@ -25,7 +27,7 @@ pro plot_55cnc_ch2,binning = binning
         xcen500 = 500.* ((planethash[aorname(a),'xcen']) - 14.5)
         ycen500 = 500.* ((planethash[aorname(a),'ycen']) - 14.5)
         limit = where(indgen(n_elements(planethash[aorname(a),'xcen'])) mod 100 eq 0) 
-        an = plot(xcen500(limit), ycen500(limit), '1s', sym_size = 0.3,   sym_filled = 1, title = '55Cnc',color = colorarr[a],/overplot)
+        an = plot(xcen500(limit), ycen500(limit), '1s', sym_size = 0.3,   sym_filled = 1, title = 'XO3',color = colorarr[a],/overplot)
      endfor
 
 
