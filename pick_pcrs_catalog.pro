@@ -26,6 +26,9 @@
 ;  obs_epoch = the planned observing epoch in years eg. 2015.6
 ;  dirloc = full path to the location of the catalog
 ;
+; OPTIONAL INPUT:
+; rad_dist = radial distance in degrees to search the catalog for
+;   acceptable peakup stars
 ; OUTPUTS:
 ;  -RA J2000
 ;  -DEC J2000
@@ -48,8 +51,9 @@
 ;  January 2015 Original Version  JK
 ;  February 2015 changed from addpm to calcpos in order to calculate
 ;  the proper motions of the science target JK
+;  June 2015 Added the optional input parameter for the radial distance
 ;-
-pro pick_pcrs_catalog,ra_deg, dec_deg, pm_ra, pm_dec, pos_epoch, obs_epoch, dirloc
+pro pick_pcrs_catalog,ra_deg, dec_deg, pm_ra, pm_dec, pos_epoch, obs_epoch, dirloc, rad_dist = rad_dist
 ;  t = systime(1)
   ;;do some error checking on the inputs
   if (N_params() lt 7) then begin
@@ -90,6 +94,9 @@ pro pick_pcrs_catalog,ra_deg, dec_deg, pm_ra, pm_dec, pos_epoch, obs_epoch, dirl
      return
   endif
 
+  ;;allow user input for the maximum allowable distance to the peak-upstar
+  ;; 0.5 degrees is the default.
+  if keyword_set(rad_dist) eq 0 then rad_dist = 0.5
      
    ;;read in the pcrs_catalog  
   read_pcrs_catalog, dirloc, star_id, Validity, Q, posEr, pErWk,  vMag, rightAscensn,  declination, prpMtnRA, prpMtnDc,  parllx, magEr,  raErr, declEr, mKER, mKED, plxEr, dOjbE, bkgEr, bstEr, P, M, L, epoch, x, y, z, spt_ind, CNTR
@@ -144,7 +151,7 @@ pro pick_pcrs_catalog,ra_deg, dec_deg, pm_ra, pm_dec, pos_epoch, obs_epoch, dirl
   sort_vmag = vMag[sortangle]
   
   ;;display a list of the stars with 
-  n = where(sort_angle le 0.5, n_angle) ;0.52
+  n = where(sort_angle le rad_dist, n_angle) ;0.5 is the suggested value
   if n_angle eq 0 then print, 'No catalog stars found'
   for i = 0, n_angle - 1 do begin
      if sort_angle[i] le 1.0 then begin
