@@ -813,6 +813,28 @@ chname = 0
 
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
+;---------
+  planetname = 'simul_XO3'
+  ra_ref = 65.469554
+  dec_ref = 57.817067
+  aorname_ch1 = [ 'r0']
+
+
+
+
+  aorname_ch2 = ['r20150000', 'r20150001', 'r20150002', 'r20150003', 'r20150004', 'r20150005', 'r20150006', 'r20150007', 'r20150008', 'r20150009', 'r20150010', 'r20150011', 'r20150012', 'r20150013', 'r20150014', 'r20150015', 'r20150016', 'r20150017', 'r20150018', 'r20150019']
+  basedir = '/Users/jkrick/external/irac_warm/' 
+  utmjd_center =   55180.50972D ; junk
+  transit_duration=100. ; junk
+  period = 3.1915239 
+  intended_phase = 0.5
+  exptime = 2.
+  stareaor = 20
+  plot_norm =1.
+  plot_corrnorm = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
 
 ;---
   planetname = 'wasp43'

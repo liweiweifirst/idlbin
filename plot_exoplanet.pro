@@ -43,6 +43,9 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
   if planetname eq 'GJ1214' then exosystem = 'GJ 1214 b'
   if planetname eq '55Cnc' then exosystem = '55 Cnc e'
   if planetname eq 'HD209458' then exosystem = 'HD 209458 b'
+  if planetname eq 'XO3' then exosystem = 'XO-3 b' 
+  if planetname eq 'simul_XO3' then exosystem = 'XO-3 b' 
+
   print, exosystem, 'exosystem'
   if planetname eq 'WASP-52b' then teq_p = 1315
   if planetname eq 'HD 7924 b' then begin

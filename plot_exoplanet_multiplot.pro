@@ -63,8 +63,8 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
      print, '0.2nflux, ncorr, ', 0.2*n_elements([planethash[aorname(a),'flux']]), corrcount
      if corrcount gt 0.2*n_elements([planethash[aorname(a),'flux']]) then pmapcorr = 1 else pmapcorr = 0
      print, 'pmapcorr', pmapcorr
-     peakpixDN = planethash[aorname(a), 'peakpixDN']
-     print, 'median peakpixDN', median(peakpixDN)
+;;     peakpixDN = planethash[aorname(a), 'peakpixDN']
+;;     print, 'median peakpixDN', median(peakpixDN)
 
 ; bin within each AOR only, don't want to bin across boundaries.
      junkpar = binning_function(a, bin_level, pmapcorr)
@@ -100,7 +100,7 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         
      endif else begin
         plotx = bin_phase
-        setxrange = [0.5, 0.65]; [0.,1.]; [-0.5,0.5]
+        setxrange = [0.58, 0.78]; [0.,1.]; [-0.5,0.5]
         ending = 'phase'
      endelse
      
@@ -154,12 +154,12 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         
         pt = plot(plotx, bin_bkgd/ bkgd_norm, '1s' , color = colorarr[a], $
                   ytitle = 'Norm. Bkgd',  margin = 0.2, position = [0.2, 0.22, 0.9, 0.35], /current, xshowtext = 0,$
-                  ytickformat = '(F10.2)', _extra = extra, ytickinterval = 2E-1, yminor = 0,$ ; yrange = [0.8, 1.1],$
+                  ytickformat = '(F10.2)', _extra = extra, ytickinterval = .02, yminor = 0,$ ; yrange = [0.8, 1.1],$
                   xrange = setxrange)                                                         ;, $ title = planetname,ymajor = 4,
         
         pxy = plot(plotx, bin_xfwhm, '1s', color = 'blue', $
                    ytitle = 'X & Y FWHM',  position = [0.2, 0.50, 0.9, 0.63], /current, $
-                   xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.1, yminor = 0,$
+                   xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.05, yminor = 0,$
                    xrange = setxrange) ;
         pxy = plot(plotx, bin_yfwhm, '1s', color = 'black', $
                    overplot = pxy, _extra = extra,$

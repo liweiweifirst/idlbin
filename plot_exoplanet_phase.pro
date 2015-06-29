@@ -165,6 +165,9 @@ print, 'snap_addoffset', snap_addoffset
      ;use time degraded corrfluxes
      bin_corrfluxp = bin_corrflux_dp
 
+     ;fake the eccentricities effect on phase
+     if planetname eq 'XO3' then bin_phasep = bin_phasep - 0.07
+     
 
 ;------------------------------------------------------
      ;;normalize for each AOR
@@ -175,8 +178,7 @@ print, 'snap_addoffset', snap_addoffset
 
 ;------------------------------------------------------
      ;;put all the variables together and save them for later
-     print, 'bin_phasep', bin_phasep
-     if a eq startaor then begin
+         if a eq startaor then begin
         bin_all_phasep = bin_phasep
         bin_all_corrfluxp = bin_corrfluxp
         bin_all_fluxerrp = bin_fluxerrp
@@ -200,7 +202,7 @@ print, 'snap_addoffset', snap_addoffset
      setyrange =  [0.996, 1.005] ;[0.996, 1.004];
      if planetname eq 'HD158460' then setyrange = [0.997, 1.003];[0.999, 1.001]
      setynormfluxrange = [0.985, 1.005] ;[0.97, 1.005]
-     setxrange = [0.50, 0.66];
+     setxrange = [0.40, 0.66];
      extra={ sym_size: 0.2, sym_filled: 1, xrange: setxrange, color: colorarr[a], title:planetname}
 
      if keyword_set(all_plots) then begin

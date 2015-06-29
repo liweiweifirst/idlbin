@@ -69,6 +69,8 @@ if planetname eq 'HD209458' then exosystem = 'HD 209458 b'
 if planetname eq 'Kepler-5' then exosystem = 'Kepler-5 b'
 if planetname eq 'Kepler-17' then exosystem = 'Kepler-17 b'
 if planetname eq 'upsandb' then exosystem = 'upsilon And b'
+if planetname eq 'XO3' then exosystem = 'XO-3 b' 
+if planetname eq 'simul_XO3' then exosystem = 'XO-3 b' 
 
 ;print, exosystem, 'exosystem'
 if planetname eq 'WASP-52b' then teq_p = 1315
@@ -89,11 +91,14 @@ get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=tra
                        INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
                        DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose
 ;ra = 1000.
+
+;print, 'ra', ra, 'dec', dec
 if ra lt 400. then begin  ; that means get_exoplanet_data actually found the target
-   ra_ref = double(ra)*15.D       ; comes in hours!;
-   help, ra_ref
-   help, double(ra)
-   print, ra, ra_ref, double(ra) * 15.D, double(ra) * 15.D/ 15.D
+  ; ra_ref = double(ra)*15.D       ; comes in hours!;
+  ; help, ra_ref
+  ; help, double(ra)
+ ;  print, ra, ra_ref, double(ra) * 15.D, double(ra) * 15.D/ 15.D
+   ra_ref = ra
    dec_ref = dec
    utmjd_center = mjd_transit
    period = p_orbit
