@@ -116,6 +116,10 @@
 ;              here.  Please see the documentation for MPFIT for the
 ;              description of these advanced options.
 ;
+;   AUTODERIV - Set to 1 to have MPFIT compute the derivatives numerically.
+;          Default is 0 -  derivatives are computed analytically, which is 
+;              generally faster.    (Prior to Jan 2011, the default was 1)
+;
 ;   CHISQ - the value of the summed squared residuals for the
 ;           returned parameter values.
 ;
@@ -165,6 +169,12 @@
 ;   NFREE - the number of free parameters in the fit.  This includes
 ;           parameters which are not FIXED and not TIED, but it does
 ;           include parameters which are pegged at LIMITS.
+;
+;   NO_FIT - if set, then return only the initial estimates without
+;            fitting.  Useful to find out what the estimates the
+;            automatic guessing algorithm produced.  If NO_FIT is set,
+;            then SIGMA and CHISQ values are not produced.  The
+;            routine returns, NAN, and STATUS=5.
 ;
 ;   NTERMS - An integer describing the number of fitting terms.
 ;            NTERMS must have a minimum value, but can optionally be
@@ -285,8 +295,13 @@
 ;     CM, 30 Mar 2009
 ;   Correct one case of old IDL 4 () array syntax (thanks to I. Urra),
 ;     CM, 25 Jan 2010
+;  Improve performance by analytic derivative computation, added AUTODERIV 
+;      keyword, W. Landsman, 2011-01-21
+;  Move estimation code to its own function; allow the user to compute
+;    only the estimate and return immediately without fitting,
+;    C. Markwardt, 2011-07-12
 ;
-;  $Id: mpfitpeak.pro,v 1.17 2010/01/26 01:07:27 craigm Exp $
+;  $Id: mpfitpeak.pro,v 1.19 2011/12/08 17:51:33 cmarkwar Exp $
 ;-
 ; Copyright (C) 1997-2001, 2003, 2005, 2007, 2008, 2009, 2010, Craig Markwardt
 ; This software is provided as is without any warranty whatsoever.
@@ -301,38 +316,138 @@ forward_function mpfit, mpfitfun, mpfitpeak, mpfitpeak_gauss, $
 function mpfitpeak_u, x, p
   COMPILE_OPT strictarr
   wid = abs(p[2]) > 1e-20
-  return, ((x-p[1])/wid)^2
+  return, ((x-p[1])/wid)
 end
 
-
 ; Gaussian Function
-function mpfitpeak_gauss, x, p, _extra=extra
-  COMPILE_OPT strictarr
-  sz = size(x)
-  if sz[sz[0]+1] EQ 5 then smax = 26D else smax = 13.
+function mpfitpeak_gauss, x, p, pder, _extra=extra
+  COMPILE_OPT strictarr,hidden
+  sz = size(x,/type)
+  if sz EQ 5 then smax = 26D else smax = 13.
   u = mpfitpeak_u(x, p)
-  mask = u LT (smax^2)  ;; Prevents floating underflow
-  if n_elements(p) GE 4 then f = p[3] else f = 0
-  if n_elements(p) GE 5 then f = f + p[4]*x
-  return,  f + p[0] * mask * exp(-0.5 * temporary(u) * mask)
+  mask = abs(u) LT smax  ;; Prevents floating underflow
+  Np = N_elements(p)
+  if Np GE 4 then f = p[3] else f = 0
+  if Np GE 5 then f = f + p[4]*x
+  uz = mask*exp(-0.5 * u^2 * mask)
+  if N_params() GT 2 then begin    ;; Compute derivatives if asked
+      pder = make_array(N_elements(x), Np,type= size(p,/type) )
+      pder[*,0] = uz      
+      if p[2] NE 0 then pder[*,1] = p[0]*uz*u/p[2]
+      pder[*,2] = pder[*,1]*u
+      if Np GE 4 then pder[*,3] = 1.
+      if Np GE 5 then pder[*,4] = x
+      endif
+  return,  f + p[0] * uz
 end
 
 ; Lorentzian Function
-function mpfitpeak_lorentz, x, p, _extra=extra
-  COMPILE_OPT strictarr
+function mpfitpeak_lorentz, x, p, pder, _extra=extra
+  COMPILE_OPT strictarr,hidden
   u = mpfitpeak_u(x, p)
-  if n_elements(p) GE 4 then f = p[3] else f = 0
-  if n_elements(p) GE 5 then f = f + p[4]*x
-  return, f + p[0] / (u + 1)
+  Np = N_elements(p)
+  if Np GE 4 then f = p[3] else f = 0
+  if Np GE 5 then f = f + p[4]*x
+  denom = 1/(u^2 + 1)
+  if N_params() GT 2 then begin   ;; Compute derivatives if asked
+      pder = make_array(N_elements(x), Np,type= size(p,/type) )
+      pder[*,0] = denom
+      if p[2] NE 0 then pder[*,1] = 2*p[0]*u*denom*denom/p[2]    
+      pder[*,2] = pder[*,1]*u
+      if Np GE 4 then pder[*,3] = 1.
+      if Np GE 5 then pder[*,4] = x
+    endif
+    return, f + p[0] *denom
 end
 
 ; Moffat Function
-function mpfitpeak_moffat, x, p, _extra=extra
+function mpfitpeak_moffat, x, p, pder,_extra=extra
   COMPILE_OPT strictarr
   u = mpfitpeak_u(x, p)
-  if n_elements(p) GE 5 then f = p[4] else f = 0
-  if n_elements(p) GE 6 then f = f + p[5]*x
-  return, f + p[0] / (u + 1)^p[3]
+  Np = N_elements(p)
+  if Np GE 5 then f = p[4] else f = 0
+  if Np GE 6 then f = f + p[5]*x
+  denom0 =   (u^2 +1)
+  denom = denom0^(-p[3])
+  if N_params() GT 2 then begin      ;; Compute derivatives if asked
+      pder = make_array(N_elements(x), Np,type= size(p,/type) )
+      pder[*,0] = denom
+      if p[2] NE 0 then pder[*,1] = 2*p[3]*p[0]*u*denom/p[2]/denom0    
+      pder[*,2] = pder[*,1]*u
+      pder[*,3] = -alog(denom0)*p[0]*denom
+      if Np GE 5 then pder[*,4] = 1.
+      if Np GE 6 then pder[*,5] = x
+    endif
+  return, f + p[0]* denom
+end
+
+;
+; Utility function to estimate peak parameters from an X,Y dataset
+;
+; X - independent variable
+; Y - dependent variable (possibly noisy)
+; NAN - if set, then ignore NAN values
+; POSITIVE_PEAK - if set, search for positive peak
+; NEGATIVE_PEAK - if set, search for negative peak
+; (if neither POSITIVE_PEAK nor NEGATIVE_PEAK is set, then search
+; for the largest magnitude peak)
+; ERRMSG - upon return, set to an error code if an error occurred
+;
+function mpfitpeak_est, x, y, nan=nan, $
+                          positive_peak=pos, negative_peak=neg, $
+                          errmsg=errmsg
+
+  ;; Here is the secret - the width is estimated based on the area
+  ;; above/below the average.  Thus, as the signal becomes more
+  ;; noisy the width automatically broadens as it should.
+
+  nx = n_elements(x)
+
+  is = sort(x)
+  xs = x[is] & ys = y[is]
+  maxx = max(xs, min=minx) & maxy = max(ys, min=miny, nan=nan)
+  dx = 0.5 * [xs[1]-xs[0], xs[2:*] - xs, xs[nx-1] - xs[nx-2]]
+  totarea = total(dx*ys, nan=nan)       ;; Total area under curve
+  av = totarea/(maxx - minx)  ;; Average height
+
+  ;; Degenerate case: all flat with no noise
+  if miny EQ maxy then begin
+      est = ys[0]*0.0 + [0,xs[nx/2],(xs[nx-1]-xs[0])/2, ys[0]]
+      guess = 1
+      return, est
+  endif
+
+  ;; Compute the spread in values above and below average... we
+  ;; take the narrowest one as the one with the peak
+  wh1 = where(y GE av, ct1)
+  wh2 = where(y LE av, ct2)
+  if ct1 EQ 0 OR ct2 EQ 0 then begin
+      errmsg = 'ERROR: average Y value should fall within the range of Y data values but does not'
+      return, !values.d_nan
+  endif
+  sd1 = total(x[wh1]^2)/ct1 - (total(x[wh1])/ct1)^2
+  sd2 = total(x[wh2]^2)/ct2 - (total(x[wh2])/ct2)^2
+      
+  ;; Compute area above/below average
+
+  if keyword_set(pos) then goto, POS_PEAK
+  if keyword_set(neg) then goto, NEG_PEAK
+  if sd1 LT sd2 then begin  ;; This is a positive peak
+      POS_PEAK:
+      cent  = x[where(y EQ maxy)] & cent = cent[0]
+      peak  = maxy - av
+  endif else begin          ;; This is a negative peak
+      NEG_PEAK:
+      cent  = x[where(y EQ miny)] & cent = cent[0]
+      peak  = miny - av
+  endelse
+  peakarea = totarea - total(dx*(ys<av), nan=nan)
+  if peak EQ 0 then peak = 0.5*peakarea
+  width = peakarea / (2*abs(peak))
+  if width EQ 0 OR finite(width) EQ 0 then width = median(dx)
+
+  est = [peak, cent, width, av]
+  return, est
 end
 
 
@@ -342,8 +457,10 @@ function mpfitpeak, x, y, a, estimates=est, nterms=nterms, $
                     chisq=chisq, bestnorm=bestnorm, niter=iter, nfev=nfev, $
                     error=dy, weights=weights, measure_errors=dym, $
                     nfree=nfree, dof=dof, nan=nan, $
+                    no_fit=no_fit, $
                     negative=neg, positive=pos, parinfo=parinfo, $
-                    errmsg=errmsg, status=status, $
+                    best_fjac=best_fjac, pfree_index=pfree_index, covar=covar,$
+                    errmsg=errmsg, status=status, autoderiv=autoderiv0, $
                     query=query, quiet=quiet, _extra=extra
 
   COMPILE_OPT strictarr
@@ -370,8 +487,9 @@ function mpfitpeak, x, y, a, estimates=est, nterms=nterms, $
   if keyword_set(query) then return, 1
 
   ;; Check the number of parameter estimates
-  if n_elements(quiet) EQ 0 then quiet=1
+  if n_elements(quiet) EQ 0 then quiet = 1
   if n_elements(nterms) EQ 0 then nterms = 4
+  if n_elements(autoderiv0) EQ 0 then autoderiv = 0 else autoderiv = keyword_set(autoderiv0)
 
   ;; Reject data vectors that are too simple
   if n_elements(x) LT nterms OR n_elements(y) LT nterms then begin
@@ -393,64 +511,20 @@ function mpfitpeak, x, y, a, estimates=est, nterms=nterms, $
       weights = dym * 0   ;; Avoid division by zero
       wh = where(dym NE 0, ct)
       if ct GT 0 then weights[wh] = 1./dym[wh]^2
-   endif
+  endif
 
+  ;; If the user did not supply an estimate of the parameter values,
+  ;; then try to guestimate them.
   if n_elements(est) EQ 0 then begin
-      ;; Here is the secret - the width is estimated based on the area
-      ;; above/below the average.  Thus, as the signal becomes more
-      ;; noisy the width automatically broadens as it should.
+      guess = 1
+      est = mpfitpeak_est(x, y, nan=nan, pos=pos, neg=neg, $
+                          errmsg=errmsg)
 
-      nx = n_elements(x)
-
-      is = sort(x)
-      xs = x[is] & ys = y[is]
-      maxx = max(xs, min=minx) & maxy = max(ys, min=miny, nan=nan)
-      dx = 0.5 * [xs[1]-xs[0], xs[2:*] - xs, xs[nx-1] - xs[nx-2]]
-      totarea = total(dx*ys, nan=nan)       ;; Total area under curve
-      av = totarea/(maxx - minx)  ;; Average height
-
-      ;; Degenerate case: all flat with no noise
-      if miny EQ maxy then begin
-          est = ys[0]*0.0 + [0,xs[nx/2],(xs[nx-1]-xs[0])/2, ys[0]]
-          guess = 1
-          goto, DONE_GUESS
-      endif
-
-      ;; Compute the spread in values above and below average... we
-      ;; take the narrowest one as the one with the peak
-      wh1 = where(y GE av, ct1)
-      wh2 = where(y LE av, ct2)
-      if ct1 EQ 0 OR ct2 EQ 0 then begin
-          errmsg = 'ERROR: average Y value should fall within the range of Y data values but does not'
+      if errmsg NE '' then begin
           message, errmsg, /cont
           status = 0
-          return, !values.d_nan
       endif
-      sd1 = total(x[wh1]^2)/ct1 - (total(x[wh1])/ct1)^2
-      sd2 = total(x[wh2]^2)/ct2 - (total(x[wh2])/ct2)^2
-      
-      ;; Compute area above/below average
-
-      if keyword_set(pos) then goto, POS_PEAK
-      if keyword_set(neg) then goto, NEG_PEAK
-      if sd1 LT sd2 then begin  ;; This is a positive peak
-          POS_PEAK:
-          cent  = x[where(y EQ maxy)] & cent = cent[0]
-          peak  = maxy - av
-      endif else begin          ;; This is a negative peak
-          NEG_PEAK:
-          cent  = x[where(y EQ miny)] & cent = cent[0]
-          peak  = miny - av
-      endelse
-      peakarea = totarea - total(dx*(ys<av), nan=nan)
-      if peak EQ 0 then peak = 0.5*peakarea
-      width = peakarea / (2*abs(peak))
-      if width EQ 0 OR finite(width) EQ 0 then width = median(dx)
-
-      est = [peak, cent, width, av]
-      guess = 1
   endif
-  DONE_GUESS:
 
   ;; Parameter checking for individual function types
   np = 3
@@ -477,12 +551,20 @@ function mpfitpeak, x, y, a, estimates=est, nterms=nterms, $
   p0 = replicate(est[0]*0, nterms[0] > n_elements(est))
   p0[0] = est
 
+  ;; If the user wanted only to get an estimate, then return here
+  if keyword_set(no_fit) then begin
+      status = 5
+      a = est
+      return, !values.d_nan
+  endif
+
   ;; Function call
   a = mpfitfun(fun, x, y, 0, p0[0:nterms[0]-1], weights=weights, $
                bestnorm=bestnorm, nfev=nfev, status=status, $
                nfree=nfree, dof=dof, nan=nan, $
                parinfo=parinfo, perror=perror, niter=iter, yfit=yfit, $
-               quiet=quiet, errmsg=errmsg, _EXTRA=extra)
+               best_fjac=best_fjac, pfree_index=pfree_index, covar=covar, $
+               quiet=quiet, errmsg=errmsg, autoderiv=autoderiv, _EXTRA=extra)
 
   ;; Print error message if there is one.
   if NOT keyword_set(quiet) AND errmsg NE '' then $

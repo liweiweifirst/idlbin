@@ -73,12 +73,61 @@
 ;  using the ERROR_CODE common block variable, as described
 ;  below under the MPFIT_ERROR common block definition.
 ;
-;  See the discussion under "EXPLICIT DERIVATIVES" and AUTODERIVATIVE
-;  in MPFIT.PRO if you wish to compute the derivatives for yourself.
-;  AUTODERIVATIVE is accepted by MPFITFUN and passed directly to
-;  MPFIT.  The user function must accept one additional parameter, DP,
-;  which contains the derivative of the user function with respect to
-;  each parameter at each data point, as described in MPFIT.PRO.
+;  MPFIT by default calculates derivatives numerically via a finite
+;  difference approximation.  However, the user function *may*
+;  calculate the derivatives if desired, but only if the model
+;  function is declared with an additional position parameter, DP, as
+;  described below.
+;
+;  To enable explicit derivatives for all parameters, set
+;  AUTODERIVATIVE=0.
+;
+;  When AUTODERIVATIVE=0, the user function is responsible for
+;  calculating the derivatives of the user function with respect to
+;  each parameter.  The user function should be declared as follows:
+;
+;    ;
+;    ; MYFUNCT - example user function
+;    ;   P - input parameter values (N-element array)
+;    ;   DP - upon input, an N-vector indicating which parameters
+;    ;          to compute derivatives for; 
+;    ;        upon output, the user function must return
+;    ;          an ARRAY(M,N) of derivatives in this keyword
+;    ;   (keywords) - any other keywords specified by FUNCTARGS
+;    ; RETURNS - function values
+;    ;
+;    FUNCTION MYFUNCT, x, p, dp [, (additional keywords if desired)]
+;     model = F(x, p)         ;; Model function
+;     
+;     if n_params() GT 2 then begin
+;       ; Create derivative and compute derivative array
+;       requested = dp   ; Save original value of DP
+;       dp = make_array(n_elements(x), n_elements(p), value=x[0]*0)
+;
+;       ; Compute derivative if requested by caller
+;       for i = 0, n_elements(p)-1 do if requested(i) NE 0 then $
+;         dp(*,i) = FGRAD(x, p, i)
+;     endif
+;    
+;     return, resid
+;    END
+;
+;  where FGRAD(x, p, i) is a model function which computes the
+;  derivative of the model F(x,p) with respect to parameter P(i) at X.
+;
+;  Derivatives should be returned in the DP array. DP should be an
+;  ARRAY(m,n) array, where m is the number of data points and n is the
+;  number of parameters.  DP[i,j] is the derivative of the ith
+;  function value with respect to the jth parameter.
+;
+;  MPFIT may not always request derivatives from the user function.
+;  In those cases, the parameter DP is not passed.  Therefore
+;  functions can use N_PARAMS() to indicate whether they must compute
+;  the derivatives or not.
+;
+;  For additional information about explicit derivatives, including
+;  additional settings and debugging options, see the discussion under
+;  "EXPLICIT DERIVATIVES" and AUTODERIVATIVE in MPFIT.PRO.
 ;
 ; CONSTRAINING PARAMETER VALUES WITH THE PARINFO KEYWORD
 ;
@@ -253,6 +302,21 @@
 ;   BESTNORM - the value of the summed squared residuals for the
 ;              returned parameter values.
 ;
+;   BEST_FJAC - upon return, BEST_FJAC contains the Jacobian, or
+;               partial derivative, matrix for the best-fit model.
+;               The values are an array,
+;               ARRAY(N_ELEMENTS(DEVIATES),NFREE) where NFREE is the
+;               number of free parameters.  This array is only
+;               computed if /CALC_FJAC is set, otherwise BEST_FJAC is
+;               undefined.
+;
+;               The returned array is such that BEST_FJAC[I,J] is the
+;               partial derivative of the model with respect to
+;               parameter PARMS[PFREE_INDEX[J]].
+;
+;   BEST_RESID - upon return, an array of best-fit deviates,
+;                normalized by the weights or errors.
+;
 ;   COVAR - the covariance matrix for the set of parameters returned
 ;           by MPFIT.  The matrix is NxN where N is the number of
 ;           parameters.  The square root of the diagonal elements
@@ -277,7 +341,11 @@
 ;   DOF - number of degrees of freedom, computed as
 ;             DOF = N_ELEMENTS(DEVIATES) - NFREE
 ;         Note that this doesn't account for pegged parameters (see
-;         NPEGGED).
+;         NPEGGED).  It also does not account for data points which
+;         are assigned zero weight, for example if :
+;           * WEIGHTS[i] EQ 0, or
+;           * ERR[i] EQ infinity, or 
+;           * any of the values is "undefined" and /NAN is set.
 ;
 ;   ERRMSG - a string error or warning message is returned.
 ;
@@ -343,8 +411,13 @@
 ;                       parameter values.
 ;
 ;   MAXITER - The maximum number of iterations to perform.  If the
-;             number is exceeded, then the STATUS value is set to 5
-;             and MPFIT returns.
+;             number of calculation iterations exceeds MAXITER, then
+;             the STATUS value is set to 5 and MPFIT returns.  
+;
+;             If MAXITER EQ 0, then MPFIT does not iterate to adjust
+;             parameter values; however, the user function is evaluated
+;             and parameter errors/covariance/Jacobian are estimated
+;             before returning.
 ;             Default: 200 iterations
 ;
 ;   NAN - ignore infinite or NaN values in the Y, ERR or WEIGHTS
@@ -368,12 +441,15 @@
 ;
 ;   NPRINT - The frequency with which ITERPROC is called.  A value of
 ;            1 indicates that ITERPROC is called with every iteration,
-;            while 2 indicates every other iteration, etc.  Note that
-;            several Levenberg-Marquardt attempts can be made in a
-;            single iteration.
+;            while 2 indicates every other iteration, etc.  Be aware
+;            that several Levenberg-Marquardt attempts can be made in
+;            a single iteration.  Also, the ITERPROC is *always*
+;            called for the final iteration, regardless of the
+;            iteration number.
 ;            Default value: 1
 ;
-;   PARINFO - Provides a mechanism for more sophisticated constraints
+;   PARINFO - A one-dimensional array of structures.
+;             Provides a mechanism for more sophisticated constraints
 ;             to be placed on parameter values.  When PARINFO is not
 ;             passed, then it is assumed that all parameters are free
 ;             and unconstrained.  Values in PARINFO are never 
@@ -402,12 +478,42 @@
 ;              DOF     = N_ELEMENTS(X) - N_ELEMENTS(PARMS) ; deg of freedom
 ;              PCERROR = PERROR * SQRT(BESTNORM / DOF)   ; scaled uncertainties
 ;
+;   PFREE_INDEX - upon return, PFREE_INDEX contains an index array
+;                 which indicates which parameter were allowed to
+;                 vary.  I.e. of all the parameters PARMS, only
+;                 PARMS[PFREE_INDEX] were varied.
+;
+;   QUERY - if set, then MPFIT() will return immediately with one of
+;           the following values:
+;                 1 - if MIN_VERSION is not set
+;                 1 - if MIN_VERSION is set and MPFIT satisfies the minimum
+;                 0 - if MIN_VERSION is set and MPFIT does not satisfy it
+;           Default: not set.
+;
 ;   QUIET - set this keyword when no textual output should be printed
 ;           by MPFIT
 ;
-;   STATUS - an integer status code is returned.  All values other
-;            than zero can represent success.  It can have one of the
+;   STATUS - an integer status code is returned.  All values greater
+;            than zero can represent success (however STATUS EQ 5 may
+;            indicate failure to converge).  It can have one of the
 ;            following values:
+;
+;        -18  a fatal execution error has occurred.  More information
+;             may be available in the ERRMSG string.
+;
+;        -16  a parameter or function value has become infinite or an
+;             undefined number.  This is usually a consequence of
+;             numerical overflow in the user's model function, which
+;             must be avoided.
+;
+;        -15 to -1 
+;             these are error codes that either MYFUNCT or ITERPROC
+;             may return to terminate the fitting process (see
+;             description of MPFIT_ERROR common below).  If either
+;             MYFUNCT or ITERPROC set ERROR_CODE to a negative number,
+;             then that number is returned in STATUS.  Values from -15
+;             to -1 are reserved for the user functions and will not
+;             clash with MPFIT.
 ;
 ;	   0  improper input parameters.
 ;         
@@ -544,10 +650,14 @@
 ;     (the weights were not being applied), CM, 03 Sep 2007
 ;   Add COMPATIBILITY section, CM, 13 Dec 2007
 ;   Add documentation about NAN behavior, CM, 30 Mar 2009
+;   Add keywords BEST_RESIDS, CALC_FJAC, BEST_FJAC, PFREE_INDEX;
+;     update some documentation that had become stale, CM, 2010-10-28
+;   Documentation corrections, CM, 2011-08-26
+;   Additional documentation about explicit derivatives, CM, 2012-07-23
 ;
-;  $Id: mpfitfun.pro,v 1.16 2010/04/09 04:58:35 craigm Exp $
+;  $Id: mpfitfun.pro,v 1.19 2012/09/27 23:59:31 cmarkwar Exp $
 ;-
-; Copyright (C) 1997-2002, 2003, 2006, 2007, 2009, Craig Markwardt
+; Copyright (C) 1997-2002, 2003, 2006, 2007, 2009, 2010, 2011, 2012, Craig Markwardt
 ; This software is provided as is without any warranty whatsoever.
 ; Permission to use, copy, modify, and distribute modified or
 ; unmodified copies is granted, provided this copyright and disclaimer
@@ -631,6 +741,8 @@ end
 
 function mpfitfun, fcn, x, y, err, p, WEIGHTS=wts, FUNCTARGS=fa, $
                    BESTNORM=bestnorm, nfev=nfev, STATUS=status, $
+                   best_resid=best_resid, pfree_index=ifree, $
+                   calc_fjac=calc_fjac, best_fjac=best_fjac, $
                    parinfo=parinfo, query=query, CASH=cash, $
                    covar=covar, perror=perror, yfit=yfit, $
                    niter=niter, nfree=nfree, npegged=npegged, dof=dof, $
@@ -735,11 +847,20 @@ function mpfitfun, fcn, x, y, err, p, WEIGHTS=wts, FUNCTARGS=fa, $
   result = mpfit('mpfitfun_eval', p, SCALE_FCN=scalfcn, $
                  parinfo=parinfo, STATUS=status, nfev=nfev, BESTNORM=bestnorm,$
                  covar=covar, perror=perror, $
+                 best_resid=best_resid, pfree_index=ifree, $
+                 calc_fjac=calc_fjac, best_fjac=best_fjac, $
                  niter=niter, nfree=nfree, npegged=npegged, dof=dof, $
                  ERRMSG=errmsg, quiet=quiet, _EXTRA=extra)
 
   ;; Retrieve the fit value
   yfit = temporary(mc)
+
+  ;; Rescale the Jacobian according to parameter uncertainties
+  if keyword_set(calc_fjac) AND nfree GT 0 AND status GT 0 then begin
+      ec = 1/wc  ;; Per-data-point errors (could be INF or NAN!)
+      for i = 0, nfree-1 do best_fjac[*,i] = - best_fjac[*,i] * ec
+  endif
+
   ;; Some cleanup
   xc = 0 & yc = 0 & wc = 0 & ec = 0 & mc = 0 & ac = 0
 
