@@ -1,10 +1,11 @@
-function binning_function, a,bin_level, pmapcorr, ch, set_nbins = set_nbins, n_nbins = n_nbins
+function binning_function, a,bin_level, pmapcorr, ch,  set_nbins = set_nbins, n_nbins = n_nbins
+;function binning_function, a,bin_level, pmapcorr, ch, set_nbins = set_nbins, n_nbins = n_nbins
 
   common bin_block
   ;-------------------------------------------------------------------------
   ;;setup
 
-  print, 'starting binning', ch
+  print, 'starting binning'
 
   timearr = [planethash[aorname(a),'timearr']]
   fluxarr = [planethash[aorname(a),'flux']]

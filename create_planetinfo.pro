@@ -516,13 +516,108 @@ chname = 0
 
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
+
+;---
+  planetname = '2massJ15150083'
+  ra_ref =228.74719
+  dec_ref = 48.800812
+  aorname_ch1= [ 'r53292288', 'r53286656','r53286144'] ;dither 'r54488576',
+
+  basedir = '~/external/dither_preaor/' 
+  utmjd_center = double(56813.4189)
+  transit_duration = 2.54 * 60. ;minutes
+  period = 10.05403
+  intended_phase = 0.0
+  exptime = 2.0
+  stareaor = 0
+  plot_norm = 1.
+  Plot = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = '2massJ08173001'
+  ra_ref =124.37314
+  dec_ref = -61.916068
+  aorname_ch1= [ 'r53288704', 'r53283584','r53283328']; dither 'r54488320',
+
+  basedir = '~/external/dither_preaor/' 
+  utmjd_center = double(56813.4189)
+  transit_duration = 2.54 * 60. ;minutes
+  period = 10.05403
+  intended_phase = 0.0
+  exptime = 2.0
+  stareaor = 0
+  plot_norm = 1.
+  Plot = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = '2massJ05120636'
+  ra_ref = 78.026482
+  dec_ref = -29.831637
+  aorname_ch1= [ 'r53282816', 'r53291008','r53290752'] ;dither'r54488064',
+
+  basedir = '~/external/dither_preaor/' 
+  utmjd_center = double(56813.4189)
+  transit_duration = 2.54 * 60. ;minutes
+  period = 10.05403
+  intended_phase = 0.0
+  exptime = 2.0
+  stareaor = 0
+  plot_norm = 1.
+  Plot = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'WASP-103b'
+  ra_ref = 249.314867
+  dec_ref = 7.183353
+  aorname_ch2= [ 'r53510656', 'r53514240', 'r53513984', 'r53513472', 'r53512960'] ;dither 'r54487552',, 'r54487808'
+  aorname_ch1 =[ 'r53510912', 'r53519104', 'r53518336', 'r53518080', 'r53519872'] ;dither 'r54487040',, 'r54487296'
+  basedir = '~/external/dither_preaor/' 
+  ;;these are incorrect
+  utmjd_center = double(56813.4189)
+  transit_duration = 2.54 * 60. ;minutes
+  period = 10.05403
+  intended_phase = 0.0
+  exptime = 12.0
+  stareaor = 0
+  plot_norm = 1.
+  Plot = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
+  planetname = 'epic202083828'
+  ra_ref = 94.206066
+  dec_ref = 24.596486
+  aorname_ch2= [ 'r54486528','r54341120', 'r54341376','r54486784'] ;dither
+
+  basedir ='~/external/dither_preaor/' 
+  ;;these are incorrect
+  utmjd_center = double(56813.4189)
+  transit_duration = 2.54 * 60. ;minutes
+  period = 10.05403
+  intended_phase = 0.0
+  exptime = 12.0
+  stareaor = 0
+  plot_norm = 1.
+  Plot = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
 ;---
   planetname = 'epic201367065b'
   ra_ref = 172.33545
   dec_ref = -1.45494
   aorname_ch2= ['r53522176','r53521920', 'r53521152', 'r53521664']
 
-  basedir = '~/irac_warm/' 
+  basedir = '~/external/irac_warm/' 
   utmjd_center = double(56813.4189)
   transit_duration = 2.54 * 60. ;minutes
   period = 10.05403
