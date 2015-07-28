@@ -43,6 +43,7 @@ if planetname eq 'Kepler-5' then exosystem = 'Kepler-5 b'
 if planetname eq 'Kepler-17' then exosystem = 'Kepler-17 b'
 if planetname eq 'upsandb' then exosystem = 'upsilon And b'
 if planetname eq 'XO3' then exosystem = 'XO-3 b' 
+if planetname eq 'simul_XO3' then exosystem = 'XO-3 b' 
 
 print, exosystem, 'exosystem'
 if planetname eq 'WASP-52b' then teq_p = 1315
@@ -62,15 +63,22 @@ get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=tra
                        TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
                        INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
                        DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose
-;ra = 1000.
-if ra lt 400. then begin  ; that means get_exoplanet_data actually found the target
-   ra_ref = double(ra)*15.D       ; comes in hours!;
-   help, ra_ref
-   help, double(ra)
-   print, ra, ra_ref, double(ra) * 15.D, double(ra) * 15.D/ 15.D
-   dec_ref = dec
-   utmjd_center = mjd_transit
-   period = p_orbit
+
+print, 'parameters from create_planetinfo'
+ra_ref = planetinfo[planetname, 'ra']
+dec_ref = planetinfo[planetname, 'dec']
+utmjd_center = planetinfo[planetname, 'utmjd_center']
+period = planetinfo[planetname, 'period']
+ra = ra_ref
+print, 'ra', ra_ref, 'dec', dec_ref
+if ra lt 400. then begin        ; that means get_exoplanet_data actually found the target
+;   ra_ref = double(ra)*15.D       ; comes in hours!;
+;   help, ra_ref
+;   help, double(ra)
+;   print, ra, ra_ref, double(ra) * 15.D, double(ra) * 15.D/ 15.D
+;   dec_ref = dec
+;   utmjd_center = mjd_transit
+;   period = p_orbit
 endif else begin
    print, 'parameters from create_planetinfo'
    ra_ref = planetinfo[planetname, 'ra']
@@ -78,7 +86,7 @@ endif else begin
    utmjd_center = planetinfo[planetname, 'utmjd_center']
    period = planetinfo[planetname, 'period']
 endelse
-
+print, 'ra, dec', ra_ref, dec_ref
 if planetname eq 'upsandb' then begin
    ;proper motions must be the problem, this is the easy fix
     ra_ref = 24.198512
@@ -119,7 +127,7 @@ for a =startaor,  stopaor do begin
 
 
    for i =startfits, n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
-;       print, 'working on ', fitsname(i)         
+;;      print, 'working on ', fitsname(i)         
       header = headfits(fitsname(i)) ;
       sclk_obs= sxpar(header, 'SCLK_OBS')
       frametime = sxpar(header, 'FRAMTIME')
@@ -179,8 +187,16 @@ for a =startaor,  stopaor do begin
       if i eq startfits and naxis ne 3 then begin
          xarr = fltarr(n_elements(fitsname))
          yarr = xarr
-         fluxarr = xarr
-         fluxerrarr = xarr
+         fluxarr_2 = xarr
+         fluxerrarr_2 = xarr
+         fluxarr_2p25 = xarr
+         fluxerrarr_2p25 = xarr
+         fluxarr_2p5 = xarr
+         fluxerrarr_2p5 = xarr
+         fluxarr_2p75 = xarr
+         fluxerrarr_2p75 = xarr
+         fluxarr_3 = xarr
+         fluxerrarr_3 = xarr
          timearr =dblarr(n_elements(fitsname))
          bmjd = dblarr(n_elements(fitsname))
          backarr = xarr
@@ -190,10 +206,13 @@ for a =startaor,  stopaor do begin
          xfwhmarr = xarr
          yfwhmarr = xarr
          peakpixDNarr = xarr
-         ;piarr =findgen(9,9,n_elements(fitsname))
+         piarr = fltarr(n_elements(fitsname),9*9)
+         bcdname = strarr((n_elements(fitsname)))
+
       endif
       fdarr = fltarr(n_elements(fitsname))
       fdarr[i] = framedly
+
 
       if naxis eq 3 then begin
          deltatime = (atimeend - aintbeg) / 64.D ; real time for each of the 64 frames
@@ -235,7 +254,6 @@ for a =startaor,  stopaor do begin
                                    xfwhm, yfwhm,  /WARM
       nanfound = where(FINITE(np) lt 1, nancount)
       if nancount gt 0 then print, 'NAN: ', fitsname(i), nanfound
-      
       x_center = temporary(x3)
       y_center = temporary(y3)
      ;choose the requested pixel aperture
@@ -295,7 +313,7 @@ for a =startaor,  stopaor do begin
 ;      print, piarr[0,*]
 
 
-      if naxis eq 2 then pi = im[(fix(x_center) - 4):(fix(x_center+4)), (fix(y_center) - 4):(fix(y_center+4))] ; now a 7x7x64 element array
+      if naxis eq 2 then pi = im[(fix(x_center) - 4):(fix(x_center+4)), (fix(y_center) - 4):(fix(y_center+4))] ; now a 9x9x64 element array
       
 ;---------------------------------
 
@@ -329,18 +347,28 @@ for a =startaor,  stopaor do begin
       if naxis eq 2 then begin; and i eq 0 then begin
          xarr[i] = x_center
          yarr[i]  =  y_center
-         fluxarr[i]  =  f
-         fluxerrarr[i]  =  fs
+         fluxarr_2[i] = f[0]   
+         fluxerrarr_2[i] = fs[0]
+         fluxarr_2p25[i] = f[1]   
+         fluxerrarr_2p25[i] = fs[1]
+         fluxarr_2p5[i] = f[2]   
+         fluxerrarr_2p5[i] = fs[2]
+         fluxarr_2p75[i] = f[3]   
+         fluxerrarr_2p75[i] = fs[3]
+         fluxarr_3[i] = f[4]   
+         fluxerrarr_3[i] = fs[4]
          timearr[i]  = sclkarr
          bmjd[i]  = bmjdarr
          backarr[i]  =  back
          backerrarr[i]  = backerr
          nparr[i]  = npcentroids
          npcentroidsarr[i] = npcentroids
+         bcdname[i] = fitsname[i]
+
          xfwhmarr[i] = xfwhm
          yfwhmarr[i] = yfwhm
          if keyword_set(rawfile) then peakpixDNarr[i] = peakpixDN
-         piarr[*,*,i] = pi
+         piarr[i,*] = pi
       endif
 
       if a eq startaor and i eq startfits then begin
@@ -354,14 +382,19 @@ for a =startaor,  stopaor do begin
 ;fill in that hash of hases
 ;--------------------------------
 ;make a framenum array
-
-   framenum = intarr(64*n_elements(fitsname))
-   for i = 0, n_elements(fitsname) - 1 do begin
-      framenum[i*64] = indgen(64)
-   endfor
+   if naxis eq 3 then begin
+      framenum = intarr(64*n_elements(fitsname))
+      for i = 0, n_elements(fitsname) - 1 do begin
+         framenum[i*64] = indgen(64)
+      endfor
+   endif else begin
+       framenum = indgen(n_elements(fitsname))
+    endelse
 
    keys =[ 'bcdname', 'framenum','xcen', 'ycen', 'flux_2','fluxerr_2','flux_2p25','fluxerr_2p25','flux_2p5','fluxerr_2p5','flux_2p75','fluxerr_2p75','flux_3','fluxerr_3', 'BMJD', 'bkgd', 'bkgderr','np','xfwhm', 'yfwhm','peakpixDN'];,'pixvals']
    values=list(bcdname, framenum, xarr, yarr, fluxarr_2, fluxerrarr_2,fluxarr_2p25, fluxerrarr_2p25,fluxarr_2p5, fluxerrarr_2p5,fluxarr_2p75, fluxerrarr_2p75,fluxarr_3, fluxerrarr_3,  bmjd,  backarr, backerrarr, npcentroidsarr, xfwhmarr, yfwhmarr, peakpixDNarr);, piarr)
+
+   help, bcdname, framenum, xarr, yarr, fluxarr_2, bmjd, backarr, bacjerrarr, npcentroidsarr, xfwhmarr, yfwhmarr, peakpixDNarr
 
    ;;create a structure to house all the variables except pixvals
    allstruct = { bcdname:bcdname, framenum:framenum, xcen:xarr, ycen:yarr, flux_2:fluxarr_2, fluxerr_2:fluxerrarr_2, flux_2p25:fluxarr_2p25, fluxerr_2p25:fluxerrarr_2p25, flux_2p5:fluxarr_2p5, fluxerr_2p5:fluxerrarr_2p5, flux_2p75:fluxarr_2p75, fluxerr_2p75:fluxerrarr_2p75, flux_3:fluxarr_3, fluxerr_3:fluxerrarr_3, bmjd:bmjd, bkgd:backarr, bkgderr:backerrarr,np:npcentroidsarr,xfwhm:xfwhmarr, yfwhm:yfwhmarr,peakpix:peakpixDNarr }
