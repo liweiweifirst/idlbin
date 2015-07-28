@@ -11,7 +11,7 @@
 ;                            TPERI_2=tperi_2,MODEL_2=model_2,TPHASE_2=tphase_2,$
 ;                            PHASE_MAX=phase_max,PHASE_MIN=phase_min,T_MAX=t_max,$
 ;                            T_MIN=t_min,AMPLITUDE=amplitude,/FIXED_FSTAR,/FIXED_TRAD,$
-;                            /FIXED_OMROT
+;                            /FIXED_OMROT,TRANSIT_DEPTH=transit_depth,ECLIPSE_DEPTH=eclipse_depth
 ;                            
 ;   Fit the phase curve of exoplanet system EXOSYSTEM
 ;
@@ -59,6 +59,10 @@
 ;;     PHASE_MAX   : TPHASE_2 of peak amplitude.  May not be an actual value in the TPHASE_2 array.
 ;;     PHASE_MIN   : TPHASE_2 of minimum amplitude.  May not be an actual value in the TPHASE_2 array.
 ;;     AMPLITUDE   : Peak-to-valley amplitude of phase curve, in units of FSTAR
+;;   TRANSIT_DEPTH : Depth of transit in the model, i.e., the flux at mid-transit divided by the
+;;                       unobstructed star + planet flux at that time.
+;;   ECLIPSE_DEPTH : Depth of eclipse in the model, i.e., the flux at mid-eclipse divided by the
+;;                       unobstructed star + planet flux at that time.
 ;
 ;  **EXOPLANET SYSTEM PARAMETERS**
 ;    (These do not need to be input because they will be read from the database, BUT
@@ -149,14 +153,15 @@ PRO FIT_PHASE_CURVE,t,f,exosystem,fstar,albedo,trad,omrot,tperi,tphase,model,TID
                     TEFF_STAR=teff_star,PORBIT=porbit,INCLINATION=inclination, MJD_TRANSIT=mjd_transit,$
                     TPERI_2=tperi_2,MODEL_2=model_2,TPHASE_2=tphase_2,FIT_SYSTEM=fit_system,SYSTEM_ERR=system_err,$
                     PHASE_MAX=phase_max,PHASE_MIN=phase_min,T_MAX=t_max,T_MIN=t_min,AMPLITUDE=amplitude,$
-                    FIXED_FSTAR=fixed_fstar,FIXED_TRAD=fixed_trad,FIXED_OMROT=fixed_omrot
+                    FIXED_FSTAR=fixed_fstar,FIXED_TRAD=fixed_trad,FIXED_OMROT=fixed_omrot,$
+                    TRANSIT_DEPTH=transit_depth,ECLIPSE_DEPTH=eclipse_depth
 ;
 ;  (0) Set values of constants
    degrad = !dpi / 180d  
    au = 149597870700d2  ;; cm
    rsun = 6.955d10 ;; cm
    IF N_ELEMENTS(FUNC) EQ 0 THEN func = MAKE_ARRAY(SIZE=SIZE(f),VALUE=1)
-   IF KEYWORD_SET(VERBOSE) THEN v=1 ELSE v = 0
+   v = KEYWORD_SET(VERBOSE) 
    SIMPLIFIED_LAMBDA = HASH('J','J','H','H','Ks2MASS','KS','K','KP','IRAC3.6','3.6','IRAC4.5','4.5','IRAC5.7','5.8','IRAC8.0','8.0')
       
    IF V THEN PRINT,'(1) Gather data for the exoplanet system'
@@ -247,7 +252,8 @@ PRO FIT_PHASE_CURVE,t,f,exosystem,fstar,albedo,trad,omrot,tperi,tphase,model,TID
    ENDIF
    exoplanet_phase_curve,ar_semimaj,ecc,argperi,rp_rstar,teff_star,porbit,lambda_band,albedo,trad,omrot,tperi_2,$
      fp_fstar,model_2,INCLINATION=inclination,A_AU=ar_semimaj * rstar * rsun/au,PHASE_FRACTION=tphase_2,$
-     amplitude=amplitude,phase_max=phase_max,phase_min=phase_min,t_max=t_max,t_min=t_min
+     amplitude=amplitude,phase_max=phase_max,phase_min=phase_min,t_max=t_max,t_min=t_min,$
+     TRANSIT_DEPTH=transit_depth,ECLIPSE_DEPTH=eclipse_depth
  
 RETURN
 END
