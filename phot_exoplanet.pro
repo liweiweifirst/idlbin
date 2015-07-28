@@ -38,7 +38,7 @@ case apradius of
    Else: apval = 2              ; if no decision, then choose an apradius = 2.5 pixels
 endcase
 
-print, 'using pmap file', pmapfile, apval
+;print, 'using pmap file', pmapfile, apval
 
 ;run code to read in all the planet parameters
 planetinfo = create_planetinfo()
@@ -92,16 +92,22 @@ get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=tra
                        DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose
 ;ra = 1000.
 
-;print, 'ra', ra, 'dec', dec
+  print, 'parameters from create_planetinfo'
+   ra_ref = planetinfo[planetname, 'ra']
+   dec_ref = planetinfo[planetname, 'dec']
+   utmjd_center = planetinfo[planetname, 'utmjd_center']
+   period = planetinfo[planetname, 'period']
+   ra = ra_ref
+print, 'ra', ra_ref, 'dec', dec_ref
 if ra lt 400. then begin  ; that means get_exoplanet_data actually found the target
   ; ra_ref = double(ra)*15.D       ; comes in hours!;
   ; help, ra_ref
   ; help, double(ra)
  ;  print, ra, ra_ref, double(ra) * 15.D, double(ra) * 15.D/ 15.D
-   ra_ref = ra
-   dec_ref = dec
-   utmjd_center = mjd_transit
-   period = p_orbit
+ ;  ra_ref = ra
+ ;  dec_ref = dec
+;   utmjd_center = mjd_transit
+;   period = p_orbit
 endif else begin
    print, 'parameters from create_planetinfo'
    ra_ref = planetinfo[planetname, 'ra']
@@ -134,9 +140,13 @@ fits_read,occ_filename, occdata, occheader
 startaor = 0
 stopaor =   n_elements(aorname) - 1
 for a =startaor,  stopaor do begin
-   print, 'working on ',aorname(a)
+   print, '----------------------------'
+   print, 'working on ',a, ' ', aorname(a)
    dir = dirname+ string(aorname(a) ) 
    CD, dir                      ; change directories to the correct AOR directory
+   pwd
+   if( n_elements(aorname) eq 3) and (a eq 2) then chname = '2'  ;;xxx only for 2mass pre_dither observations
+   print, 'chname in use', chname
 ;   command  = strcompress( 'find ch'+chname+"/bcd -name 'sdcorrSPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
    command  = strcompress( 'find ch'+chname+"/bcd -name 'SPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
 ;   print, 'command', command
@@ -180,7 +190,7 @@ for a =startaor,  stopaor do begin
 
       if ch eq '2' and frametime eq 2 then ronoise = 12.1
       if i eq startfits then begin
-         print, 'ronoise', ronoise, gain, fluxconv, exptime, ra_ref, dec_ref
+         print, 'ronoise', ronoise, gain, fluxconv, exptime, ra_ref, dec_ref, naxis
          sclk_0 = sclk_obs
       endif
 
@@ -323,8 +333,8 @@ for a =startaor,  stopaor do begin
 
 ;track the values of the 7x7 pixel box around the centroid
 ;        pi = track_box(im, x_center, y_center)   ; tb now a 25 x 64 element array
-         if naxis eq 3 then pi = im[12:18, 12:18,*] ; now a 7x7x64 element array
-         if naxis eq 2 then pi = im[(fix(x_center) - 3):(fix(x_center+3)), (fix(y_center) - 3):(fix(y_center+3))] ; now a 7x7x64 element array
+      if naxis eq 3 then pi = im[12:18, 12:18,*] ; now a 7x7x64 element array
+      if naxis eq 2 then pi = im[(fix(x_center) - 3):(fix(x_center+3)), (fix(y_center) - 3):(fix(y_center+3))] ; now a 7x7x64 element array
 
 ;track the value of a column
       if keyword_set(columntrack) then begin 
