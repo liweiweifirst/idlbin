@@ -1,8 +1,8 @@
 PRO get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,RSTAR=rstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
-                       TEQ_P=teq_p,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=secondary_lambda,$
+                       TEQ_P=teq_p,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=secondary_lambda,OM=om,$
                        INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
                        DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,LIST_NAMES=list_names,VERBOSE=verbose,$
-                       TRANSIT_SUMMARY=transit_summary
+                       TRANSIT_SUMMARY=transit_summary,INFO_STRING=info_string
 ;;  EXOSYSTEM - the name of the exoplanet system, a string found in the exoplanets.org database (eg., "WASP-46 b").  
 ;;              If this is given then the other keywords can be passed as outputs.  Otherwise they will all have to be input
 ;;              to specify the parameters of the orbits.
@@ -29,6 +29,7 @@ PRO get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,RSTAR=rstar,T
 ;;  /TRANSIT_SUMMARY - print a summary of the database for planets with confirmed transits 
 ;;                    Sort planets by Orbital Period and Transit Depth 
 ;;  /VERBOSE - print info on progress
+;;  INFO_STRING - returns a string array with all info printed to screen under /VERBOSE
 ;;  
 ;; OUTPUT KEYWORDS (output when EXOSYSTEM is input)
 ;;  RA - Right Ascension string (decimal hr, J2000, epoch 2000, from database)
@@ -36,6 +37,7 @@ PRO get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,RSTAR=rstar,T
 ;;  VMAG - V magnitude of the host star
 ;;  DISTANCE - distance of system, parsecs
 ;;  ECC - orbital eccentricity
+;;  OM - argument of periastron, degrees
 ;;  T14 - time between first and fourth contacts (total transit time)
 ;;  F36 - Estimated 3.6 micron flux density (mJy) of star, extrapolated from VMAG and TEFF_STAR
 ;;  F45 - Estimated 4.5 micron flux density (mJy) of star, extrapolated from VMAG and TEFF_STAR
@@ -50,6 +52,7 @@ PRO get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,RSTAR=rstar,T
 ;OGLE-TR-113 b,GJ 436 b,WASP-14 b,WASP-24 b,WASP-17 b,XO-1 b,HD 149026 b,TrES-3 b,TrES-4 b,WASP-3 b,
 ;TrES-1 b,Kepler-12 b,TrES-2 b,KOI-13 b,Kepler-7 b,CoRoT-2 b,HAT-P-7 b,Kepler-6 b,Kepler-17 b,
 ;Kepler-5 b,HD 189733 b,WASP-2 b,HD 209458 b,HAT-P-8 b,HAT-P-1 b,WASP-4 b,HAT-P-6 b,XO-4 b
+INFO_STRING = !null
 CASE 1 OF 
    N_ELEMENTS(LIST_NAMES) NE 0: BEGIN
      IF ~N_ELEMENTS(exodata) THEN BEGIN
@@ -99,7 +102,7 @@ CASE 1 OF
       
    END
    ELSE: BEGIN
-   
+      IF N_ELEMENTS(SECONDARY_LAMBDA) EQ 0 THEN SKIP_SECONDARY=1 ELSE SKIP_SECONDARY=0
       h = 6.626068d-27
       kb = 1.3806503d-16
       c = 2.99792458d10
@@ -112,19 +115,18 @@ CASE 1 OF
          ENDIF
          iuse = WHERE(exodata.NAME EQ EXOSYSTEM,nuse)
          IF NUSE EQ 0 THEN BEGIN
-            print,'GET_EXOPLANET_DATA: Cannot find "'+exosystem+'" in '+exoplanet_data_file+'.  Returning.'
-            RA = 1000. ; set this so I know when the output is useless JK
+            print,'GET_EXOPLANET_DATA: Cannot find "'+exosystem+'" .  Returning.'
             return
          ENDIF
          MSINI = exodata.MSINI[iuse[0]]
          MSTAR = exodata.MSTAR[iuse[0]]
-         help, exodata.RA
-         RA = exodata.RA[iuse[0]]
+         RA = exodata.RA[iuse[0]] * 15.
          DEC = exodata.DEC[iuse[0]]
          P_ORBIT = exodata.PER[iuse[0]]
          VMAG = exodata.V[iuse[0]]
          DISTANCE = exodata.DIST[iuse[0]]
          ECC = exodata.ECC[iuse[0]]
+         OM = exodata.OM[iuse[0]]
          IF ECC GT 0.1 THEN PRINT,'WARNING: exoplanetary orbital eccentricity is '+STRNG(ecc)+', so circular approximation might not be valid.'
          a = exodata.A[iuse[0]]
          AR_SEMIMAJ = exodata.AR[iuse[0]]
@@ -133,11 +135,11 @@ CASE 1 OF
          F36 = MAGNITUDE_FLUX(VMAG,'V',TEFF_STAR,MAGSYSTEMTO='IRAC3.6')
          F45 = MAGNITUDE_FLUX(VMAG,'V',TEFF_STAR,MAGSYSTEMTO='IRAC4.5')
          known_transit = exodata.TRANSIT[iuse[0]]
-         IF KEYWORD_SET(VERBOSE) THEN BEGIN
-            PRINT,'Reading data on system '+exosystem
-            PRINT,'Stellar params: VMAG: '+STRNG(vmag)+'; M:'+STRNG(mstar)+'(Msun);  R:'+STRNG(rstar)+'(Rsun); Teff:'+STRNG(teff_star)+'(K); D:'+STRNG(distance)+'(pc)'
-            PRINT,'Orbital params: P: '+STRNG(p_orbit)+'(dy); Msini:'+STRNG(msini)+'(MEarth);  e:'+STRNG(ecc)+'; a:'+STRNG(ar_semimaj)+'(Rstar)'
-         ENDIF
+         INFO_STRING = [INFO_STRING,'System '+exosystem]
+         INFO_STRING = [INFO_STRING,'STELLAR PARAMS (from DB): VMAG: '+STRNG(vmag)+'; M:'+STRNG(mstar)+'(Msun);  R:'+STRNG(rstar)+'(Rsun);;',$
+                                    '                          Teff:'+STRNG(teff_star)+'(K); D:'+STRNG(distance)+'(pc)']
+         INFO_STRING = [INFO_STRING,'ORBITAL PARAMS (from DB): P: '+STRNG(p_orbit)+'(dy); Msini:'+STRNG(msini)+'(MEarth);  e:'+STRNG(ecc)+';',$
+                                    '                          a:'+STRNG(ar_semimaj)+'(Rstar); OM:'+STRNG(om)]
          IF known_transit THEN BEGIN
             TRANSIT_DEPTH = exodata.DEPTH[iuse[0]]
             RP_RSTAR = SQRT(transit_depth)
@@ -145,40 +147,43 @@ CASE 1 OF
             MJD_TRANSIT = exodata.TT[iuse[0]]-2400000.5D0
             b_impact = exodata.B[iuse[0]]
             inclination = exodata.I[iuse[0]]
-            IF KEYWORD_SET(VERBOSE) THEN BEGIN
-               PRINT,'Transit params: Depth: '+STRNG(transit_depth)+'; Rp:'+STRNG(rp_rstar)+'(Rstar);  T14:'+STRNG(t14)+'(dy); MJD (transit):'+STRNG(mjd_transit)+'(dy); i:'+STRNG(inclination)+'(deg)'
-            ENDIF
+            INFO_STRING = [INFO_STRING,'TRANSIT_PARAMS (from DB): Depth: '+STRNG(transit_depth)+'; Rp:'+STRNG(rp_rstar)+'(Rstar);',$
+                                       '                          T14:'+STRNG(t14)+'(dy); MJD (transit):'+STRNG(mjd_transit)+'(dy); i:'+STRNG(inclination)+'(deg)']
          ENDIF ELSE BEGIN
-            PRINT,'No observed transit for this target.'
+            INFO_STRING = [INFO_STRING,'No observed transit for this target.']
             b_impact = ar_semimaj * cos(inclination/!radeg)
             IF KEYWORD_SET(transit_DEPTH) THEN RP_RSTAR=SQRT(transit_depth)
             t14 = P_ORBIT/!dpi * ACOS(SQRT(1 - (1+rp_rstar)^2/ar_semimaj^2)/SIN(inclination/!radeg))
          ENDELSE
-         known_secondary = exodata.SE[iuse[0]]
-         IF known_secondary THEN BEGIN
-            SECONDARY_DEPTH_HASH = HASH('J', exodata.SEDEPTHJ[iuse[0]]) ;; 1.25 micron
-            SECONDARY_DEPTH_HASH['H']  = exodata.SEDEPTHH[iuse[0]] ;; 1.65 micron
-            SECONDARY_DEPTH_HASH['KS'] = exodata.SEDEPTHKS[iuse[0]] ;; Ks band, 2.15 micron
-            SECONDARY_DEPTH_HASH['KP'] = exodata.SEDEPTHKP[iuse[0]] ;; Kepler 400-865 nm
-            SECONDARY_DEPTH_HASH['3.6'] = exodata.SEDEPTH36[iuse[0]] ;; 3.6 micron
-            SECONDARY_DEPTH_HASH['4.5'] = exodata.SEDEPTH45[iuse[0]] ;; 4.5 micron
-            SECONDARY_DEPTH_HASH['5.8'] = exodata.SEDEPTH58[iuse[0]] ;; 5.8 micron
-            SECONDARY_DEPTH_HASH['8.0'] = exodata.SEDEPTH80[iuse[0]] ;; 8.0 micron
-            IF SECONDARY_DEPTH_HASH[SECONDARY_LAMBDA] EQ 0 THEN BEGIN
-               PRINT,'No observed secondary in the '+secondary_lambda+' band.  Using the input planetary temperature.'
-               IF N_ELEMENTS(teq_p) EQ 0 THEN BEGIN
-                  PRINT,'No planet equilibrium temperature input.  Returning'
-                  RETURN
-               ENDIF
+         IF ~SKIP_SECONDARY THEN BEGIN
+            known_secondary = exodata.SE[iuse[0]]
+            IF known_secondary THEN BEGIN
+               SECONDARY_DEPTH_HASH = HASH('J', exodata.SEDEPTHJ[iuse[0]]) ;; 1.25 micron
+               SECONDARY_DEPTH_HASH['H']  = exodata.SEDEPTHH[iuse[0]] ;; 1.65 micron
+               SECONDARY_DEPTH_HASH['KS'] = exodata.SEDEPTHKS[iuse[0]] ;; Ks band, 2.15 micron
+               SECONDARY_DEPTH_HASH['KP'] = exodata.SEDEPTHKP[iuse[0]] ;; Kepler 400-865 nm
+               SECONDARY_DEPTH_HASH['3.6'] = exodata.SEDEPTH36[iuse[0]] ;; 3.6 micron
+               SECONDARY_DEPTH_HASH['4.5'] = exodata.SEDEPTH45[iuse[0]] ;; 4.5 micron
+               SECONDARY_DEPTH_HASH['5.8'] = exodata.SEDEPTH58[iuse[0]] ;; 5.8 micron
+               SECONDARY_DEPTH_HASH['8.0'] = exodata.SEDEPTH80[iuse[0]] ;; 8.0 micron
+               IF SECONDARY_DEPTH_HASH[SECONDARY_LAMBDA] EQ 0 THEN BEGIN
+                  PRINT,'No observed secondary in the '+secondary_lambda+' band.  Using the input planetary temperature '+STRNG(teq_p)+' K.'
+                  IF N_ELEMENTS(teq_p) EQ 0 THEN BEGIN
+                     PRINT,'No planet equilibrium temperature input.  Returning'
+                     RETURN
+                  ENDIF
+                  INFO_STRING = [INFO_STRING,'No observed secondary in the '+secondary_lambda+' band.  Using the input planetary temperature '+STRNG(teq_p)+' K.']
+               ENDIF ELSE BEGIN
+                  lambda = lambda_hash[secondary_lambda]
+                  secondary_depth = secondary_depth_hash[secondary_lambda]
+                  teq_p = (h*c/(lambda*1d-4*kb)) / ALOG( rp_rstar^2 * (exp(h*c/(lambda*1d-4*kb*teff_star)) - 1D0)/(secondary_depth) + 1 )
+               ENDELSE
             ENDIF ELSE BEGIN
+               INFO_STRING = [INFO_STRING,'No observed secondary eclipse.  Using the input planetary temperature '+STRNG(teq_p)+' K.']
+               PRINT,'No known secondary eclipse.  Using the input planetary temperature.'
                lambda = lambda_hash[secondary_lambda]
-               secondary_depth = secondary_depth_hash[secondary_lambda]
-               teq_p = (h*c/(lambda*1d-4*kb)) / ALOG( rp_rstar^2 * (exp(h*c/(lambda*1d-4*kb*teff_star)) - 1D0)/(secondary_depth) + 1 )
-            ENDELSE
-         ENDIF ELSE BEGIN
-            PRINT,'No known secondary eclipse.  Using the input planetary temperature.'
-            lambda = lambda_hash[secondary_lambda]
-         ENDELSE 
+            ENDELSE 
+         ENDIF
       ENDIF ELSE BEGIN
          IF KEYWORD_SET(transit_DEPTH) THEN RP_RSTAR=SQRT(transit_depth) ELSE transit_depth = RP_RSTAR^2
          b_impact = ar_semimaj * cos(inclination/!radeg)
@@ -187,18 +192,22 @@ CASE 1 OF
          IF ~known_transit then t14 = 0 ELSE BEGIN
             t14 = P_ORBIT/!dpi * ACOS(SQRT(1 - (1+rp_rstar)^2/ar_semimaj^2)/SIN(inclination/!radeg))
             IF N_ELEMENTS(MJD_TRANSIT) EQ 0 THEN mjd_transit = systime(/julian) - 2400000.5D0  ;; set transit time to now
-            PRINT,'Transit params: Depth: '+STRNG(transit_depth)+'; Rp:'+STRNG(rp_rstar)+'(Rstar);  T14:'+STRNG(t14)+'(dy); MJD (transit):'+STRNG(mjd_transit)+'(dy); i:'+STRNG(inclination)+'(deg)'
+            INFO_STRING = [INFO_STRING,'TRANSIT_PARAMS (Input): Depth: '+STRNG(transit_depth)+'; Rp:'+STRNG(rp_rstar)+'(Rstar);',$
+                                       '                        T14:'+STRNG(t14)+'(dy); MJD (transit):'+STRNG(mjd_transit)+'(dy); i:'+STRNG(inclination)+'(deg)']
          ENDELSE
-         lambda = lambda_hash[secondary_lambda]
          IF N_ELEMENTS(ecc) EQ 0 THEN ecc = 0
-         PRINT,'Orbital params: P: '+STRNG(p_orbit)+'(dy); Msini:'+STRNG(msini)+'(MEarth);  e:'+STRNG(ecc)+'; a:'+STRNG(ar_semimaj)+'(Rstar)'
+         IF N_ELEMENTS(om) EQ 0 THEN om = 90
+         INFO_STRING = [INFO_STRING,'ORBITAL PARAMS (Input): P: '+STRNG(p_orbit)+'(dy); Msini:'+STRNG(msini)+'(MEarth);  e:'+STRNG(ecc)+';',$
+                                    '                        a:'+STRNG(ar_semimaj)+'(Rstar); om:'+STRING(OM)]
       ENDELSE
-
-      fp_fstar0 = (exp(h*c/(lambda * 1e-4 * kb * teff_star)) - 1d0) / (exp(h*c/(lambda * 1e-4 * kb * teq_p)) - 1d0) * rp_rstar^2
-      IF KEYWORD_SET(VERBOSE) THEN PRINT,'FP/F*: '+STRNG(fp_fstar0)+'; Rp: '+STRNG(RP_RSTAR)+'(Rstar)'
+      IF ~SKIP_SECONDARY THEN BEGIN
+         lambda = lambda_hash[secondary_lambda]
+         fp_fstar0 = (exp(h*c/(lambda * 1e-4 * kb * teff_star)) - 1d0) / (exp(h*c/(lambda * 1e-4 * kb * teq_p)) - 1d0) * rp_rstar^2
+         INFO_STRING = [INFO_STRING,'FP/F* (eclipse depth) (Input): '+STRNG(fp_fstar0)]
+      ENDIF
    END
 ENDCASE
-
+IF KEYWORD_SET(VERBOSE) THEN PRINT,INFO_STRING
 RETURN
 END
 
