@@ -1,8 +1,8 @@
 pro read_pitch_roll_yaw
 ; 
 
-infile='/Users/jkrick/external/initial_drift/ctab_data.16102.ecsv'
-
+infile='/Users/jkrick/external/initial_drift/ctab_data.6378.ecsv'
+savefile = '/Users/jkrick/external/initial_drift/ctab_data.6378.ecsv.sav'
 nmax=99999999L
 
 pitch=dblarr(nmax)
