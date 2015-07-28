@@ -21,7 +21,7 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
   period =  planetinfo[planetname, 'period']
   stareaor = planetinfo[planetname, 'stareaor']
 ;for debugging: skip some AORs
-  startaor = 5                  ;5
+  startaor = 0                  ;5
   stopaor =   n_elements(aorname) - 1
   print, 'stopaor', stopaor
 ;  plot_norm= planetinfo[planetname, 'plot_norm']
@@ -91,6 +91,7 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         print, 'making plot as a function of time'
         plotx = (bin_timearr-  time_0)/60./60./24.
         print, 'plotx', plotx(0)
+
         if plotx(0) gt 300. then begin
            print, 'large plotx', plotx(0)
            plotx = plotx - (7800./24.)
@@ -100,7 +101,7 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         
      endif else begin
         plotx = bin_phase
-        setxrange = [0.58, 0.78]; [0.,1.]; [-0.5,0.5]
+        setxrange =  [0.5, 0.67]; [0.5,0.65]; [0.,1.]; 
         ending = 'phase'
      endelse
      
@@ -126,25 +127,25 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
         
         pp = plot(plotx, bin_xcen, '1s',  $ ;title = planetname, $
-                  color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 0.1, $
-                  xshowtext = 0, ytickformat = '(F10.1)', dimensions = [600, 900], _extra = extra, yminor = 0,$
-                  xrange = setxrange) ;, $, ymajor = 4
+                  color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 1.0, $
+                  xshowtext = 0, ytickformat = '(F10.2)', dimensions = [600, 900], _extra = extra, yminor = 0,$
+                  xrange = setxrange, yrange = [17.0, 18.0]) ;, $, ymajor = 4
         
                                 ;turn off refreshing to make this quicker hopefully
 ;           pp.Refresh, /Disable
         
         
         pq= plot(plotx, bin_ycen, '1s',  color = colorarr[a], $
-                 ytitle = 'Y position',  position = [0.2, 0.64, 0.9, 0.77],/current,  ytickinterval = 0.2,$
-                 xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, yminor = 0,$
-                 xrange = setxrange) ;, yrange = [15.5, 17.5]) ;, $, title = planetname , ymajor = 4
+                 ytitle = 'Y position',  position = [0.2, 0.64, 0.9, 0.77],/current,  ytickinterval = 1.0,$
+                 xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, yminor = 0,$
+                 xrange = setxrange, yrange = [237.0, 239.0]) ;, $, title = planetname , ymajor = 4
                                 ;xrange = setxrange)
         
         
         pr = plot(plotx, bin_flux/plot_norm, '1s',  $
                   color = colorarr[a],   ytitle = 'Norm. Flux', xtitle = 'Phase',$ 
                   position = [0.2,0.08, 0.9, 0.21], /current, _extra = extra, ytickinterval = 0.01, yminor = 0,$
-                  xrange = setxrange) ;, yrange = [0.98, 1.02]
+                  xrange = setxrange, yrange = [0.98, 1.02])
         
         
         ps= plot(plotx, bin_npcent, '1s', color = colorarr[a], $
@@ -154,8 +155,8 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         
         pt = plot(plotx, bin_bkgd/ bkgd_norm, '1s' , color = colorarr[a], $
                   ytitle = 'Norm. Bkgd',  margin = 0.2, position = [0.2, 0.22, 0.9, 0.35], /current, xshowtext = 0,$
-                  ytickformat = '(F10.2)', _extra = extra, ytickinterval = .02, yminor = 0,$ ; yrange = [0.8, 1.1],$
-                  xrange = setxrange)                                                         ;, $ title = planetname,ymajor = 4,
+                  ytickformat = '(F10.2)', _extra = extra, ytickinterval = .02, yminor = 0,$ 
+                  xrange = setxrange, yrange = [0.88, 1.04])  ;, $ title = planetname,ymajor = 4,
         
         pxy = plot(plotx, bin_xfwhm, '1s', color = 'blue', $
                    ytitle = 'X & Y FWHM',  position = [0.2, 0.50, 0.9, 0.63], /current, $
