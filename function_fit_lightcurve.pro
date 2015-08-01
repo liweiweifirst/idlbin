@@ -18,19 +18,19 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
 
  
  ;normalize for more understandable plots
- normcorr = mean(fluxarr)
- fluxarr = fluxarr / normcorr
- errarr = errarr / normcorr
+; normcorr = mean(fluxarr)
+; fluxarr = fluxarr / normcorr
+; errarr = errarr / normcorr
 
  ;actually want the bottom of eclipse to be at 1.0
  ;fake this for now  XXX
  ;;fluxarr = fluxarr + 0.0015
 
 ;and sort them into phase-order
- sp = sort(phasearr)
- phasearr = phasearr[sp]
- fluxarr = fluxarr[sp]
- errarr = errarr[sp]
+; sp = sort(phasearr)
+; phasearr = phasearr[sp]
+; fluxarr = fluxarr[sp]
+; errarr = errarr[sp]
 
 ;remove nan's in error array
  print, 'n before nan', n_elements(phasearr)
@@ -49,7 +49,14 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
  amplitude = .001             ; messing around with amplitude of the phase curve.
  phase_offset = 1.
  params0 = [fp_fstar0, rp_rstar, ar_semimaj, inclination, amplitude, phase_offset]
-; params0 = [fp_fstar0, .08, ar_semimaj, inclination, amplitude, phase_offset]
+; params0 = [fp_fstar0, .08, ar_semimaj, inclination, amplitude,
+; phase_offset]
+
+;;overplot the starting values before fitting to check where we start
+;;out
+;;  model = mandel_agol(params0, t=phasearr, flux=fluxarr, err=errarr, p_orbit=p_orbit, mjd_start=mjd_start, mjd_transit=mjd_transit ,savefilename = savefilename, /overplot )
+
+
  parinfo = replicate({value:0.D, fixed:0, limited:[0,0], limits:[0.D,0.D]}, n_elements(params0))
 ; ;limit fp_f_star0 to be positive and less than 1.
  parinfo[0].limited[0] = 1
@@ -87,7 +94,7 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
 ;want to overplot the fitted curve
   params0 = pa  ; just give it the answer, and run with overplot
   ph = findgen(100) / 100. - 0.5   ; give it a nice set of phases for a nice plot
-  model = mandel_agol(params0, t=phasearr, flux=fluxarr, err=errarr, p_orbit=p_orbit, mjd_start=mjd_start, mjd_transit=mjd_transit ,savefilename = savefilename);, overplot = overplot);, rp_rstar=rp_rstar, ar_semimaj=ar_semimaj,inclination=inclination,
+  model = mandel_agol(params0, t=phasearr, flux=fluxarr, err=errarr, p_orbit=p_orbit, mjd_start=mjd_start, mjd_transit=mjd_transit ,savefilename = savefilename, /overplot );, rp_rstar=rp_rstar, ar_semimaj=ar_semimaj,inclination=inclination,
 
 
 return, 0
