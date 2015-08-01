@@ -2,7 +2,7 @@ pro rms_binsize_v3, planetname
 if planetname eq 'WASP-14b' then begin
    colorarr = ['black', 'gray','red','orange','blue','burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']
 endif else begin
- colorarr = ['burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']
+ colorarr = ['black', 'blue', 'red', 'green','burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']
 endelse
 
   planetinfo = create_planetinfo()
@@ -13,16 +13,16 @@ endelse
 ;  readcol, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/wong/ch2.dat', model_phase, model_flux
 
   for a =startaor , n_elements(aorname) -1 do begin
-     corrflux =planethash[aorname(a),'corrflux_d']
-     corrfluxerr =planethash[aorname(a),'corrfluxerr']
+     corrflux =planethash[aorname(a),'corrflux_d'];'corrflux_d'
+     corrfluxerr =planethash[aorname(a),'corrfluxerr'];'corrfluxerr'
      phasearr = planethash[aorname(a),'phase']
 
      ;;get rid of NANs
-     b = where(finite(corrflux) gt 0, good)
+     b = where(finite(corrflux) gt 0 and phasearr lt -0.002 and phasearr gt -0.012, good)
 
      ;;only consider those AORs with more than 20% of their data in
      ;;the sweet spot.
-     if good gt 0.2*n_elements(corrflux) and a ne 8 then begin
+     if good gt 0.1*n_elements(corrflux) and a ne 8 then begin
         print, 'a', a, good, 0.2*n_elements(corrflux), ' ', colorarr(a), mean(corrflux, /nan)
 
         corrflux = corrflux(b)
@@ -54,7 +54,7 @@ endelse
               endfor
               bin_corrflux = bin_corrflux[0:c-1]
 
-;              if n lt 65 and n mod 3 eq 0 then begin
+;              if a eq 1 and n lt 65 and n mod 3 eq 0 then begin
 ;                 plothist, bin_corrflux, xhist, yhist, bin = 1E-4, /noprint, /noplot
 ;                 ph = barplot(xhist, yhist, fill_color = 'sky blue')
 ;              endif
