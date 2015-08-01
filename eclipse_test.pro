@@ -1,12 +1,13 @@
 pro eclipse_test, planetname
 ;restore,'/Users/jkrick/irac_warm/hd209458/hd209458_plot_Ch4.sav'
-restore, '/Users/jkrick/irac_warm/pcrs_planets/hat22/hat22_plot_ch2.sav'
+;restore, '/Users/jkrick/irac_warm/pcrs_planets/hat22/hat22_plot_ch2.sav'
+restore, '/Users/jkrick/external/irac_warm/XO3/XO3_plot_ch2.sav'
 
 x = (bin_timearr - bin_timearr(0))/60./60.
 y = bin_corrfluxp / median(bin_corrfluxp)            
 yerr = bin_corrfluxerrp 
 
-t1 = 1.; hrs start of ingress
+t1 = 3.; hrs start of ingress
 dt = .5 ; hrs duration of ingress (or egress)
 ;t2 = t1+dt ; hrs end of ingress
 ;t4 = 3.36 + t1 ; hrs, end of egress
