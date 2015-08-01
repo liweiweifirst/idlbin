@@ -87,7 +87,7 @@ print, 'using UTMJD', utmjd_center
   
   dirname = strcompress(basedir + planetname +'/')                                                            ;+'/hybrid_pmap_nn/')
 ;  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all) ;
-  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150223.sav',/remove_all) ;
+  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150226.sav',/remove_all) ;
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)
@@ -1106,6 +1106,9 @@ print, 'using UTMJD', utmjd_center
      endif
 
 
+  savename = strcompress(dirname + planetname +'_plot_ch'+chname+'.sav')
+  save, /all, filename=savename
+  print, 'saving planethash', savename
 
 
 jumpend: print, 'ending '
@@ -1135,9 +1138,6 @@ end
 ;;;;;;;-----------------------------------------------------------------
 
 
-;  savename = strcompress(dirname + planetname +'_plot_ch'+chname+'.sav')
-;  save, /all, filename=savename
-;  print, 'saving planethash', savename
 
 
 ;  pp.save, dirname +'binxcen_time_ch'+chname+'.png'
