@@ -386,7 +386,7 @@ for a =startaor,  stopaor do begin
 
          corrflux = pmap_correct(x_center,y_center,abcdflux,ch,xfwhm,yfwhm,NP = npcentroids,$
                                  FUNC=fs,CORR_UNC=corrfluxerr, DATAFILE=pmapfile,NNEAREST=nn, $
-                                 R_USE = apradius, USE_PMAP = IMAIN) ;,/VERBOSE
+                                 R_USE = apradius, USE_PMAP = IMAIN, /position_only) ;,/VERBOSE
 ;         print, 'corrflux', corrflux[0:10]
          ;corrflux = pmap_correct(x_center,y_center,abcdflux,ch,npcentroids,occdata, corr_unc = corrfluxerr, func = fs,$
          ;                       datafile =pmapfile,/threshold_occ,/use_np) 
