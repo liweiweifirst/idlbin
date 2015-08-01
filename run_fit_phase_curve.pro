@@ -4,29 +4,44 @@ pro run_fit_phase_curve, exodata = exodata
   t = systime(1)
 
   ;;setup some known quantities for wasp14
-  porbit = 2.24376543D          ;days
-  mjd_transit = 2456034.21290D - 2400000.5D
-  ecc = 0.0828D
-  argperi = 252.11D             ;degrees
-  ar_semimaj = 5.99d
-  rp_rstar = 0.09420d
-  ar_semimaj = 5.99d
-  inclination=84.63d
+;  porbit = 2.24376543D          ;days
+;  mjd_transit = 2456034.21290D - 2400000.5D
+;  ecc = 0.0828D
+;  argperi = 252.11D             ;degrees
+;  ar_semimaj = 5.99d
+;  rp_rstar = 0.09420d
+;  inclination=84.63d
+;  exosystem = 'WASP-14 b'
+;  verbose = 1
+;  trad =1.d ;2.  ;; initial guess
+;  omrot =1.d ;0.9  ;; initial guess
+;  fstar = 0.0577d ;; initial guess
 
-  exosystem = 'WASP-14 b'
+
+  ;;setup some known quantities for XO3
+  porbit = 3.1915239D           ;days
+  mjd_transit = 2454449.86816D - 2400000.5D
+  ecc = 0.26D
+  argperi = 345.8D             ;degrees
+  ar_semimaj = 5.99d ;XXX
+  rp_rstar = 0.09420d ;XXX
+  inclination=84.79d
+  exosystem = 'XO-3 b'
   verbose = 1
   trad =1.d ;2.  ;; initial guess
   omrot =1.d ;0.9  ;; initial guess
-  fstar = 0.0577d ;; initial guess
+  fstar = 0.049d ;; initial guess
+  teff_star = 6781.0d
+
   startvals = [trad, omrot, fstar]
   albedo = !NULL  ;; set to null to fix the value at zero in the fit
   IF N_ELEMENTS(RP_RSTAR) EQ 0 AND ~KEYWORD_SET(FIT_SYSTEM) THEN rp_rstar = 0.09420d
-  IF N_ELEMENTS(INCLINATION) EQ 0 AND ~KEYWORD_SET(FIT_SYSTEM) THEN inclination=84.63d
+  IF N_ELEMENTS(INCLINATION) EQ 0 AND ~KEYWORD_SET(FIT_SYSTEM) THEN inclination=84.79d
 
   ;;read in the snapshot mode photometry
   ;starefile = '/Users/jkrick/irac_warm/pcrs_planets/wasp-14b/wasp14_snap_latenterr_150226.txt'
-  starefile = '/Users/jkrick/irac_warm/pcrs_planets/wasp-14b/wasp14_snap_phaseonly_150226.txt'
-  readcol, starefile, starebmjd, starephase, corrflux, corrfluxerr, format = 'D, D, D, D',/nan
+  ;starefile = '/Users/jkrick/irac_warm/pcrs_planets/wasp-14b/wasp14_snap_phaseonly_150226.txt'
+ ; readcol, starefile, starebmjd, starephase, corrflux, corrfluxerr, format = 'D, D, D, D',/nan
 
   ;;in this instance want to not include transit and eclipse
  ; good1 = where(starephase gt -0.47 and starephase lt -0.04)
@@ -36,14 +51,18 @@ pro run_fit_phase_curve, exodata = exodata
  ; goodcorrfluxerr = [corrfluxerr(good1), corrfluxerr(good2)]
  ; goodbmjd = [starebmjd(good1), starebmjd(good2)]
  
-  
-      
+  ;;read in the save file
+  restore, '/Users/jkrick/external/irac_warm/XO3/XO3_phot_ch2_2.25000_150226.sav'
+  corrflux = planethash['r46471424', 'corrflux']
+  corrfluxerr = planethash['r46471424', 'corrfluxerr']
+  starebmjd =  planethash['r46471424', 'bmjdarr']
+
   ;;test output by plotting
   ;;p1 = plot(goodphase, goodcorrflux, '1s', sym_size =0.2, sym_filled= 1, xtitle = 'phase', ytitle = 'corrflux')
      
 
   ;;run the fitting iteratively. start with fixed number of iterations
-  for i = 0, 4 do begin
+  for i = 0, 2 do begin
      print, '-------------------------'
      print, 'starting fit', fstar, trad, omrot
      ;;now do some fitting
