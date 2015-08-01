@@ -23,7 +23,6 @@ function mandel_Agol,params0, t = t, flux = flux, err = err, p_orbit =p_orbit, m
 ;IF nlow NE 0 THEN phase[ilow] += 1
 ;ihi = WHERE(phase GT 0.5,nhi)
 ;IF nhi NE 0 THEN phase[ihi] -= 1
- 
 phase = t
 tdiff = t
 nt = n_elements(phase)
@@ -64,7 +63,7 @@ phase_curve = 1+ params0[0] + params0[4]*cos(2*!dpi*tdiff/p_orbit) + params0[5]*
 ;testing
 ;phase_curve = params0[4]*sin(alpha + params0[5])
 
-rel_flux = (1-lambda_star) + params0[0] * (1-lambda_planet) * phase_curve
+rel_flux = (1-lambda_star) + params0[0] * (1-lambda_planet) ;* phase_curve
 ;rel_flux = (1-lambda_star) + fp_fstar0 * (1-lambda_planet) * phase_curve
 
 
