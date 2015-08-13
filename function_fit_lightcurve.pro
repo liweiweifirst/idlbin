@@ -81,14 +81,15 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
 ;do the fitting
  afargs = {t:phasearr, flux:fluxarr, err:errarr, p_orbit:p_orbit, mjd_start:mjd_start, mjd_transit:mjd_transit, savefilename:savefilename} ;, rp_rstar:rp_rstar ar_semimaj:ar_semimaj,,inclination:inclination}
  print, 'calling mandel_agol'
- pa = mpfit('mandel_agol', params0, FUNCTARGS=afargs, PERROR=spa, BESTNORM=achi, DOF=adof, COVAR = COV, status = status, errmsg = errmsg, parinfo = parinfo) ;, savefilename = savefilename)
+ pa = mpfit('mandel_agol', params0, FUNCTARGS=afargs, PERROR=spa, BESTNORM=achi, DOF=adof, COVAR = COV, status = status, errmsg = errmsg, parinfo = parinfo) 
+;, savefilename = savefilename)
 
   print, 'status', status
   print, errmsg
   print, 'reduced chi squared',  achi / adof
   print, 'perror', spa
 
-  print, 'primary depth', pa(1)^2, spa(1)^2
+  print, 'primary depth', pa(1)^2, 2*pa(1)*spa(1)  ;error propagation for pa(1)^2
   print, 'secondary depth', pa(0), spa(0)
 
 ;want to overplot the fitted curve
