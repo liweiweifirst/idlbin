@@ -15,12 +15,6 @@ aornum = 11
   exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
   exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
   
-  planetinfo = create_planetinfo()
-  if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
-  basedir = planetinfo[planetname, 'basedir']
-  period =  planetinfo[planetname, 'period']
-  stareaor = planetinfo[planetname, 'stareaor']
-
   dirname = strcompress(basedir + planetname +'/')       
   savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150226.sav',/remove_all) ;
   print, 'restoring ', savefilename
@@ -38,7 +32,7 @@ aornum = 11
   se = where(phase0 gt 0.47 and phase0 lt 0.51)
   
   plot_corrnorm =  mean(corrflux0,/nan)
-  startaor = 11
+  startaor = 1
   stopaor = 20
   for a = startaor,stopaor, 2 do begin
      print, '------------------------------------------------------'
