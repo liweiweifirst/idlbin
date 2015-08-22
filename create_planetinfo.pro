@@ -326,6 +326,25 @@ chname = 0
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
+  planetname = 'GJ3470'
+  ra_ref = 119.77445833
+  dec_ref = 15.39152778
+  aorname_ch2 = ['r56751360' ,'r50648576', 'r50658048','r56751616' ] 
+  aorname_ch1 = ['r0000000000']
+  basedir = '/Users/jkrick/external/dither_preaor/' 
+  utmjd_center = 56089.9769D
+  transit_duration=96.300  ;XXX bullshit
+  period = 3.33671
+  intended_phase = 0.0
+  exptime =  0.4
+  stareaor = 0
+  plot_norm = 1.
+  plot_corrnorm = 1.
+
+  values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
   planetname = 'gj436'
   ra_ref = 175.5493
   dec_ref = 26.704311
