@@ -8,7 +8,7 @@
 ;                            REDUCED_CHI2=reduced_chi2,AR_SEMIMAJ=ar_semimaj,ECC=ecc,$
 ;                            ARGPERI=argperi,RP_RSTAR=rp_rstar,TEFF_STAR=teff_star,$
 ;                            PORBIT=porbit,INCLINATION=inclination,MJD_TRANSIT=mjd_transit,$
-;                            TPERI_2=tperi_2,MODEL_2=model_2,TPHASE_2=tphase_2,$
+;                            LIMB_DARKENING=limb_darkening,TPERI_2=tperi_2,MODEL_2=model_2,TPHASE_2=tphase_2,$
 ;                            PHASE_MAX=phase_max,PHASE_MIN=phase_min,T_MAX=t_max,$
 ;                            T_MIN=t_min,AMPLITUDE=amplitude,/FIXED_FSTAR,/FIXED_TRAD,$
 ;                            /FIXED_OMROT,TRANSIT_DEPTH=transit_depth,ECLIPSE_DEPTH=eclipse_depth
@@ -56,16 +56,18 @@
 ;    MODEL_2       : Model values at TPERI_2 or TPHASE_2
 ;;         T_MAX   : Model TPERI of peak amplitude.  May not be an actual time in the returned TPERI_2 array.
 ;;         T_MIN   : Model TPERI of minimum amplitude.  May not be an actual time in the returned TPERI_2 array.
-;;     PHASE_MAX   : TPHASE_2 of peak amplitude.  May not be an actual value in the TPHASE_2 array.
-;;     PHASE_MIN   : TPHASE_2 of minimum amplitude.  May not be an actual value in the TPHASE_2 array.
-;;     AMPLITUDE   : Peak-to-valley amplitude of phase curve, in units of FSTAR
-;;   TRANSIT_DEPTH : Depth of transit in the model, i.e., the flux at mid-transit divided by the
+;;     PHASE_MAX   : [TPHASE_2 of peak amplitude, uncertainty] (two-element vector).  
+;;                   May not be an actual value in the TPHASE_2 array.
+;;     PHASE_MIN   : [TPHASE_2 of minimum amplitude, uncertainty] (two-element vector). 
+;;                    May not be an actual value in the TPHASE_2 array.
+;;     AMPLITUDE   : [Peak-to-valley amplitude of phase curve, in units of FSTAR, uncertainty] (two-element vector)
+;;   TRANSIT_DEPTH : [Depth of transit in the model, uncertainty] (two-element vector), i.e., the flux at mid-transit divided by the
 ;;                       unobstructed star + planet flux at that time.
-;;   ECLIPSE_DEPTH : Depth of eclipse in the model, i.e., the flux at mid-eclipse divided by the
+;;   ECLIPSE_DEPTH : [Depth of eclipse in the model, uncertainty] (two-element vector), i.e., the flux at mid-eclipse divided by the
 ;;                       unobstructed star + planet flux at that time.
 ;
 ;  **EXOPLANET SYSTEM PARAMETERS**
-;    (These do not need to be input because they will be read from the database, BUT
+;    (Except for LIMB_DARKENING, these do not need to be input because they will be read from the database, BUT
 ;     they may be input to override values from database)
 ;    (Parameters indicated by asterisks "*" are fittable if /FIT_SYSTEM keyword is set.
 ;     In this case, input or database values will be used as a guess.  If neither is available, use default guess.)
@@ -77,6 +79,12 @@
 ;       PORBIT     : Orbital period (dy)
 ;  INCLINATION*    : Orbital inclination (degrees)
 ;  MJD_TRANSIT*    : MJD of transit (dy)
+; LIMB_DARKENING   : The set of stellar limb darkening coefficients to use to compute the transit profile.
+;                    See Claret (2000) for a description of the model, and Mandel & Agol (2002) for the
+;                    effect on transit profiles.  Leave undefined for no limb darkening.  
+;                    NOT IN DATABASE -- MUST BE INPUT
+;
+
 
 
 PRO fpc_time,t,mjd_transit,porbit,ecc,argperi,ttransit,tperi,tphase
@@ -98,7 +106,7 @@ END
 
 FUNCTION PHASE_CURVE_FUNCTION,p,TIME=t,FLUX=flux,FUNC=func,AR_SEMIMAJ=ar_semimaj,ECC=ecc,ARGPERI=argperi, RP_RSTAR=rp_rstar,$
                               TEFF_STAR=teff_star,PORBIT=porbit, LAMBDA_BAND=lambda_band, INCLINATION=inclination,$
-                              MODEL=model,A_AU=a_au
+                              MODEL=model,A_AU=a_au,LIMB_DARKENING=limb_darkening
   FSTAR = P[0]                              
   ALBEDO=P[1]
   TRAD=P[2]
@@ -115,7 +123,7 @@ FUNCTION PHASE_CURVE_FUNCTION,p,TIME=t,FLUX=flux,FUNC=func,AR_SEMIMAJ=ar_semimaj
   IF nkeep ne 0 THEN BEGIN      
     ;;; Compute a model light curve for one orbit.                        
      exoplanet_phase_curve,ar_semimaj,ecc,argperi,rp_rstar,teff_star,porbit,lambda_band,albedo,trad,omrot,tperi_model,$
-                           fp_fstar,relative_flux,INCLINATION=inclination,A_AU=a_au
+                           fp_fstar,relative_flux,INCLINATION=inclination,A_AU=a_au,LIMB_DARKENING=limb_darkening
      st = SORT(tperi_model)
      nt = N_ELEMENTS(tperi_model)                           
      ;;; triple the orbit in the model, so interpolation works at the boundaries
@@ -133,7 +141,8 @@ PRO phase_curve_show_fit,myfunct,p,iter,fnorm,FUNCTARGS=fa,PARINFO=parinfo,QUIET
   IF ~KEYWORD_SET(QUIET) THEN BEGIN
     resid = PHASE_CURVE_FUNCTION(p,TIME=fa.time,FLUX=fa.flux,FUNC=fa.func,AR_SEMIMAJ=fa.ar_semimaj,ECC=fa.ecc,$
                                  ARGPERI=fa.argperi,RP_RSTAR=fa.rp_rstar,TEFF_STAR=fa.teff_star,PORBIT=fa.porbit,$
-                                 LAMBDA_BAND=fa.lambda_band,INCLINATION=fa.inclination,MODEL=model,A_AU=fa.a_au)
+                                 LAMBDA_BAND=fa.lambda_band,INCLINATION=fa.inclination,MODEL=model,A_AU=fa.a_au,$
+                                 LIMB_DARKENING=fa.limb_darkening)
     set_plot,'x'
     st = sort(fa.time)
     CGplot,fa.time[st],fa.flux[st]/p[0],psym=3,xstyle=1,ystyle=1,yrange=[0.98,1.02]
@@ -154,7 +163,7 @@ PRO FIT_PHASE_CURVE,t,f,exosystem,fstar,albedo,trad,omrot,tperi,tphase,model,TID
                     TPERI_2=tperi_2,MODEL_2=model_2,TPHASE_2=tphase_2,FIT_SYSTEM=fit_system,SYSTEM_ERR=system_err,$
                     PHASE_MAX=phase_max,PHASE_MIN=phase_min,T_MAX=t_max,T_MIN=t_min,AMPLITUDE=amplitude,$
                     FIXED_FSTAR=fixed_fstar,FIXED_TRAD=fixed_trad,FIXED_OMROT=fixed_omrot,$
-                    TRANSIT_DEPTH=transit_depth,ECLIPSE_DEPTH=eclipse_depth
+                    TRANSIT_DEPTH=transit_depth,ECLIPSE_DEPTH=eclipse_depth,LIMB_DARKENING=limb_darkening
 ;
 ;  (0) Set values of constants
    degrad = !dpi / 180d  
@@ -230,13 +239,14 @@ PRO FIT_PHASE_CURVE,t,f,exosystem,fstar,albedo,trad,omrot,tperi,tphase,model,TID
    ENDIF
    IF V THEN PRINT,'(4) Set values of function arguments'
    FUNCTARGS = {AR_SEMIMAJ:ar_semimaj, ECC:ecc, ARGPERI:argperi, RP_RSTAR:rp_rstar, TEFF_STAR:teff_star, MODEL: DBLARR(N_ELEMENTS(t)), $
-                PORBIT:porbit, LAMBDA_BAND:lambda_band, INCLINATION:inclination, A_AU:ar_semimaj * rstar * rsun/au, TIME:tperi, FLUX:f, FUNC:func}
+                PORBIT:porbit, LAMBDA_BAND:lambda_band, INCLINATION:inclination, A_AU:ar_semimaj * rstar * rsun/au, $
+               LIMB_DARKENING: limb_darkening, TIME:tperi, FLUX:f, FUNC:func}
    IF V THEN PRINT,'(5) Run the fit'
    PARAM_RESULT = MPFIT('PHASE_CURVE_FUNCTION',FUNCTARGS=functargs,PARINFO=parinfo,AUTODERIVATIVE=1,$
                          QUIET=~V,PERROR=perror,BESTNORM=bestnorm,status=status,errmsg=errmsg,$
-                         iterproc='phase_curve_show_fit',XTOL=1d-6)
-   IF v THEN print,'(6) Done.  Status=',status,' ',errmsg
-   iFIXED = WHERE(parinfo[*].FIXED EQ 1,nfixed)
+                         iterproc='phase_curve_show_fit',XTOL=1d-6,COVAR=covar,NOCATCH=0)
+   IF v THEN print,'(6) Done fit.  Status=',status,' ',errmsg
+   iFIXED = WHERE(parinfo[*].FIXED EQ 1,nfixed,ncomplement=nfloat,complement=ifloat)
    DOF = N_ELEMENTS(tperi) - N_ELEMENTS(params) - nfixed
    reduced_chi2 = SQRT(BESTNORM/DOF)
    param_err = perror*reduced_chi2
@@ -253,7 +263,64 @@ PRO FIT_PHASE_CURVE,t,f,exosystem,fstar,albedo,trad,omrot,tperi,tphase,model,TID
    exoplanet_phase_curve,ar_semimaj,ecc,argperi,rp_rstar,teff_star,porbit,lambda_band,albedo,trad,omrot,tperi_2,$
      fp_fstar,model_2,INCLINATION=inclination,A_AU=ar_semimaj * rstar * rsun/au,PHASE_FRACTION=tphase_2,$
      amplitude=amplitude,phase_max=phase_max,phase_min=phase_min,t_max=t_max,t_min=t_min,$
-     TRANSIT_DEPTH=transit_depth,ECLIPSE_DEPTH=eclipse_depth
- 
+     TRANSIT_DEPTH=transit_depth,ECLIPSE_DEPTH=eclipse_depth,LIMB_DARKENING=limb_darkening
+   IF V THEN PRINT,'(7) Compute uncertainties in calculated light curve parameters.'
+   ;; GET THE PARTIAL DERIVATIVES and the UNCERTAINTIES in amplitude, phase_max, phase_min, transit_depth, and eclipse_depth
+   amplitude_unc = 0d
+   phase_max_unc = 0d
+   phase_min_unc = 0d
+   transit_depth_unc = 0d
+   eclipse_depth_unc = 0d
+   FOR i = 0,nfloat-1 DO BEGIN ;; Loop over all floating parameters
+      dx = param_err[ifloat[i]]
+      please_continue=0
+      CASE PARINFO[ifloat[i]].parname OF
+        'T_RAD': BEGIN
+          x = trad+dx*[-1,0,1d]
+          exoplanet_phase_curve,ar_semimaj,ecc,argperi,rp_rstar,teff_star,porbit,lambda_band,albedo,trad+dx,omrot,tperi_2,$
+            fp_fstar,model_2,INCLINATION=inclination,A_AU=ar_semimaj * rstar * rsun/au,PHASE_FRACTION=tphase_2,$
+            amplitude=amplitude2,phase_max=phase_max2,phase_min=phase_min2,t_max=t_max,t_min=t_min,$
+            TRANSIT_DEPTH=transit_depth2,ECLIPSE_DEPTH=eclipse_depth2,LIMB_DARKENING=limb_darkening
+          exoplanet_phase_curve,ar_semimaj,ecc,argperi,rp_rstar,teff_star,porbit,lambda_band,albedo,trad-dx,omrot,tperi_2,$
+            fp_fstar,model_2,INCLINATION=inclination,A_AU=ar_semimaj * rstar * rsun/au,PHASE_FRACTION=tphase_2,$
+            amplitude=amplitude0,phase_max=phase_max0,phase_min=phase_min0,t_max=t_max,t_min=t_min,$
+            TRANSIT_DEPTH=transit_depth0,ECLIPSE_DEPTH=eclipse_depth0,LIMB_DARKENING=limb_darkening
+        END
+        'OMEGA_ROT': BEGIN
+          x = omrot+dx*[-1,0,1d]
+          exoplanet_phase_curve,ar_semimaj,ecc,argperi,rp_rstar,teff_star,porbit,lambda_band,albedo,trad,omrot+dx,tperi_2,$
+            fp_fstar,model_2,INCLINATION=inclination,A_AU=ar_semimaj * rstar * rsun/au,PHASE_FRACTION=tphase_2,$
+            amplitude=amplitude2,phase_max=phase_max2,phase_min=phase_min2,t_max=t_max,t_min=t_min,$
+            TRANSIT_DEPTH=transit_depth2,ECLIPSE_DEPTH=eclipse_depth2,LIMB_DARKENING=limb_darkening
+          exoplanet_phase_curve,ar_semimaj,ecc,argperi,rp_rstar,teff_star,porbit,lambda_band,albedo,trad,omrot-dx,tperi_2,$
+            fp_fstar,model_2,INCLINATION=inclination,A_AU=ar_semimaj * rstar * rsun/au,PHASE_FRACTION=tphase_2,$
+            amplitude=amplitude0,phase_max=phase_max0,phase_min=phase_min0,t_max=t_max,t_min=t_min,$
+            TRANSIT_DEPTH=transit_depth0,ECLIPSE_DEPTH=eclipse_depth0,LIMB_DARKENING=limb_darkening
+        END
+        ELSE: please_continue=1
+          ;;; HERE -- add cases
+      ENDCASE
+      IF please_continue THEN CONTINUE
+      damp = (DERIV(x,[amplitude0,amplitude,amplitude2]))[1]
+      dpmx = (DERIV(x,[phase_max0,phase_max,phase_max2]))[1]
+      dpmn = (DERIV(x,[phase_min0,phase_min,phase_min2]))[1]
+      dtran = (DERIV(x,[transit_depth0,transit_depth,transit_depth2]))[1]
+      decl = (DERIV(x,[eclipse_depth0,eclipse_depth,eclipse_depth2]))[1]
+      amplitude_unc += (damp * dx)^2
+      phase_max_unc += (dpmx * dx)^2
+      phase_min_unc += (dpmn * dx)^2
+      transit_depth_unc += (dtran * dx)^2
+      eclipse_depth_unc += (decl * dx)^2
+   ENDFOR
+  amplitude_unc = SQRT(amplitude_unc)
+  phase_max_unc = SQRT(phase_max_unc)
+  phase_min_unc = SQRT(phase_min_unc)
+  transit_depth_unc = SQRT(transit_depth_unc)
+  eclipse_depth_unc = SQRT(eclipse_depth_unc) 
+  amplitude = [amplitude,amplitude_unc]
+  phase_max = [phase_max,phase_max_unc]
+  phase_min = [phase_min,phase_min_unc]
+  transit_depth = [transit_depth,transit_depth_unc]
+  eclipse_depth = [eclipse_depth,eclipse_depth_unc]
 RETURN
 END

@@ -6,7 +6,8 @@ END
 
 PRO exoplanet_phase_curve,ar_semimaj,e,argperi,rp_rstar,teff_star,porbit,lambda_band,albedo,trad,omrot,tperi,$
                           fp_fstar,relative_flux,R=r,Theta=theta,OMORB_PERI=omorb_peri,OBS_ANOMALY=phase,$
-                          INCLINATION=inclination,A_AU=a_au,PLOT=plot,VERBOSE=verbose,TIDALLY_LOCKED=tidally_locked,$
+                          INCLINATION=inclination,A_AU=a_au,LIMB_DARKENING=limb_darkening,PLOT=plot,VERBOSE=verbose,$
+                          TIDALLY_LOCKED=tidally_locked,$
                           ITRANSIT=itransit,IECLIPSE=ieclipse,TEMP_MAX=temp_max,LONG_TEMP_MAX=long_temp_max,AMPLITUDE=amplitude,$
                           PHASE_FRACTION=phase_fraction,T_MAX=t_max,T_MIN=t_min,PHASE_MAX=phase_max,PHASE_MIN=phase_min,$
                           TEMP_SUBSTELLAR=temp_substellar,TRANSIT_DEPTH=transit_depth,ECLIPSE_DEPTH=eclipse_depth
@@ -44,6 +45,9 @@ PRO exoplanet_phase_curve,ar_semimaj,e,argperi,rp_rstar,teff_star,porbit,lambda_
 ;;               R     = Distance from star of planet over the course of TPERI, in units of the semimajor axis.
 ;;           THETA     = Polar angle of planetary orbit as a function of TPERI, degrees.  Measured from the line 
 ;;                       going from the star to the planet at periastron.  Also known as True Anomaly.
+;;     LIMB_DARKENING  = The set of stellar limb darkening coefficients to use to compute the transit profile.
+;;                       See Claret (2000) for a description of the model, and Mandel & Agol (2002) for the
+;;                       effect on transit profiles.  Leave undefined for no limb darkening.
 ;;         OMORB_PERI  = Angular velocity as a function of TPERI, relative to the angular velocity at perihelion.
 ;;         OBS_ANOMALY = True Anomaly, phased to the line of sight, in radians, as a function of time.
 ;;                       This is the angle the planet's radius vector makes with the line of sight.
@@ -210,8 +214,8 @@ PRO exoplanet_phase_curve,ar_semimaj,e,argperi,rp_rstar,teff_star,porbit,lambda_
      END 
      ELSE: wt[3] = 1
   ENDCASE
-  ;;print,[0,0.1*prot,prot,3*prot,3*porbit]
-  ;;print,wt
+  ;print,[0,0.1*prot,prot,3*prot,3*porbit]
+  ;print,wt
   IF KEYWORD_SET(VERBOSE) THEN PRINT,'(5) Compute Temp for all latitudes by multiplying normalized temps by T0'
   FOR k = 0,nlat-1 DO BEGIN
     ;;; Combine the solutions together, with the various weights
@@ -263,7 +267,7 @@ PRO exoplanet_phase_curve,ar_semimaj,e,argperi,rp_rstar,teff_star,porbit,lambda_
   raw_phase_norm = raw_phase/(2*!dpi)  ;;; number of orbits, phased to the line of sight, from periastron
 
   IF KEYWORD_SET(VERBOSE) THEN PRINT,'(10) Compute stellar and planetary obstruction as a function of tperi, and calculate light curve'
-  EXOPLANET_TRANSIT_ECLIPSE,raw_phase,ar_semimaj,r,rp_rstar,inclination,star_frac,planet_frac,itransit_raw,ieclipse_raw
+  EXOPLANET_TRANSIT_ECLIPSE,raw_phase,ar_semimaj,r,rp_rstar,inclination,star_frac,planet_frac,itransit_raw,ieclipse_raw,LIMB_DARKENING=limb_darkening
   relative_flux = star_frac + planet_frac * fp_fstar
   
   IF KEYWORD_SET(PLOT) THEN BEGIN
@@ -318,22 +322,28 @@ PRO exoplanet_phase_curve,ar_semimaj,e,argperi,rp_rstar,teff_star,porbit,lambda_
 ;;; Keep only last 1 orbit's worth of transit and eclipse
   transit_depth=!null
   eclipse_depth=!null
+  itransit = !null
+  ieclipse = !null
   IF N_ELEMENTS(itransit_RAW) NE 0 THEN BEGIN
      ikeep_transit = WHERE(itransit_raw ge (ntime-1000),nkeep_transit)
-     itransit0 = itransit_raw[ikeep_transit]-(ntime-1000)
-     dum = MAX(COS(phase[itransit0]),imid)
-     itransit = itransit0[imid]
-     transit_depth = 1d - relative_flux[itransit] / (1d + fp_fstar[itransit])
+     IF nkeep_transit NE 0 THEN BEGIN
+        itransit0 = itransit_raw[ikeep_transit]-(ntime-1000)
+        dum = MAX(COS(phase[itransit0]),imid)
+        itransit = itransit0[imid]
+        transit_depth = 1d - relative_flux[itransit] / (1d + fp_fstar[itransit])
+     ENDIF
 ;     transit_depth = 1d - relative_flux[itransit] / fp_fstar[itransit]
-  ENDIF ELSE itransit = !null
+  ENDIF 
   IF N_ELEMENTS(ieclipse_raw) NE 0 THEN BEGIN
      ikeep_eclipse = WHERE(ieclipse_raw ge (ntime-1000),nkeep_eclipse)
-     ieclipse0 = ieclipse_raw[ikeep_eclipse]-(ntime-1000)
-     dum = MIN(COS(phase[ieclipse0]),imid)
-     ieclipse = ieclipse0[imid]
+     IF nkeep_eclipse NE 0 THEN BEGIN
+        ieclipse0 = ieclipse_raw[ikeep_eclipse]-(ntime-1000)
+        dum = MIN(COS(phase[ieclipse0]),imid)
+        ieclipse = ieclipse0[imid]
 ;     eclipse_depth = 1d - relative_flux[ieclipse] / (1d + fp_fstar[ieclipse])
-     eclipse_depth = fp_fstar[ieclipse]
-  ENDIF ELSE ieclipse = !null
+        eclipse_depth = fp_fstar[ieclipse]
+     ENDIF
+  ENDIF 
   theta_transit = 2.*!dpi * ( (!dpi/2. - argperi*degrad)/(2.*!dpi) mod 1 )    ;; Angle between periastron and transit
   IF theta_transit LT 0 THEN theta_transit += 2.*!dpi
   st = sort(theta)
