@@ -7,9 +7,9 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
      colorarr = ['gray', 'gray','gray','gray','gray','burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']
    
   endif else begin
-     colorarr = ['burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']
+;     colorarr = ['burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']
 
-;colorarr = ['blue', 'red','black','green','grey','purple', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ]
+colorarr = ['black', 'red','blue','black','grey','purple', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'orange_red', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ]
 ;
   endelse
 
@@ -28,12 +28,14 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
 ;  plot_corrnorm = planetinfo[planetname, 'plot_corrnorm']
   
   dirname = strcompress(basedir + planetname +'/');+'/hybrid_pmap_nn/')
-  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150226.sav',/remove_all)
+  if chname eq '2' then savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150226.sav',/remove_all)
+  if chname eq '1' then savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_140716.sav',/remove_all)
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)
   time_0 = (planethash[aorname(startaor),'timearr']) 
   time_0 = time_0(0)
+  print, 'time_0', time_0
 ;  plothist, planethash[aorname(0),'npcentroids'], xhist, yhist, /noplot, bin = 0.01
 ;  testplot = plot(xhist, yhist,  xtitle = 'NP', ytitle = 'Number', thick =3, color = 'blue')
 
@@ -113,22 +115,22 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
 ;     setxrange = [-1, 18]
 
      ;;normalize each AOR seperately
-     plot_norm =  median(bin_flux)
-     plot_corrnorm = mean(bin_corrfluxp,/nan)
-     bkgd_norm =  mean(bin_bkgd,/nan)
+     ;plot_norm =  median(bin_flux)
+     ;plot_corrnorm = mean(bin_corrfluxp,/nan)
+     ;bkgd_norm =  mean(bin_bkgd,/nan)
 
      if a eq startaor then begin ; for the first AOR
                                 ;set the normalization values from the
                                 ;medians of the first AOR...is close enough
-;;        plot_norm =  median(bin_flux)
-;;        plot_corrnorm = mean(bin_corrfluxp,/nan)
-;;        bkgd_norm =  mean(bin_bkgd,/nan)
+        plot_norm =  median(bin_flux)
+        plot_corrnorm = mean(bin_corrfluxp,/nan)
+        bkgd_norm =  mean(bin_bkgd,/nan)
 ;           print, 'bin_xcen', bin_xcen
         print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
         pp = plot(plotx, bin_xcen, '1s',  $ ;title = planetname, $
                   color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 0.1, $
                   xshowtext = 0, ytickformat = '(F10.2)', dimensions = [600, 900], _extra = extra, yminor = 0,$
-                  xrange = setxrange, yrange = [15.0, 15.3]) ;, $, ymajor = 4
+                  xrange = setxrange, yrange = [14.9, 15.2]) ;, $, ymajor = 4
         
                                 ;turn off refreshing to make this quicker hopefully
 ;           pp.Refresh, /Disable
@@ -137,13 +139,13 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         pq= plot(plotx, bin_ycen, '1s',  color = colorarr[a], $
                  ytitle = 'Y position',  position = [0.2, 0.64, 0.9, 0.77],/current,  ytickinterval = 0.1,$
                  xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, yminor = 0,$
-                 xrange = setxrange);, yrange = [237.0, 239.0]) ;, $, title = planetname , ymajor = 4
+                 xrange = setxrange, yrange = [14.9, 15.2]) ;, $, title = planetname , ymajor = 4
                                 ;xrange = setxrange)
         
         
         pr = plot(plotx, bin_flux/plot_norm, '1s',  $
                   color = colorarr[a],   ytitle = 'Norm. Flux', xtitle = 'Phase',$ 
-                  position = [0.2,0.08, 0.9, 0.21], /current, _extra = extra, ytickinterval = 0.01, yminor = 0,$
+                  position = [0.2,0.08, 0.9, 0.21], /current, _extra = extra, ytickinterval = 0.03, yminor = 0,$
                   xrange = setxrange);, yrange = [0.98, 1.02])
         
         
@@ -154,14 +156,14 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         
         pt = plot(plotx, bin_bkgd/ bkgd_norm, '1s' , color = colorarr[a], $
                   ytitle = 'Norm. Bkgd',  margin = 0.2, position = [0.2, 0.22, 0.9, 0.35], /current, xshowtext = 0,$
-                  ytickformat = '(F10.2)', _extra = extra, ytickinterval = .02, yminor = 0,$ 
+                  ytickformat = '(F10.2)', _extra = extra, ytickinterval = .2, yminor = 0,$ 
                   xrange = setxrange);, yrange = [0.88, 1.04])  ;, $ title = planetname,ymajor = 4,
         
-        pxy = plot(plotx, bin_xfwhm, '1s', color = 'blue', $
+        pxy = plot(plotx, bin_xfwhm, '1s', color = colorarr[a], $
                    ytitle = 'X & Y FWHM',  position = [0.2, 0.50, 0.9, 0.63], /current, $
-                   xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.05, yminor = 0,$
+                   xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.2, yminor = 0,$
                    xrange = setxrange) ;
-        pxy = plot(plotx, bin_yfwhm, '1s', color = 'black', $
+        pxy = plot(plotx, bin_yfwhm, '1s', color = colorarr[a], $
                    overplot = pxy, _extra = extra,$
                    xrange = setxrange) ;
         
@@ -188,8 +190,8 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
 ;           pt.window.SetCurrent
         pt = plot(plotx, bin_bkgd/ bkgd_norm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pt,/current) 
         
-        pxy = plot(plotx, bin_xfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = 'blue', overplot = pxy,/current)
-        pxy = plot(plotx, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = 'black', overplot = pxy,/current)
+        pxy = plot(plotx, bin_xfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pxy,/current)
+        pxy = plot(plotx, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pxy,/current)
         
         
      endif
@@ -214,8 +216,8 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         
         pt = plot(plotx, bin_bkgd/bkgd_norm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
                   overplot = pt) 
-        pxy = plot(plotx, bin_xfwhm, '1s',  sym_size = 0.2,   sym_filled = 1, color = 'blue', overplot = pxy)    ;
-        pxy = plot(plotx, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1, color = 'black', overplot = pxy)    ;
+        pxy = plot(plotx, bin_xfwhm, '1s',  sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = pxy)    ;
+        pxy = plot(plotx, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = pxy)    ;
         
         
      endif
