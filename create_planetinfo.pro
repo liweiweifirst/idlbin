@@ -4,6 +4,24 @@ function create_planetinfo
   keys =['ra', 'dec','aorname_ch2','aorname_ch1','basedir','chname', 'utmjd_center', 'transit_duration', 'period', 'intended_phase', 'exptime','mask', 'maskreg','stareaor','plot_norm','plot_corrnorm']
 chname = 0
 ;---
+  planetname = 'WASP-80b'
+  ra_ref = 303.167750
+  dec_ref = -2.143944
+  aorname_ch2 = ['r48360448', 'r48359936'] ;ch2
+  aorname_ch1 = ['r48361472','r48360960']
+  basedir = '/Users/jkrick/external/irac_warm/' 
+  utmjd_center = 56124.91751D	;junk
+  transit_duration= 127.8 ;min close but not perfect=
+  period =   3.06785200  ;days 
+  exptime = [0.4, 2.0]
+  intended_phase = 0.0
+  stareaor = 2
+  plot_norm = 1.0
+  plot_corrnorm = 1.0
+
+  values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
   planetname = 'WASP-38b'
   ra_ref = 243.95985208                    ; 16 15 50.3645 
   dec_ref = 10.03259056 ; +10 01 57.326 
@@ -915,8 +933,8 @@ chname = 0
   aorname_ch1 = [ 'r0']
   aorname_ch2 = ['r46467072', 'r46471424', 'r46467840', 'r46471168', 'r46470144', 'r46470912', 'r46467584', 'r46470656', 'r46469376','r46470400', 'r46466816', 'r46469632', 'r46468864', 'r46469120', 'r46469888', 'r46468608', 'r46467328', 'r46468352','r46471680', 'r46468096']
 ;  aorname_ch2 = [ 'r46466816', 'r46468096', 'r46469376', 'r46470656', 'r46484224', 'r46486784','r31618816', 'r46467072', 'r46468352', 'r46469632', 'r46470912', 'r46484992', 'r46487040','r39117312', 'r46467328', 'r46468608', 'r46469888', 'r46471168', 'r46485504', 'r46487296','r39117568', 'r46467584', 'r46468864', 'r46470144', 'r46471424', 'r46486016', 'r46487552','r39117824', 'r46467840', 'r46469120', 'r46470400', 'r46471680',  'r46486528','r24291328']
-;  basedir = '/Users/jkrick/external/irac_warm/' 
-  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  basedir = '/Users/jkrick/external/irac_warm/' 
+;  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   utmjd_center =   55180.50972D ; junk
   transit_duration=100. ; junk
   period = 3.1915239 
