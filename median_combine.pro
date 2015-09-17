@@ -23,24 +23,26 @@ pro median_combine, dir_name
 ;     readcol,dir_name(j) + 'bcd_ch2.txt', bcdch1list, format="A", /silent
 
      print, 'n ch1list,', n_elements(bcdch1list);, n_elements(bcdch2list)
-     bigim = fltarr(256, 256, n_elements(bcdch1list));n_elements(bcdch1list))
+     bigim = fltarr(32, 32, 128, n_elements(bcdch1list));n_elements(bcdch1list))
 ;     bigim = fltarr(256, 256, 70);n_elements(bcdch1list))
      c = 0
         
      for i =0, n_elements(bcdch1list) -1 do begin
+;        print, i, bcdch1list(i), c
 ;     for i =0, 70 - 1 do begin
 ;     for i =n_elements(bcdch1list) -70, n_elements(bcdch1list) -1 do begin
         fits_read, bcdch1list(i), im, imheader
         ;im = im * ch1flat
         ;im = im + 0.25
         ;im = im / ch1flat
-;        bigim(0,0,i-59) = im
-        bigim(0,0,c) = im
+;        bigim(0,0,c) = im
+        bigim(0,0,0,c) = im
         c = c + 1
      endfor
      
-     medarr, bigim, meddark
-     fits_write, dir_name(j) + 'med_nosex_ch1.fits', meddark, imheader
+;     medarr, bigim, meddark
+     meddark = median(bigim, dimension = 4)
+     fits_write, dir_name(j) + 'med_ch1.fits', meddark, imheader
 ;     fits_write, dir_name(j) + 'med_ch1_beg.fits', meddark, imheader
 ;     fits_write, dir_name(j) + 'med_ch1_end.fits', meddark, imheader
 ;----
