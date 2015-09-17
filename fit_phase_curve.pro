@@ -82,7 +82,7 @@
 ; LIMB_DARKENING   : The set of stellar limb darkening coefficients to use to compute the transit profile.
 ;                    See Claret (2000) for a description of the model, and Mandel & Agol (2002) for the
 ;                    effect on transit profiles.  Leave undefined for no limb darkening.  
-;                    NOT IN DATABASE -- MUST BE INPUT
+;                    NOT IN DATABASE -- MUST BE INPUT.
 ;
 
 
@@ -164,6 +164,8 @@ PRO FIT_PHASE_CURVE,t,f,exosystem,fstar,albedo,trad,omrot,tperi,tphase,model,TID
                     PHASE_MAX=phase_max,PHASE_MIN=phase_min,T_MAX=t_max,T_MIN=t_min,AMPLITUDE=amplitude,$
                     FIXED_FSTAR=fixed_fstar,FIXED_TRAD=fixed_trad,FIXED_OMROT=fixed_omrot,$
                     TRANSIT_DEPTH=transit_depth,ECLIPSE_DEPTH=eclipse_depth,LIMB_DARKENING=limb_darkening
+                    
+  IF N_ELEMENTS(LIMB_DARKENING) EQ 0 THEN limb_darkening = 0                    
 ;
 ;  (0) Set values of constants
    degrad = !dpi / 180d  
@@ -276,23 +278,35 @@ PRO FIT_PHASE_CURVE,t,f,exosystem,fstar,albedo,trad,omrot,tperi,tphase,model,TID
       please_continue=0
       CASE PARINFO[ifloat[i]].parname OF
         'T_RAD': BEGIN
-          x = trad+dx*[-1,0,1d]
-          exoplanet_phase_curve,ar_semimaj,ecc,argperi,rp_rstar,teff_star,porbit,lambda_band,albedo,trad+dx,omrot,tperi_2,$
+          x = dblarr(3)
+          IF TRAD EQ 0 THEN BEGIN
+              x[0] = trad+dx
+              x[1] = trad
+              x[2] = trad+dx*2d0   
+          ENDIF ELSE BEGIN
+              x[0] = trad-dx > 0
+              x[1] = trad
+              x[2] = trad+dx
+          ENDELSE
+          exoplanet_phase_curve,ar_semimaj,ecc,argperi,rp_rstar,teff_star,porbit,lambda_band,albedo,x[2],omrot,tperi_2,$
             fp_fstar,model_2,INCLINATION=inclination,A_AU=ar_semimaj * rstar * rsun/au,PHASE_FRACTION=tphase_2,$
             amplitude=amplitude2,phase_max=phase_max2,phase_min=phase_min2,t_max=t_max,t_min=t_min,$
             TRANSIT_DEPTH=transit_depth2,ECLIPSE_DEPTH=eclipse_depth2,LIMB_DARKENING=limb_darkening
-          exoplanet_phase_curve,ar_semimaj,ecc,argperi,rp_rstar,teff_star,porbit,lambda_band,albedo,trad-dx,omrot,tperi_2,$
+          exoplanet_phase_curve,ar_semimaj,ecc,argperi,rp_rstar,teff_star,porbit,lambda_band,albedo,x[0],omrot,tperi_2,$
             fp_fstar,model_2,INCLINATION=inclination,A_AU=ar_semimaj * rstar * rsun/au,PHASE_FRACTION=tphase_2,$
             amplitude=amplitude0,phase_max=phase_max0,phase_min=phase_min0,t_max=t_max,t_min=t_min,$
             TRANSIT_DEPTH=transit_depth0,ECLIPSE_DEPTH=eclipse_depth0,LIMB_DARKENING=limb_darkening
         END
         'OMEGA_ROT': BEGIN
-          x = omrot+dx*[-1,0,1d]
-          exoplanet_phase_curve,ar_semimaj,ecc,argperi,rp_rstar,teff_star,porbit,lambda_band,albedo,trad,omrot+dx,tperi_2,$
+          x = dblarr(3)
+          x[0] = omrot-dx > 0
+          x[1] = omrot
+          x[2] = omrot+dx
+          exoplanet_phase_curve,ar_semimaj,ecc,argperi,rp_rstar,teff_star,porbit,lambda_band,albedo,trad,x[2],tperi_2,$
             fp_fstar,model_2,INCLINATION=inclination,A_AU=ar_semimaj * rstar * rsun/au,PHASE_FRACTION=tphase_2,$
             amplitude=amplitude2,phase_max=phase_max2,phase_min=phase_min2,t_max=t_max,t_min=t_min,$
             TRANSIT_DEPTH=transit_depth2,ECLIPSE_DEPTH=eclipse_depth2,LIMB_DARKENING=limb_darkening
-          exoplanet_phase_curve,ar_semimaj,ecc,argperi,rp_rstar,teff_star,porbit,lambda_band,albedo,trad,omrot-dx,tperi_2,$
+          exoplanet_phase_curve,ar_semimaj,ecc,argperi,rp_rstar,teff_star,porbit,lambda_band,albedo,trad,x[0],tperi_2,$
             fp_fstar,model_2,INCLINATION=inclination,A_AU=ar_semimaj * rstar * rsun/au,PHASE_FRACTION=tphase_2,$
             amplitude=amplitude0,phase_max=phase_max0,phase_min=phase_min0,t_max=t_max,t_min=t_min,$
             TRANSIT_DEPTH=transit_depth0,ECLIPSE_DEPTH=eclipse_depth0,LIMB_DARKENING=limb_darkening
@@ -301,11 +315,12 @@ PRO FIT_PHASE_CURVE,t,f,exosystem,fstar,albedo,trad,omrot,tperi,tphase,model,TID
           ;;; HERE -- add cases
       ENDCASE
       IF please_continue THEN CONTINUE
-      damp = (DERIV(x,[amplitude0,amplitude,amplitude2]))[1]
-      dpmx = (DERIV(x,[phase_max0,phase_max,phase_max2]))[1]
-      dpmn = (DERIV(x,[phase_min0,phase_min,phase_min2]))[1]
-      dtran = (DERIV(x,[transit_depth0,transit_depth,transit_depth2]))[1]
-      decl = (DERIV(x,[eclipse_depth0,eclipse_depth,eclipse_depth2]))[1]
+      sx = SORT(x) 
+      damp = (DERIV(x[sx],([amplitude0,amplitude,amplitude2])[sx]))[1]
+      dpmx = (DERIV(x[sx],([phase_max0,phase_max,phase_max2])[sx]))[1]
+      dpmn = (DERIV(x[sx],([phase_min0,phase_min,phase_min2])[sx]))[1]
+      dtran = (DERIV(x[sx],([transit_depth0,transit_depth,transit_depth2])[sx]))[1]
+      decl = (DERIV(x[sx],([eclipse_depth0,eclipse_depth,eclipse_depth2])[sx]))[1]
       amplitude_unc += (damp * dx)^2
       phase_max_unc += (dpmx * dx)^2
       phase_min_unc += (dpmn * dx)^2

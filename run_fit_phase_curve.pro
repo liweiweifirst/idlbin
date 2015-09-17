@@ -62,7 +62,7 @@ pro run_fit_phase_curve, exodata = exodata
      
 
   ;;run the fitting iteratively. start with fixed number of iterations
-  for i = 0, 2 do begin
+  for i = 0, 0 do begin
      print, '-------------------------'
      print, 'starting fit', fstar, trad, omrot
      ;;now do some fitting
@@ -76,8 +76,8 @@ pro run_fit_phase_curve, exodata = exodata
                      PHASE_MIN=phase_min,TRANSIT_DEPTH=transit_depth,ECLIPSE_DEPTH=eclipse_depth ;/FIT_SYSTEM ,
 
 
-     print, 'final fit amplitude', amplitude[0],amplitude[1]
-     print, 'phase_max', phase_max[o], phase_max[1]
+     print, 'final fit amplitude', amplitude; amplitude[0],amplitude[1]
+     print, 'phase_max', phase_max[0], phase_max[1]
      print, 'phase_min', phase_min[0], phase_min[1]
      ;;print, 'param err albedo, trad, omrot', param_err
      ;;print, 'other params', rp_rstar, inclination, mjd_transit
