@@ -19,11 +19,12 @@ case apradius of
    2.25: begin
       apval = 1
       if chname eq '2' then begin
-         pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_150226.sav'
+         pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_150723.sav'
          ;restore, '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_indices_150309.sav'
       endif
 
-      if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p25_s3_7_0p4s_140716.sav'
+      if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_rmulti_s3_7_sd_0p4s_sdark_150722.sav'
+;pmap_data_ch1_r2p25_s3_7_0p4s_140716.sav'
    end
    2.5: begin
       apval = 2
