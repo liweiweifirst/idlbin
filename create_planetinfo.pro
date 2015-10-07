@@ -649,6 +649,42 @@ chname = 0
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
+  planetname = 'epic201912552'
+  ra_ref = 172.560133
+  dec_ref = 7.587843
+  aorname_ch2= ['r56416512', 'r56416000']
+
+  basedir = '~/external/irac_warm/' 
+  utmjd_center = double(56813.4189)
+  transit_duration = 2.54 * 60. ;minutes
+  period = 10.05403
+  intended_phase = 0.0
+  exptime = 2.0
+  stareaor = 2
+  plot_norm = 1.
+  Plot = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'epic201637175'
+  ra_ref = 169.482657
+  dec_ref = 2.618976
+  aorname_ch2= ['r56418304', 'r56419328']
+
+  basedir = '~/external/irac_warm/' 
+  utmjd_center = double(56813.4189)
+  transit_duration = 2.54 * 60. ;minutes
+  period = 10.05403
+  intended_phase = 0.0
+  exptime = 2.0
+  stareaor = 2
+  plot_norm = 1.
+  Plot = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
   planetname = 'epic201367065b'
   ra_ref = 172.33545
   dec_ref = -1.45494
@@ -935,7 +971,7 @@ chname = 0
 ;  aorname_ch2 = [ 'r46466816', 'r46468096', 'r46469376', 'r46470656', 'r46484224', 'r46486784','r31618816', 'r46467072', 'r46468352', 'r46469632', 'r46470912', 'r46484992', 'r46487040','r39117312', 'r46467328', 'r46468608', 'r46469888', 'r46471168', 'r46485504', 'r46487296','r39117568', 'r46467584', 'r46468864', 'r46470144', 'r46471424', 'r46486016', 'r46487552','r39117824', 'r46467840', 'r46469120', 'r46470400', 'r46471680',  'r46486528','r24291328']
   basedir = '/Users/jkrick/external/irac_warm/' 
 ;  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
-  utmjd_center =   55180.50972D ; junk
+  utmjd_center =   54024.897D ; junk
   transit_duration=100. ; junk
   period = 3.1915239 
   intended_phase = 0.5
@@ -953,7 +989,7 @@ chname = 0
   aorname_ch1 = [ 'r0']
   aorname_ch2 = ['r20150000', 'r20150001', 'r20150002', 'r20150003', 'r20150004', 'r20150005', 'r20150006', 'r20150007', 'r20150008', 'r20150009', 'r20150010', 'r20150011', 'r20150012', 'r20150013', 'r20150014', 'r20150015', 'r20150016', 'r20150017', 'r20150018', 'r20150019']
   basedir = '/Users/jkrick/external/irac_warm/' 
-  utmjd_center =   55180.50972D ; junk
+  utmjd_center =   54024.897D ; junk
   transit_duration=100. ; junk
   period = 3.1915239 
   intended_phase = 0.5
