@@ -6,6 +6,7 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
   if planetname eq 'WASP-52b' then teq_p = 1315
   if planetname eq 'WASP-14b' then exosystem = 'WASP-14 b'
   if planetname eq 'XO3' then exosystem = 'XO-3 b' 
+  if planetname eq 'simul_XO3' then exosystem = 'XO-3 b' 
 
   get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
                        TEQ_P=teq_p,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA='4.5',$
@@ -48,7 +49,8 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
 ;Initial guess, start with those from the literature
  amplitude = .001             ; messing around with amplitude of the phase curve.
  phase_offset = 1.
- params0 = [fp_fstar0, rp_rstar, ar_semimaj, inclination, amplitude, phase_offset]
+ linear = 1.0
+ params0 = [fp_fstar0, rp_rstar, ar_semimaj, inclination, amplitude, phase_offset];, linear]
 ; params0 = [fp_fstar0, .08, ar_semimaj, inclination, amplitude,
 ; phase_offset]
 
