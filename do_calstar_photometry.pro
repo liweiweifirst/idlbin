@@ -46,8 +46,8 @@ function do_calstar_photometry, ch, dirname
         
 ;read in the image, get important info from the header
         fits_read,fitsname(c), im, h
-        inter = strmid(fitsname(c), 0, 48)
-        uncname = strcompress(inter + 'sig_dntoflux.fits',/remove_all)
+        inter = strmid(fitsname(c), 0, 46)
+        uncname = strcompress(inter + '*sig_dntoflux.fits',/remove_all)
 ;        print, 'uncname',i,  uncname, fitsname(i)
         fits_read, uncname, unc, hunc, /no_abort ; so it won't crash if the file isn't there but should use the last unc file.
         chnlnum = sxpar(h, 'CHNLNUM')
@@ -71,7 +71,7 @@ function do_calstar_photometry, ch, dirname
         endelse
         ;if starname eq '1812095' then print, 'working on 1812095'
         if xcen gt 5 and ycen gt 5 and xcen lt xmax and ycen lt ymax then begin
-;           print, 'starting photometry ' , i, c, fitsname(c), starname
+;           print, 'starting photometry ' , i, c, fitsname(c), starname, uncname
            ;do photometry
 ;           print, '      about to start get_centroids', systime(1) - ft1
 
@@ -85,9 +85,9 @@ function do_calstar_photometry, ch, dirname
                                 ;choose the requested pixel aperture =
                                 ;3.0 pixels to match
                                 ;pixphasecorrectgauss
-           abcdflux = f[*,3]      
+           abcdflux = f[*,4]      
 ;           print, 'flux', x3, y3, abcdflux
-           fs = fs[*,3]
+           fs = fs[*,4]
                                 ; 3-7 pixel background
            back = b[*,0]
            backerr = bs[*,0]
