@@ -1,7 +1,9 @@
 pro eclipse_test_mandel_agol, planetname, bin_level, apradius, chname
 ;planetname = 'XO3'
 
-  COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm,  bin_corrflux_dp
+  COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm,  bin_corrflux_dp, bin_bmjdarrp
+
+ colorarr = ['burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']
 
 aornum = 11
 
@@ -14,9 +16,10 @@ aornum = 11
   print, 'stareaor', stareaor
   exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
   exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
-  
+  if planetname eq 'simul_XO3' then exosystem = 'XO-3 b'
+
   dirname = strcompress(basedir + planetname +'/')       
-  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150226.sav',/remove_all) ;
+  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150723.sav',/remove_all) ;
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)
@@ -31,7 +34,7 @@ aornum = 11
   corrflux0 = planethash[aorname(aornum),'corrflux_d']
   se = where(phase0 gt 0.47 and phase0 lt 0.51)
   
-  plot_corrnorm =  mean(corrflux0,/nan)
+  plot_corrnorm =  mean(corrflux0(se),/nan)
   startaor = 1
   stopaor = 20
   for a = startaor,stopaor, 2 do begin
@@ -51,15 +54,34 @@ aornum = 11
      bin_corrfluxp = bin_corrflux_dp
 
      ;fake that this is a transit/ not eclipse
-     bin_phasep = bin_phasep - 0.585
+     bin_phasep = bin_phasep -0.595; 0.585
+
+     ;pick the normalization
+     se = where(bin_phasep gt -0.015 and bin_phasep lt 0.015)
+     plot_corrnorm =  mean(bin_corrfluxp(se),/nan)
+     print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
+
      pu = errorplot(bin_phasep, (bin_corrfluxp/plot_corrnorm), $
                              bin_corrfluxerrp/plot_corrnorm,  '1s', sym_size = 0.3,  $
-                              sym_filled = 1,color ='black' ,xtitle = 'Orbital Phase',$
-                             errorbar_color =  scolor, title = aorname(a), ytitle = 'Pmap Corrected Flux')
+                              sym_filled = 1,color =colorarr[a] ,xtitle = 'Orbital Phase',$
+                             errorbar_color =  colorarr[a], title = aorname(a), ytitle = 'Pmap Corrected Flux')
 
 
      test = function_fit_lightcurve(planetname, bin_phasep, bin_corrfluxp/plot_corrnorm,  bin_corrfluxerrp/plot_corrnorm, modelfilename)
-     p2 = plot(findgen(20) - 5, fltarr(20) + 1.0 - 0.001696, overplot = pu, xrange = [-0.08, 0.06])
+     p2 = plot(findgen(20) - 5, fltarr(20) + 1.0 + 0.001875, overplot = pu, xrange = [-0.08, 0.06]) ; 0.00158
+     plotname = strcompress(dirname + planetname +'_'+aorname(a)+'_'+string(apradius)+'_fit_150723.png',/remove_all) 
+     p2.save, plotname
+
+     ;write output to be used by TAP
+     outfilename =  strcompress(dirname +'phot_ch'+chname+'_TAP_'+aorname(a)+'_bin10.ascii',/remove_all)
+     openw, outlun, outfilename,/GET_LUN
+     for te = 0, n_elements(bin_phasep) -1 do begin
+        printf, outlun,  bin_bmjdarrp(te) , ' ', bin_corrfluxp(te)/plot_corrnorm,  format = '(F0, A,F0)'
+     endfor
+     free_lun, outlun
+     
   endfor
+
+
 
 end
