@@ -8,8 +8,8 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
   endif else begin
    
 
-;     colorarr = ['burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']
-     colorarr = ['black', 'red','blue','black','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple',  'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','green','black','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ,'blue', 'red','black','green','black','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ,'blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua']
+ colorarr = ['black','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia'] ;'burlywood'
+;     colorarr = ['black', 'red','blue','black','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple',  'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','green','black','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ,'blue', 'red','black','green','black','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua' ,'blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua','blue', 'red','black','green','grey','purple', 'deep_pink', 'magenta', 'medium_purple', 'orchid', 'thistle', 'pink', 'orange_red', 'rosy_brown',  'chocolate', 'saddle_brown', 'maroon', 'dark_orange', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'khaki', 'tomato','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'dark_turquoise', 'aqua']
 ;
   endelse
 
@@ -104,7 +104,7 @@ print, 'using UTMJD', utmjd_center
 
 ;for debugging: skip some AORs
   startaor =  0                 ;  n_elements(aorname) -29
-  stopaor =   n_elements(aorname) - 1
+  stopaor =    n_elements(aorname) - 1
 
 
   xsweet = 15.12
@@ -116,9 +116,11 @@ print, 'using UTMJD', utmjd_center
 
 ;this one overlays the positions on the pmap contours
   if keyword_set(position_plot) then begin
-     if chname eq '2' then fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_121120.fits', pmapdata, pmapheader
-     if chname eq '1' then fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120409.fits', pmapdata, pmapheader
-     c = contour(pmapdata, /fill, n_levels = 21, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [0,500], yrange = [0,500], axis_style = 0)
+    ;; if chname eq '2' then fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_121120.fits', pmapdata, pmapheader
+    ;; if chname eq '1' then fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120409.fits', pmapdata, pmapheader
+     if chname eq '2' then fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_100x100_ch2_r2p25_s3_7_0p1s_x4_150723.fits', pmapdata, pmapheader
+     if chname eq '1' then fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_500x500_ch1_r2p25_s3_7_sd_0p4s_sdark_150722.fits', pmapdata, pmapheader
+     c = contour(pmapdata, /fill, n_levels = 15, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [0,100], yrange = [0,150], axis_style = 0) ;21
       if planethash[aorname(0),'exptime'] lt 10. then begin
         xss = 14.5
         yss = 14.5
@@ -140,9 +142,9 @@ print, 'using UTMJD', utmjd_center
 ;      if planethash[aorname(a),'exptime'] gt 0.2 then begin
          ;scolor = 'blue'
 ;        scolor = 'red'
-
-        xcen500 = 500.* ((planethash[aorname(a),'xcen']) - xss)
-        ycen500 = 500.* ((planethash[aorname(a),'ycen']) - yss)
+        print, 'mean position', mean(planethash[aorname(a),'xcen']), mean(planethash[aorname(a),'ycen'])
+        xcen500 = 100.* ((planethash[aorname(a),'xcen']) - xss)
+        ycen500 = 100.* ((planethash[aorname(a),'ycen']) - yss)
         ;limit = where(indgen(n_elements(planethash[aorname(a),'xcen'])) mod 100 eq 0) 
         an = plot(xcen500, ycen500, '1s', sym_size = 0.3,   sym_filled = 1, color = colorarr[a],/overplot)
 ;;        an = plot(xcen500(limit), ycen500(limit), '1s', sym_size = 0.3,   sym_filled = 1, color = colorarr[a],/overplot)
@@ -497,11 +499,12 @@ print, 'using UTMJD', utmjd_center
      ;make plot symbold based on the size of the AOR
 ;     if n_elements([planethash[aorname(a),'flux']])  lt 1000 then plotsym = 's' else plotsym = '*'
      plotsym = 's'
-     setyrange = [0.989, 1.005]
+     setyrange = [0.989, 1.02]
      if planetname eq 'WASP-80b' then setyrange = [0.96, 1.02];[0.999, 1.001]
      if keyword_set(phaseplot) then begin ;make the plot as a function of phase
-        print, ' phase', bin_phase
-        setxrange = [0.43, 0.51]; [-0.5, 0.5] 
+        ;print, ' phase', bin_phase
+        print, 'corrflux',  (bin_corrfluxp/plot_corrnorm)
+        setxrange =  [-0.22, -0.17] 
         corrnormoffset =  0; 0.02
         corroffset = 1.0
         if planetname eq 'WASP14-b' then corroffset =  1.000;0.0015
@@ -582,7 +585,7 @@ print, 'using UTMJD', utmjd_center
 ;                        title = planetname, ytitle = 'Flux',  yrange
 ;                        = [0.995, 1.02], xrange = setxrange) ;
               if a le stareaor then begin
-                 scolor = 'gray' 
+                 scolor = colorarr[a]; 'gray' 
                  if planetname eq 'WASP-14b' then corroffset =  1.000; 0.0015    
                  if planetname eq 'HD158460' then corroffset = 0.0
               endif else begin
@@ -655,8 +658,8 @@ print, 'using UTMJD', utmjd_center
 ;                              /overplot, /current)
               
               pu = errorplot(bin_phasep, (bin_corrfluxp/plot_corrnorm) * corroffset , bin_corrfluxerrp/plot_corrnorm,$
-                             '1s', sym_size = 0.7, symbol = plotsym, sym_filled = 1,color ='gray', $
-                             errorbar_color = 'gray', overplot = pu) ;
+                             '1s', sym_size = 0.7, symbol = plotsym, sym_filled = 1,color =colorarr[a], $
+                             errorbar_color = colorarr[a], overplot = pu) ;
            endif
            
         endif  ; a gt 0 a lt stareor
@@ -798,7 +801,7 @@ print, 'using UTMJD', utmjd_center
                      ;xrange = setxrange)
                      
 
-           pq = plot((bin_timearr - time_0)/60./60., bin_ycen, '1s', sym_size = 0.3,   sym_filled = 1, color = colorarr[a], $
+           pqy = plot((bin_timearr - time_0)/60./60., bin_ycen, '1s', sym_size = 0.3, sym_filled = 1, color = colorarr[a], $
                      xtitle = 'Time(hrs)', ytitle = 'Y position', aspect_ratio = 0.0, margin = 0.2);, $, title = planetname
                      ;xrange = setxrange)
 
@@ -816,9 +819,10 @@ print, 'using UTMJD', utmjd_center
            if pmapcorr eq 1 then begin
               print, 'inside pmapcorr eq 1', median(bin_corrfluxp), median(bin_flux)
               if keyword_set(errorbars) then begin
-                 pr = errorplot((bin_timearr - time_0)/60./60., (bin_flux/plot_corrnorm) -corrnormoffset,  $
-                        bin_corrfluxerrp/plot_corrnorm ,/overplot, '1s', sym_size = 0.3, $
-                        sym_filled = 1, color = colorarr[a])
+                 pr = errorplot((bin_timearrp - time_0)/60./60., (bin_corrfluxp/plot_corrnorm) -corrnormoffset,  $
+                        bin_corrfluxerrp/plot_corrnorm , '1s', sym_size = 0.3, $
+                        sym_filled = 1, color = colorarr[a], xtitle = 'Time(hrs)', $
+                                ytitle = 'Normalized Corrected Flux', title = planetname,aspect_ratio = 0.0, margin = 0.2)
               endif else begin
                  pr = plot((bin_timearr - time_0)/60./60., (bin_flux/plot_corrnorm) -corrnormoffset,  '1s', $
                            sym_size = 0.3,   sym_filled = 1, color = colorarr[a],  xtitle = 'Time(hrs)', $
@@ -867,34 +871,30 @@ print, 'using UTMJD', utmjd_center
         print,'median bin_corrfluxp ',  median(bin_corrfluxp), median(bin_flux)
         if (a gt 0) and (a le stareaor) then begin
            print, 'inside a gt 0 a le stareaor', a
-           pp.window.SetCurrent
-           pp = plot((bin_timearr - time_0)/60./60., bin_xcen, '1s', sym_size = 0.3,   sym_filled = 1,color = colorarr[a],  /overplot,/current)
-           pq.window.SetCurrent
-           pq = plot((bin_timearr - time_0)/60./60., bin_ycen, '1s', sym_size = 0.3,   sym_filled = 1, color = colorarr[a], /overplot,/current)
+           pp = plot((bin_timearr - time_0)/60./60., bin_xcen, '1s', sym_size = 0.3,   sym_filled = 1,color = colorarr[a],  overplot=pp)
+           pqy = plot((bin_timearr - time_0)/60./60., bin_ycen, '1s', sym_size = 0.3,   sym_filled = 1, color = colorarr[a], overplot=pq)
 ;           pr.window.SetCurrent
 ;           pr = plot((bin_timearr - time_0)/60./60., bin_flux/plot_norm , '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a], /overplot,/current,/nodata)
-           if pmapcorr eq 1 then begin
-              pr = plot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm)-corrnormoffset, /overplot, 's1', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/current)
-           endif
 
-           ps.window.SetCurrent
-           ps = plot((bin_timearr - time_0)/60./60., bin_npcent, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a], /overplot,/current) ;, xtitle = 'Time(hrs)', ytitle = 'Normalized Flux',) 
+           ps = plot((bin_timearr - time_0)/60./60., bin_npcent, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a], overplot=ps) ;, xtitle = 'Time(hrs)', ytitle = 'Normalized Flux',) 
 
-           pt.window.SetCurrent
-           pt = plot((bin_timearr - time_0)/60./60., bin_bkgd, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a],/overplot,/current) 
+           pt = plot((bin_timearr - time_0)/60./60., bin_bkgd, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a],overplot=pt) 
 
            if pmapcorr eq 1 then begin
 ;                  pu.window.SetCurrent
 ;                  pu =  errorplot(((bin_timearr - time_0)/60./60.) - 5.E3, (bin_flux/plot_norm) + corroffset, bin_fluxerr/plot_norm, $
 ;                                  sym_size = 0.7,symbol = plotsym, sym_filled = 1,color = scolor, errorbar_color =  scolor, $
 ;                                  overplot = pu, /current)
-              print, 'time, corrflux', (((bin_timearr - time_0)/60./60.) - 5.5E3)/24., (bin_corrfluxp/plot_corrnorm) + corroffset
+              ;;print, 'time, corrflux', (((bin_timearr - time_0)/60./60.) - 5.5E3)/24., (bin_corrfluxp/plot_corrnorm) + corroffset
 ;              pu =  plot(((bin_timearr - time_0)/60./60.) , (bin_corrfluxp/median(bin_all_corrfluxp)) + corroffset, $ ;- 5.5E3)/24.
 ;                               sym_size = 1.0, symbol = plotsym, sym_filled = 1,$
-;                              color = 'black', overplot = ay, /current)  ;pu
-              pu =  errorplot(((bin_timearr - time_0)/60./60.) , (bin_corrfluxp/plot_corrnorm) + corroffset, $ ;- 5.5E3)/24.
+;                              color = 'black', overplot = ay,
+;                              /current)  ;pu
+
+              ;;pr = plot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm)-corrnormoffset, overplot=pr, 's1', sym_size = 0.2,   sym_filled = 1, color = colorarr[a])
+              pr =  errorplot(((bin_timearrp - time_0)/60./60.) , (bin_corrfluxp/plot_corrnorm) + corroffset, $ ;- 5.5E3)/24.
                               bin_corrfluxerrp/plot_corrnorm, sym_size = 0.7, symbol = plotsym, sym_filled = 1,$
-                              color = colorarr[a], errorbar_color =  colorarr[a], overplot = pu, /current)  ;pu
+                              color = colorarr[a], errorbar_color =  colorarr[a], overplot = pr)  ;pu
 
            endif
 
@@ -904,13 +904,12 @@ print, 'using UTMJD', utmjd_center
 
         if a gt stareaor then begin
            print, 'inside a gt stareaor', a
-           pp.window.SetCurrent
            pp = plot((bin_timearr - time_0)/60./60., bin_xcen, '1s', sym_size = 0.3,   sym_filled = 1,color = colorarr[a],$
-                     /overplot,/current)
+                     overplot=pp)
 
            pq.window.SetCurrent
            pq = plot((bin_timearr - time_0)/60./60., bin_ycen, '1s', sym_size = 0.3,   sym_filled = 1, color = colorarr[a],$
-                     /overplot,/current)
+                     overplot=pq)
 
            if keyword_set(errorbars) then begin
 ;           pr.window.SetCurrent
@@ -928,10 +927,10 @@ print, 'using UTMJD', utmjd_center
                if keyword_set(errorbars) then begin
                   pr = errorplot((bin_timearr - time_0)/60./60., (bin_flux/plot_corrnorm)- corrnormoffset,$
                             bin_corrfluxerrp/ plot_corrnorm, '1s', sym_size = 0.3,   $
-                            sym_filled = 1, color = colorarr[a],/overplot,/current)
+                            sym_filled = 1, color = colorarr[a],overplot=pr)
                endif else begin
                   pr = plot((bin_timearr - time_0)/60./60., (bin_flux/plot_corrnorm) - corrnormoffset, '1s', $
-                            sym_size = 0.3,   sym_filled = 1, color = colorarr[a],/overplot,/current)
+                            sym_size = 0.3,   sym_filled = 1, color = colorarr[a],overplot=pr)
                endelse
                
                if pmapcorr eq 1 then begin
@@ -946,13 +945,11 @@ print, 'using UTMJD', utmjd_center
                
             endif
 
-           ps.window.SetCurrent
            ps = plot((bin_timearr - time_0)/60./60., bin_npcent, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a],$
-                     /overplot,/current) 
+                     overplot=ps) 
 
-           pt.window.SetCurrent
            pt = plot((bin_timearr - time_0)/60./60., bin_bkgd, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a], $
-                     /overplot,/current) 
+                    overplot=pt) 
 ;           pu =  plot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm) + corroffset, '1s', sym_size = 0.2,  $
 ;                      sym_filled = 1,color = colorarr[a], overplot = pu, /current)
            pxf = plot((bin_timearr - time_0)/60./60., bin_xfwhm, '1s', sym_size = 0.3,   sym_filled = 1,  color = colorarr[a], $
