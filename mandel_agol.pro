@@ -41,6 +41,7 @@ i1 = WHERE( (z GT (1+P)) OR (0.5*!dpi LT phi_orbit AND 1.5*!dpi GE phi_orbit),n1
 i2 = WHERE( z GT (1-P) AND z LE (1+P) AND (phi_orbit GT 1.5*!dpi OR phi_orbit LE 0.5*!dpi),n2)   ;;; Partial transit
 i3 = WHERE( z LE (1-P)  AND (phi_orbit GT 1.5*!dpi OR phi_orbit LE 0.5*!dpi),n3)  ;; Full Transit
 lambda_star = DBLARR(nt)
+;IF n1 NE 0 THEN lambda_star[i1] = params0[6]*phi_orbit ;0.0
 IF n1 NE 0 THEN lambda_star[i1] = 0.0
 IF n2 NE 0 THEN lambda_star[i2] = lambda_2[i2]
 IF n3 NE 0 THEN lambda_star[i3] = p^2
@@ -75,7 +76,8 @@ if keyword_set(overplot) then begin
    test = plot(phase, rel_flux, color = 'Sky Blue', thick = 4, /overplot )
    openw, outlun, '/Users/jkrick/irac_warm/pcrs_planets/WASP-52b/jk_model.txt',/GET_LUN
    for nm = 0, n_elements(phase) - 1 do printf, outlun, phase(nm), rel_flux(nm)
-   close, outlun
+   free_lun, outlun
+   
 endif
 
 ;change 'phot' to 'model'
