@@ -20,18 +20,29 @@ if result eq 1 then begin  ;file exists
 ;incrememnt by 1.  + turn into string
 ;                        to find the right directory
    restore, savefilename
-   ti = ti - 100                 ; set back since the first thing the while loop does is to increment
+   ti = ti - 100; 1800                 ; 100 set back since the first thing the while loop does is to increment
 endif else begin
 ;if that file doesn't exist, then start from old campaign
 ;and increment until there are no more directories
    ti = orig_num
 endelse
-
+; start from old campaign
+;and increment until there are no more directories
+;   ti = orig_num
 
 ;error check on existance of directory
 good_dir = 1
-while good_dir eq 1 do begin  ; while there is data to work with, and not an empty directory
-   ti =ti + 100
+print, 'ti to start', ti
+while good_dir eq 1 do begin    ; while there is data to work with, and not an empty directory
+   if ti eq 40600 then ti = 40400
+   if ti eq 40500 then begin
+      ti = 42700
+   endif else begin
+      ti =ti + 100
+   endelse
+
+   print, 'ti after changing ti', ti
+   
    dirname = strcompress('/Volumes/iracdata/flight/IWIC/IRAC0' +string(ti),/remove_all)
    print, 'dirname ', dirname
    good_dir = chk_dir(dirname)
@@ -48,7 +59,7 @@ while good_dir eq 1 do begin  ; while there is data to work with, and not an emp
          bigxcen = xarr
          bigycen = yarr
          bigstarnamearr = starnamearr
-         bigtimearr = bmjdarr+ 2400000.5
+         bigtimearr = bmjdarr+ 2400000.5D
          bigfluxarr = fluxarr
          bigfluxerrarr = fluxerrarr
          bigbackarr = backarr
@@ -59,7 +70,7 @@ while good_dir eq 1 do begin  ; while there is data to work with, and not an emp
          bigxcen = [bigxcen, xarr]
          bigycen = [bigycen,yarr]
          bigstarnamearr = [bigstarnamearr,starnamearr]
-         bigtimearr = [bigtimearr,bmjdarr + 2400000.5]
+         bigtimearr = [bigtimearr,bmjdarr + 2400000.5D]
          bigfluxarr = [bigfluxarr, fluxarr]
          bigfluxerrarr = [bigfluxerrarr,fluxerrarr]
          bigbackarr = [bigbackarr,backarr]
@@ -81,17 +92,21 @@ save,  ti, bigxcen,  bigycen,  bigstarnamearr,  bigtimearr,  bigfluxarr,  bigflu
 ;for bsn =0, 500 do print, bsn, bigstarnamearr(bsn)
 
 if keyword_set(make_plot) then begin
-     colorarr = ['blue', 'red','black','green','grey','purple', 'deep_pink','fuchsia', 'magenta', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal']
+    colorarr = ['blue', 'red','black','green','grey','purple', 'deep_pink','fuchsia', 'medium_purple','medium_orchid', 'orchid', 'violet', 'plum', 'thistle', 'pink', 'light_pink', 'rosy_brown','pale_violet_red',  'chocolate', 'saddle_brown', 'maroon', 'hot_pink', 'dark_orange', 'peach_puff', 'pale_goldenrod','red',  'aquamarine', 'teal', 'steel_blue', 'dodger_blue', 'dark_blue', 'indigo','dark_slate_blue', 'blue_violet', 'purple','dim_grey', 'slate_grey', 'dark_slate_grey', 'khaki', 'tomato', 'lavender','gold', 'green_yellow', 'lime', 'green', 'olive_drab', 'pale_green', 'spring_green','blue', 'red','deep_pink', 'magenta', 'medium_purple','light_sea_green', 'teal']
 
+    
+colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistle', 'indigo', 'blue_violet', 'light_sky_blue','dodger_blue', 'Navy', 'turquoise', 'pale_green', 'lime', 'orange', 'yellow', 'dark_khaki', 'sienna','lemon_chiffon']
+     
    ;need to sort by star
      names = [  'KF08T3_', 'KF06T2_', 'KF06T1_', 'KF09T1_',  'NPM1p67','NPM1p60','BD20_417', 'HD4182_', 'HD37725', 'HD55677','HD77823', 'HD89562', 'HD99253', 'HD11374', 'HD13176', 'HD13742', 'HD15689', 'HD18483', 'HD19506', 'HD21852', 'HD28437'];, '1812095','NPM1p68'] ;, 'HD16545']
-     
+
+;;     loadct, 42, ncolors = n_elements(names), RGB_TABLE = colornames
      normvals = fltarr(n_elements(names))
      for n = 0, n_elements(names) - 1 do begin
         
         an = where(bigstarnamearr eq names(n), count)
         if count gt 10 then begin
-;           print, 'n, name', n, bigstarnamearr(an), colorarr(n)
+;           print, 'n, name', n, bigstarnamearr(an), colornames(n)
 
 
                                               
@@ -99,22 +114,22 @@ if keyword_set(make_plot) then begin
            junkcorr = bigcorrfluxarr(an)
            junkflux = bigfluxarr(an)
            junkname = bigstarnamearr(an)
-           print, 'stddev flux', colorarr(n), stddev(junkflux)
-           print, 'stddev corrflux', colorarr(n), stddev(junkcorr)
+           print, 'stddev flux', colornames(n), stddev(junkflux)
+           print, 'stddev corrflux', colornames(n), stddev(junkcorr)
 ;           print, 'bigstarname', junkname[0:50]
 ;           print, 'bigcorrfluxarr', junkcorr[0:50] 
 ;           print, 'bigfluxarr', junkflux[0:50]
            print, median(bigcorrfluxarr(an)), median(bigfluxarr(an))
          
            p = errorplot(bigtimearr(an) , bigcorrfluxarr(an)/median(bigcorrfluxarr(an)), $ ;- bigtimearr(0))/60./60./ 24.
-                         bigfluxerrarr(an)/median(bigcorrfluxarr(an)), '1s', sym_size = 0.5, ERRORBAR_COLOR = colorarr(n),$
-                         sym_filled = 1, ytitle = 'Corrected Flux',color = colorarr(n), overplot = p,$
+                         bigfluxerrarr(an)/median(bigcorrfluxarr(an)), '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
+                         sym_filled = 1, ytitle = 'Corrected Flux',color = colornames(n), overplot = p,$
                          yrange = [0.85,1.15], XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = 'months', $
                          title = 'Ch' + string(ch), xrange = [min(bigtimearr),max(bigtimearr)],/buffer)
 
            pz = errorplot(bigtimearr(an) , bigfluxarr(an)/median(bigfluxarr(an)), $
-                         bigfluxerrarr(an)/median(bigfluxarr(an)), '1s', sym_size = 0.5, ERRORBAR_COLOR = colorarr(n),$
-                         sym_filled = 1, ytitle = 'Flux',color = colorarr(n), overplot = pz,$
+                         bigfluxerrarr(an)/median(bigfluxarr(an)), '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
+                         sym_filled = 1, ytitle = 'Flux',color = colornames(n), overplot = pz,$
                          yrange = [0.85,1.15], XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = 'months', $
                           title = 'Ch' + string(ch), xrange = [min(bigtimearr),max(bigtimearr)],/buffer)
 
@@ -127,6 +142,8 @@ if keyword_set(make_plot) then begin
               sort_corrflux = bigcorrfluxarr(an(s))
               sort_fluxarr = bigfluxarr(an(s))
               sort_fluxerrarr = bigfluxerrarr(an(s))
+
+              ;;print, 'sort time', sort_time
               
               h = histogram(sort_time, OMIN=om, binsize = 1.0, reverse_indices = ri)
               bin_corrflux = findgen(n_elements(h))
@@ -159,12 +176,12 @@ if keyword_set(make_plot) then begin
               bin_fluxerrarr = bin_fluxerrarr[0:c-1]
               bin_time = bin_time[0:c-1]
 
-
-              pb = errorplot(bin_time , bin_corrflux/median(bin_corrflux), $
-                             bin_fluxerrarr/median(bin_corrflux), '1s', sym_size = 0.5, ERRORBAR_COLOR = colorarr(n),$
-                             sym_filled = 1, ytitle = 'Binned Corrected Flux',color = colorarr(n), overplot = pb,$
-                             yrange = [0.95,1.05], xrange = [min(bigtimearr),max(bigtimearr)], xtickunits = 'months', $
-                             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', title = 'Ch' + string(ch),/buffer) ;- bigtimearr(0))/60./60./ 24.
+             ;; print, 'bin_time', bin_time
+              pb = errorplot(bin_time , bin_corrflux/median(bin_corrflux[0:20]), $
+                             bin_fluxerrarr/median(bin_corrflux), '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
+                             sym_filled = 1, ytitle = 'Binned Corrected Flux',color = colornames(n), overplot = pb,$
+                             yrange = [0.95,1.05], xrange = [min(bigtimearr),max(bigtimearr) + 100.], xtickunits = 'months', $ ;
+                             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', title = 'Ch' + string(ch), xmajor = 5, /buffer) ;- bigtimearr(0))/60./60./ 24.
               pbl = plot(bin_time, intarr(n_elements(bin_time)) + 1.0, overplot = pb)
            endif   ;if keyword set binning
            
