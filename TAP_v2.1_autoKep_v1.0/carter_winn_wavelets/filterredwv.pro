@@ -35,6 +35,7 @@ d=x
  els = n_elements(d)
   pow = ceil(alog(els)/alog(2.))
   if (2^pow ne els and keyword_set(zeropad)) then begin
+     print, 'inside if'
      diff = 2.^pow-els
      left = floor(diff/2.)
      right = diff-left
@@ -43,6 +44,7 @@ d=x
   endif else x = d
   
 J = alog(n_elements(x))/alog(2)
+help, J
 if (abs(J-fix(J)) ne 0) then message,'Data length must be a power of two'
 J = fix(J)
 
