@@ -40,7 +40,11 @@ aornum = 11
   for a = startaor,stopaor, 2 do begin
      print, '------------------------------------------------------'
      print, 'working on AOR', a, '   ', aorname(a), startaor
- 
+     ;unbinned stuff
+     corrflux = planethash[aorname(a),'corrflux']
+     corrfluxerr =  planethash[aorname(a),'corrfluxerr']
+     bmjd =  planethash[aorname(a),'bmjdarr']
+
      ;check if I should be using pmap corr or not
      ncorr = where(finite([ planethash[aorname(a),'corrflux']]) gt 0, corrcount,/L64)
      ;if 20% of the values are correctable than go with the pmap corr 
@@ -73,10 +77,11 @@ aornum = 11
      p2.save, plotname
 
      ;write output to be used by TAP
-     outfilename =  strcompress(dirname +'phot_ch'+chname+'_TAP_'+aorname(a)+'_bin10.ascii',/remove_all)
+     outfilename =  strcompress(dirname +'phot_ch'+chname+'_TAP_'+aorname(a)+'.ascii',/remove_all)
      openw, outlun, outfilename,/GET_LUN
-     for te = 0, n_elements(bin_phasep) -1 do begin
-        printf, outlun,  bin_bmjdarrp(te) , ' ', bin_corrfluxp(te)/plot_corrnorm,  format = '(F0, A,F0)'
+     for te = 0, n_elements(bmjd) -1 do begin ;n_elements(bin_phasep) -1
+ ;       printf, outlun,  bin_bmjdarrp(te) , ' ', bin_corrfluxp(te)/plot_corrnorm,  format = '(F0, A,F0)'
+        if finite(corrflux(te)) then printf, outlun, bmjd(te), ' ', corrflux(te)/plot_corrnorm, ' ', corrfluxerr(te)/plot_corrnorm, format = '(F0, A,F0, A, F0)'
      endfor
      free_lun, outlun
      
