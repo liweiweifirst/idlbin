@@ -1,4 +1,4 @@
-pro track_calstar_photometry, savefilename,ch, make_plot = make_plot, binning = binning
+pro track_calstar_photometry_plot, savefilename,ch, make_plot = make_plot, binning = binning
 ;track_calstar_photometry,'/Users/jkrick/irac_warm/calstars/track_calstar_ch2.sav', 2, /make_plot
  st1 = systime(1)
 
@@ -106,7 +106,7 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
         
         an = where(bigstarnamearr eq names(n), count)
         if count gt 10 then begin
-;           print, 'n, name', n, bigstarnamearr(an), colornames(n)
+           print, 'n, name, color', n, names(n), colornames(n)
 
 
                                               
@@ -176,12 +176,19 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
               bin_fluxerrarr = bin_fluxerrarr[0:c-1]
               bin_time = bin_time[0:c-1]
 
-             ;; print, 'bin_time', bin_time
-              pb = errorplot(bin_time , bin_corrflux/median(bin_corrflux[0:20]), $
+              print, 'n_elements bin_corrflux', n_elements(bin_corrflux)
+;              pb = errorplot(bin_time , bin_corrflux/median(bin_corrflux[0:18]), $
+;                             bin_fluxerrarr/median(bin_corrflux), '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
+;                             sym_filled = 1, ytitle = 'Binned Corrected Flux',color = colornames(n), overplot = pb,$
+;                             yrange = [0.95,1.05], xrange = [min(bigtimearr),max(bigtimearr) + 100.], xtickunits = 'months', $ ;
+;                             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', title = 'Ch' + string(ch), xmajor = 7 ) ;,- bigtimearr(0))/60./60./ 24.
+              dummy = LABEL_DATE(DATE_FORMAT=['%D-%M-%Y'])
+              pb = errorplot(bin_time , bin_corrflux/median(bin_corrflux[0:18]), $
                              bin_fluxerrarr/median(bin_corrflux), '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
                              sym_filled = 1, ytitle = 'Binned Corrected Flux',color = colornames(n), overplot = pb,$
-                             yrange = [0.95,1.05], xrange = [min(bigtimearr),max(bigtimearr) + 100.], xtickunits = 'months', $ ;
-                             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', title = 'Ch' + string(ch), xmajor = 5, /buffer) ;- bigtimearr(0))/60./60./ 24.
+                             yrange = [0.95,1.05], xrange = [min(bigtimearr),max(bigtimearr) + 100.], XTICKUNITS = ['Time'], $ ;
+                             XTICKFORMAT='LABEL_DATE', title = 'Ch' + string(ch),  xminor = 11) ;,  xtickinterval = 1, xmajor = 7,- bigtimearr(0))/60./60./ 24.
+
               pbl = plot(bin_time, intarr(n_elements(bin_time)) + 1.0, overplot = pb)
            endif   ;if keyword set binning
            
@@ -194,11 +201,11 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
   endif
 basedir = '/Volumes/IRAC/Calibration/Trending/'
 plotname = strcompress(basedir + 'ch' + string(ch) + '_track_binned.png',/remove_all)
-if keyword_set(binning) then pb.save, plotname
+;if keyword_set(binning) then pb.save, plotname
 plotname = strcompress(basedir + 'ch' + string(ch) + '_track_corrected.png',/remove_all)
-p.save, plotname
+;p.save, plotname
 plotname = strcompress(basedir + 'ch' + string(ch) + '_track_flux.png',/remove_all)
-pz.save, plotname
+;pz.save, plotname
 print, 'time check', systime(1) - st1
 
 
