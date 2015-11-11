@@ -1,4 +1,4 @@
-pro eclipse_test_mandel_agol, planetname, bin_level, apradius, chname
+pro eclipse_test_mandel_agol, planetname, bin_level, apradius, chname,nobin = nobin
 ;planetname = 'XO3'
 
   COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm,  bin_corrflux_dp, bin_bmjdarrp
@@ -28,13 +28,12 @@ aornum = 11
 
   modelfilename = strcompress(dirname + planetname +'_model_ch'+chname+'_'+string(apradius)+'.sav',/remove_all)
 
-
-;pick the normalization
+ ;pick the normalization
   phase0 = planethash[aorname(aornum),'phase']
-  corrflux0 = planethash[aorname(aornum),'corrflux_d']
+  corrflux_d = planethash[aorname(aornum),'corrflux_d']
   se = where(phase0 gt 0.47 and phase0 lt 0.51)
   
-  plot_corrnorm =  mean(corrflux0(se),/nan)
+  plot_corrnorm =  mean(corrflux_d(se),/nan)
   startaor = 1
   stopaor = 20
   for a = startaor,stopaor, 2 do begin
@@ -48,40 +47,47 @@ aornum = 11
      ;check if I should be using pmap corr or not
      ncorr = where(finite([ planethash[aorname(a),'corrflux']]) gt 0, corrcount,/L64)
      ;if 20% of the values are correctable than go with the pmap corr 
-     print, '0.2nflux, ncorr, ', 0.2*n_elements([planethash[aorname(a),'flux']]), corrcount
+     ;;print, '0.2nflux, ncorr, ', 0.2*n_elements([planethash[aorname(a),'flux']]), corrcount
      if corrcount gt 0.2*n_elements([planethash[aorname(a),'flux']]) then pmapcorr = 1 else pmapcorr = 0
-     print, 'pmapcorr', pmapcorr
+     ;;print, 'pmapcorr', pmapcorr
      
-     junkpar = binning_function(a, bin_level, pmapcorr,chname)
-
-     ;use time degraded corrfluxes
-     bin_corrfluxp = bin_corrflux_dp
+     if keyword_set(nobin) then begin
+        bin_corrfluxp = corrflux_d
+        bin_phasep = phase0
+        bin_corrfluxerrp = corrfluxerr
+        print, n_elements(bin_corrfluxp), n_elements(bin_phasep), n_elements(bin_corrfluxerrp)
+     endif else begin
+        junkpar = binning_function(a, bin_level, pmapcorr,chname)
+        ;;use time degraded corrfluxes
+        bin_corrfluxp = bin_corrflux_dp
+     endelse
+     
 
      ;fake that this is a transit/ not eclipse
-     bin_phasep = bin_phasep -0.595; 0.585
+     bin_phasep = bin_phasep - 0.585; 0.585-0.685;
 
      ;pick the normalization
      se = where(bin_phasep gt -0.015 and bin_phasep lt 0.015)
      plot_corrnorm =  mean(bin_corrfluxp(se),/nan)
-     print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
+    ;; print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
 
      pu = errorplot(bin_phasep, (bin_corrfluxp/plot_corrnorm), $
-                             bin_corrfluxerrp/plot_corrnorm,  '1s', sym_size = 0.3,  $
+                             bin_corrfluxerrp/plot_corrnorm,  '1s', sym_size = 0.3, yrange = [0.97, 1.03], $
                               sym_filled = 1,color =colorarr[a] ,xtitle = 'Orbital Phase',$
                              errorbar_color =  colorarr[a], title = aorname(a), ytitle = 'Pmap Corrected Flux')
 
-
+    
      test = function_fit_lightcurve(planetname, bin_phasep, bin_corrfluxp/plot_corrnorm,  bin_corrfluxerrp/plot_corrnorm, modelfilename)
-     p2 = plot(findgen(20) - 5, fltarr(20) + 1.0 + 0.001875, overplot = pu, xrange = [-0.08, 0.06]) ; 0.00158
+     p2 = plot(findgen(20) - 5, fltarr(20) + 1.0 + 0.001875, overplot = pu , xrange = [-0.08, 0.08]) ; 0.00158
      plotname = strcompress(dirname + planetname +'_'+aorname(a)+'_'+string(apradius)+'_fit_150723.png',/remove_all) 
      p2.save, plotname
 
      ;write output to be used by TAP
-     outfilename =  strcompress(dirname +'phot_ch'+chname+'_TAP_'+aorname(a)+'.ascii',/remove_all)
+     outfilename =  strcompress(dirname +'phot_ch'+chname+'_TAP_'+aorname(a)+'_bin10.ascii',/remove_all)
      openw, outlun, outfilename,/GET_LUN
-     for te = 0, n_elements(bmjd) -1 do begin ;n_elements(bin_phasep) -1
- ;       printf, outlun,  bin_bmjdarrp(te) , ' ', bin_corrfluxp(te)/plot_corrnorm,  format = '(F0, A,F0)'
-        if finite(corrflux(te)) then printf, outlun, bmjd(te), ' ', corrflux(te)/plot_corrnorm, ' ', corrfluxerr(te)/plot_corrnorm, format = '(F0, A,F0, A, F0)'
+     for te = 0, n_elements(bin_bmjdarrp) -1 do begin ;n_elements(bin_phasep) -1
+        printf, outlun,  bin_bmjdarrp(te) , ' ', bin_corrfluxp(te)/plot_corrnorm,  bin_corrfluxerrp(te)/plot_corrnorm, format = '(F0, A,F0, A, F0)'
+ ;;       if finite(corrflux(te)) then printf, outlun, bmjd(te), ' ', corrflux(te)/plot_corrnorm, ' ', corrfluxerr(te)/plot_corrnorm, format = '(F0, A,F0, A, F0)'
      endfor
      free_lun, outlun
      
