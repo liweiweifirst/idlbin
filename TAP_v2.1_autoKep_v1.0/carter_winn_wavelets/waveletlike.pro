@@ -33,9 +33,13 @@ function waveletlike,x,sigma_r,sigma_w,zeropad=zeropad
 
 gamma=1
 
+;;help, x
 d=x
- els = n_elements(d)
-  pow = ceil(alog(els)/alog(2.))
+els = n_elements(d)
+;;help, els
+pow = ceil(alog(els)/alog(2.))
+;;print, 'alog(els)', alog(els), alog(els)/alog(2.), ceil(alog(els)/alog(2.))
+;;print, '2^pow', 2^pow
   if (2^pow ne els and keyword_set(zeropad)) then begin
      diff = 2.^pow-els
      left = floor(diff/2.)
@@ -44,7 +48,14 @@ d=x
         x = [d,replicate(0d,right)] 
   endif else x = d
   
-J = alog(n_elements(x))/alog(2)
+  J = alog(double(n_elements(x)))/alog(2d0)
+;;  help, x
+;;  print, 'J', alog(n_elements(x))/alog(2)
+;;  help, J
+;;  print, '(abs(J-fix(J)', abs(J-fix(J))
+;;  I = fix(J)
+;;  help, I
+;;  print, 'abs(J-I)', abs(J-I)
 if (abs(J-fix(J)) ne 0) then message,'Data length must be a power of two'
 J = fix(J)
 

@@ -1202,7 +1202,8 @@ pro TAP::create_ascii
   tpar = transit.params.value
   tpar[9] = 1d0
   tpar[10] = 0d0
-  dum = TAP_MPFit_function(tpar,time=*transit.model_tfine,flux=*transit.model_ffine,dfit=dfit,finefit=ffit,redfit=redfit,tdat=transit.transit_tday,fdat=transit.transit_flux,rebin=transit.rebin,smooth=transit.t_int)
+;;  dum = TAP_MPFit_function(tpar,time=*transit.model_tfine,flux=*transit.model_ffine,dfit=dfit,finefit=ffit,redfit=redfit,tdat=transit.transit_tday,fdat=transit.transit_flux,rebin=transit.rebin,smooth=transit.t_int)
+  dum = TAP_MPFit_function(tpar,time=*transit.model_tfine,flux=*transit.model_ffine,dfit=dfit,finefit=ffit,tdat=transit.transit_tday,fdat=transit.transit_flux,rebin=transit.rebin,smooth=transit.t_int)
 
   openw,strlun,self.plot_dir+'ascii_phased_model.ascii',/get_lun,width=2500,bufsize=0
   printf,strlun,'# Phased from '+transit.fname+' Parameters'
@@ -1387,7 +1388,8 @@ pro TAP::updateModel
      if (where(transit.params.set eq links))[0] ne -1 then begin
         transit.params[where(transit.params.set eq links)].value = params[where(transit.params.set eq links)]
         redfit = dblarr(n_elements(transit.rednoise))
-        dum = TAP_MPFit_function(transit.params.value,time=*transit.model_tfine,flux=*transit.model_ffine,dfit=dfit,finefit=ffit,redfit=redfit,tdat=transit.transit_tday,fdat=transit.transit_flux,rebin=transit.rebin,smooth=transit.t_int)
+;;        dum = TAP_MPFit_function(transit.params.value,time=*transit.model_tfine,flux=*transit.model_ffine,dfit=dfit,finefit=ffit,redfit=redfit,tdat=transit.transit_tday,fdat=transit.transit_flux,rebin=transit.rebin,smooth=transit.t_int)
+        dum = TAP_MPFit_function(transit.params.value,time=*transit.model_tfine,flux=*transit.model_ffine,dfit=dfit,finefit=ffit,tdat=transit.transit_tday,fdat=transit.transit_flux,rebin=transit.rebin,smooth=transit.t_int)
         transit.rednoise = redfit
         *transit.model_f = dfit*1d0
         transit.residuals = transit.transit_flux - dfit
