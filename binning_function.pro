@@ -5,8 +5,6 @@ function binning_function, a,bin_level, pmapcorr, ch,  set_nbins = set_nbins, n_
   ;-------------------------------------------------------------------------
   ;;setup
 
-  print, 'starting binning'
-
   timearr = [planethash[aorname(a),'timearr']]
   fluxarr = [planethash[aorname(a),'flux']]
   fluxerrarr = [planethash[aorname(a),'fluxerr']]
@@ -51,7 +49,7 @@ function binning_function, a,bin_level, pmapcorr, ch,  set_nbins = set_nbins, n_
   npcentarr = npcentroids[good]
   xfwhm = xfwhmarr[good]
   yfwhm = yfwhmarr[good]
-  
+
   ;;and a second set for those that are in the sweet spot
   xarrp = xarr[goodpmap]
   yarrp = yarr[goodpmap]
@@ -274,7 +272,8 @@ function binning_function, a,bin_level, pmapcorr, ch,  set_nbins = set_nbins, n_
         bin_corrfluxerrp[cp] =  sqrt(total(icorrdataerr^2))/ (n_elements(icorrdataerr))
         
         
-                                ;can only compute means if there are values in there
+                                ;can only compute means if there are
+                                ;values in there
         if pmapcorr eq 1 then begin
            meanclip, corrfluxp[rip[rip[j]:rip[j+1]-1]], meancorrflux, sigmacorrflux
 ;              meancorrflux = mean(corrflux[rip[rip[j]:rip[j+1]-1]],/nan)
@@ -319,7 +318,6 @@ function binning_function, a,bin_level, pmapcorr, ch,  set_nbins = set_nbins, n_
 ;
 ;     bin_centerpixp = bin_centerpixp[0:cp-1]
 ;  bin_bkgderrp = bin_bkgderrp[0:cp-1]
-  
   
   
   

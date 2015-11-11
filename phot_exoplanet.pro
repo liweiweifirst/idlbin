@@ -1,4 +1,4 @@
-pro phot_exoplanet, planetname, apradius,chname, columntrack = columntrack, breatheap = breatheap, hybrid = hybrid, rawfile = rawfile
+pro phot_exoplanet, planetname, apradius,chname, columntrack = columntrack, breatheap = breatheap, hybrid = hybrid, rawfile = rawfile, simulated = simulated
 ;do photometry on any IRAC staring mode exoplanet data
 ;now with hashes of hashes!
 ;print, 'waiting'
@@ -20,6 +20,7 @@ case apradius of
       apval = 1
       if chname eq '2' then begin
          pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_150723.sav'
+         
          ;restore, '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_indices_150309.sav'
       endif
 
@@ -39,7 +40,8 @@ case apradius of
    Else: apval = 2              ; if no decision, then choose an apradius = 2.5 pixels
 endcase
 
-;print, 'using pmap file', pmapfile, apval
+if keyword_set(simulated) then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_sim_data_ch2_rmulti_s3_7_0p1sx4_151030.sav'
+print, 'using pmap file', pmapfile, apval
 
 ;run code to read in all the planet parameters
 planetinfo = create_planetinfo()

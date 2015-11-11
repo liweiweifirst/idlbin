@@ -11,7 +11,7 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
   get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
                        TEQ_P=teq_p,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA='4.5',$
                        INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
-                       DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/VERBOSE;verbose
+                       DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0;,/VERBOSE;verbose
 
   IF N_ELEMENTS(mjd_start) EQ 0 THEN BEGIN
      mjd_start = get_exoplanet_start(p_orbit,mjd_transit,START_HR_BEFORE_TRANSIT=start_hr_before_transit,START_PHASE=start_phase)
@@ -41,6 +41,13 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
  errarr = errarr(good)
  print, 'n after nan', n_elements(phasearr)
 
+  print, 'n before nan', n_elements(phasearr)
+ bad = where(finite(fluxarr) lt 1, badcount, complement = good)
+ phasearr = phasearr(good)
+ fluxarr = fluxarr(good)
+ errarr = errarr(good)
+ print, 'n after nan', n_elements(phasearr)
+
 
 ;delete this if I want to overplot on the plot_pixphasecorr plot
  ;XXX will need to add the color offsets.
@@ -50,7 +57,8 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
  amplitude = .001             ; messing around with amplitude of the phase curve.
  phase_offset = 1.
  linear = 1.0
- params0 = [fp_fstar0, rp_rstar, ar_semimaj, inclination, amplitude, phase_offset];, linear]
+ params0 = [fp_fstar0, rp_rstar, ar_semimaj, inclination, amplitude, phase_offset] ;, linear]
+ print, 'params0', params0
 ; params0 = [fp_fstar0, .08, ar_semimaj, inclination, amplitude,
 ; phase_offset]
 
@@ -82,13 +90,13 @@ function function_fit_lightcurve, planetname, phasearr, fluxarr, errarr, savefil
 ;parinfo[5].fixed = 1
 ;do the fitting
  afargs = {t:phasearr, flux:fluxarr, err:errarr, p_orbit:p_orbit, mjd_start:mjd_start, mjd_transit:mjd_transit, savefilename:savefilename} ;, rp_rstar:rp_rstar ar_semimaj:ar_semimaj,,inclination:inclination}
- print, 'calling mandel_agol'
- pa = mpfit('mandel_agol', params0, FUNCTARGS=afargs, PERROR=spa, BESTNORM=achi, DOF=adof, COVAR = COV, status = status, errmsg = errmsg, parinfo = parinfo) 
+ ;;print, 'calling mandel_agol'
+ pa = mpfit('mandel_agol', params0, FUNCTARGS=afargs, PERROR=spa, BESTNORM=achi, DOF=adof, COVAR = COV, status = status, errmsg = errmsg, parinfo = parinfo,/quiet) 
 ;, savefilename = savefilename)
 
   print, 'status', status
   print, errmsg
-  print, 'reduced chi squared',  achi / adof
+  print, 'reduced chi squared',  achi / adof, adof
   print, 'perror', spa
 
   print, 'primary depth', pa(1)^2, 2*pa(1)*spa(1)  ;error propagation for pa(1)^2
