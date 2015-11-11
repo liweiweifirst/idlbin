@@ -29,7 +29,7 @@ function do_calstar_photometry, ch, dirname
   raarr = timearr
   decarr = timearr
   bmjdarr = timearr    
-  
+  procverarr = starnamearr
 
   startfits = 0L
   stopfits =  nfits - 1
@@ -58,6 +58,8 @@ function do_calstar_photometry, ch, dirname
         aintbeg = sxpar(header, 'AINTBEG')
         atimeend = sxpar(header, 'ATIMEEND')
         bmjd_obs = sxpar(header, 'BMJD_OBS')
+        proc_ver = sxpar(header, 'CREATOR') ;which processing version
+        framtime = sxpar(header, 'FRAMTIME')
         starname = strmid(AORLABEL, 13, 7)
 
 ;make sure the target is on the frame
@@ -118,7 +120,7 @@ function do_calstar_photometry, ch, dirname
               raarr[i:i+63] = ra_ref
               decarr[i:i+63] = dec_ref
               starnamearr[i:i+63] = starname
-              
+              procverarr[i:i+63] = proc_ver
               deltatime = (atimeend - aintbeg) / 64.D ; real time for each of the 64 frames
               nt = dindgen(64)
               timearr[i] = sclk_obs  + (deltatime*nt)/60./60./24.D ; 0.5*frametime + frametime*nt
@@ -141,6 +143,7 @@ function do_calstar_photometry, ch, dirname
               raarr[i] = ra_ref
               decarr[i] = dec_ref
               starnamearr[i] = starname
+              procverarr[i] = proc_ver
               i = i + 1
            endif
           ;print, 'xarr', xarr[0:100]
@@ -162,7 +165,8 @@ function do_calstar_photometry, ch, dirname
   nparr = nparr[0:final-1] 
   xfwhmarr = xfwhmarr[0:final-1] 
   yfwhmar = yfwhmarr[0:final-1] 
-  starnamearr = starnamearr[0:final-1] 
+  starnamearr = starnamearr[0:final-1]
+  procverarr = procverarr[0:final-1]
   raarr = raarr[0:final-1] 
   decarr = decarr[0:final-1] 
           
