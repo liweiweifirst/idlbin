@@ -130,6 +130,6 @@ pro plot_xo3
   ;;and add a mean value of everyone's reduction.
   pmean = plot(findgen(10), fltarr(10) + .0015445, color = 'black', name = 'average all users', overplot = p1)
   
-  ls = legend(target = [p1, p2, p4, p5, p6,p7, pmean], position = [3.5, .0030], /data, /auto_text_color)
+  ls = legend(target = [p1, p2, p3, p4, p5, p6,p7, pmean], position = [3.5, .0030], /data, /auto_text_color)
 
 end

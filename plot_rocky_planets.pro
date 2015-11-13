@@ -79,7 +79,8 @@ pro plot_rocky_planets, figure1 = figure1, figure2 = figure2
   Ks = Ks(good)
   
   ;;sort by year of discovery
-  new = where(firstref gt 2014, complement = old)
+  k2 = where (strmid(name, 0, 2) eq 'K2', complement = old)
+  new = where(firstref gt 2014 , complement = old)
 
   if keyword_set(figure1) then begin
 
@@ -96,7 +97,9 @@ pro plot_rocky_planets, figure1 = figure1, figure2 = figure2
      
      p1 = bubbleplot(Teq(old), R(old), magnitude = depth(old), /shaded, exponent = 0.5,  /xlog,/ylog, $
                      color = 'light salmon', overplot = p1)
-     p1 = bubbleplot(Teq(new), R(new),magnitude = depth(new), /shaded, exponent = 0.5, color = 'blue', /xlog, /ylog,  overplot = p1);, labels = name(new)
+     p2 = bubbleplot(Teq(new), R(new),magnitude = depth(new), /shaded, exponent = p1.exponent, color = 'light salmon', /xlog, /ylog,  overplot = p1, max_value= p1.max_value) ; labels = name(new),
+     p2 = bubbleplot(Teq(k2), R(k2),magnitude = depth(k2), /shaded, exponent = p1.exponent, color = 'blue', /xlog, /ylog,  overplot = p1, label_position = "top", max_value= p1.max_value) ; labels = name(k2),
+
      
      yaxis = axis('Y', location = 'right', Title = 'Planet Radius ($R_{Earth}$)',coord_transform=[0,10.97], thick = 2, tickfont_style = 1)
      xaxis = axis('X', location = 'top', showtext = 0, thick = 2)
@@ -108,7 +111,7 @@ pro plot_rocky_planets, figure1 = figure1, figure2 = figure2
      ;;i1 = image(earth,/xlog, /ylog, overplot = 1)
      s = text(270,0.1, '$\oplus$', /data, overplot = p1, font_style = 1)
      s2 = text(205, 0.11, 'Earth', /data, overplot = p1, font_style = 1)
-     s3 = text(310, 0.08, 'GJ1132b', /data, overplot = p1, font_style = 1)
+     ;;s3 = text(310, 0.08, 'GJ1132b', /data, overplot = p1, font_style = 1)
      ;;s = symbol(300, 0.1, 's', /data, sym_color = 'yellow', overplot =
      ;;p1)
      
