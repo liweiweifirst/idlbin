@@ -1,5 +1,5 @@
 pro run_driver_trans_sec_phase_ramp, planetname, chname, apradius, pmapname, bin_level
-  ;;run_driver_trans_sec_phase_ramp, 'WASP-14b', '2', 2.25, '150723'
+  ;;run_driver_trans_sec_phase_ramp, 'WASP-14b', '2', 2.25, '150723',63L
   COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm,  bin_corrflux_dp
 
   COMMON data, bjd_tot, flux_tot, nbr_ind, gw, err, time_tot, nonlin_c
@@ -24,7 +24,9 @@ pro run_driver_trans_sec_phase_ramp, planetname, chname, apradius, pmapname, bin
      
      ;;do some binning at least for the tests
      junkpar = binning_function(a, bin_level, pmapcorr,chname)
+     ;;print, 'bin_bmjdarr', bin_bmjdarr[0:10]
      if a eq 0 then bin_corrflux_dp = bin_corrflux_dp + 0.0001
+     print, 'pmapcorr', pmapcorr
      if pmapcorr gt 0 then begin
         if a eq 0 then begin
            bjd_tot = bin_bmjdarr
@@ -48,15 +50,16 @@ pro run_driver_trans_sec_phase_ramp, planetname, chname, apradius, pmapname, bin
      
   endfor
   ;;normalize
-  se = where(phase_tot gt 0.47 and phase_tot lt 0.51)
-  ph = where(phase_tot lt 0.6 and phase_tot gt 0.55)
+  se = where(phase_tot gt 0.47 and phase_tot lt 0.51, secount)
+  ph = where(phase_tot lt 0.6 and phase_tot gt 0.55, phcount)
   plot_corrnorm =  mean(flux_tot(ph),/nan)
   plot_corrnorm = 0.05775
-  print, 'plot_corrnorm', plot_corrnorm
+  ;;print, 'plot_corrnorm', plot_corrnorm
   flux_tot = flux_tot / plot_corrnorm
   err_tot = err_tot/plot_corrnorm
-  
-  
+  ;;print, 'flux_tot', flux_tot[0:10]
+  ;;print, 'err_tot', err_tot[0:10]
+  ;;print, 'bjd_tot', bjd_tot[0:10]
   ;;test inputs
   p1 = errorplot(bjd_tot, flux_tot, err_tot, xtitle = 'bjd', ytitle = 'flux', yrange = [0.987, 1.003])
   ;print, 'flux_tot', flux_tot[0:20]
