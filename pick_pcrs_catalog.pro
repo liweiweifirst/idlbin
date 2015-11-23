@@ -44,8 +44,7 @@
 ;  http://proceedings.spiedigitallibrary.org/proceeding.aspx?articleid=847055
 ;
 ; EXAMPLE:
-;  pick_pcrs_catalog, 330.79488375, 18.884310, 0.029, -0.019, 2000,
-;  2015.5,  '~/external/irac_warm/pcrs_catalog/pubdb_pcrs.unl'
+;  pick_pcrs_catalog, 330.79488375, 18.884310, 0.029, -0.019, 2000, 2015.9,  '~/irac_warm/pcrs_catalog/pubdb_pcrs.unl'
 ;
 ; MODIFICATION HISTORY:
 ;  January 2015 Original Version  JK
