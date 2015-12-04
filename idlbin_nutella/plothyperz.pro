@@ -1,14 +1,15 @@
 pro plothyperz, keeper, filenameplot
 
-print, '/Users/jkrick/nutella/zphot/zphot.target.param'
-;print, "keeper", keeper
-restore, '/Users/jkrick/nutella/idlbin/objectnew_swirc.sav'
+  
+;;print, '/Users/jkrick/external/zphot/zphot.target.param'
+print, "keeper", keeper
+restore, '/Users/jkrick/idlbin/idlbin_nutella/objectnew_swirc.sav'
 ;restore, '/Users/jkrick/idlbin/object.
 ;----------------------------------------------------------------------
 ;make hyperz input file
 ;----------------------------------------------------------------------
 
-openw, outlunh, "/Users/jkrick/nutella/ZPHOT/hyperz_cat_target.txt",/get_lun
+openw, outlunh, "/Users/jkrick/external/ZPHOT/hyperz_cat_target.txt",/get_lun
 for num = long(0), n_elements(keeper) - 1 do begin
 ;   print, "working on", num, keeper(num)
    if objectnew[keeper(num)].flamjmag gt 0 and objectnew[keeper(num)].flamjmag ne 99 then begin
@@ -66,7 +67,7 @@ for num = long(0), n_elements(keeper) - 1 do begin
 ;                 objectnew[keeper(num)].irac3magerr, objectnew[keeper(num)].irac4magerr;err1,err2,err3,err4;
 
    printf, outlunh, format='(I10,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2,F10.2, F10.2, F10.2)',$
-           keeper(num), objectnew[keeper(num)].umag, objectnew[keeper(num)].gmag, objectnew[keeper(num)].rmag, $
+           keeper(num), objectnew[keeper(num)].zphot, objectnew[keeper(num)].umag, objectnew[keeper(num)].gmag, objectnew[keeper(num)].rmag, $
            objectnew[keeper(num)].imag,  objectnew[keeper(num)].acsmag, objectnew[keeper(num)].zmagbest, jmagab, wircjmagab, $
            objectnew[keeper(num)].tmassjmag,  objectnew[keeper(num)].swircjmagauto, wirchmagab, $
            objectnew[keeper(num)].tmasshmag, wirckmagab, $
@@ -80,6 +81,8 @@ for num = long(0), n_elements(keeper) - 1 do begin
            tmasskerr,objectnew[keeper(num)].irac1magerr,objectnew[keeper(num)].irac2magerr,$
            objectnew[keeper(num)].irac3magerr, objectnew[keeper(num)].irac4magerr ;err1,err2,err3,err4;
 
+   ;;I just added zphot above, which may mess up the hyperz catalog -
+;;but not using it for hyperz just now.
 
  endfor
 close, outlunh
@@ -89,37 +92,36 @@ free_lun, outlunh
 ;run hyperz
 ;----------------------------------------------------------------------
 
-commandline = '~/nutella/bin/hyperz /Users/jkrick/nutella/ZPHOT/zphot.target.param'
-spawn, commandline
-spawn, 'mv *.spe /Users/jkrick/nutella/ZPHOT/'
+commandline = '~/external/bin/hyperz /Users/jkrick/external/ZPHOT/zphot.target.param'
+;spawn, commandline
+;spawn, 'mv *.spe /Users/jkrick/external/ZPHOT/'
 
 ;----------------------------------------------------------------------
 ;plot SED's of keeper objectnews
 ;----------------------------------------------------------------------
 ;!p.multi = [0, 2, 1]
-!p.multi = [0,3, 3]
+;;!p.multi = [0,3, 3]
 
 ;ps_open, file =filenameplot, /portrait, xsize = 7, ysize =3,/color
 ps_open, file =filenameplot, /portrait, xsize = 6, ysize =6,/color
 ;ps_open, file = "/Users/jkrick/nutella/nep/target.ps", /portrait, xsize = 6, ysize =6,/color
 !X.margin = [1,1]
 !Y.margin = [1,1]
-readcol,'/Users/jkrick/nutella/ZPHOT/hyperz_swire_target.z_phot',idz, zphota, chia, proba, specta, nagea, agea, $
-        ava, ba, zinf99a,zsup99a,zinf90a,zsup90a,zinf68a,zsup68a,zwma,probwma,Mabsa,$
-        zphot2a,prob2a,format="A"
+;;readcol,'/Users/jkrick/external/ZPHOT/hyperz_swire_target.z_phot',idz, zphota, chia, proba, specta, nagea, agea, $
+;;        ava, ba, zinf99a,zsup99a,zinf90a,zsup90a,zinf68a,zsup68a,zwma,probwma,Mabsa,$;        zphot2a,prob2a,format="A"
+;;
+;;readlargecol, '/Users/jkrick/external/ZPHOT/hyperz_swire_target.obs_sed',idz, u,g,r,i,acs,z,j,wj,tj,sj,wh,th,wk,tk,one,two,three, four,$
+;;         uerr, gerr, rerr, ierr,zerr,acserr, jerr, wjerr,tjerr,sjerr, wherr,therr,wkerr,tkerr,oneerr, twoerr, threeerr, fourerr,format="A",/debug
 
-readlargecol, '/Users/jkrick/nutella/ZPHOT/hyperz_swire_target.obs_sed',idz, u,g,r,i,acs,z,j,wj,tj,sj,wh,th,wk,tk,one,two,three, four,$
-         uerr, gerr, rerr, ierr,zerr,acserr, jerr, wjerr,tjerr,sjerr, wherr,therr,wkerr,tkerr,oneerr, twoerr, threeerr, fourerr,format="A",/debug
-
-print, n_elements(zphota), n_elements(u)
+;;print, n_elements(zphota), n_elements(u)
 
 ;spectral type key
-sptkey=[" Arp220 " ," Ell13  " ," Ell2  " ," I19254 " ," M82  " ," Mrk231" ," QSO1 " ," QSO2 " ," S0   " ," Sa  " ," Sb  " ," Sc  " ," Sd  " ," Sey2  " ," Torus" ]     
+;;sptkey=[" Arp220 " ," Ell13  " ," Ell2  " ," I19254 " ," M82  " ," Mrk231" ," QSO1 " ," QSO2 " ," S0   " ," Sa  " ," Sb  " ," Sc  " ," Sd  " ," Sey2  " ," Torus" ]     
 
-newsptkey=[" Arp220 " ," Ell13  " ," Ell2  "  ," M82  " ," Mrk231" ," QSO1 " ," QSO2 " ," S0   " ," Sa  " ," Sb  " ," Sc  " ," Sd  " ,"Sey18", " Sey2  " ," Torus" ]  
+;;newsptkey=[" Arp220 " ," Ell13  " ," Ell2  "  ," M82  " ," Mrk231" ," QSO1 " ," QSO2 " ," S0   " ," Sa  " ," Sb  " ," Sc  " ," Sd  " ,"Sey18", " Sey2  " ," Torus" ]  
 ;---------------------------------------------------------------------
 
-acshead = headfits('/Users/jkrick/nutella/hst/raw/wholeacs.fits');
+acshead = headfits('/Users/jkrick/external/nep/hst/raw/wholeacs.fits');
 adxy, acshead, objectnew[keeper].ra,objectnew[keeper].dec , xcenter, ycenter
 
 size = 6
@@ -128,35 +130,38 @@ x = [.3540,.4660,.6255,.7680,.8330,0.86,1.196, 1.25,1.24,1.25,1.635,1.65,2.15,2.
 y = x
 yerr = x
 
-fits_read, '/Users/jkrick/nutella/spitzer/mips/mips24/Combine/mosaic.fits',mipsdata, mipsheader
+fits_read, '/Users/jkrick/external/nep/spitzer/mips/mips24/Combine/mosaic.fits',mipsdata, mipsheader
 adxy, mipsheader, objectnew[keeper].ra,objectnew[keeper].dec , mipsxcenter, mipsycenter
 
-fits_read, '/Users/jkrick/nutella/spitzer/IRAC/ch1/mosaic.fits',iracdata, iracheader
+fits_read, '/Users/jkrick/external/nep/spitzer/IRAC/ch1/mosaic.fits',iracdata, iracheader
 adxy, iracheader, objectnew[keeper].ra,objectnew[keeper].dec , iracxcenter, iracycenter
-fits_read, '/Users/jkrick/nutella/spitzer/IRAC/ch2/mosaic.fits',irac2data, irac2header
+fits_read, '/Users/jkrick/external/nep/spitzer/IRAC/ch2/mosaic.fits',irac2data, irac2header
 adxy, irac2header, objectnew[keeper].ra,objectnew[keeper].dec , irac2xcenter, irac2ycenter
-fits_read, '/Users/jkrick/nutella/spitzer/IRAC/ch3/mosaic.fits',irac3data, irac3header
+fits_read, '/Users/jkrick/external/nep/spitzer/IRAC/ch3/mosaic.fits',irac3data, irac3header
 adxy, irac3header, objectnew[keeper].ra,objectnew[keeper].dec , irac3xcenter, irac3ycenter
-fits_read, '/Users/jkrick/nutella/spitzer/IRAC/ch4/mosaic.fits',irac4data, irac4header
+fits_read, '/Users/jkrick/external/nep/spitzer/IRAC/ch4/mosaic.fits',irac4data, irac4header
 adxy, irac4header, objectnew[keeper].ra,objectnew[keeper].dec , irac4xcenter, irac4ycenter
-fits_read, '/Users/jkrick/nutella/mmt/IRACCF.z.coadd.fits',zdata,zheader
+fits_read, '/Users/jkrick/external/nep/mmt/IRACCF.z.coadd.fits',zdata,zheader
 adxy,zheader, objectnew[keeper].ra,objectnew[keeper].dec , zxcenter,zycenter
-fits_read, '/Users/jkrick/nutella/palomar/lfc/coadd_r.fits',rdata,rheader
+fits_read, '/Users/jkrick/external/irac_warm/palomar/lfc/coadd_r.fits',rdata,rheader
 adxy,rheader, objectnew[keeper].ra,objectnew[keeper].dec , rxcenter,rycenter
-fits_read, '/Users/jkrick/nutella/palomar/wirc/wirc_2008/k/coadd.fits',kdata,kheader
+fits_read, '/Users/jkrick/external/irac_warm/palomar/wirc/wirc_2008/k/coadd.fits',kdata,kheader
 adxy,kheader, objectnew[keeper].ra,objectnew[keeper].dec , kxcenter,kycenter
 
-for n = 0,n_elements(keeper) - 1 do begin
+for n = 0, n_elements(keeper) - 1 do begin 
 
 ;output the acs image of the objectnew
    print, "working on n ", n, keeper(n)
 
-   if objectnew[keeper(n)].rmag gt 0 then begin;and objectnew[keeper(n)].acsmag lt 90 
-      plotimage, xrange=[rxcenter(n) - size/0.18,rxcenter(n)+ size/.18],$
-                yrange=[rycenter(n) -size/.18,rycenter(n)+size/.18], $
+   if objectnew[keeper(n)].rmag gt 0 then begin ;and objectnew[keeper(n)].acsmag lt 90
+      plotimage, xrange=[rxcenter(n) - size/0.18,rxcenter(n)+ size/0.18],$
+                yrange=[rycenter(n) -size/0.18,rycenter(n)+size/0.18], $
                  bytscl(rdata, min =-0.2, max = 0.2),title='r',$
-                 /preserve_aspect, /noaxes, ncolors=60
- ;     xyouts, xcenter(n)- 0.6*size/0.05, -10., string(keeper(n)),charthick = 3
+                 /preserve_aspect, /noaxes, ncolors=60, position=[0,0.7,0.3,1.0]
+      
+      ;; xyouts, xcenter(n)- 0.6*size/0.05, -10.,
+      ;;                     string(keeper(n)),charthick = 3
+      xyouts, rxcenter(n),rycenter(n)- 0.35*size/0.05, string(keeper(n)), charthick = 3 
    endif else begin
       ;need a placeholder
       plot, findgen(10), findgen(10), thick=0, xthick=0,ythick=0, charthick=0, charsize=0, xstyle=4, ystyle=4, psym=3
@@ -164,12 +169,13 @@ for n = 0,n_elements(keeper) - 1 do begin
    endelse
 
    if objectnew[keeper(n)].acsmag gt 0  and ycenter(n) - size/0.05 gt 0 and ycenter(n) + size/0.05 lt 20300 then begin;and objectnew[keeper(n)].acsmag lt 90 
-      acsdata = mrdfits('/Users/jkrick/nutella/hst/raw/wholeacs.fits', range=[ycenter(n) -size/0.05, ycenter(n)+size/0.05])
-      plotimage, xrange=[xcenter(n) - size/0.05, xcenter(n)+ size/0.05],$
-;;                 yrange=[ycenter(n) -size/0.05, ycenter(n)+size/0.05], $
-                 bytscl(acsdata, min = -0.01, max = 0.1),title='acs',$
-                 /preserve_aspect, /noaxes, ncolors=60;, position=[0,0.5,0.5,1.0]
-      xyouts, xcenter(n)- 0.6*size/0.05, -16., strcompress( string(objectnew[keeper(n)].ra) +'   '+ string(objectnew[keeper(n)].dec)),charthick = 3
+      acsdata = mrdfits('/Users/jkrick/external/nep/hst/raw/wholeacs.fits');, range=[ycenter(n) -size/0.05, ycenter(n)+size/0.05])
+      oplotimage, xrange=[xcenter(n) - size/0.05, xcenter(n)+ size/0.05],$
+                 yrange=[ycenter(n) -size/0.05, ycenter(n)+size/0.05], $                 
+                  bytscl(acsdata, min = -0.01, max = 0.1),title='acs',$
+                  /preserve_aspect, /noaxes, ncolors=60, position=[0.35,0.7,0.65,1.0]
+
+      xyouts, xcenter(n), ycenter(n)- 1.2*size/0.05, strcompress( string(objectnew[keeper(n)].ra) +'   '+ string(objectnew[keeper(n)].dec)),charthick = 3
    endif else begin
       ;need a placeholder
       plot, findgen(10), findgen(10), thick=0, xthick=0,ythick=0, charthick=0, charsize=0, xstyle=4, ystyle=4, psym=3
@@ -178,8 +184,8 @@ for n = 0,n_elements(keeper) - 1 do begin
 
 
 ;   if objectnew[keeper(n)].zmagbest gt 0 then begin;and objectnew[keeper(n)].acsmag lt 90 
-;      plotimage, xrange=[zxcenter(n) - size/0.31,zxcenter(n)+ size/.31],$
-;                 yrange=[zycenter(n) -size/.31,zycenter(n)+size/.31], $
+;      plotimage, xrange=[zxcenter(n) - size/0.31,zxcenter(n)+ size/0.31],$
+;                 yrange=[zycenter(n) -size/0.31,zycenter(n)+size/0.31], $
 ;                 bytscl(zdata, min =-100, max = 198),title='z',$
 ;                 /preserve_aspect, /noaxes, ncolors=60
 ;;      xyouts, 0, -10., strcompress( string(objectnew[keeper(n)].ra) +'   '+ string(objectnew[keeper(n)].dec)),charthick = 3
@@ -191,10 +197,10 @@ for n = 0,n_elements(keeper) - 1 do begin
 
 
  if objectnew[keeper(n)].wirckmag gt 0 then begin;and objectnew[keeper(n)].acsmag lt 90 
-     plotimage, xrange=[kxcenter(n) - size/0.25,kxcenter(n)+ size/.25],$
+     oplotimage, xrange=[kxcenter(n) - size/0.25,kxcenter(n)+ size/.25],$
                 yrange=[kycenter(n) -size/.25,kycenter(n)+size/.25], $
                 bytscl(kdata, min =-43, max =200),title='k',$;
-                /preserve_aspect, /noaxes, ncolors=60
+                /preserve_aspect, /noaxes, ncolors=60, position=[0.7,0.7,1.0,1.0]
 ;      xyouts, 0, -10., strcompress( string(objectnew[keeper(n)].ra) +'   '+ string(objectnew[keeper(n)].dec)),charthick = 3
   endif else begin
      ;need a placeholder
@@ -203,10 +209,10 @@ for n = 0,n_elements(keeper) - 1 do begin
   endelse
 
    if objectnew[keeper(n)].irac1mag gt 0 then begin;and objectnew[keeper(n)].acsmag lt 90 
-      plotimage, xrange=[iracxcenter(n) - size/0.6, iracxcenter(n)+ size/0.6],$
+      oplotimage, xrange=[iracxcenter(n) - size/0.6, iracxcenter(n)+ size/0.6],$
                  yrange=[iracycenter(n) -size/0.6, iracycenter(n)+size/0.6], $
                  bytscl(iracdata, min =0.04, max = 0.06),title='irac1',$
-                 /preserve_aspect, /noaxes, ncolors=60;,position=[0.5,1.0,0.5,1.0]
+                 /preserve_aspect, /noaxes, ncolors=60, position=[0,0.35,0.3,0.65]
  ;     xyouts, xcenter(n)- 0.6*size/0.05, -10., string(keeper(n)),charthick = 3
    endif else begin
       ;need a placeholder
@@ -215,10 +221,10 @@ for n = 0,n_elements(keeper) - 1 do begin
    endelse
 
    if objectnew[keeper(n)].irac2mag gt 0 then begin;and objectnew[keeper(n)].acsmag lt 90 
-      plotimage, xrange=[irac2xcenter(n) - size/0.6, irac2xcenter(n)+ size/0.6],$
+      oplotimage, xrange=[irac2xcenter(n) - size/0.6, irac2xcenter(n)+ size/0.6],$
                  yrange=[irac2ycenter(n) -size/0.6, irac2ycenter(n)+size/0.6], $
                  bytscl(irac2data, min =0.2, max = 0.32),title='irac2',$
-                 /preserve_aspect, /noaxes, ncolors=60;,position=[0.5,1.0,0.5,1.0]
+                 /preserve_aspect, /noaxes, ncolors=60, position=[0.35,0.35,0.65,0.65]
  ;     xyouts, xcenter(n)- 0.6*size/0.05, -10., string(keeper(n)),charthick = 3
    endif else begin
       ;need a placeholder
@@ -227,10 +233,10 @@ for n = 0,n_elements(keeper) - 1 do begin
    endelse
 
    if objectnew[keeper(n)].irac3mag gt 0 then begin;and objectnew[keeper(n)].acsmag lt 90 
-      plotimage, xrange=[irac3xcenter(n) - size/0.6, irac3xcenter(n)+ size/0.6],$
+      oplotimage, xrange=[irac3xcenter(n) - size/0.6, irac3xcenter(n)+ size/0.6],$
                  yrange=[irac3ycenter(n) -size/0.6, irac3ycenter(n)+size/0.6], $
                  bytscl(irac3data, min =1.95, max = 2.2),title='irac3',$
-                 /preserve_aspect, /noaxes, ncolors=60;,position=[0.5,1.0,0.5,1.0]
+                 /preserve_aspect, /noaxes, ncolors=60, position=[0.7,0.35,1.0,0.65]
  ;     xyouts, xcenter(n)- 0.6*size/0.05, -10., string(keeper(n)),charthick = 3
    endif else begin
       ;need a placeholder
@@ -239,10 +245,10 @@ for n = 0,n_elements(keeper) - 1 do begin
    endelse
 
    if objectnew[keeper(n)].irac4mag gt 0 then begin;and objectnew[keeper(n)].acsmag lt 90 
-      plotimage, xrange=[irac4xcenter(n) - size/0.6, irac4xcenter(n)+ size/0.6],$
+      oplotimage, xrange=[irac4xcenter(n) - size/0.6, irac4xcenter(n)+ size/0.6],$
                  yrange=[irac4ycenter(n) -size/0.6, irac4ycenter(n)+size/0.6], $
                  bytscl(irac4data, min =5.25, max = 5.4),title='irac4',$
-                 /preserve_aspect, /noaxes, ncolors=60;,position=[0.5,1.0,0.5,1.0]
+                 /preserve_aspect, /noaxes, ncolors=60, position=[0,0,0.3,0.3]
  ;     xyouts, xcenter(n)- 0.6*size/0.05, -10., string(keeper(n)),charthick = 3
    endif else begin
       ;need a placeholder
@@ -252,10 +258,10 @@ for n = 0,n_elements(keeper) - 1 do begin
 
 
    if objectnew[keeper(n)].mips24mag gt 0 then begin ;and objectnew[keeper(n)].acsmag lt 90 
-      plotimage, xrange=[mipsxcenter(n) - size/1.2, mipsxcenter(n)+ size/1.2],$
+      oplotimage, xrange=[mipsxcenter(n) - size/1.2, mipsxcenter(n)+ size/1.2],$
                  yrange=[mipsycenter(n) -size/1.2, mipsycenter(n)+size/1.2], $
                  bytscl(mipsdata, min = 15.45, max = 15.6),title='mips24',$
-                 /preserve_aspect, /noaxes, ncolors=60;,position=[0,0.5,0,0.5]
+                 /preserve_aspect, /noaxes, ncolors=60, position=[0.35,0,0.65,0.3]
 ;      xyouts, xcenter(n)- 0.6*size/0.05, -10., string(keeper(n)),charthick = 3
    endif else begin
       ;need a placeholder
@@ -268,22 +274,38 @@ for n = 0,n_elements(keeper) - 1 do begin
 
 ;   y = [u(n),g(n),r(n),i(n),acs(n), z(n),j(n),wj(n),tj(n),wh(n),th(n),wk(n),tk(n),one(n),two(n),three(n), four(n)] ;photometry
 ;   yerr = [uerr(n),gerr(n),rerr(n),ierr(n),acserr(n),zerr(n), jerr(n),wjerr(n),tjerr(n), wherr(n),therr(n),wkerr(n), tkerr(n),oneerr(n),twoerr(n),threeerr(n), fourerr(n)]
-   y = [u(n),g(n),r(n),i(n),acs(n), z(n),j(n),wj(n),tj(n),sj(n), wh(n),th(n),wk(n),tk(n),one(n),two(n),three(n), four(n)] ;photometry
-   yerr = [uerr(n),gerr(n),rerr(n),ierr(n),acserr(n),zerr(n), jerr(n),wjerr(n),sjerr(n), tjerr(n), wherr(n),therr(n),wkerr(n), tkerr(n),oneerr(n),twoerr(n),threeerr(n), fourerr(n)]
+;;   y = [u(n),g(n),r(n),i(n),acs(n), z(n),j(n),wj(n),tj(n),sj(n), wh(n),th(n),wk(n),tk(n),one(n),two(n),three(n), four(n)] ;photometry
+;;   yerr = [uerr(n),gerr(n),rerr(n),ierr(n),acserr(n),zerr(n), jerr(n),wjerr(n),sjerr(n), tjerr(n), wherr(n),therr(n),wkerr(n), tkerr(n),oneerr(n),twoerr(n),threeerr(n), fourerr(n)]
 
+
+   y = [objectnew[keeper(n)].umag, objectnew[keeper(n)].gmag, objectnew[keeper(n)].rmag, $
+           objectnew[keeper(n)].imag,  objectnew[keeper(n)].acsmag, objectnew[keeper(n)].zmagbest, jmagab, wircjmagab, $
+           objectnew[keeper(n)].tmassjmag,  objectnew[keeper(n)].swircjmagauto, wirchmagab, $
+           objectnew[keeper(n)].tmasshmag, wirckmagab, $
+           objectnew[keeper(n)].tmasskmag, objectnew[keeper(n)].irac1mag,objectnew[keeper(n)].irac2mag,$
+        objectnew[keeper(n)].irac3mag,objectnew[keeper(n)].irac4mag]
+   yerr = [objectnew[keeper(n)].umagerr, objectnew[keeper(n)].gmagerr, $
+           objectnew[keeper(n)].rmagerr, objectnew[keeper(n)].imagerr, objectnew[keeper(n)].acsmagerr, $
+           objectnew[keeper(n)].zmagerrbest, objectnew[keeper(n)].flamjmagerr, $
+           objectnew[keeper(n)].wircjmagerr,tmassjerr, objectnew[keeper(n)].swircjmagautoerr,$
+           objectnew[keeper(n)].wirchmagerr, tmassherr, objectnew[keeper(n)].wirckmagerr,$
+           tmasskerr,objectnew[keeper(n)].irac1magerr,objectnew[keeper(n)].irac2magerr,$
+           objectnew[keeper(n)].irac3magerr, objectnew[keeper(n)].irac4magerr]
+
+   
 !X.margin = [6,2]
 !Y.margin = [4,2]
    pos = where(alog10(y) gt 0)
    if pos(0) ge 0 then begin
-      plot,alog10(x), alog10(y), psym = 5, thick = 3, charthick = 3, xthick = 3, ythick = 3, $
-           xtitle = "log(microns)", ytitle = "log(flux(microjansky))", xrange=[-0.5,1.5],$
+;      plot,alog10(x), alog10(y), psym = 5, thick = 3, charthick = 3, xthick = 3, ythick = 3, $
+;           xtitle = "log(microns)", ytitle = "log(flux(microjansky))", xrange=[-0.5,1.5], position=[0.7,0,1.0,0.3]
            ;title=strcompress(string(zphota(n)) + string(proba(n)) + string(newsptkey(specta(n)-1)))
-           title=strcompress("objectnew " + string(idz(n)) +string(zphota(n)) + string(proba(n)) + string(newsptkey(specta(n)-1))) ;,position=[0.5,1.0,0,0.5]
+           ;;title=strcompress("objectnew " + string(idz(n)) +string(zphota(n)) + string(proba(n)) + string(newsptkey(specta(n)-1))) ;,position=[0.5,1.0,0,0.5]
 ;   plot,(x)*10000., (y), psym = 5, thick = 3, charthick = 3, xthick = 3, ythick = 3, $
 ;        xtitle = "angstroms", ytitle = "flux(microjansky))", title=strcompress("objectnew " + string(idz(n)) +string(zphota(n)) + string(proba(n)) + string(sptkey(specta(n)-1))), xrange=[4000,8000]
 
-      xyouts, alog10(24), alog10(objectnew[keeper[n]].mips24flux), 'x', charthick = 3
-      errplot, alog10(x), alog10(y - yerr), alog10(y + yerr)
+;      xyouts, alog10(24), alog10(objectnew[keeper[n]].mips24flux), 'x', charthick = 3
+;      errplot, alog10(x), alog10(y - yerr), alog10(y + yerr)
 
    endif else begin
       ;need a placeholder
@@ -292,8 +314,8 @@ for n = 0,n_elements(keeper) - 1 do begin
    endelse
 
 
-   readcol,strcompress('/Users/jkrick/nutella/ZPHOT/' + string(idz(n)) + '.spe', /remove_all),x2, y2,format="A",/silent
-   oplot, alog10((x2/1E4)), alog10(y2), thick = 3
+ ;  readcol,strcompress('/Users/jkrick/external/ZPHOT/' + string(idz(n)) + '.spe', /remove_all),x2, y2,format="A",/silent
+ ;  oplot, alog10((x2/1E4)), alog10(y2), thick = 3
  
    
 endfor
