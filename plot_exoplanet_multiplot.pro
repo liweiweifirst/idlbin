@@ -21,14 +21,14 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
   period =  planetinfo[planetname, 'period']
   stareaor = planetinfo[planetname, 'stareaor']
 ;for debugging: skip some AORs
-  startaor = 0                  ;5
+  startaor =  6;0                  ;5
   stopaor =   n_elements(aorname) - 1
   print, 'stopaor', stopaor
 ;  plot_norm= planetinfo[planetname, 'plot_norm']
 ;  plot_corrnorm = planetinfo[planetname, 'plot_corrnorm']
   
   dirname = strcompress(basedir + planetname +'/');+'/hybrid_pmap_nn/')
-  if chname eq '2' then savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150723.sav',/remove_all)
+  if chname eq '2' then savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150723_newtime.sav',/remove_all)
   if chname eq '1' then savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_140716.sav',/remove_all)
   print, 'restoring ', savefilename
   restore, savefilename
@@ -55,7 +55,7 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
   stddev_corrfluxarr = mean_corrfluxarr
   stddev_dsweetarr = mean_corrfluxarr
  
-  for a = startaor,stopaor do begin
+  for a = startaor,stopaor,14 do begin
      print, '------------------------------------------------------'
      print, 'working on AOR', a, '   ', aorname(a)
 
@@ -92,8 +92,11 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
      if keyword_set(timeplot) then begin ;make the plot as a function of time
         print, 'making plot as a function of time'
         plotx = (bin_timearr-  time_0)/60./60./24.
-        print, 'plotx', plotx(0)
-
+      
+        plotx2 =(bin_timearr - bin_timearr(0))/60./60.
+        help, bin_timearr
+        print,bin_timearr
+        if planetname eq 'WASP-14b' then plotx = plotx2
         if plotx(0) gt 300. then begin
            print, 'large plotx', plotx(0)
            plotx = plotx - (7800./24.)
@@ -102,8 +105,8 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         ending = 'time'
         
      endif else begin
-        plotx = bin_phase
-        setxrange =   [0.5,0.67];  [-0.5,0.5];
+        plotx =  bin_phase -1.09
+        setxrange =  [-0.58,-0.43]; [0.45,0.67];  [-0.5,0.5];
         ending = 'phase'
      endelse
      
@@ -127,47 +130,47 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         bkgd_norm =  mean(bin_bkgd,/nan)
 ;           print, 'bin_xcen', bin_xcen
         print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
-        pp = plot(plotx, bin_xcen, '1s',  $ ;title = planetname, $
+        pp = plot(plotx, bin_xcen, '1s-',  $ ;title = planetname, $
                   color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 0.1, $
                   xshowtext = 0, ytickformat = '(F10.2)', dimensions = [600, 900], _extra = extra, yminor = 0,$
-                  xrange = setxrange, yrange = [14.9,15.3], title = planetname ) ;, $, ymajor = 4 [22.85, 23.2]
+                  xrange = setxrange, yrange = [14.9,15.3]);, title = planetname ) ;, $, ymajor = 4 [22.85, 23.2]
         
                                 ;turn off refreshing to make this quicker hopefully
 ;           pp.Refresh, /Disable
         
         
-        pq= plot(plotx, bin_ycen, '1s',  color = colorarr[a], $
+        pq= plot(plotx, bin_ycen, '1s-',  color = colorarr[a], $
                  ytitle = 'Y position',  position = [0.2, 0.64, 0.9, 0.77],/current,  ytickinterval = 0.1,$
                  xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, yminor = 0,$
                  xrange = setxrange, yrange = [14.9,15.3]) ;, $, title = planetname , ymajor = 4
                                 ;xrange = setxrange); [230.85,231.15]
         
-        
-        pr = plot(plotx, bin_flux/plot_norm, '1s',  $
-                  color = colorarr[a],   ytitle = 'Norm. Flux', xtitle = 'Phase',$ 
-                  position = [0.2,0.08, 0.9, 0.21], /current, _extra = extra, ytickinterval = 0.01, yminor = 0,$
-                  xrange = setxrange, yrange = [0.98, 1.02])
-        
-        
-        ps= plot(plotx, bin_npcent, '1s', color = colorarr[a], $
+         pxy = plot(plotx, bin_xfwhm, '1s-', color = 'blue', $
+                   ytitle = 'X & Y FWHM',  position = [0.2, 0.50, 0.9, 0.63], /current, $
+                   xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.1, yminor = 0,$
+                   xrange = setxrange, yrange = [1.9, 2.2]) ;
+        pxy = plot(plotx, bin_yfwhm, '1s-', color = 'black', $
+                   overplot = pxy, _extra = extra,$
+                   xrange = setxrange) ;
+       
+         
+        ps= plot(plotx, bin_npcent, '1s-', color = colorarr[a], $
                  ytitle = 'Noise Pixel',  position = [0.2, 0.36, 0.9, 0.49], /current, $
                  xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, ytickinterval = 1.0, yminor = 0, yrange = [4.0, 7.0],$
                  xrange = setxrange) ;,$ title = planetname,, ymajor = 4;xrange = setxrange)
         
-        pt = plot(plotx, bin_bkgd/ bkgd_norm, '1s' , color = colorarr[a], $
+        pt = plot(plotx, bin_bkgd/ bkgd_norm, '1s-' , color = colorarr[a], $
                   ytitle = 'Norm. Bkgd',  margin = 0.2, position = [0.2, 0.22, 0.9, 0.35], /current, xshowtext = 0,$
                   ytickformat = '(F10.2)', _extra = extra, ytickinterval = .2, yminor = 0,$ 
                   xrange = setxrange, yrange = [0.80, 1.2])  ;, $ title = planetname,ymajor = 4,
         
-        pxy = plot(plotx, bin_xfwhm, '1s', color = colorarr[a], $
-                   ytitle = 'X & Y FWHM',  position = [0.2, 0.50, 0.9, 0.63], /current, $
-                   xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.1, yminor = 0,$
-                   xrange = setxrange, yrange = [1.9, 2.2]) ;
-        pxy = plot(plotx, bin_yfwhm, '1s', color = colorarr[a], $
-                   overplot = pxy, _extra = extra,$
-                   xrange = setxrange) ;
         
+        pr = plot(plotx, bin_flux/plot_norm, '1s-',  $
+                  color = colorarr[a],   ytitle = 'Norm. Flux', xtitle = 'Phase',$ 
+                  position = [0.2, 0.08, 0.9, 0.21], /current, _extra = extra, ytickinterval = 0.01, yminor = 0,$
+                  xrange = setxrange, yrange = [0.98, 1.01]) ;
         
+ 
      endif                      ; if a = startaor
      
                                 ;  test_med(a) = median(bin_corrfluxp)
@@ -175,23 +178,23 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
      if (a gt 0) and (a le stareaor) then begin
         print, 'inside a gt 0 a le stareaor', a
 ;           pp.window.SetCurrent
-        pp = plot(plotx, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],  overplot = pp,/current)
+        pp = plot(plotx, bin_xcen, '1s-', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],  overplot = pp,/current)
 ;           pq.window.SetCurrent
-        pq = plot(plotx, bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = pq,/current)
+        pq = plot(plotx, bin_ycen, '1s-', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = pq,/current)
 ;           pr.window.SetCurrent
-        pr = plot(plotx, bin_flux/plot_norm , '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pr,/current)
+        pr = plot(plotx, bin_flux/plot_norm , '1s-', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pr,/current)
                                 ;          if pmapcorr eq 1 then begin
 ;              pr = plot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm)-corrnormoffset, /overplot, 's1', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/current,overplot = pr)
 ;           endif
         
 ;           ps.window.SetCurrent
-        ps = plot(plotx, bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = ps,/current) ;, xtitle = 'Time(hrs)', ytitle = 'Normalized Flux',) 
+        ps = plot(plotx, bin_npcent, '1s-', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = ps,/current) ;, xtitle = 'Time(hrs)', ytitle = 'Normalized Flux',) 
         
 ;           pt.window.SetCurrent
-        pt = plot(plotx, bin_bkgd/ bkgd_norm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pt,/current) 
+        pt = plot(plotx, bin_bkgd/ bkgd_norm, '1s-', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pt,/current) 
         
-        pxy = plot(plotx, bin_xfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pxy,/current)
-        pxy = plot(plotx, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pxy,/current)
+;;        pxy = plot(plotx, bin_xfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pxy,/current)
+;;        pxy = plot(plotx, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], overplot = pxy,/current)
         
         
      endif
@@ -200,24 +203,24 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
      
      if a gt stareaor then begin
         print, 'inside a gt stareaor', a
-        pp = plot(plotx, bin_xcen, '1s', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],$
+        pp = plot(plotx, bin_xcen, '1s-', sym_size = 0.2,   sym_filled = 1,color = colorarr[a],$
                   overplot = pp, layout = [1,5,1])
         
         
-        pq = plot(plotx, bin_ycen, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],$
+        pq = plot(plotx, bin_ycen, '1s-', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],$
                   overplot = pq, layout = [1,5,2])
         
-        pr = plot(plotx, bin_flux/(plot_norm) , '1s', sym_size = 0.2,   sym_filled = 1,  $
+        pr = plot(plotx, bin_flux/(plot_norm) , '1s-', sym_size = 0.2,   sym_filled = 1,  $
                   color = colorarr[a], overplot = pr)
         
         
-        ps = plot(plotx, bin_npcent, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a],$
+        ps = plot(plotx, bin_npcent, '1s-', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a],$
                   overplot = ps) 
         
-        pt = plot(plotx, bin_bkgd/bkgd_norm, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
+        pt = plot(plotx, bin_bkgd/bkgd_norm, '1s-', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
                   overplot = pt) 
-        pxy = plot(plotx, bin_xfwhm, '1s',  sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = pxy)    ;
-        pxy = plot(plotx, bin_yfwhm, '1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], overplot = pxy)    ;
+        pxy = plot(plotx, bin_xfwhm, '1s-',  sym_size = 0.2,   sym_filled = 1, color ='blue', overplot = pxy)    ;
+        pxy = plot(plotx, bin_yfwhm, '1s-', sym_size = 0.2,   sym_filled = 1, color = 'black', overplot = pxy)    ;
         
         
      endif
@@ -236,23 +239,23 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
 
   if keyword_set(timeplot) then begin
      if planetname eq 'WASP-14b' then begin
-        pp.xrange = [0, 800/24.]
-        pq.xrange = [0, 800/24.]
-        pt.xrange = [0, 800/24.]
-        ps.xrange = [0, 800/24.]
-        pr.xrange = [0, 800/24.]
-        pxy.xrange = [0, 800/24.]
-        pp = plot([550/24., 520/24.], [min(pp.yrange), max(pp.yrange)], linestyle = 4, overplot = pp)
-        pq = plot([550/24., 520/24.], [min(pq.yrange), max(pq.yrange)], linestyle = 4, overplot = pq)
-        pt = plot([550/24., 520/24.], [min(pt.yrange), max(pt.yrange)], linestyle = 4, overplot = pt)
-        ps = plot([550/24., 520/24.], [min(ps.yrange), max(ps.yrange)], linestyle = 4, overplot = ps)
-        pr = plot([550/24., 520/24.], [min(pr.yrange), max(pr.yrange)], linestyle = 4, overplot = pr)
-        pxy = plot([550/24., 520/24.], [min(pxy.yrange), max(pxy.yrange)], linestyle = 4, overplot = pxy)
-        pr.xtickname = ['0', '5', '10', '15','20', '350', '355'] ; account for the time shifting
+;;        pp.xrange = [0, 800/24.]
+;;        pq.xrange = [0, 800/24.]
+;;        pt.xrange = [0, 800/24.]
+;;        ps.xrange = [0, 800/24.]
+;;        pr.xrange = [0, 800/24.]
+;;        pxy.xrange = [0, 800/24.]
+;;        pp = plot([550/24., 520/24.], [min(pp.yrange), max(pp.yrange)], linestyle = 4, overplot = pp)
+;;        pq = plot([550/24., 520/24.], [min(pq.yrange), max(pq.yrange)], linestyle = 4, overplot = pq)
+;;        pt = plot([550/24., 520/24.], [min(pt.yrange), max(pt.yrange)], linestyle = 4, overplot = pt)
+;;        ps = plot([550/24., 520/24.], [min(ps.yrange), max(ps.yrange)], linestyle = 4, overplot = ps)
+;;        pr = plot([550/24., 520/24.], [min(pr.yrange), max(pr.yrange)], linestyle = 4, overplot = pr)
+;;        pxy = plot([550/24., 520/24.], [min(pxy.yrange), max(pxy.yrange)], linestyle = 4, overplot = pxy)
+;;        pr.xtickname = ['0', '5', '10', '15','20', '350', '355'] ; account for the time shifting
      endif
      
-     pr.xtitle = 'Time(Days)'
-
+;;     pr.xtitle = 'Time(Days)'
+pr.xtitle = 'Time(hours)'
   endif
 
   pp.save, dirname +'multiplot_ch'+chname+'_'+ending+'.eps'

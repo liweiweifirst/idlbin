@@ -61,10 +61,10 @@ pro run_driver_trans_sec_phase_ramp, planetname, chname, apradius, pmapname, bin
   ;;print, 'err_tot', err_tot[0:10]
   ;;print, 'bjd_tot', bjd_tot[0:10]
   ;;test inputs
-  p1 = errorplot(bjd_tot, flux_tot, err_tot, xtitle = 'bjd', ytitle = 'flux', yrange = [0.987, 1.003])
-  ;print, 'flux_tot', flux_tot[0:20]
+  p1 = errorplot(bjd_tot, flux_tot, err_tot, xtitle = 'bjd', ytitle = 'flux', yrange = [0.987, 1.005])
+  print, 'flux_tot', flux_tot[0:20]
   ;print, 'bjd_tot', bjd_tot[0:20]
-  ;print, 'err_tot', err_tot[0:20]
+  print, 'err_tot', err_tot[0:20]
   
    ;;I don't really need the rest so make them up for now
   nbr_ind = findgen(n_elements(bjd_tot))
@@ -77,6 +77,10 @@ pro run_driver_trans_sec_phase_ramp, planetname, chname, apradius, pmapname, bin
   ;;---------------------------------------------------------------
   ;;call Nikole's code
   ;;---------------------------------------------------------------
+;  outfile = 'fitting_output_phot_ch2_2.25000_150723.sav'
+;  infile = 'fitting_input_phot_ch2_2.25000_150723.sav'
+;  restore, infile
+
   outfile = strcompress('/Users/jkrick/irac_warm/pcrs_planets/' + planetname + '/'+ 'fitting_output_phot_ch'+chname+'_'+string(apradius)+'_' + pmapname + '.sav',/remove_all)
   driver_trans_sec_phase_ramp_jk, 2, 'flat', 0, 0, outfile
 ;;  driver_trans_sec_phase_ramp_jk, 2, 'cowan', 0, 0, outfile
@@ -85,3 +89,5 @@ pro run_driver_trans_sec_phase_ramp, planetname, chname, apradius, pmapname, bin
   pfit = plot(bjd_tot, trans,  overplot = p1, color = 'cyan', thick = 2)
 
 end
+
+
