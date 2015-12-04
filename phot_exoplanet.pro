@@ -183,6 +183,7 @@ for a =startaor,  stopaor do begin
       exptime = sxpar(header, 'EXPTIME')
       aintbeg = sxpar(header, 'AINTBEG')
       atimeend = sxpar(header, 'ATIMEEND')
+      ;;print, 'aintbeg, atimeend', aintbeg, atimeend
       naxis = sxpar(header, 'NAXIS')
       framedly = sxpar(header, 'FRAMEDLY')
       if ra_ref gt 359. then begin
@@ -241,13 +242,13 @@ for a =startaor,  stopaor do begin
       if naxis eq 3 then begin
          deltatime = (atimeend - aintbeg) / 64.D ; real time for each of the 64 frames
          nt = dindgen(64)
-         sclkarr = sclk_obs  + (deltatime*nt)/60./60./24.D ; 0.5*frametime + frametime*nt
+         sclkarr = sclk_obs  + (deltatime*nt);/60./60./24.D ; 0.5*frametime + frametime*nt
          bmjdarr= bmjd_obs + (deltatime*nt)/60./60./24.D   ; 0.5*(frametime/60./60./24.) + (frametime/60./60./24.)*nt
       endif else begin          ; full array, so don't need to expand out the times
          sclkarr = sclk_obs
          bmjdarr = bmjd_obs
       endelse
-;         print, 'bmjdarr split up', bmjdarr(0), ' ' ,bmjdarr(20), ' ' ,bmjdarr(60),  format = '(A, D0, A, D0, A, D0)'
+         print, 'sclk split up', sclkarr(0), ' ' ,sclkarr(1), ' ' ,sclkarr(60),  format = '(A, D0, A, D0, A, D0)'
 
       ;read in the files
       fits_read, fitsname(i), im, h
@@ -540,7 +541,7 @@ if keyword_set(breatheap) then begin
    savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav')
 endif else begin
    pmapname = strmid(pmapfile, 9, 6,/reverse_offset)
-   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_' + pmapname + '.sav',/remove_all)
+   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_' + pmapname + '_newtime.sav',/remove_all)
 endelse
 
 save, planethash, filename=savename
