@@ -462,7 +462,7 @@ COMMON data, bjd_tot, flux_tot, nbr_ind, gw, err_tot, time_tot, nonlin_c
 restore,'/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/fitting_input_phot_ch2_2.25000_150723.sav'
 nonlin_c=[0.0225, 0.3828, -0.2748, -0.0522] ;wasp-14b specific
 Tc=56042.65d
-p0_test=[2.24d0, 84.8d0*!dtor, 6.0d0, -.0247236, -0.0792322, Tc,  0.09421d0, 0.002115d0, 0.002367d0] ; for inc *!dtor
+p0_test=[2.24d0, 84.8d0*!dtor, 5.98d0, -.0247236, -0.0792322, Tc,  0.09421d0, 0.002115d0, 0.002367d0] ; for inc *!dtor
 
 
 p0_ramp=[0.00016d0, 0.07d0]
@@ -491,21 +491,21 @@ p0_cowan=[0.d0, 0.d0, 0.d0, 0.d0]
 ;p(9:13) -> phase curve parameters
 ;p(14:15) -> ramp parameters
 ;;pa=replicate({value:0.d0, fixed:0, limited:[0,0], limits:[0.d0, 0.d0], mpmaxstep:0.d0},16)
-pa=replicate({value:0.d0, fixed:0, limited:[0,0], limits:[0.d0, 0.d0]},16)
+pa=replicate({value:0.d0, fixed:0, limited:[0,0], limits:[0.d0, 0.d0], mpmaxstep:0.d0},16)
 ;starting values from Pal et al. (2010)
 pa(*).value=[p0_test, p0_phase(*,pind),p0_ramp]
 pa(*).limited(*)=[1,1]
-pa(0).limits(*)=[2.d0,2.3d0]
+pa(0).limits(*)=[2.d0,2.4d0]
 pa(1).limits(*)=[70.d0, 90.d0]*!dtor
-pa(2).limits(*)=[4.5d0, 7.0d0]
+pa(2).limits(*)=[5.0d0, 7.0d0]
 pa(3).limits(*)=[-0.1d0,0.1d0]
 pa(4).limits(*)=[-0.1d0, 0.1d0]
-pa(5).limits(*)=Tc+[-1.d0,1.d0]*0.01d0; 0.002d0
-pa(6).limits(*)=[0.00d0,0.1d0] 
-pa([7,8]).limits(*)=[0.0d0,0.003d0]
+pa(5).limits(*)=Tc+[-1.d0,1.d0]* 0.01d0
+pa(6).limits(*)=[0.01d0,0.1d0] 
+pa([7,8]).limits(*)=[0.001d0,0.007d0]
 pa(9).limits(*)=[0.d0,0.011d0]
 pa(10).limits(*)=[0.d0,1.8d0] 
-pa(11:12).limits(*)=[0.00d0,6.0d0]
+pa(11:12).limits(*)=[0.04d0,6.0d0]
 pa(13).limits(*)=[-0.0015d0,0.0015d0]
 ;pa(14).limits(*)=[0.d0, 0.01d0]
 pa(14).limits(*)=[-0.01d0, 0.01d0]
@@ -523,7 +523,7 @@ if (phase_func eq 'flat') then pa(9:12).fixed=1
 if (phase_func eq 'dist_sq') then pa(11:12).fixed=1
 
 
-pa([0, 1, 2, 3, 4]).fixed=1
+pa([0, 1,2,3, 4]).fixed=1 ;, 1, 2, 3, 4
 ;pa(4).fixed=1
 ;pa(7:8).fixed=1
 ;pa(1).mpmaxstep=0.0001d0
@@ -550,12 +550,13 @@ endif
 
 
 fa={phase_func:phase_func}
-p = mpfit('calc_trans_sec_phase', parinfo=pa, functargs=fa, perror=perror, status=status,  DOF=adof,bestnorm=bestnorm, ERRMSG=ERRMSG, /fastnorm)
 
+p = mpfit('calc_trans_sec_phase', parinfo=pa, functargs=fa, perror=perror, status=status,  DOF=adof,bestnorm=bestnorm, ERRMSG=ERRMSG, /fastnorm)
+print, 'perror', perror
 print, 'status', status
 print, errmsg
 print, 'reduced chi squared',  bestnorm / adof
-
+print, 'pa', pa.fixed
 porb=p(0)
 ecc=sqrt(p(3)^2+p(4)^2)
 om=atan(p(4),p(3))
