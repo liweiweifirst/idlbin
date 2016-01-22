@@ -31,7 +31,7 @@ pro plot_debris_disks
 
   readcol, '/Users/jkrick/external/irac_warm/senior_review_2016/P1121.phot.ch1.20150820.txt', aorkey, BMJD,  starflux, starflux_err, flux, flux_err, format = '(I10,D10, F10, F10, F10, F10)'
   jd = BMJD + 2400000.5
-  q1 = errorplot(jd, flux/flux(0), flux_err, '1o', sym_filled = 1, XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = 'years',xminor = 11,name = 'P1121 3.6$\mu$m', ytitle = 'Normalized Disk Flux Density(mJy)', color=[166,206,227], errorbar_color = [166,206,227], errorbar_capsize = 0.1, xrange = [jd(0) -30, jd(n_elements(jd) - 1) + 30], sym_size = 0.5, yrange = [0, 3.4])
+  q1 = errorplot(jd, flux/flux(0), flux_err, '1o', sym_filled = 1, XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = 'years',xminor = 11,name = 'P1121 3.6$\mu$m', ytitle = 'Normalized Disk Flux Density(mJy)', color=[166,206,227], errorbar_color = [166,206,227], errorbar_capsize = 0.1, xrange = [jd(0) -30, jd(n_elements(jd) - 1) + 30], sym_size = 0.5, yrange = [0, 3.4], xthick = 2, ythick = 2, font_style = 'bf')
   readcol, '/Users/jkrick/external/irac_warm/senior_review_2016/P1121.phot.ch2.20150820.txt', aorkey, BMJD,  starflux, starflux_err, flux, flux_err, format = '(I10,D10, F10, F10, F10, F10)'
   jd = BMJD + 2400000.5
   q2 = errorplot(jd, flux/flux(0), flux_err, '1o', sym_filled = 1, name = 'P1121 4.5$\mu$m',  color=[31,120,180], errorbar_color = [31,120,180], errorbar_capsize = 0.1, overplot = q1, sym_size = 0.5)

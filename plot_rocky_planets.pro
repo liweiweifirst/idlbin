@@ -1,7 +1,7 @@
 pro plot_rocky_planets, figure1 = figure1, figure2 = figure2
   ;readcol, '/Users/jkrick/external/irac_warm/senior_review_2016/test.txt',  NAME,MSINI,A,PER,ECC,year,DEPTH,KS,MASS,SEP,R,TEFF, format = '(A, F10, F10, F10, F10, I10, F10, F10, F10, F10, F10, I10 )'
 
-  readcol, '/Users/jkrick/irac_warm/senior_review_2016/exoplanetsprg_10_22_15.txt', NAME,PER,FIRSTREF,DEPTH,DEPTHUPPER,DEPTHLOWER,UDEPTH,KS,MASS,SEP,R,DIST,TEFF, Rstar, format = '(A, F10, I10, F10, F10, F10, F10, F10, F10, F10, F10,F10, I10 , F10)'
+  readcol, '/Users/jkrick/external/irac_warm/senior_review_2016/exoplanetsprg_10_22_15.txt', NAME,PER,FIRSTREF,DEPTH,DEPTHUPPER,DEPTHLOWER,UDEPTH,KS,MASS,SEP,R,DIST,TEFF, Rstar, format = '(A, F10, I10, F10, F10, F10, F10, F10, F10, F10, F10,F10, I10 , F10)'
 
   ;make sure they are transiting
   good = where(depth gt 0, goodcount)
@@ -120,23 +120,30 @@ pro plot_rocky_planets, figure1 = figure1, figure2 = figure2
   
 ;----------------------------------------------------------------------------------------
 ;;spitzer
-  S_period=[  0.2016,0.2659,1.8723,3.9890,9.6799,0.8932,0.5222,1.3414]
-  S_rad =[  0.3445, 0.3705,0.6045,0.7308,0.730,0.5009,0.4377, 0.5566]
+  S_period=[  0.2016,0.2659,1.8723,3.9890,9.6799,0.8932,0.5222,1.3414, 41.]
+  S_rad =[  0.3445, 0.3705,0.6045,0.7308,0.730,0.5009,0.4377, 0.5566,0.73]
   
   S_rad = S_rad(sort(S_period))
   S_period = S_period(sort(S_period))
   
 ;;Mearth
-  M_period =[0.2033,0.3078,0.3803,0.5265,0.6611,1.0173,1.3634,1.6438,2.1499,3.2026,4.2920,6.0889,8.2939,9.4466]
-  M_rad = [0.6825,0.7494,0.7828,0.8423,0.8868,0.9723,1.0391,1.0837,1.1509,1.2549,1.3400,1.4443,1.5480,1.5889]
+  M_period =[0.2033,0.3078,0.3803,0.5265,0.6611,1.0173,1.3634,1.6438,2.1499,3.2026,4.2920,6.0889,8.2939,9.4466, 15.0]
+  M_rad = [0.6825,0.7494,0.7828,0.8423,0.8868,0.9723,1.0391,1.0837,1.1509,1.2549,1.3400,1.4443,1.5480,1.5889, 1.8]
   
 ;;Harps
-  H_period=[0.2016,0.3285,0.4775,0.7653,1.3414,2.2030,3.3627,5.3896,9.7590]
-  H_rad = [0.9760,1.0206,1.0577,1.1023,1.1617,1.2137,1.2620,1.3177,1.3883]
+  H_period=[0.2016,0.3285,0.4775,0.7653,1.3414,2.2030,3.3627,5.3896,9.7590, 40.]
+  H_rad = [0.9760,1.0206,1.0577,1.1023,1.1617,1.2137,1.2620,1.3177,1.3883, 1.6]
   
   if keyword_set(figure2) then begin
-     p2 = plot(S_period, S_rad, color = 'deep sky blue', /xlog, thick = 2, xrange = [0.2, 12], yrange = [0.1,1.8],$
+     p2 = plot(S_period, S_rad, color = 'deep sky blue', /xlog, thick = 2, xrange = [0.2, 10], yrange = [0.1,1.8],$
                xtitle = 'Period(Days)', ytitle = 'Planet Radius (Rearth)')
+
+     ;;make polygon for habitable zone
+     xf = [2.0,5.3,5.3,2.0]
+     yf = [0.1, 0.1, 1.8, 1.8]
+     poly = polygon( xf, yf,/data, /fill_background, fill_color = 'light blue',transparency = 20, overplot = p2)
+     p2 = plot(S_period, S_rad, color = 'deep sky blue', /xlog, thick = 2,overplot = p2)
+     
      t2 = text(4.3, 0.74,'Spitzer',/data, target = p2, color = 'deep sky blue', font_style = 1)
      p2 = plot(M_period, M_rad, color = 'brown', /xlog, thick = 2,overplot = p2)
      t2 = text(0.3,0.65,'MEarth',/data, target = p2, color = 'brown', font_style = 1)
@@ -144,8 +151,8 @@ pro plot_rocky_planets, figure1 = figure1, figure2 = figure2
      t2 = text(0.3, 1.08,'HARPS',/data, target = p2, color = 'chocolate', font_style = 1)
      
 ;;add known planets
-     x = [1.6,3.1, 9.3, 0.85]
-     y = [1.2,1.6, 1.6, 1.68]
+     x = [1.6];,3.1, 9.3, 0.85]
+     y = [1.2];,1.6, 1.6, 1.68]
      short_depth = [0.0028,0.000359,0.0007 ]
      locations = ['top', 'top','top']
      names = ['GJ1132b', 'HD219134b','K2-21b']
@@ -162,6 +169,8 @@ pro plot_rocky_planets, figure1 = figure1, figure2 = figure2
      t2 = text(5.0, 0.19, 'Moon', /data, target = p2,  color = 'gray', font_style = 1)
      l2 = polyline([0.2, 10.], [0.413,0.413], /data, target = p2, color = 'gray', linestyle =2, thick = 2)
      t2 = text(5.0, 0.31, 'Ganymede', /data, target = p2,  color = 'gray', font_style = 1)
+
+    
   endif
   
 end
