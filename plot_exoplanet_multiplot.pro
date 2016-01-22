@@ -21,14 +21,14 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
   period =  planetinfo[planetname, 'period']
   stareaor = planetinfo[planetname, 'stareaor']
 ;for debugging: skip some AORs
-  startaor =  6;0                  ;5
+  startaor =  0                  ;5
   stopaor =   n_elements(aorname) - 1
   print, 'stopaor', stopaor
 ;  plot_norm= planetinfo[planetname, 'plot_norm']
 ;  plot_corrnorm = planetinfo[planetname, 'plot_corrnorm']
   
   dirname = strcompress(basedir + planetname +'/');+'/hybrid_pmap_nn/')
-  if chname eq '2' then savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150723_newtime.sav',/remove_all)
+  if chname eq '2' then savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150723.sav',/remove_all)
   if chname eq '1' then savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_140716.sav',/remove_all)
   print, 'restoring ', savefilename
   restore, savefilename
@@ -55,7 +55,7 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
   stddev_corrfluxarr = mean_corrfluxarr
   stddev_dsweetarr = mean_corrfluxarr
  
-  for a = startaor,stopaor,14 do begin
+  for a = startaor,stopaor do begin
      print, '------------------------------------------------------'
      print, 'working on AOR', a, '   ', aorname(a)
 
@@ -105,8 +105,8 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         ending = 'time'
         
      endif else begin
-        plotx =  bin_phase -1.09
-        setxrange =  [-0.58,-0.43]; [0.45,0.67];  [-0.5,0.5];
+        plotx =  bin_phase ;;-1.09
+        setxrange =  [0.5,0.65]; [0.45,0.67];  [-0.5,0.5];
         ending = 'phase'
      endelse
      
@@ -145,30 +145,30 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
                  xrange = setxrange, yrange = [14.9,15.3]) ;, $, title = planetname , ymajor = 4
                                 ;xrange = setxrange); [230.85,231.15]
         
-         pxy = plot(plotx, bin_xfwhm, '1s-', color = 'blue', $
-                   ytitle = 'X & Y FWHM',  position = [0.2, 0.50, 0.9, 0.63], /current, $
-                   xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.1, yminor = 0,$
-                   xrange = setxrange, yrange = [1.9, 2.2]) ;
-        pxy = plot(plotx, bin_yfwhm, '1s-', color = 'black', $
-                   overplot = pxy, _extra = extra,$
-                   xrange = setxrange) ;
+       ;  pxy = plot(plotx, bin_xfwhm, '1s-', color = 'blue', $
+       ;            ytitle = 'X & Y FWHM',  position = [0.2, 0.50, 0.9, 0.63], /current, $
+       ;            xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, ytickinterval = 0.1, yminor = 0,$
+       ;            xrange = setxrange, yrange = [1.9, 2.2]) ;
+       ; pxy = plot(plotx, bin_yfwhm, '1s-', color = 'black', $
+       ;            overplot = pxy, _extra = extra,$
+       ;            xrange = setxrange) ;
        
          
         ps= plot(plotx, bin_npcent, '1s-', color = colorarr[a], $
-                 ytitle = 'Noise Pixel',  position = [0.2, 0.36, 0.9, 0.49], /current, $
+                 ytitle = 'Noise Pixel',  position = [0.2, 0.50, 0.9, 0.63] , /current, $
                  xshowtext = 0,ytickformat = '(F10.1)', _extra = extra, ytickinterval = 1.0, yminor = 0, yrange = [4.0, 7.0],$
-                 xrange = setxrange) ;,$ title = planetname,, ymajor = 4;xrange = setxrange)
+                 xrange = setxrange) ;,$ title = planetname,, ymajor = 4;xrange = setxrange) position = [0.2, 0.36, 0.9, 0.49]
         
         pt = plot(plotx, bin_bkgd/ bkgd_norm, '1s-' , color = colorarr[a], $
-                  ytitle = 'Norm. Bkgd',  margin = 0.2, position = [0.2, 0.22, 0.9, 0.35], /current, xshowtext = 0,$
+                  ytitle = 'Norm. Bkgd',  margin = 0.2,position = [0.2, 0.36, 0.9, 0.49] , /current, xshowtext = 0,$
                   ytickformat = '(F10.2)', _extra = extra, ytickinterval = .2, yminor = 0,$ 
-                  xrange = setxrange, yrange = [0.80, 1.2])  ;, $ title = planetname,ymajor = 4,
+                  xrange = setxrange, yrange = [0.80, 1.2])  ;, $ title = planetname,ymajor = 4, position = [0.2, 0.22, 0.9, 0.35]
         
         
         pr = plot(plotx, bin_flux/plot_norm, '1s-',  $
                   color = colorarr[a],   ytitle = 'Norm. Flux', xtitle = 'Phase',$ 
-                  position = [0.2, 0.08, 0.9, 0.21], /current, _extra = extra, ytickinterval = 0.01, yminor = 0,$
-                  xrange = setxrange, yrange = [0.98, 1.01]) ;
+                   position = [0.2, 0.22, 0.9, 0.35], /current, _extra = extra, ytickinterval = 0.01, yminor = 0,$
+                  xrange = setxrange, yrange = [0.98, 1.01]) ;position = [0.2, 0.08, 0.9, 0.21]
         
  
      endif                      ; if a = startaor

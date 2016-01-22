@@ -74,6 +74,8 @@ if planetname eq 'Kepler-17' then exosystem = 'Kepler-17 b'
 if planetname eq 'upsandb' then exosystem = 'upsilon And b'
 if planetname eq 'XO3' then exosystem = 'XO-3 b' 
 if planetname eq 'simul_XO3' then exosystem = 'XO-3 b' 
+if planetname eq 'tres2' then exosystem = 'TrES-2 b'
+if planetname eq 'WASP-63b' then exosystem = 'WASP-63 b'
 
 ;print, exosystem, 'exosystem'
 if planetname eq 'WASP-52b' then teq_p = 1315
@@ -248,7 +250,7 @@ for a =startaor,  stopaor do begin
          sclkarr = sclk_obs
          bmjdarr = bmjd_obs
       endelse
-         print, 'sclk split up', sclkarr(0), ' ' ,sclkarr(1), ' ' ,sclkarr(60),  format = '(A, D0, A, D0, A, D0)'
+        ;; print, 'sclk split up', sclkarr(0), ' ' ,sclkarr(1), ' ' ,sclkarr(60),  format = '(A, D0, A, D0, A, D0)'
 
       ;read in the files
       fits_read, fitsname(i), im, h

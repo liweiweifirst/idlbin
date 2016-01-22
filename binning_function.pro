@@ -7,7 +7,7 @@ function binning_function, a,bin_level, pmapcorr, ch,  set_nbins = set_nbins, n_
 
   timearr = [planethash[aorname(a),'timearr']]
   help, timearr
-  print, timearr[50:100], format = '(D0)'
+;;  print, timearr[50:100], format = '(D0)'
   fluxarr = [planethash[aorname(a),'flux']]
   fluxerrarr = [planethash[aorname(a),'fluxerr']]
   corrfluxarr=[planethash[aorname(a),'corrflux']]

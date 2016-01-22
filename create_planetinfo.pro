@@ -1019,6 +1019,43 @@ chname = 0
 
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'WASP-63b'
+  ra_ref = 94.33750000
+  dec_ref = -38.32333333
+  aorname_ch2 = [ 'r51822080','r51834112']  ;ch2
+  aorname_ch1 = [ 'r51820800','r51835904'] ;ch1
+  basedir = '/Users/jkrick/external/irac_warm/' 
+  utmjd_center =   55921.1527D
+  transit_duration=100 ; junk
+  period =4.37809
+  intended_phase = 0.5
+  exptime = 0.4
+  stareaor = 0
+  plot_norm =1.0
+  plot_corrnorm = 1.0
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'tres2'
+  ra_ref = 286.80833333
+  dec_ref = 49.31638889
+  aorname_ch2 = [ 'r46866688','r46857472']  ;ch2
+  aorname_ch1 = [ 'r46859264','r46857728'] ;ch1
+  basedir = '/Users/jkrick/external/irac_warm/' 
+  utmjd_center = 53957.1355D
+  transit_duration=100 ; junk
+  period =2.4706133738
+  intended_phase = 1.0
+  exptime = 2.0
+  stareaor = 0
+  plot_norm =1.0
+  plot_corrnorm = 1.0
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
 
 ;---
   planetname = 'NoisePixTest2'

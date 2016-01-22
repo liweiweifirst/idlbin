@@ -88,8 +88,8 @@ print, 'using UTMJD', utmjd_center
   
   dirname = strcompress(basedir + planetname +'/')                                                            ;+'/hybrid_pmap_nn/')
 ;  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all) ;
-  if chname eq '2' then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150723.sav',/remove_all) ;'_150226_bcdnosdcorr.sav'
-  if chname eq '1' then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_140716.sav',/remove_all) ;140716
+  if chname eq '2' then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150723_newtime.sav',/remove_all) ;'_150226_bcdnosdcorr.sav'
+  if chname eq '1' then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150722_newtime.sav',/remove_all) ;140716
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)
@@ -322,7 +322,7 @@ print, 'using UTMJD', utmjd_center
       DN = DNpers *exptime
       e = DN * gain
         if a eq 0 then begin
-           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., e,'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'Electrons', xtitle = 'Time(hrs)') ;,title = planetname
+           ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., e,'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'Electrons', xtitle = 'Time(hrs)', yrange = [7000, 8E4]) ;,title = planetname
         endif else begin
            ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., e,'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a],/overplot)
         endelse
@@ -504,13 +504,13 @@ print, 'using UTMJD', utmjd_center
      if keyword_set(phaseplot) then begin ;make the plot as a function of phase
         ;print, ' phase', bin_phase
         print, 'corrflux',  (bin_corrfluxp/plot_corrnorm)
-        setxrange =  [-0.22, -0.17] 
+        setxrange =  [0.4, 0.6] 
         corrnormoffset =  0; 0.02
         corroffset = 1.0
         if planetname eq 'WASP14-b' then corroffset =  1.000;0.0015
         if planetname eq 'HD209458' then corroffset = 0.001
        
-        setynormfluxrange = [0.96, 1.02];[0.97, 1.005]
+        setynormfluxrange = [0.98, 1.04];[0.97, 1.005]
 
  ;       cphase = where(bin_phase lt 0)
  ;       bin_phase(cphase) = bin_phase(cphase) + 1.0
@@ -548,15 +548,15 @@ print, 'using UTMJD', utmjd_center
 
               if pmapcorr eq 1 then begin
                  print, 'inside pmapcorr eq 1', median( (bin_corrfluxp/plot_corrnorm) ), median(bin_flux)
-;              if keyword_set(errorbars) then begin
-;                 pr = errorplot(bin_phasep, (bin_corrfluxp/plot_corrnorm) -corrnormoffset,  $
-;                        bin_corrfluxerrp/plot_corrnorm ,/overplot, '1s', sym_size = 0.2, $
-;                        sym_filled = 1, color = colorarr[a])
-;              endif else begin
-;                 print, 'plotting corrfluxp',  (bin_corrfluxp(1)/plot_corrnorm) -corrnormoffset
-;                 pr = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm) -corrnormoffset ,overplot = pr, '1s', $
-;                           sym_size = 0.2,   sym_filled = 1, color = colorarr[a]);
-;              endelse           ;/errorbars
+              if keyword_set(errorbars) then begin
+                 pr = errorplot(bin_phasep, (bin_corrfluxp/plot_corrnorm) -corrnormoffset,  $
+                        bin_corrfluxerrp/plot_corrnorm ,/overplot, '1s', sym_size = 0.2, $
+                        sym_filled = 1, color = colorarr[a])
+              endif else begin
+                 print, 'plotting corrfluxp',  (bin_corrfluxp(1)/plot_corrnorm) -corrnormoffset
+                 pr = plot(bin_phasep, (bin_corrfluxp/plot_corrnorm) -corrnormoffset ,overplot = pr, '1s', $
+                           sym_size = 0.2,   sym_filled = 1, color = colorarr[a]);
+              endelse           ;/errorbars
                  
               endif             ;enough pmap corrections
               
