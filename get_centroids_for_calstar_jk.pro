@@ -469,7 +469,7 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ; 1st set of apertures
 ;;			aper, eim, x5[i], y5[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
 ;;                aper, eim, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
-                aper, eim, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps1, back1, $
+                aper, eim, x3[i], y3[i], xf, xfs, xb, xbs, 1.0, aps1, back6, $
                       badpix, /FLUX, /EXACT, /NAN, /SILENT, /MEANBACK,$
                       READNOISE=readnoise[nch-1, findex];, SETSKYVAL = ebslice
                 f[i, 0:(naps1-1)] = xf / sbtoe
