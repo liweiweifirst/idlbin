@@ -19,7 +19,8 @@ case apradius of
    2.25: begin
       apval = 1
       if chname eq '2' then begin
-         pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_150723.sav'
+         pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_15_0p1s_x4_160126.sav'
+         ;;pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_150723.sav'
          
          ;restore, '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_indices_150309.sav'
       endif
@@ -543,7 +544,7 @@ if keyword_set(breatheap) then begin
    savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_varap.sav')
 endif else begin
    pmapname = strmid(pmapfile, 9, 6,/reverse_offset)
-   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_' + pmapname + '_newtime.sav',/remove_all)
+   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_' + pmapname + '.sav',/remove_all)
 endelse
 
 save, planethash, filename=savename
