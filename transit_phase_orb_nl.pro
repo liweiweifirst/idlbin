@@ -330,7 +330,9 @@ end
 
 
 
-function transit_phase_orb_nl,t,x, x_ph, phase_func, nonlin_c
+function transit_phase_orb_nl,t,x, x_ph, phase_func;, nonlin_c
+
+  COMMON data, bjd_tot, flux_tot, nbr_ind, gw, err_tot, time_tot, nonlin_c
 
 ;new routine based on Eric Agol's transit_orb_quicker routine
 ;Modified by NKL on 12/1/10 for use with HAT-P-2b CH 1&2
@@ -374,7 +376,7 @@ nm0=where(m eq 0.d0)
 if(total(nm0) ge 0) then f(nm0)=0.d0
 
 ;phase correction due to light travel time
-df=2.d0*!dpi*(x(9)/86400.d0/x(0))*(sin(ekep)+1.0)/2.d0
+;;df=2.d0*!dpi*(x(9)/86400.d0/x(0))*(sin(ekep)+1.0)/2.d0
 ;f=f-df
 
 radius=x(2)*(1d0-x(3)^2)/(1d0+x(3)*cos(f))
@@ -416,7 +418,8 @@ trans2=flux_sec_new-1.d0
 ph_sec=phase
 ph_sec(ind_sec1)=(trans2(ind_sec1)+x(7))*((phase(ind_sec1)-ph0_sec1)/x(7)+1.d0)-(x(7)-ph0_sec1)
 ph_sec(ind_sec2)=(trans2(ind_sec2)+x(8))*((phase(ind_sec2)-ph0_sec2)/x(8)+1.d0)-(x(8)-ph0_sec2)
-offset=min([ph_sec(ind_sec1), ph_sec(ind_sec2)])
+;offset=min([ph_sec(ind_sec1), ph_sec(ind_sec2)])
+offset=min(ph_sec(ind_sec2))
 
 ph_sec=ph_sec-offset
 ind=where(ph_sec lt 0.d0, count)
@@ -424,6 +427,19 @@ if (count gt 0.0) then ph_sec(ind)=0.d0
 
 flux=ph_sec+flux_trans
 ;flux=(ph_sec+1.d0)*flux_trans
+
+ph_min=min(phase-offset, mind)
+if (ph_min) lt 0.d0 then ph_min=0.d0
+tph_min=bjd_tot(mind)
+
+ph_max=max(phase-offset, mxind)
+tph_max=bjd_tot(mxind)
+
+;;orb_params=[tp, phi_sec, t_sec1, t_sec2, t14_trans, t12_trans, t34_trans, t14_sec1, t12_sec1, t34_sec1, t14_sec2, t12_sec2, t34_sec2]
+ph_params=[ph_min, tph_min, ph_max, tph_max]
+print,'ph_params', ph_params
+print, 'amplitude',( ph_params(2) - ph_params(0))/2.
+print, 'phase shift', (x(5) - ph_params(1))*(1./x(0))*360.
 
 return,flux
 
