@@ -324,7 +324,8 @@ if (phase_func eq 'cowan2') then phase=cowan(f+xt(4)+!dpi, x_ph(0:4))
 ind_trans=where(abs(bjd_tot-xt(5)) lt 0.25 and flux_trans lt 1.d0, c0)
 ind_sec1=where(abs(bjd_tot-t_sec1) lt 0.25 and flux_sec lt 1.d0, c1)
 ind_sec2=where(abs(bjd_tot-t_sec2) lt 0.25 and flux_sec lt 1.d0, c2)
-
+;;ind_sec2=where(abs(bjd_tot-t_sec2) lt 0.25 , c2)
+;;print, 'testing c', c0, c1, c2
 flux_trans([ind_sec1,ind_sec2])=1.d0
 flux_sec(ind_trans)=1.d0
 
@@ -398,7 +399,6 @@ end
 
 function calc_trans_sec_phase, p, phase_func=phase_func
 COMMON data, bjd_tot, flux_tot, nbr_ind, gw, err_tot, time_tot, nonlin_c
-
 porb=p(0)
 ecc=sqrt(p(3)^2+p(4)^2)
 om=atan(p(4),p(3))
@@ -427,6 +427,17 @@ wf1=flux1/w1
 res=(wf1-1.d0)/err_tot
 
 
+;;testing different code
+;;xph=p(9:12)
+
+;;trans=transit_phase_orb_nl(bjd_tot, xt, xph, phase_func);, nonlin_c)
+
+;;flux_mod=trans;*p(13)
+
+;;wf1=flux_tot/flux_mod
+;;res=(wf1-1.d0)/err_tot
+
+
 return, res
 
 end
@@ -449,7 +460,7 @@ xt=[porb, inc, a_Rs, ecc, omega, p(5:8)]
 xph=p(9:13)
 xr=p(14:15)
 
-;trans=transit_phase_orb_nl(bjd_tot, xt, xph, phase_func, nonlin_c)
+;;trans=transit_phase_orb_nl(bjd_tot, xt, xph, phase_func);, nonlin_c)
 transit_phase_orb, xt, xph, phase_func, trans, orb_params, ph_params
 
 plot, bjd_tot-p(5), flux_tot-1.d0, psym=3
@@ -462,21 +473,24 @@ w1 = 1.0
 ;plot, bjd_tot-xt(5), trans-1.0
 
 save, p, perror, bestnorm, xt, xph, xr, bjd_tot, time_tot, w1, flux_tot, trans, orb_params, ph_params, phase_func, filename=sfile
+;ph_params=[ph_min, tph_min, ph_max, tph_max]
+
 print,'ph_params', ph_params
 print, 'amplitude',( ph_params(2) - ph_params(0))/2.
-print, 'phase shift', ((ph_params(3) - p(5)) / p(0) ) / p(0)*365.
+print, 'phase shift', (p(5) - ph_params(1))*(1./p(0))*360.
 end
 
 
-pro driver_trans_sec_phase_ramp_jk_nkl, channel, phase_func, ramp_flag, cowan_opt, sfile
+pro driver_trans_sec_phase_ramp_jk_nkl, channel, phase_func, ramp_flag, cowan_opt, sfile, filename
 
 COMMON data, bjd_tot, flux_tot, nbr_ind, gw, err_tot, time_tot, nonlin_c
+;;restore,'/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/fitting_input_phot_ch2_2.25000_150723.sav'
+restore,filename; '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/fitting_input_phot_wong.sav'
 
-restore,'/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/fitting_input_phot_ch2_2.25000_150723.sav'
 ;;flux_tot=flux_tot+0.002d0
 ;nonlin_c=[0.0225, 0.3828, -0.2748, -0.0522] ;wasp-14b specific
 nonlin_c=[0.523357, -0.74367, 0.801920, -0.316680]
-Tc=56042.65d
+Tc=56042.687d0;56042.65d0
 p0_test=[2.24376507d0, 84.63d0*!dtor, 5.98d0, -.0247236, -0.0792322, Tc,  0.09421d0, 0.002115d0, 0.002367d0] ; for inc *!dtor
 
 
@@ -487,11 +501,11 @@ p0_phase=[[0.00265d0, 1.0d0, 0.5d0, 0.5d0, 0.0001d0],$ ;flat
           [0.001184d0, 0.4114d0, 0.88d0, 0.2500d0, 6.962d-05],$ ;lorentz_sym
           [0.001178d0, 0.1654d0, 0.438d0, 1.13d0, 6.403d-05],$ ;lorentz_asym
           [0.0001988d0, 0.6602d0, 0.2500d0, 0.2500d0, 0.0001087d0],$  ;dist_sq
-          [0.0003122d0, 0.0002354d0, 1.352d-06, 9.158d-05, 0.0004129d0]]  ;cowan
+          [0.00076689572d0, 0.00011690945d0, 2.3513864d-05,2.4894987d-05, 0.00041290000d0]]  ;cowan
 
 ph_opt=['flat','cosf','lorentz_sym', 'lorentz_asym', 'dist_sq','cowan']
 pind=where(ph_opt eq phase_func)
-p0_cowan=[0.d0, 0.d0, 0.d0, 0.d0]
+p0_cowan=[0.00076689572d0, 0.00011690945d0, 2.3513864d-05,2.4894987d-05];, 0.00041290000d0]; [0.d0, 0.d0, 0.d0, 0.d0]
 
 ;values for orbital fit
 ;p(0) -> orbital period (days)
@@ -515,7 +529,7 @@ pa(1).limits(*)=[70.d0, 90.d0]*!dtor
 pa(2).limits(*)=[5.0d0, 7.0d0]
 pa(3).limits(*)=[-0.1d0,0.1d0]
 pa(4).limits(*)=[-0.1d0, 0.0d0]
-pa(5).limits(*)=Tc+[-1.d0,1.d0]* 0.1d0
+pa(5).limits(*)=Tc+[-1.d0,1.d0]* 0.05d0
 pa(6).limits(*)=[0.01d0,0.15d0] 
 pa([7,8]).limits(*)=[0.001d0,0.007d0]
 pa(9).limits(*)=[0.d0,0.011d0]
@@ -538,7 +552,7 @@ if (phase_func eq 'flat') then pa(9:12).fixed=1
 if (phase_func eq 'dist_sq') then pa(11:12).fixed=1
 
 
-pa([0,1,2,3,4,5]).fixed=1 ;, 1, 2, 3, 4
+pa([0,1,2,3,4,5, 6,7,8]).fixed=1 ;, 1, 2, 3, 4 ,9,10,11,12,13 ,9,10,11,12,13
 ;pa(4).fixed=1
 ;pa(7:8).fixed=1
 ;pa(1).mpmaxstep=0.0001d0
@@ -565,8 +579,8 @@ endif
 
 
 fa={phase_func:phase_func}
-
-p = mpfit('calc_trans_sec_phase', parinfo=pa, functargs=fa, perror=perror, status=status,  DOF=adof,bestnorm=bestnorm, ERRMSG=ERRMSG, /fastnorm)
+message, /reset
+p = mpfit('calc_trans_sec_phase', parinfo=pa, functargs=fa, perror=perror, status=status,  DOF=adof,bestnorm=bestnorm, ERRMSG=ERRMSG, /fastnorm,/nocatch)
 print, 'perror', perror
 print, 'status', status
 print, errmsg
@@ -580,11 +594,8 @@ om=atan(p(4),p(3))
 omega=om
 a_Rs=p(2)
 inc=p(1)
-
 print, [transpose(p), transpose(perror)]
-
 final_answer, p, perror, bestnorm, phase_func, sfile
-
 
 ;save, p, perror, xt, bestnorm, filename=sfile
 
