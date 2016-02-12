@@ -1,4 +1,4 @@
-pro run_driver_trans_sec_phase_ramp_test,error_bars = error_bars, wong = wong, pmap = pmap
+pro run_driver_trans_sec_phase_ramp_test,error_bars = error_bars, wong = wong, pmap = pmap, snapshots=snapshots
   
   COMMON data, bjd_tot, flux_tot, nbr_ind, gw, err_tot, time_tot, nonlin_c
 
@@ -30,6 +30,11 @@ pro run_driver_trans_sec_phase_ramp_test,error_bars = error_bars, wong = wong, p
      fluxerr_all = [err[0:n_elements(planethash[aorname(0),'bmjdarr'])],err_pmap]
 ;     print, 'n', n_elements(bjd_all), n_elements(flux_all), n_elements(fluxerr_all)
 
+     ;;testing without wong
+     bjd_all = bmjd_pmap
+     flux_all = flux_pmap
+     fluxerr_all = err_pmap
+     
      ;;remove bad data
      good = where(finite(bjd_all) gt 0 and finite(flux_all) gt 0 and finite(fluxerr_all) gt 0)
      bjd_all = bjd_all(good)
@@ -194,7 +199,7 @@ pro run_driver_trans_sec_phase_ramp_test,error_bars = error_bars, wong = wong, p
      for r = 0, nruns - 1 do begin
         rand = (2* randomu(seed, 16)) - 1 ; these will be the number of sigma for each of 16 parameters
         randomp = finalp + rand*finalperror
-        driver_trans_sec_phase_ramp_fixed, 2, 'cowan', 0, 0, outfile, randomp, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/fitting_input_phot_wong.sav'
+        driver_trans_sec_phase_ramp_fixed, 2, 'cowan', 0, 0, outfile, randomp, infile
         restore, outfile
         amparr(r) = ( ph_params(2) - ph_params(0))/2.
         shiftarr(r) = (p(5) - ph_params(1))*(1./p(0))*360.
@@ -207,7 +212,7 @@ pro run_driver_trans_sec_phase_ramp_test,error_bars = error_bars, wong = wong, p
      plothist, amparr, xhist, yhist, /noplot, bin = 1E-6
      ph1 = plot(xhist, yhist, xtitle = 'Amplitude pf phase curve', ytitle = 'number')
      ;;fit with a gaussian?
-     start = [7.75E-4,1E-4, 100.]
+     start = [7.85E-4,1E-5, 1000.]
      noise = fltarr(n_elements(yhist))
      noise[*] = 1                                              ;equally weight the values
      result= MPFITFUN('mygauss',xhist,yhist, noise, start) ;/quiet   ; fit a gaussian to the histogram 
@@ -217,7 +222,7 @@ pro run_driver_trans_sec_phase_ramp_test,error_bars = error_bars, wong = wong, p
      plothist, shiftarr, xhist, yhist, /noplot, bin = 2E-1
      ph2 = plot(xhist, yhist, xtitle = 'Phase Curve Shift(degrees)', ytitle = 'number')
           ;;fit with a gaussian?
-     start = [13.,5., 100.]
+     start = [16.,1.0, 500.]
      noise = fltarr(n_elements(yhist))
      noise[*] = 1                                              ;equally weight the values
      result= MPFITFUN('mygauss',xhist,yhist, noise, start) ;/quiet   ; fit a gaussian to the histogram 
