@@ -9,8 +9,8 @@ pro sample_stare_wasp14_nkl, n_samples, exodata = exodata
 ;;distributions of the resulting best-fit parameters
 
   ;;setup some known quantities for wasp14
-  ;;porbit = 2.24376543D          ;days
-  ;;mjd_transit = 2456034.21290D - 2400000.5D
+  period = 2.24376543D          ;days
+  utmjd_center = 56042.687d0; 2456034.21290D - 2400000.5D
   ;;ecc = 0.0828D
   ;;argperi = 252.11D             ;degrees
   ;;ar_semimaj = 5.99D
@@ -18,14 +18,20 @@ pro sample_stare_wasp14_nkl, n_samples, exodata = exodata
   verbose = 0
 
   ;;read in the staring mode photometry with pmap reduction
-  starefile = '/Users/jkrick/irac_warm/pcrs_planets/wasp-14b/wasp14_stare_150226.txt'
-  readcol, starefile, starebmjd, starephase, corrflux, corrfluxerr, format = 'D, F, F, F',/nan
+;;  starefile = '/Users/jkrick/irac_warm/pcrs_planets/wasp-14b/wasp14_stare_150226.txt'
+;;  readcol, starefile, starebmjd, starephase, corrflux, corrfluxerr, format = 'D, F, F, F',/nan`
+;;     normfactor = 0.05775
 
   ;;or try reading in the wong et al reduction
-;;  readcol, '/Users/jkrick/irac_warm/pcrs_planets/wasp-14b/wong/ch2_data.dat', bjd, flux, format = '(D0, D0)'
-;;  corrfluxerr = fltarr(n_elements(bjd)) + 0.00388070540434
-;;  starebmjd =  bjd + 56000. - 0.5
-;;  corrflux = flux / normfactor      ; re-normalize
+  readcol, '/Users/jkrick/irac_warm/pcrs_planets/wasp-14b/wong/ch2_data.dat', bjd, flux, format = '(D0, D0)'
+  normfactor = 0.9985
+  corrfluxerr = fltarr(n_elements(bjd)) + 0.00388070540434
+  starebmjd =  bjd + 56000. - 0.5
+  corrflux = flux ;/ normfactor      ; re-normalize
+
+  ;;and convert to phase
+  bmjd_dist = starebmjd - utmjd_center ; how many UTC away from the transit center
+  starephase =( bmjd_dist / period )- fix(bmjd_dist/period)
 
   ;;setup arrays for free parameters
   amparr = fltarr(n_samples)
@@ -40,8 +46,10 @@ pro sample_stare_wasp14_nkl, n_samples, exodata = exodata
   ;;run this sampling n_samples times
   for ji = 0, n_samples - 1 do begin
      ;phasecenter = (edge*2)*(randomu(seed, 43)) - edge  ;;these will be different every time this is called
-     phasecenter = (1.0)*(randomu(seed, 43)) - 0.5;.82 .37  ;;these will be different every time this is called
-
+     phasecenter = (1.15)*(randomu(seed, 43)) - 0.55;.82 .37  ;;these will be different every time this is called
+     plothist, phasecenter, xhist, yhist, /noplot, bin = 0.1
+     phtest = plot(xhist, yhist, xtitle = 'random phase choices', overplot = phtest)
+     
      print, 'phasecenter', phasecenter
      ;;want to grab 30 min around these phasecenters from the actual data
      for i = 0, n_elements(phasecenter) - 1 do begin
@@ -54,7 +62,8 @@ pro sample_stare_wasp14_nkl, n_samples, exodata = exodata
        
         
         ;;remove NaNs
-        good = where(finite(unbincorrflux) gt 0, ngood)
+        good = where(finite(unbincorrflux) gt 0, ngood, COMPLEMENT=nbad)
+        ;;print, 'number of nan', nbad
         unbincorrflux = unbincorrflux(good)
         unbinbmjd = unbinbmjd(good)
         unbincorrfluxerr = unbincorrfluxerr(good)
@@ -62,16 +71,21 @@ pro sample_stare_wasp14_nkl, n_samples, exodata = exodata
 
         ;;binning
         bin_level = 63L
+        n_bins = 15L
         numberarr = findgen(n_elements(unbinbmjd))
-        h = histogram(numberarr, OMIN=om, binsize = bin_level, reverse_indices = ri)
+;;        h = histogram(numberarr, OMIN=om, binsize = bin_level, reverse_indices = ri)
+        h = histogram(numberarr, OMIN=om, nbins = n_bins, reverse_indices = ri)
+;;        print, 'n_elements', n_elements(h), n_elements(numberarr), n_elements(numberarr) / 3.
         bin_flux = dblarr(n_elements(h))
         bin_fluxerr = bin_flux
         bin_bmjd = bin_flux
         c = 0
-        for j = 0L, n_elements(h) - 1 do begin
+        for j = 0L, n_elements(h) - 2 do begin
            
            ;;get rid of the bins with no values and low numbers, meaning
            ;;low overlap
+;;           print, 'ri[j+1]',ri[j+1]
+;;           print, 'ri[j]',ri[j]
            if (ri[j+1] gt ri[j] + 2)  then begin ;require 3 elements in the bin
               meanclip, unbincorrflux[ri[ri[j]:ri[j+1]-1]], meanflux, sigmaflux
               bin_flux[c] = meanflux ; mean(fluxarr[ri[ri[j]:ri[j+1]-1]])
@@ -91,7 +105,7 @@ pro sample_stare_wasp14_nkl, n_samples, exodata = exodata
         bin_fluxerr = bin_fluxerr[0:c-1]
         bin_bmjd = bin_bmjd[0:c-1]
 
-
+        print, 'bin_bmjd', bin_bmjd
         
         if i eq 0 then begin
            simulcorrflux = bin_flux
@@ -122,7 +136,6 @@ pro sample_stare_wasp14_nkl, n_samples, exodata = exodata
  
      ;;need to normalize
      ;;hardcode since it is not agiven that I will get samples during secondary
-     normfactor = 0.05775
      flux_tot = flux_tot / normfactor
      err_tot = err_tot / normfactor
      
@@ -146,8 +159,9 @@ pro sample_stare_wasp14_nkl, n_samples, exodata = exodata
      shiftarr(ji) = (p(5) - ph_params(1))*(1./p(0))*360.
 
      ;;overplot the results
-    ;; pfit = plot(bjd_tot, trans,  overplot = p1, color = 'cyan', thick = 2)
+     pfit = plot(bjd_tot, trans,  overplot = p1, color = colorarr[ji], thick = 2)
 
+     ;;wait, 5s
   endfor
   ;;overplot the fit from the wong et al. dataset
   ;;outfile = '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/fitting_output.sav'
