@@ -46,7 +46,7 @@ pro sample_stare_wasp14_nkl, n_samples, exodata = exodata
   ;;run this sampling n_samples times
   for ji = 0, n_samples - 1 do begin
      ;phasecenter = (edge*2)*(randomu(seed, 43)) - edge  ;;these will be different every time this is called
-     phasecenter = (1.15)*(randomu(seed, 43)) - 0.55;.82 .37  ;;these will be different every time this is called
+     phasecenter = (1.15)*(randomu(seed, 43)) - 0.57;.82 .37  ;;these will be different every time this is called
      plothist, phasecenter, xhist, yhist, /noplot, bin = 0.1
      phtest = plot(xhist, yhist, xtitle = 'random phase choices', overplot = phtest)
      
@@ -58,7 +58,8 @@ pro sample_stare_wasp14_nkl, n_samples, exodata = exodata
         unbincorrfluxerr = corrfluxerr[a]
         unbinphase = starephase[a]
         unbinbmjd = starebmjd[a]
-
+        print, 'unbinphase', unbinphase
+        print, 'unbinbmjd', unbinbmjd
        
         
         ;;remove NaNs
