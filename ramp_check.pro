@@ -13,7 +13,8 @@ pro ramp_check
   period =  planetinfo[planetname, 'period']
   
   dirname = strcompress(basedir + planetname +'/')                                     
-  savefilename = strcompress(dirname + planetname +'_phot_ch2_2.25000_150226_bcdsdcorr.sav',/remove_all) ;
+  ;;savefilename = strcompress(dirname + planetname +'_phot_ch2_2.25000_150226_bcdsdcorr.sav',/remove_all) ;
+  savefilename = strcompress(dirname + planetname +'_phot_ch2_2.25000_160126.sav',/remove_all) ;
   restore, savefilename
   stareaor = 5
   startaor =  stareaor               
