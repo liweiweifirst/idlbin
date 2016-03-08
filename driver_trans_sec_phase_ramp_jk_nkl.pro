@@ -283,6 +283,7 @@ pro transit_phase_orb, xt, x_ph, phase_func, trans, orb_params, ph_params
 
 COMMON data, bjd_tot, flux_tot, nbr_ind, gw, err_tot, time_tot, nonlin_c
 
+;;ON_ERROR, 2
 
 e1=xt(3)
 ;transit information
@@ -321,9 +322,12 @@ if (strmid(phase_func,0,4) eq 'dist') then phase=call_function(phase_func, f, x_
 if (phase_func eq 'cowan') then phase=cowan(f, x_ph(0:4))
 if (phase_func eq 'cowan2') then phase=cowan(f+xt(4)+!dpi, x_ph(0:4))
 
+print, 'tsec1, tsec2, xt(5)', t_sec1, t_sec2, xt(5)
+
 ind_trans=where(abs(bjd_tot-xt(5)) lt 0.25 and flux_trans lt 1.d0, c0)
 ind_sec1=where(abs(bjd_tot-t_sec1) lt 0.25 and flux_sec lt 1.d0, c1)
 ind_sec2=where(abs(bjd_tot-t_sec2) lt 0.25 and flux_sec lt 1.d0, c2)
+;;ind_sec2=where( flux_sec lt 1.d0, c2)
 ;;ind_sec2=where(abs(bjd_tot-t_sec2) lt 0.25 , c2)
 ;;print, 'testing c', c0, c1, c2
 flux_trans([ind_sec1,ind_sec2])=1.d0
@@ -361,7 +365,10 @@ ph4_sec1=phase(ind_sec1(c1-1.0)+1.0)
 ph0_sec1=(ph1_sec1+ph4_sec1)/2.d0
 
 ph1_sec2=phase(ind_sec2(0)-1.0)
-ph4_sec2=phase(ind_sec2(c2-1.0)+1.0)
+print, 'phase', n_elements(phase), ind_sec2(c2-1.0)+1.0
+subvar = ind_sec2(c2-1.0)+1.0
+if ind_sec2(c2-1.0)+1.0 ge n_elements(phase) then subvar = n_elements(phase) - 1
+ph4_sec2=phase(subvar)
 ph0_sec2=(ph1_sec2+ph4_sec2)/2.d0
 
 trans2=flux_sec_new-1.d0
@@ -390,7 +397,7 @@ ph_params=[ph_min, tph_min, ph_max, tph_max]
 ;;jk added
 ;;test plot
 ;help, bjd_tot
-;help, phase
+;help, phase8
 ;print, 'phase', phase[0:10], min(phase), max(phase)
 ;print, 'ending transit phase orb'
 ;print, 'shouldnt see this'
@@ -552,7 +559,7 @@ if (phase_func eq 'flat') then pa(9:12).fixed=1
 if (phase_func eq 'dist_sq') then pa(11:12).fixed=1
 
 
-pa([0,1,2,3,4,5, 6,7,8]).fixed=1 ;, 1, 2, 3, 4 ,9,10,11,12,13 ,9,10,11,12,13
+pa([0, 1,2,3,4,5, 6,7, 8, 14, 15]).fixed=1 ;, 1, 2, 3, 4 ,9,10,11,12,13 ,9,10,11,12,13
 ;pa(4).fixed=1
 ;pa(7:8).fixed=1
 ;pa(1).mpmaxstep=0.0001d0

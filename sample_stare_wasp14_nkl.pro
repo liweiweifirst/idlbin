@@ -32,21 +32,19 @@ pro sample_stare_wasp14_nkl, n_samples, exodata = exodata
   ;;and convert to phase
   bmjd_dist = starebmjd - utmjd_center ; how many UTC away from the transit center
   starephase =( bmjd_dist / period )- fix(bmjd_dist/period)
-
+  print, 'min/max phase', min(starephase) + .005, max(starephase) - .005
+  print, 'min/max bmjd', min(starebmjd), max(starebmjd)
   ;;setup arrays for free parameters
   amparr = fltarr(n_samples)
   shiftarr = amparr
 
   ;;pick 43 random start phases from -0.5 to 0.5
- ;;actually don't want to be too close to the edge, 30 min AOR,
- ;;so want random phases to run from -0.495 to 0.495
-  edge = 0.45; 0.495
   fifteen = 0.005
 
   ;;run this sampling n_samples times
   for ji = 0, n_samples - 1 do begin
-     ;phasecenter = (edge*2)*(randomu(seed, 43)) - edge  ;;these will be different every time this is called
-     phasecenter = (1.15)*(randomu(seed, 43)) - 0.57;.82 .37  ;;these will be different every time this is called
+     phasecenter = (1.1)*(randomu(seed, 40)) - 0.55 ;1.1 ..55  ;;these will be different every time this is called
+     phasecenter = [phasecenter, 0.5, -0.5, 0.0]  ; force transit and eclipse
      plothist, phasecenter, xhist, yhist, /noplot, bin = 0.1
      phtest = plot(xhist, yhist, xtitle = 'random phase choices', overplot = phtest)
      
@@ -58,8 +56,8 @@ pro sample_stare_wasp14_nkl, n_samples, exodata = exodata
         unbincorrfluxerr = corrfluxerr[a]
         unbinphase = starephase[a]
         unbinbmjd = starebmjd[a]
-        print, 'unbinphase', unbinphase
-        print, 'unbinbmjd', unbinbmjd
+;        print, 'unbinphase', unbinphase
+;        print, 'unbinbmjd', unbinbmjd
        
         
         ;;remove NaNs
@@ -106,7 +104,7 @@ pro sample_stare_wasp14_nkl, n_samples, exodata = exodata
         bin_fluxerr = bin_fluxerr[0:c-1]
         bin_bmjd = bin_bmjd[0:c-1]
 
-        print, 'bin_bmjd', bin_bmjd
+;;        print, 'i, bin_bmjd', i,  bin_bmjd
         
         if i eq 0 then begin
            simulcorrflux = bin_flux
@@ -141,8 +139,8 @@ pro sample_stare_wasp14_nkl, n_samples, exodata = exodata
      err_tot = err_tot / normfactor
      
      ;;test output by plotting
-     p1 = errorplot(bjd_tot, flux_tot, err_tot, '1s', sym_size =0.2, sym_filled= 1, xtitle = 'BMJD', $
-                    ytitle = 'corrflux', color = colorarr[ji], errorbar_color = colorarr[ji], overplot = p1)
+     ;;p1 = errorplot(bjd_tot, flux_tot, err_tot, '1s-', sym_size =0.2, sym_filled= 1, xtitle = 'BMJD', $
+     ;;               ytitle = 'corrflux', color = colorarr[ji], errorbar_color = colorarr[ji], overplot = p1)
      
      infile = '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/continuous_subsampled.sav'
      outfile ='/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/fitting_output_continuous_subsampled.sav'
@@ -160,7 +158,7 @@ pro sample_stare_wasp14_nkl, n_samples, exodata = exodata
      shiftarr(ji) = (p(5) - ph_params(1))*(1./p(0))*360.
 
      ;;overplot the results
-     pfit = plot(bjd_tot, trans,  overplot = p1, color = colorarr[ji], thick = 2)
+     ;;pfit = plot(bjd_tot, trans,  overplot = p1, color = colorarr[ji], thick = 2)
 
      ;;wait, 5s
   endfor

@@ -16,7 +16,12 @@ pro run_driver_trans_sec_phase_ramp, planetname, chname, apradius, pmapname, bin
   ;;first stare?:  'r45426688',
 
   aorname= ['r45840128','r45839616','r45839104','r45838592','r45847040','r45846784','r45846528','r45846272','r45846016','r45843200','r45842944','r45842688','r45842432','r45842176','r45841920','r45841664','r45841408','r45845504','r45840896','r45845760','r45845504','r45845248','r45844992','r45844736','r45844480','r45844224','r45843968','r45843712','r45843456','r45840640','r45840384','r45839872','r45839360','r45838848','r45838336','r48688384','r48688128','r48687872','r48687616','r48683776','r48683264','r48682752','r48682240','r48681472','r48681216','r48680704']
-  
+
+  colorarr = ['burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia'] ;'gray', 'gray','gray','gray','gray',
+
+  T0 = 56042.687D0
+  period = 2.2437651D0
+
   for a = 0, n_elements(aorname) - 1 do begin
      ;;check if I should be using pmap corr or not
      ncorr = where(finite([ planethash[aorname(a),'corrflux']]) gt 0, corrcount,/L64)
@@ -39,11 +44,12 @@ pro run_driver_trans_sec_phase_ramp, planetname, chname, apradius, pmapname, bin
         
      endif else begin
         ;;do some binning at least for the tests
-        junkpar = binning_function(a, bin_level, pmapcorr,chname)
+        ;;junkpar = binning_function(a, bin_level, pmapcorr,chname)
+        junkpar = binning_function(a, bin_level, pmapcorr,chname,/set_nbins, n_nbins = 15L)
         ;;print, 'bin_bmjdarr', bin_bmjdarr[0:10]
         ;;if a eq 0 then bin_corrflux_dp = bin_corrflux_dp + 0.0001
         print, 'pmapcorr', pmapcorr
-        extraerr = 0.0001         ;  0.0001
+        extraerr = 0;0.0001         ;  0.0001
         if pmapcorr gt 0 then begin
            if a eq 0 then begin
               bjd_tot =bin_bmjdarrp
@@ -63,8 +69,14 @@ pro run_driver_trans_sec_phase_ramp, planetname, chname, apradius, pmapname, bin
            endelse
         endif  ;;pmapcorr gt 0
      endelse  ;;binning
-     
-     
+
+     bjd_plot = (bin_phasep*period) +T0 
+
+     p1 = errorplot(bjd_plot, bin_corrflux_dp/0.057606741, bin_corrfluxerrp/0.057606741, $
+                    xtitle = 'BJD', ytitle = 'Relative Flux',xrange = [5.60412E4, 5.60440E4],  $
+                    overplot = p1, color = colorarr[a], errorbar_color = colorarr[a],$
+                   yrange = [0.986, 1.007], xmajor = 4);
+
   endfor  ;for all AORs
 
   if keyword_set(unbin) then begin
@@ -85,8 +97,6 @@ pro run_driver_trans_sec_phase_ramp, planetname, chname, apradius, pmapname, bin
   err_tot = err_tot(sortco)
   bjd_tot = bjd_tot(sortco)
 
-  T0 = 56042.687D0
-  period = 2.2437651D0
   bjd_single = (phase_tot*period) +T0
   bjd_tot = bjd_single
 
@@ -112,9 +122,10 @@ pro run_driver_trans_sec_phase_ramp, planetname, chname, apradius, pmapname, bin
   err_tot = err_tot/plot_corrnorm
 
   ;;plot
-  p1 = errorplot(bjd_tot, flux_tot, err_tot, xtitle = 'BJD', ytitle = 'Relative Flux', $
-                 yrange = [0.99, 1.005]);, xrange = [-0.7, 0.7]) ;
-
+ ;; p1 = errorplot(bjd_tot, flux_tot, err_tot, $
+ ;;                xtitle = 'BJD', ytitle = 'Relative Flux', $
+ ;;                yrange = [0.99, 1.005])
+  
   ;setup for running fitting code
   infile = strcompress('/Users/jkrick/irac_warm/pcrs_planets/' + planetname + '/'+ 'fitting_input_phot_ch'+$
                        chname+'_'+string(apradius)+'_' + pmapname + '.sav',/remove_all)
@@ -140,6 +151,8 @@ pro run_driver_trans_sec_phase_ramp, planetname, chname, apradius, pmapname, bin
   restore, outfile
   finalp = p
   finalperror = perror
+
+
   pfit = plot(bjd_tot, trans,  overplot = p1, color = 'cyan', thick = 2)
 
   ;;now what about error bars on phase amplitude and phase shift
@@ -256,7 +269,7 @@ pro run_driver_trans_sec_phase_ramp, planetname, chname, apradius, pmapname, bin
   bjd = bjd + 56000 - 0.5
 
   readcol, '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/wong/ch2.dat', bjdmodel, fluxmodel, format = '(D0,D0)'
-  pmodel = plot(bjd, fluxmodel/normfactor, overplot = p1, color = 'blue', thick = 2)
+  pmodel = plot(bjd, fluxmodel/normfactor, overplot = p1, color = 'yellow', thick = 2)
      
 
   ;;overplot the fit from the wong et al. dataset

@@ -4,7 +4,8 @@ pro run_driver_trans_sec_phase_ramp_test,error_bars = error_bars, wong = wong, p
 
   dirname = '/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/'
   normfactor = 0.9985
-
+  colorarr = ['gray', 'gray','gray','gray','gray','burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']
+  
   if keyword_set(pmap) then begin
      ;;read in the unbinned data
      restore, dirname + 'WASP-14b_phot_ch2_2.25000_150723_newtime.sav'
