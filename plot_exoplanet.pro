@@ -83,12 +83,12 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
   endif
 
 
-print, 'using UTMJD', utmjd_center
+;print, 'using UTMJD', utmjd_center
 ;---------------
   
   dirname = strcompress(basedir + planetname +'/')                                                            ;+'/hybrid_pmap_nn/')
 ;  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all) ;
-  if chname eq '2' then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150723_newtime.sav',/remove_all) ;'_150226_bcdnosdcorr.sav'
+  if chname eq '2' then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_160126.sav',/remove_all) ;'_150226_bcdnosdcorr.sav'
   if chname eq '1' then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150722_newtime.sav',/remove_all) ;140716
   print, 'restoring ', savefilename
   restore, savefilename
@@ -226,7 +226,7 @@ print, 'using UTMJD', utmjd_center
            ay = plot( (planethash[aorname(a),'timearr'] - (planethash[aorname(0),'timearr'])(0))/60./60., $
                       (planethash[aorname(a),'corrflux'])/unormfactor,'1s', sym_size = 0.1,   sym_filled = 1, $
                       color = colorarr[a], ytitle = 'Flux', xtitle = 'Time(hrs)',title = planetname,$
-                      yrange = [0.98, 1.02], xrange = [0,190])
+                      yrange = [0.99, 1.005], xrange = [0,190])
            ;ay = plot( (planethash[aorname(a),'phase']), (planethash[aorname(a),'flux'])/plot_corrnorm - 0.001,'1s', sym_size = 0.2,   sym_filled = 1, color = colorarr[a], ytitle = 'Raw Flux', xtitle = 'Phase', yrange = [0.985, 1.015], xrange = [-0.5, 0.5]) ;,title = planetname, xtitle = 'Time(hrs)'
         endif else begin
            if pmapcorr gt 0 then begin
@@ -357,7 +357,7 @@ print, 'using UTMJD', utmjd_center
   se = where(phase0 gt 0.47 and phase0 lt 0.51)
   
   plot_corrnorm =  mean(corrflux0(se),/nan)
-
+  
   for a = startaor,stopaor do begin
      print, '------------------------------------------------------'
      print, 'working on AOR', a, '   ', aorname(a), startaor
@@ -381,7 +381,7 @@ print, 'using UTMJD', utmjd_center
      if keyword_set(set_nbins) then begin
         if a ge stareaor then begin
            ;;variable binning
-           junkpar = binning_function(a, bin_level, pmapcorr,chname, /set_nbins, n_nbins = 4)
+           junkpar = binning_function(a, bin_level, pmapcorr,chname, /set_nbins, n_nbins = 1)
         endif else begin
            
            junkpar = binning_function(a, bin_level, pmapcorr,chname, /set_nbins, n_nbins = 95)
@@ -484,8 +484,8 @@ print, 'using UTMJD', utmjd_center
         bin_sclk = dindgen(n_elements(bin_bmjdarr))*elapsed_secs / n_elements(bin_bmjdarr)
         bin_sclk = bin_sclk + sclk_0
 
-        print, 'testing sclk', bin_sclk[0:10], bin_sclk(n_elements(bin_sclk)-1)
-        print, 'showing bmjd', bin_bmjdarr[0:10], bin_bmjdarr(n_elements(bin_bmjdarr)-1)
+;        print, 'testing sclk', bin_sclk[0:10], bin_sclk(n_elements(bin_sclk)-1)
+;        print, 'showing bmjd', bin_bmjdarr[0:10], bin_bmjdarr(n_elements(bin_bmjdarr)-1)
 
         ;psn= plot(bin_sclk, bin_np, '1s', sym_size = 0.2,   sym_filled = 1,  color = colorarr[a], $
         ;            xtitle = 'Sclk_time', ytitle = 'Noise Pixel', title = planetname)
@@ -499,18 +499,18 @@ print, 'using UTMJD', utmjd_center
      ;make plot symbold based on the size of the AOR
 ;     if n_elements([planethash[aorname(a),'flux']])  lt 1000 then plotsym = 's' else plotsym = '*'
      plotsym = 's'
-     setyrange = [0.989, 1.02]
+     setyrange = [0.99, 1.005]
      if planetname eq 'WASP-80b' then setyrange = [0.96, 1.02];[0.999, 1.001]
      if keyword_set(phaseplot) then begin ;make the plot as a function of phase
         ;print, ' phase', bin_phase
-        print, 'corrflux',  (bin_corrfluxp/plot_corrnorm)
-        setxrange =  [0.4, 0.6] 
+;        print, 'corrflux',  (bin_corrfluxp/plot_corrnorm)
+        setxrange =  [-0.5, 0.5] 
         corrnormoffset =  0; 0.02
         corroffset = 1.0
         if planetname eq 'WASP14-b' then corroffset =  1.000;0.0015
         if planetname eq 'HD209458' then corroffset = 0.001
        
-        setynormfluxrange = [0.98, 1.04];[0.97, 1.005]
+        setynormfluxrange = [0.99, 1.005];[0.97, 1.005]
 
  ;       cphase = where(bin_phase lt 0)
  ;       bin_phase(cphase) = bin_phase(cphase) + 1.0
@@ -613,7 +613,7 @@ print, 'using UTMJD', utmjd_center
 ;        print, 'a', a
 ;-------------------------------------
         if (a gt 0) and (a lt stareaor) then begin
-           if planetname eq 'WASP-14b' then corroffset =  1.000; 0.0015
+           if planetname eq 'WASP-14b' then corroffset =  1.000; 0.0015 ;
            print, 'inside a gt 0 a le stareaor', a, corroffset
            print, 'just before pmapcorr',mean(bin_flux/plot_norm)
 
@@ -667,7 +667,7 @@ print, 'using UTMJD', utmjd_center
 
 
         if a gt stareaor then begin
-           if planetname eq 'WASP-14b' then corroffset =  1.;002; 0.0015
+           if planetname eq 'WASP-14b' then corroffset =  1.0015; 0.0015
            print, 'inside a ge stareaor', a, corroffset
            if keyword_set(all_plots) then begin
               pp.window.SetCurrent
@@ -848,7 +848,7 @@ print, 'using UTMJD', utmjd_center
 
            ;setup a plot for just the snaps
            if n_elements(aorname) gt 6 and pmapcorr eq 1 then begin
-              print, '((bin_timearr - time_0)/60./60.) - 2.E3', ((bin_timearr - time_0)/60./60.), ((bin_timearr - time_0)/60./60.) - 2.E3
+;              print, '((bin_timearr - time_0)/60./60.) - 2.E3', ((bin_timearr - time_0)/60./60.), ((bin_timearr - time_0)/60./60.) - 2.E3
               help, bin_timearr
               help, time_0
 ;              pu = plot(((bin_timearr - time_0)/60./60.) , (bin_corrfluxp/median(bin_all_corrfluxp)) + corroffset,$ ;- 5.E3)/24.
@@ -907,7 +907,7 @@ print, 'using UTMJD', utmjd_center
            pp = plot((bin_timearr - time_0)/60./60., bin_xcen, '1s', sym_size = 0.3,   sym_filled = 1,color = colorarr[a],$
                      overplot=pp)
 
-           pq.window.SetCurrent
+           ;;pq.window.SetCurrent
            pq = plot((bin_timearr - time_0)/60./60., bin_ycen, '1s', sym_size = 0.3,   sym_filled = 1, color = colorarr[a],$
                      overplot=pq)
 
