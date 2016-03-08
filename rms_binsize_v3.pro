@@ -9,7 +9,8 @@ endelse
   aorname= planetinfo[planetname, 'aorname_ch2'] 
   basedir = planetinfo[planetname, 'basedir']
   startaor = planetinfo[planetname, 'stareaor']
-  restore, strcompress(basedir + planetname + '/' + planetname + '_phot_ch2_2.25000_150723_newtime.sav',/remove_all)
+  ;;restore, strcompress(basedir + planetname + '/' + planetname + '_phot_ch2_2.25000_150723_newtime.sav',/remove_all)
+  restore, strcompress(basedir + planetname + '/' + planetname + '_phot_ch2_2.25000_160126.sav',/remove_all)
 
   ;;need a 2D array to keep track of all rms arrays, then be able
   ;;toaverage them.  binning scales are always the same, so can just
