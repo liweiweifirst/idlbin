@@ -25,7 +25,8 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
 
 
   dirname = strcompress(basedir + planetname +'/')                                                            ;+'/hybrid_pmap_nn/')
-  savefilename = strcompress(dirname + planetname +'_phot_ch2_2.25000_150226_bcdsdcorr.sav',/remove_all) ;
+;  savefilename = strcompress(dirname + planetname +'_phot_ch2_2.25000_150226_bcdsdcorr.sav',/remove_all)
+  savefilename = strcompress(dirname + planetname +'_phot_ch2_2.25000_160126.sav',/remove_all) 
   restore, savefilename
 
  
@@ -298,7 +299,7 @@ pro plot_wasp14_snaps, bin_level, time_plot = time_plot, position_plot=position_
            end
         endcase
      endfor
-     pt.save,'/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/snaps_paper/allfluxes_period_ch2_zoom1.eps'
+     pt.save,'/Users/jkrick/irac_warm/pcrs_planets/WASP-14b/snaps_paper/allfluxes_period_ch2_zoom1_3_7.eps'
   endif                         ; time_plot
   
 ;;-------------------------------------------------
