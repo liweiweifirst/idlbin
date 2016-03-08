@@ -1,8 +1,11 @@
 pro track_calstar_photometry, savefilename,ch, make_plot = make_plot, binning = binning
-;track_calstar_photometry,'/Users/jkrick/irac_warm/calstars/track_calstar_ch2.sav', 2, /make_plot
+;;track_calstar_photometry,'/Users/jkrick/irac_warm/calstars/track_calstar_ch2.sav',2, /make_plot,/binning
+;;  track_calstar_photometry,'/Users/jkrick/irac_warm/calstars/track_calstar_ch1.sav', 1, /make_plot,/binning
  st1 = systime(1)
 
-;how do I set xrange with dates?
+                                ;am I using the right corrections for
+                                ;the right processing versions?  no,
+                                ;too many processing versions.
 
 COMMON track_block, photcordata, photcorhead, xarr,  yarr,  starnamearr,  timearr,  fluxarr,  fluxerrarr,  backarr,  corrfluxarr ,  raarr ,  decarr, bmjdarr, procverarr
 
@@ -13,14 +16,16 @@ if ch eq 2 then fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch2_ph
  
    
 result = file_test(savefilename)
-orig_num = 38500                ;33500  38500
+orig_num = 33500                ;33500  38500
 
 if result eq 1 then begin  ;file exists
 ;if that file exists then figure out which campaign was last done and
 ;incrememnt by 1.  + turn into string
 ;                        to find the right directory
    restore, savefilename
-   ti = ti - 100; 1800                 ; 100 set back since the first thing the while loop does is to increment
+   print, 'ti from file', ti
+    
+   ;;ti = ti - 3300                ; 100;  2300          ; 100 set back since the first thing the while loop does is to increment
 endif else begin
 ;if that file doesn't exist, then start from old campaign
 ;and increment until there are no more directories
@@ -34,26 +39,22 @@ endelse
 good_dir = 1
 print, 'ti to start', ti
 while good_dir eq 1 do begin    ; while there is data to work with, and not an empty directory
-   if ti eq 40800 then begin
-      ti = 42700
-;;   if ti eq 40600 then begin
-;      ti = 42700
-   endif else begin
-      ti =ti + 100
-   endelse
-
-   print, 'ti after changing ti', ti
+   if (ti ) eq 41000 then ti = 41100
+   if (ti ) eq 41700 then ti = 42700
+;;   endif else begin
+;;      ti =ti + 100
+;;   endelse
    
+   print, 'ti after changing ti', ti
    dirname = strcompress('/Volumes/iracdata/flight/IWIC/IRAC0' +string(ti),/remove_all)
    print, 'dirname ', dirname
    good_dir = chk_dir(dirname)
-
    if good_dir eq 1 then begin  ;got a live one
 ;      print, 'starting photometry', systime(1) - st1
       junk = do_calstar_photometry(ch, dirname)
 ;      print, 'finished photometry', systime(1) - st1
 
-      if ti eq orig_num + 100 then begin
+      if ti eq orig_num then begin ;;+ 100
       ;need to dynamically assaign these arrays since I don't
       ;know how many there are
          
@@ -79,8 +80,11 @@ while good_dir eq 1 do begin    ; while there is data to work with, and not an e
          bigraarr = [bigraarr, raarr]
          bigdecarr = [bigdecarr, decarr]
       endelse
+   ti = ti + 100
+   print, 'ti at end of while', ti
+   junk12 = where(bigtimearr lt 2400001, wcount)
+   print, 'bigtimearr', n_elements(bigtimearr), n_elements(bmjdarr), wcount
    endif
-
 endwhile
 
 ;convert bmjd to month, day, year
@@ -88,7 +92,19 @@ endwhile
 ;caldat, bigtimearr, montharr, dayarr, yeararr
 
 print, 'after while loop ', ti
+print, 'saving', savefilename
 save,  ti, bigxcen,  bigycen,  bigstarnamearr,  bigtimearr,  bigfluxarr,  bigfluxerrarr,  bigcorrfluxarr, bigbackarr,  bigraarr,  bigdecarr , filename =savefilename
+
+;;think about sorting
+;;s1 = sort(bigtimearr)
+;;bigtimearr = bigtimearr(s1)
+;;bigcorrfluxarr = bigcorrfluxarr(s1)
+;;bigfluxerrarr = bigfluxerrarr(s1)
+;;bigfluxarr = bigfluxarr(s1)
+;;print, min(bigtimearr), 'min(bigtimearr)', bigtimearr[0:10]
+w = where(bigtimearr lt 2400001, wcount)
+print, 'wcount ', wcount, n_elements(bigtimearr)
+print, bigstarnamearr(w)
 
 ;for bsn =0, 500 do print, bsn, bigstarnamearr(bsn)
 
@@ -107,9 +123,9 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
         
         an = where(bigstarnamearr eq names(n), count)
         if count gt 10 then begin
-           print, 'n, name, color', n, names(n), colornames(n)
-
-
+           print, 'n, name, color', n, names(n), colornames(n), n_elements(bigtimearr(an))
+           
+           if n eq 0 then print, 'bigtimearr', bigtimearr(an)
                                               
            ;check normalization
            junkcorr = bigcorrfluxarr(an)
@@ -121,15 +137,16 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
 ;           print, 'bigcorrfluxarr', junkcorr[0:50] 
 ;           print, 'bigfluxarr', junkflux[0:50]
            print, median(bigcorrfluxarr(an)), median(bigfluxarr(an))
-         
-           p = errorplot(bigtimearr(an) , bigcorrfluxarr(an)/median(bigcorrfluxarr(an)), $ ;- bigtimearr(0))/60./60./ 24.
-                         bigfluxerrarr(an)/median(bigcorrfluxarr(an)), '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
+           normcorr = median(bigcorrfluxarr(an))  ; median(bigcorrfluxarr(an[0:10]))
+           normflux = median(bigfluxarr(an)); median(bigfluxarr(an[0:10]))
+           p = errorplot(bigtimearr(an) , bigcorrfluxarr(an)/normcorr, $ ;- bigtimearr(0))/60./60./ 24.
+                         bigfluxerrarr(an)/normcorr, '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
                          sym_filled = 1, ytitle = 'Corrected Flux',color = colornames(n), overplot = p,$
                          yrange = [0.85,1.15], XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = 'months', $
                          title = 'Ch' + string(ch), xrange = [min(bigtimearr),max(bigtimearr)],/buffer)
 
-           pz = errorplot(bigtimearr(an) , bigfluxarr(an)/median(bigfluxarr(an)), $
-                         bigfluxerrarr(an)/median(bigfluxarr(an)), '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
+           pz = errorplot(bigtimearr(an) , bigfluxarr(an)/normflux, $
+                         bigfluxerrarr(an)/normflux, '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
                          sym_filled = 1, ytitle = 'Flux',color = colornames(n), overplot = pz,$
                          yrange = [0.85,1.15], XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = 'months', $
                           title = 'Ch' + string(ch), xrange = [min(bigtimearr),max(bigtimearr)],/buffer)
@@ -177,6 +194,8 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
               bin_fluxerrarr = bin_fluxerrarr[0:c-1]
               bin_time = bin_time[0:c-1]
 
+              if n eq 19 then print, bin_time
+              
               print, 'n_elements bin_corrflux', n_elements(bin_corrflux)
 ;              pb = errorplot(bin_time , bin_corrflux/median(bin_corrflux[0:18]), $
 ;                             bin_fluxerrarr/median(bin_corrflux), '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
@@ -184,10 +203,11 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
 ;                             yrange = [0.95,1.05], xrange = [min(bigtimearr),max(bigtimearr) + 100.], xtickunits = 'months', $ ;
 ;                             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', title = 'Ch' + string(ch), xmajor = 7 ) ;,- bigtimearr(0))/60./60./ 24.
               dummy = LABEL_DATE(DATE_FORMAT=['%D-%M-%Y'])
-              pb = errorplot(bin_time , bin_corrflux/median(bin_corrflux[0:18]), $
+              print, min(bin_time), 'min(bin_time)'
+              pb = errorplot(bin_time , bin_corrflux/median(bin_corrflux[0:10]), $
                              bin_fluxerrarr/median(bin_corrflux), '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
                              sym_filled = 1, ytitle = 'Binned Corrected Flux',color = colornames(n), overplot = pb,$
-                             yrange = [0.95,1.05], xrange = [min(bigtimearr),max(bigtimearr) + 100.], XTICKUNITS = ['Time'], $ ;
+                             yrange = [0.95,1.05], xrange = [2456293, max(bin_time) + 300.],  XTICKUNITS = ['Time'], $ ;xrange = [min(bin_time),max(bin_time) + 300.], 2.45714e+06
                              XTICKFORMAT='LABEL_DATE', title = 'Ch' + string(ch),  xminor = 11, errorbar_capsize = 0.1, /buffer) ;,  xtickinterval = 1, xmajor = 7,- bigtimearr(0))/60./60./ 24.
 
               pbl = plot(bin_time, intarr(n_elements(bin_time)) + 1.0, overplot = pb)
@@ -196,14 +216,44 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
               JDCNV, 2015, 5, 1,0., Julian
               x = fltarr(5) + Julian
               y = findgen(5)
-              pbll = plot(x, y, overplot = pb, thick = 2)
-              t = text(Julian+5., 0.955, 'May 2015',orientation = 30, /data, overplot = pb)
+;;              pbll = plot(x, y, overplot = pb, thick = 2)
+;;              t = text(Julian+5., 0.955, 'May 2015',orientation = 50, /data, overplot = pb)
 
-              JDCNV, 2015, 9, 17,0., Julian
+              JDCNV, 2015, 9, 23,0., Julian
+              ;;print, 'S19.2 Julian', julian
               x = fltarr(5) + Julian
               y = findgen(5)
               pbll = plot(x, y, overplot = pb, thick = 2)
-              t = text(Julian+ 5., 0.955, 'S19.2',orientation = 30,/data, overplot = pb)
+              t = text(Julian- 55., 0.960, 'S19.2',orientation = 50,/data, overplot = pb)
+
+
+              JDCNV, 2015, 10, 2,0., Julian
+              ;;print, 'S19.2 Julian', julian
+              x = fltarr(5) + Julian
+              y = findgen(5)
+;;              pbll = plot(x, y, overplot = pb, thick = 2)
+;;              t = text(Julian+ 5., 0.955, 'PC162',orientation = 50,/data, overplot = pb)
+
+               JDCNV, 2015, 10, 15,0., Julian
+              ;;print, 'S19.2 Julian', julian
+              x = fltarr(5) + Julian
+              y = findgen(5)
+;;              pbll = plot(x, y, overplot = pb, thick = 2)
+;;              t = text(Julian+ 5., 0.955, 'PC163',orientation = 50,/data, overplot = pb)
+              
+              JDCNV, 2015, 10, 29,0., Julian
+              ;;print, 'S19.2 Julian', julian
+              x = fltarr(5) + Julian
+              y = findgen(5)
+;;              pbll = plot(x, y, overplot = pb, thick = 2)
+;;              t = text(Julian+ 5., 0.955, 'PC164',orientation = 50,/data, overplot = pb)
+             
+              JDCNV, 2015, 12, 21,0., Julian
+              x = fltarr(5) + Julian
+              y = findgen(5)
+              pbll = plot(x, y, overplot = pb, thick = 2)
+              t = text(Julian+ 5., 0.960, 'Dec 21',orientation =50,/data, overplot = pb)
+              t = text(Julian+ 10., 0.955, 'turn on',orientation =50,/data, overplot = pb)
 
            endif   ;if keyword set binning
            
