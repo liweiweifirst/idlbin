@@ -21,7 +21,7 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
   period =  planetinfo[planetname, 'period']
   stareaor = planetinfo[planetname, 'stareaor']
 ;for debugging: skip some AORs
-  startaor = 5; 0                  ;5
+  startaor = 0; 0                  ;5
   stopaor =   n_elements(aorname) - 1
   print, 'stopaor', stopaor
 ;  plot_norm= planetinfo[planetname, 'plot_norm']
@@ -71,7 +71,7 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
 
 ; bin within each AOR only, don't want to bin across boundaries.
      junkpar = binning_function(a, bin_level, pmapcorr)
-;     print, 'testing phase', (planethash[aorname(a),'phase'] )[0:10], (planethash[aorname(a),'phase'] )[600:610]
+     print, 'testing phase', (planethash[aorname(a),'phase'] )[0:10], (planethash[aorname(a),'phase'] )[100:110], bin_phase[0:10]
 ;     print, 'testing x', bin_xcen[0:10]
 ;     print, 'testing y', bin_ycen[0:10]
 ;     print, 'testing npcent', bin_npcent[0:10]
@@ -111,7 +111,7 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         
      endif else begin
         plotx =  bin_phase ;;-1.09
-        setxrange =    [-0.5,0.5];[0.5,0.65]; [0.45,0.67];
+        setxrange =    [-0.5,1.5];[0.5,0.65]; [0.45,0.67];
         ending = 'phase'
      endelse
      
