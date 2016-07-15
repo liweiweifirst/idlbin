@@ -1,6 +1,7 @@
 pro readcol,name,v1,V2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15, $
             v16,v17,v18,v19,v20,v21,v22,v23,v24,v25,v26,v27,v28,v29,v30,$
-            v31,v32,v33,v34,v35,v36,v37,v38,v39,v40, COMMENT = comment, $
+            v31,v32,v33,v34,v35,v36,v37,v38,v39,v40,v41,v42,v43,v44,v45, $
+	    v46,v47,v48,v49,v50, COMMENT = comment, $
             FORMAT = fmt, DEBUG=debug, SILENT=silent, SKIPLINE = skipline, $
             NUMLINE = numline, DELIMITER = delimiter, NAN = NaN, $
             PRESERVE_NULL = preserve_null, COUNT=ngood, NLINES=nlines, $
@@ -23,7 +24,7 @@ pro readcol,name,v1,V2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15, $
 ;       can be significantly improved by setting the /QUICK keyword.
 ;
 ; CALLING SEQUENCE:
-;       READCOL, name, v1, [ v2, v3, v4, v5, ...  v40 , COMMENT=, /NAN
+;       READCOL, name, v1, [ v2, v3, v4, v5, ...  v50 , COMMENT=, /NAN
 ;           DELIMITER= ,FORMAT = , /DEBUG ,  /SILENT , SKIPLINE = , NUMLINE = 
 ;           COUNT =, STRINGSKIP= 
 ;
@@ -58,8 +59,7 @@ pro readcol,name,v1,V2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15, $
 ;                beginning with this character will be skipped.   Default is
 ;                no comment lines.
 ;       /COMPRESS - If set, then the file is assumed to be gzip compressed.
-;                There is no automatic recognition of compressed files
-;                by extension type.
+;                The file is assumed to be compressed if it ends in '.gz'
 ;       DELIMITER - Character(s) specifying delimiter used to separate 
 ;                columns.   Usually a single character but, e.g. delimiter=':,'
 ;                specifies that either a colon or comma as a delimiter. 
@@ -84,8 +84,8 @@ pro readcol,name,v1,V2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15, $
 ;               skip over comment lines.
 ;
 ; OUTPUTS:
-;       V1,V2,V3,...V40 - IDL vectors to contain columns of data.
-;               Up to 40 columns may be read.  The type of the output vectors
+;       V1,V2,V3,...V50 - IDL vectors to contain columns of data.
+;               Up to 50 columns may be read.  The type of the output vectors
 ;               are as specified by FORMAT.
 ;
 ; OPTIONAL OUTPUT KEYWORDS:
@@ -95,7 +95,7 @@ pro readcol,name,v1,V2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15, $
 ;
 ; EXAMPLES:
 ;       Each row in a file position.dat contains a star name and 6 columns
-;       of data giving an RA and Dec in sexigesimal format.   Read into IDL 
+;       of data giving an RA and Dec in sexagesimal format.   Read into IDL 
 ;       variables.   (NOTE: The star names must not include the delimiter 
 ;       as a part of the name, no spaces or commas as default.)
 ;
@@ -162,34 +162,40 @@ pro readcol,name,v1,V2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15, $
 ;       Accept normal FORTRAN formats (e.g. F5.1) P. Noterdaeme/W.L Jan 2011
 ;       Add COMPRESS keyword, IDL 6 notation W. Landsman/J. Bailin   Feb 2011
 ;       Allow filename to be 1 element array W.Landsman/S.Antonille Apr 2011
+;       Feb 2010 change caused errors when reading blanks as numbers. 
+;                          W.L. July 2012
+;       Read up to 50 columns W.L.  March 2013
+;       Assume a compressed file if it ends in '.gz'  W.L.  Oct 2015
 ;-
   On_error,2                    ;Return to caller
   compile_opt idl2
 
   if N_params() lt 2 then begin
-     print,'Syntax - READCOL, name, v1, [ v2, v3,...v40, /NAN, DELIMITER='
-     print,'        FORMAT= ,/SILENT  ,SKIPLINE =, NUMLINE = , /DEBUG, COUNT=]'
+    print,'Syntax - READCOL, name, v1, [ v2, v3,...v50, /NAN, DELIMITER=,/QUICK'
+    print,'        FORMAT= ,/SILENT  ,SKIPLINE =, NUMLINE = , /DEBUG, COUNT=]'
      return
   endif
 
 ; Get number of lines in file
 
   ngood = 0L                 ;Number of good lines
+  if N_elements(compress) EQ 0 then $
+        compress = strmid(name,2,3,/reverse) EQ '.gz'
   nlines = FILE_LINES( name, COMPRESS=compress )
   
 
   if keyword_set(DEBUG) then $
      message,'File ' + name+' contains ' + strtrim(nlines,2) + ' lines',/INF
 
-  if ~keyword_set( SKIPLINE ) then skipline = 0
+  if N_elements( SKIPLINE ) EQ 0 then skipline = 0
   nlines = nlines - skipline
   if nlines LE 0 then begin
      message,'ERROR - File ' + name+' contains no data',/CON
      return
   endif     
-  if keyword_set( NUMLINE) then nlines = numline < nlines
+  if N_elements( NUMLINE) GT 0 then nlines = numline < nlines
 
-  if ~keyword_set( SKIPSTART ) then begin
+  if N_elements( SKIPSTART ) EQ 0 then begin
      skipstart_flg=0 
   endif else begin
      skipstart_flg=1
@@ -220,7 +226,7 @@ pro readcol,name,v1,V2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15, $
   endif else begin              ;Read everything as floating point
 
      frmt = 'F'
-     if ncol GT 1 then for i = 1,ncol-1 do frmt = frmt + ',F'
+     if ncol GT 1 then for i = 1,ncol-1 do frmt += ',F'
      if ~keyword_set( SILENT ) then message, $
         'Format keyword not supplied - All columns assumed floating point',/INF
 
@@ -266,6 +272,7 @@ pro readcol,name,v1,V2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15, $
   goodcol = where(idltype)
   idltype = idltype[goodcol]
   check_numeric = (idltype NE 7)
+  check_comment = N_elements(comment) GT 0
   openr, lun, name, /get_lun, compress=compress
 
   temp = ' '
@@ -291,7 +298,7 @@ pro readcol,name,v1,V2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15, $
      endif
 
      temp = strtrim(temp,1)     ;Remove leading spaces
-     if keyword_set(comment) then if strmid(temp,0,1) EQ comment then begin
+     if check_comment then if strmid(temp,0,1) EQ comment then begin
         ngood--
         if keyword_set(DEBUG) then $
            message,'Skipping Comment Line ' + strtrim(skipline+j+1,2),/INF
@@ -310,7 +317,7 @@ pro readcol,name,v1,V2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15, $
      var = var[goodcol]
 
      k = 0
-     if keyword_set(quick) then $
+     if keyword_set(quick) then $      ;Don't check for valid numeric values
      
          for i = 0L,ncol-1 do (*bigarr[i])[ngood] = var[i]   $
     
@@ -324,11 +331,14 @@ pro readcol,name,v1,V2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15, $
            if ~tst  then begin                           ;If not, skip this line
               if ~keyword_set(SILENT) then $ 
                  message,'Skipping Line ' + strtrim(skipline+j+1,2),/INF 
-              ngood = ngood-1
+              ngood--
               goto, BADLINE 
            endif
         endif 
-       (*bigarr[k])[ngood] = var[i]
+	if strlen(strtrim(var[i],2)) Eq 0 then begin
+	   if keyword_set(NAN) then (*bigarr[k])[ngood] = !VALUES.F_NAN else $
+	                            (*bigarr[k])[ngood] = 0 
+        endif else (*bigarr[k])[ngood] = var[i]
         k++
 
      endfor
