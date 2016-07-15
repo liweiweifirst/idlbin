@@ -203,7 +203,45 @@ chname = 0
 
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'KOI069' ;kepler 93
+  ra_ref = 291.41798
+  dec_ref = 38.672208
+  aorname_ch1 = []  ;ch1
+  aorname_ch2 = ['r39438336', 'r39438592','r41009920','r41010432']  ;ch2 
+  basedir = '/Users/jkrick/irac_warm/' 
+  utmjd_center =  55072.93381 ;;junk
+  transit_duration=0.
+  period = 4.727 ;days
+  intended_phase = 0.0
+  exptime = [12.,12,2.,2.]
+  stareaor = 0
+  mask = 'no'
+  plot_norm = 1.
+  plot_corrnorm = 1.
 
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'KOI245'  ;kepler 37 don't know if b, c, or d
+  ra_ref = 284.05941
+  dec_ref = 44.51844
+  aorname_ch1 = []  ;ch1
+  aorname_ch2 = ['r39420928','r41009664']  ;ch2 
+  basedir = '/Users/jkrick/irac_warm/' 
+  utmjd_center =  55072.93381 ;;junk
+  transit_duration=0.
+  period = 13.36 ;days
+  intended_phase = 0.0
+  exptime = [12.,12,2.,2.]
+  stareaor = 0
+  mask = 'no'
+  plot_norm = 1.
+  plot_corrnorm = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
   planetname = 'HD158460'   ; !!!This is a standard star, ie should have a flat light curve
   ra_ref = 261.42213
   dec_ref = 60.048479

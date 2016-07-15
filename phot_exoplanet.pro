@@ -77,6 +77,7 @@ if planetname eq 'XO3' then exosystem = 'XO-3 b'
 if planetname eq 'simul_XO3' then exosystem = 'XO-3 b' 
 if planetname eq 'tres2' then exosystem = 'TrES-2 b'
 if planetname eq 'WASP-63b' then exosystem = 'WASP-63 b'
+if planetname eq 'KOI069' then exosystem = 'Kepler-93 b'
 
 ;print, exosystem, 'exosystem'
 if planetname eq 'WASP-52b' then teq_p = 1315
@@ -307,13 +308,13 @@ for a =startaor,  stopaor do begin
 ;      np = noisepix(im, x_center, y_center, ronoise, gain, exptime, fluxconv, naxis, 3.5, 6.5, 12.5)
       np = findgen(64)
       ; if changing the apertures then use this to calculate photometry
-      if keyword_set(breatheap) then begin
-         abcdflux = betap(im, x_center, y_center, ronoise, gain, exptime, fluxconv,np, chname)
+;;      if keyword_set(breatheap) then begin
+;;         abcdflux = betap(im, x_center, y_center, ronoise, gain, exptime, fluxconv,np, chname)
          ;XXXfake these for now
-         fs = abcdflux
-         back = abcdflux
-         backerr = abcdflux
-      endif 
+;;         fs = abcdflux
+;;         back = abcdflux
+;;         backerr = abcdflux
+;;      endif 
       
       if keyword_set(rawfile) then begin
 ;read in the raw data file and get the DN level of the peakpixel      
