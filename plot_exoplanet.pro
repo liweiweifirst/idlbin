@@ -89,7 +89,7 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
   dirname = strcompress(basedir + planetname +'/')                                                            ;+'/hybrid_pmap_nn/')
 ;  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all) ;
   if chname eq '2' then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_160126.sav',/remove_all) ;'_150226_bcdnosdcorr.sav'
-  if chname eq '1' then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150722_newtime.sav',/remove_all) ;140716
+  if chname eq '1' then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150722.sav',/remove_all) ;140716
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)
@@ -353,10 +353,10 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
 
 ;pick the normalization
   phase0 = planethash[aorname(0),'phase']
-  corrflux0 = planethash[aorname(0),'corrflux_d']
+  corrflux0 = planethash[aorname(1),'corrflux_d']
   se = where(phase0 gt 0.47 and phase0 lt 0.51)
   
-  plot_corrnorm =  mean(corrflux0(se),/nan)
+  plot_corrnorm =  mean(corrflux0,/nan)
   
   for a = startaor,stopaor do begin
      print, '------------------------------------------------------'
@@ -501,10 +501,11 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
      plotsym = 's'
      setyrange = [0.99, 1.005]
      if planetname eq 'WASP-80b' then setyrange = [0.96, 1.02];[0.999, 1.001]
+     if planetname eq 'HAT-P-22' then setyrange = [0.995, 1.004];[0.999, 1.001]
      if keyword_set(phaseplot) then begin ;make the plot as a function of phase
         ;print, ' phase', bin_phase
 ;        print, 'corrflux',  (bin_corrfluxp/plot_corrnorm)
-        setxrange =  [-0.5, 0.5] 
+        setxrange =  [-0.01, 0.05] 
         corrnormoffset =  0; 0.02
         corroffset = 1.0
         if planetname eq 'WASP14-b' then corroffset =  1.000;0.0015
