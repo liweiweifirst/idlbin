@@ -9,8 +9,8 @@ pro noise_exptime_stare
  
 
 ;using WASP-14 data
-  fits_read, '/Users/jkrick/irac_warm/KOI069/r41009920/ch2/bcd/SPITZER_I2_41009920_0023_0000_2_bcd.fits', im, h
-  fits_read, '/Users/jkrick/irac_warm/KOI069/r39438336/ch2/bcd/SPITZER_I2_39438336_0023_0000_2_bcd.fits', im, h
+  fits_read, '/Users/jkrick/irac_warm/KOI069/r41009920/ch2/bcd/SPITZER_I2_41009920_0023_0000_2_bcd.fits', im, h  ;2s sub
+  fits_read, '/Users/jkrick/irac_warm/KOI069/r39438336/ch2/bcd/SPITZER_I2_39438336_0023_0000_2_bcd.fits', im, h  ;12s full
 
 ;assume aperture size of 2.25 pixels radius
   apsize = 2.25
