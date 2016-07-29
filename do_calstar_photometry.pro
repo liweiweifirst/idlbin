@@ -3,8 +3,10 @@ function do_calstar_photometry, ch, dirname
   ft1 = systime(1)
   cd, dirname
   pwd
-  if ch eq 1 then command ="find ./bcd/00*/ -name 'IRAC.1*bcd_fp.fits' > /Users/jkrick/irac_warm/calstars/allch1bcdlist.txt "
-  if ch eq 2 then command ="find ./bcd/00*/ -name 'IRAC.2*bcd_fp.fits' > /Users/jkrick/irac_warm/calstars/allch2bcdlist.txt "
+;;  if ch eq 1 then command ="find ./bcd/00*/ -name 'IRAC.1*bcd_fp.fits' > /Users/jkrick/irac_warm/calstars/allch1bcdlist.txt "
+;;  if ch eq 2 then command ="find ./bcd/00*/ -name 'IRAC.2*bcd_fp.fits' > /Users/jkrick/irac_warm/calstars/allch2bcdlist.txt "
+  if ch eq 1 then command ="find ./ch1/bcd/ -name 'SPITZER_I1*_bcd.fits' > /Users/jkrick/irac_warm/calstars/allch1bcdlist.txt "
+  if ch eq 2 then command ="find ./ch2/bcd/ -name 'SPITZER_I2*_bcd.fits' > /Users/jkrick/irac_warm/calstars/allch2bcdlist.txt "
   spawn, command  
   readcol,strcompress('/Users/jkrick/irac_warm/calstars/allch'+string(ch)+'bcdlist.txt',/remove_all), fitsname, format = 'A', /silent
 ;  print, '      read in bcdlist', systime(1) - ft1
