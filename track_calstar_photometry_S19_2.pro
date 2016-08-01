@@ -7,28 +7,27 @@ pro track_calstar_photometry_S19_2, savefilename,ch, make_plot = make_plot, binn
                                 ;the right processing versions?  no,
                                 ;too many processing versions.
 
-COMMON track_block, photcordata, photcorhead, xarr,  yarr,  starnamearr,  timearr,  fluxarr,  fluxerrarr,  backarr,  corrfluxarr ,  raarr ,  decarr, bmjdarr, procverarr
+COMMON track_block, photcordata, photcorhead, xarr,  yarr,  starnamearr,  timearr,  fluxarr,  fluxerrarr,  backarr,  corrfluxarr ,  raarr ,  decarr, bmjdarr, procverarr, campaignarr
 
-;look for a save file with photometry
 ;for array dependant photometric correction warm
 if ch eq 1 then fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch1_photcorr_ap_5.fits', photcordata, photcorhead
 if ch eq 2 then fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch2_photcorr_ap_5.fits', photcordata, photcorhead
  
    
 ;;make a list of all directories and read that in
-topdir = '/Users/jkrick/irac_warm/calstars/S19.2/'
+topdir = '/Users/jkrick/irac_warm/calstars/S19_2/'
 command  = strcompress('ls ' + topdir +' > dirlist.txt')
 spawn, command
 readcol,strcompress(topdir + 'dirlist.txt'), dirlist, format = '(A)'
 
-for gi = 0, n_elements(dirlist) - 1 do begin   
-   dirname = strcompress('/Users/jkrick/irac_warm/calstars/S19.2/' +dirlist(gi),/remove_all)
+for gi = 1, n_elements(dirlist) - 1 do begin   
+   dirname = strcompress('/Users/jkrick/irac_warm/calstars/S19_2/' +dirlist(gi),/remove_all)
    print, 'dirname ', dirname
 ;      print, 'starting photometry', systime(1) - st1
       junk = do_calstar_photometry(ch, dirname)
 ;      print, 'finished photometry', systime(1) - st1
 
-      if gi eq 0 then begin ;;+ 100
+      if gi eq 1 then begin ;;+ 100
       ;need to dynamically assaign these arrays since I don't
       ;know how many there are
          
@@ -59,9 +58,9 @@ for gi = 0, n_elements(dirlist) - 1 do begin
 ;convert bmjd to month, day, year
 ;bigtimearr = bigtimearr + 2400000.5 ; back to JD
 ;caldat, bigtimearr, montharr, dayarr, yeararr
-
+ti = 42200
 print, 'saving', savefilename
-save,  ti, bigxcen,  bigycen,  bigstarnamearr,  bigtimearr,  bigfluxarr,  bigfluxerrarr,  bigcorrfluxarr, bigbackarr,  bigraarr,  bigdecarr , filename =savefilename
+save,  ti, campaignarr, bigxcen,  bigycen,  bigstarnamearr,  bigtimearr,  bigfluxarr,  bigfluxerrarr,  bigcorrfluxarr, bigbackarr,  bigraarr,  bigdecarr , filename =savefilename
 
 ;;think about sorting
 ;;s1 = sort(bigtimearr)
@@ -234,11 +233,14 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
   endif
 basedir = '/Volumes/IRAC/Calibration/Trending/'
 plotname = strcompress(basedir + 'ch' + string(ch) + '_track_binned.png',/remove_all)
-if keyword_set(binning) then pb.save, plotname
-plotname = strcompress(basedir + 'ch' + string(ch) + '_track_corrected.png',/remove_all)
-p.save, plotname
-plotname = strcompress(basedir + 'ch' + string(ch) + '_track_flux.png',/remove_all)
-pz.save, plotname
+if keyword_set(binning) then begin
+   pb.save, plotname
+   plotname = strcompress(basedir + 'ch' + string(ch) + '_track_corrected.png',/remove_all)
+   p.save, plotname
+   plotname = strcompress(basedir + 'ch' + string(ch) + '_track_flux.png',/remove_all)
+   pz.save, plotname
+endif
+
 print, 'time check', systime(1) - st1
 
 
