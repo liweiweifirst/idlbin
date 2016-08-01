@@ -48,9 +48,11 @@ function do_calstar_photometry, ch, dirname
         
 ;read in the image, get important info from the header
         fits_read,fitsname(c), im, h
-        inter = strmid(fitsname(c), 0, 46)
-        uncname = strcompress(inter + '*sig_dntoflux.fits',/remove_all)
-;        print, 'uncname',i,  uncname, fitsname(i)
+;;        inter = strmid(fitsname(c), 0, 46)
+;;        uncname = strcompress(inter + '*sig_dntoflux.fits',/remove_all)
+        inter = strmid(fitsname(c), 0, 41)
+        uncname = strcompress(inter + '*bunc.fits',/remove_all)
+;;        print, 'uncname',i,  uncname, fitsname(i)
         fits_read, uncname, unc, hunc, /no_abort ; so it won't crash if the file isn't there but should use the last unc file.
         chnlnum = sxpar(h, 'CHNLNUM')
         ra_ref = sxpar(h, 'RA_REF')
@@ -63,7 +65,7 @@ function do_calstar_photometry, ch, dirname
         proc_ver = sxpar(header, 'CREATOR') ;which processing version
         framtime = sxpar(header, 'FRAMTIME')
         starname = strmid(AORLABEL, 13, 7)
-
+        campaign = sxpar(header, 'CAMPAIGN')
 ;make sure the target is on the frame
         ADXY, h, ra_ref, dec_ref, xcen, ycen
         if naxis eq 2 then begin
@@ -171,9 +173,11 @@ function do_calstar_photometry, ch, dirname
   procverarr = procverarr[0:final-1]
   raarr = raarr[0:final-1] 
   decarr = decarr[0:final-1] 
-          
 
-
-
+  if i gt 0 then begin
+     campaign_int = fix(strmid(campaign, 5))
+     if campaignarr eq !NULL then campaignarr = campaign_int else campaignarr = [campaignarr, campaign_int]
+  endif
+  
   return, 0
 end
