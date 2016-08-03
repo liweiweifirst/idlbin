@@ -39,11 +39,11 @@ endelse
 good_dir = 1
 ;once I successfully make the save file with all S19.2 calstars up to
 ;June 2016, can just start there and move forward.
-;;ti = 42200
+ti = 42200
 print, 'ti to start', ti
 while good_dir eq 1 do begin    ; while there is data to work with, and not an empty directory
 ;;   if (ti ) eq 41000 then ti = 41100
-;;   if (ti ) eq 42600 then ti = 42700
+   if (ti ) eq 42600 then ti = 43100
 ;;   endif else begin
 ;;      ti =ti + 100
 ;;   endelse

@@ -1,17 +1,23 @@
-function do_calstar_photometry, ch, dirname
+function do_calstar_photometry, ch, dirname, processing
   common track_block
   ft1 = systime(1)
-  fullname = strcompress(dirname+'ch'+string(ch),/remove_all)
-  exist_dir = chk_dir(fullname)
 
-  if exist_dir eq 1 then begin  ;got a live one
+  if processing eq 'SHA' then begin
+     fullname = strcompress(dirname+'ch'+string(ch),/remove_all)
+     exist_dir = chk_dir(fullname)
+  endif
+  
+;;  if exist_dir eq 1 then begin  ;got a live one
   
      cd, dirname
      pwd
-     ;;if ch eq 1 then command ="find ./bcd/00*/ -name 'IRAC.1*bcd_fp.fits' > /Users/jkrick/irac_warm/calstars/allch1bcdlist.txt "
-     ;;if ch eq 2 then command ="find ./bcd/00*/ -name 'IRAC.2*bcd_fp.fits' > /Users/jkrick/irac_warm/calstars/allch2bcdlist.txt "
-     if ch eq 1 then command ="find ./ch1/bcd/ -name 'SPITZER_I1*_bcd.fits' > /Users/jkrick/irac_warm/calstars/allch1bcdlist.txt "
-     if ch eq 2 then command ="find ./ch2/bcd/ -name 'SPITZER_I2*_bcd.fits' > /Users/jkrick/irac_warm/calstars/allch2bcdlist.txt "
+     if ch eq 1 then command ="find ./bcd/00*/ -name 'IRAC.1*bcd_fp.fits' > /Users/jkrick/irac_warm/calstars/allch1bcdlist.txt "
+     if ch eq 2 then command ="find ./bcd/00*/ -name 'IRAC.2*bcd_fp.fits' > /Users/jkrick/irac_warm/calstars/allch2bcdlist.txt "
+     if processing eq 'SHA' then begin
+        if ch eq 1 then command ="find ./ch1/bcd/ -name 'SPITZER_I1*_bcd.fits' > /Users/jkrick/irac_warm/calstars/allch1bcdlist.txt "
+        if ch eq 2 then command ="find ./ch2/bcd/ -name 'SPITZER_I2*_bcd.fits' > /Users/jkrick/irac_warm/calstars/allch2bcdlist.txt "
+     endif
+     
      spawn, command  
      readcol,strcompress('/Users/jkrick/irac_warm/calstars/allch'+string(ch)+'bcdlist.txt',/remove_all), fitsname, format = 'A', /silent
 ;  print, '      read in bcdlist', systime(1) - ft1
@@ -53,10 +59,13 @@ function do_calstar_photometry, ch, dirname
            
 ;read in the image, get important info from the header
            fits_read,fitsname(c), im, h
-;;           inter = strmid(fitsname(c), 0, 46)
-;;           uncname = strcompress(inter + '*sig_dntoflux.fits',/remove_all)
-           inter = strmid(fitsname(c), 0, 41)
-           uncname = strcompress(inter + '*bunc.fits',/remove_all)
+           inter = strmid(fitsname(c), 0, 46)
+           uncname = strcompress(inter + '*sig_dntoflux.fits',/remove_all)
+           if processing eq 'SHA' then begin
+              inter = strmid(fitsname(c), 0, 41)
+              uncname = strcompress(inter + '*bunc.fits',/remove_all)
+           endif
+           
 ;;        print, 'uncname',i,  uncname, fitsname(i)
            fits_read, uncname, unc, hunc, /no_abort ; so it won't crash if the file isn't there but should use the last unc file.
            chnlnum = sxpar(h, 'CHNLNUM')
@@ -183,8 +192,7 @@ function do_calstar_photometry, ch, dirname
         campaign_int = fix(strmid(campaign, 5))
         if campaignarr eq !NULL then campaignarr = campaign_int else campaignarr = [campaignarr, campaign_int]
      endif
-  endif  ; does the directory exist?
-  
+;;  endif  ; does the directory exist?
      return, 0
   end
   
