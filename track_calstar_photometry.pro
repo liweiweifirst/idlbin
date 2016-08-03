@@ -7,7 +7,7 @@ pro track_calstar_photometry, savefilename,ch, make_plot = make_plot, binning = 
                                 ;the right processing versions?  no,
                                 ;too many processing versions.
 
-COMMON track_block, photcordata, photcorhead, xarr,  yarr,  starnamearr,  timearr,  fluxarr,  fluxerrarr,  backarr,  corrfluxarr ,  raarr ,  decarr, bmjdarr, procverarr
+COMMON track_block, photcordata, photcorhead, xarr,  yarr,  starnamearr,  timearr,  fluxarr,  fluxerrarr,  backarr,  corrfluxarr ,  raarr ,  decarr, bmjdarr, procverarr, campaignarr
 
 ;look for a save file with photometry
 ;for array dependant photometric correction warm
@@ -37,12 +37,13 @@ endelse
 
 ;error check on existance of directory
 good_dir = 1
-;just for catching up with wonky numbers
-ti = 41100
+;once I successfully make the save file with all S19.2 calstars up to
+;June 2016, can just start there and move forward.
+;;ti = 42200
 print, 'ti to start', ti
 while good_dir eq 1 do begin    ; while there is data to work with, and not an empty directory
-   if (ti ) eq 41000 then ti = 41100
-   if (ti ) eq 42600 then ti = 42700
+;;   if (ti ) eq 41000 then ti = 41100
+;;   if (ti ) eq 42600 then ti = 42700
 ;;   endif else begin
 ;;      ti =ti + 100
 ;;   endelse
@@ -85,7 +86,7 @@ while good_dir eq 1 do begin    ; while there is data to work with, and not an e
    ti = ti + 100
    print, 'ti at end of while', ti
    junk12 = where(bigtimearr lt 2400001, wcount)
-   print, 'bigtimearr', n_elements(bigtimearr), n_elements(bmjdarr), wcount
+  ;; print, 'bigtimearr', n_elements(bigtimearr), n_elements(bmjdarr), wcount
    endif
 endwhile
 
@@ -95,7 +96,7 @@ endwhile
 
 print, 'after while loop ', ti
 print, 'saving', savefilename
-save,  ti, bigxcen,  bigycen,  bigstarnamearr,  bigtimearr,  bigfluxarr,  bigfluxerrarr,  bigcorrfluxarr, bigbackarr,  bigraarr,  bigdecarr , filename =savefilename
+save,  ti, campaignarr, bigxcen,  bigycen,  bigstarnamearr,  bigtimearr,  bigfluxarr,  bigfluxerrarr,  bigcorrfluxarr, bigbackarr,  bigraarr,  bigdecarr , filename =savefilename
 
 ;;think about sorting
 ;;s1 = sort(bigtimearr)
@@ -206,7 +207,7 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
 ;                             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', title = 'Ch' + string(ch), xmajor = 7 ) ;,- bigtimearr(0))/60./60./ 24.
               dummy = LABEL_DATE(DATE_FORMAT=['%D-%M-%Y'])
               print, min(bin_time), 'min(bin_time)'
-              pb = errorplot(bin_time , bin_corrflux/median(bin_corrflux[0:10]), $
+              pb = errorplot(bin_time , bin_corrflux/median(bin_corrflux[0:9]), $
                              bin_fluxerrarr/median(bin_corrflux), '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
                              sym_filled = 1, ytitle = 'Binned Corrected Flux',color = colornames(n), overplot = pb,$
                              yrange = [0.95,1.05], xrange = [2456293, max(bin_time) + 300.],  XTICKUNITS = ['Time'], $ ;xrange = [min(bin_time),max(bin_time) + 300.], 2.45714e+06

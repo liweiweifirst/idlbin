@@ -62,6 +62,8 @@ ti = 42200
 print, 'saving', savefilename
 save,  ti, campaignarr, bigxcen,  bigycen,  bigstarnamearr,  bigtimearr,  bigfluxarr,  bigfluxerrarr,  bigcorrfluxarr, bigbackarr,  bigraarr,  bigdecarr , filename =savefilename
 
+print,'bigstarname', bigstarnamearr[0:10]
+
 ;;think about sorting
 ;;s1 = sort(bigtimearr)
 ;;bigtimearr = bigtimearr(s1)
