@@ -54,7 +54,7 @@ while good_dir eq 1 do begin    ; while there is data to work with, and not an e
    good_dir = chk_dir(dirname)
    if good_dir eq 1 then begin  ;got a live one
 ;      print, 'starting photometry', systime(1) - st1
-      junk = do_calstar_photometry(ch, dirname)
+      junk = do_calstar_photometry(ch, dirname,'iracdata')
 ;      print, 'finished photometry', systime(1) - st1
 
       if ti eq orig_num then begin ;;+ 100
