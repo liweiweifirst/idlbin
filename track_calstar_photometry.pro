@@ -43,7 +43,7 @@ ti = 42200
 print, 'ti to start', ti
 while good_dir eq 1 do begin    ; while there is data to work with, and not an empty directory
 ;;   if (ti ) eq 41000 then ti = 41100
-   if (ti ) eq 42600 then ti = 43100
+   if (ti ) eq 42700 then ti = 43300
 ;;   endif else begin
 ;;      ti =ti + 100
 ;;   endelse
