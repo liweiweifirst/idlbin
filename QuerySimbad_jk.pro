@@ -1,6 +1,5 @@
-PRO QuerySimbad_jk, name, ra, de, id, Found = found, NED = ned, ERRMSG = errmsg, $
-    Verbose = verbose, CADC = cadc, CFA=cfa, Server=server, SILENT=silent, $
-    Print = print,Vmag=Vmag,Jmag=Jmag,Hmag=Hmag,Kmag=Kmag,parallax=parallax
+PRO QuerySimbad_jk,  ra, dec, name, Found = found, ERRMSG = errmsg, $
+    Verbose = verbose,  Print = print,Vmag=Vmag,Jmag=Jmag,Hmag=Hmag,Kmag=Kmag,parallax=parallax
 ;+
 ; NAME: 
 ;   QUERYSIMBAD
@@ -9,37 +8,26 @@ PRO QuerySimbad_jk, name, ra, de, id, Found = found, NED = ned, ERRMSG = errmsg,
 ;   Query the SIMBAD/NED/Vizier astronomical name resolver to obtain coordinates
 ;
 ; EXPLANATION: 
-;   Uses the IDL SOCKET command to query either the SIMBAD or NED nameserver 
-;   over the Web to return J2000 coordinates.  By default, QuerySimbad 
-;   first queries the Simbad database, then (if no match found) the NED 
-;   database, and then the Vizier database.
+;   Uses the IDL SOCKET command to query  the SIMBAD server 
+;   over the Web to return a star name given the J2000 coordinates.  
 ;    
 ;   For details on the SIMBAD service, see http://simbad.u-strasbg.fr/Simbad 
-;   and for the NED service, see http://ned.ipac.caltech.edu/
 ;
 ; CALLING SEQUENCE: 
-;    QuerySimbad, name, ra, dec, [ id, Found=, /NED, /CADC, ERRMSG=, /VERBOSE]
-;        /PRINT, Vmag=V, Jmag=J, Hmag=H, Kmag=Kmag, parallax=parallax
+;     QuerySimbad_jk, 280.93945, -32.45678, /VERBOSE
 ;
 ; INPUTS: 
-;    name - a scalar string containing the target name in SIMBAD (or NED)
-;           nomenclature. For SIMBAD details see
-;           http://vizier.u-strasbg.fr/cgi-bin/Dic-Simbad .
-;
-; OUTPUTS: 
 ;     ra -  Right ascension of the target in J2000.0 in *degrees*, scalar 
 ;     dec - declination of the target in degrees, scalar
 ;
+; OUTPUTS: 
+;     starid - name of the nearest object
+;  
 ; OPTIONAL INPUT KEYWORD:
-;     /CFA - if set, then use the Simbad server at the Center for Astrophysics
-;             rather than the default server in Strasbourg, France.
 ;     ERRMSG   = If defined and passed, then any error messages will be
 ;                  returned to the user in this parameter rather than
 ;                  depending on the MESSAGE routine in IDL.  If no errors are
 ;                  encountered, then a null string is returned. 
-;     /NED - if set, then only the nameserver of the NASA Extragalactic database
-;            is used to resolve the name and return coordinates.   Note that
-;           /NED cannot be used with Galactic objects
 ;     /VERBOSE - If set, then the HTTP-GET command is displayed
 ;     /PRINT - if set, then output coordinates are displayed at the terminal 
 ;            By default, the coordinates are displayed if no output parameters
@@ -120,22 +108,12 @@ PRO QuerySimbad_jk, name, ra, de, id, Found = found, NED = ned, ERRMSG = errmsg,
   ;;
   printerr = ~arg_present(errmsg)
   if ~printerr  then errmsg = ''
-  object = repstr(name,'+','%2B')
-  object = repstr(strcompress(object),' ','%20')
- ;; if keyword_set(Cadc) then message,'CADC keyword is no longer supported'
- ;; if keyword_set(cfa) then base = 'vizier.cfa.harvard.edu/viz-bin' ;else $
-     ;;   base = 'cdsweb.u-strasbg.fr/cgi-bin'
+
+
   base1 = "http://simbad.u-strasbg.fr/simbad/sim-coo?Coord="
   base2 = "&Radius=5&Radius.unit=arcmin&output.format=ASCII&coodisp1=d"
-  ra = 208.9279
-  dec = -32.1597
-;;  if keyword_set(NED) then begin
-;;     QueryURL = "http://" + base + "/nph-sesame/-o/NF?" + $
-;;                strcompress(object,/remove)
-;;  endif else begin
-;;     QueryURL = "http://" + base + "/nph-sesame/-oIF?" + $
-;;                strcompress(object,/remove)
-
+;;  ra = 208.9279
+;;  dec = -32.1597
 
   QueryURL = strcompress(base1 + string(ra) + string(dec) + base2,/remove)
   
@@ -155,47 +133,28 @@ PRO QuerySimbad_jk, name, ra, de, id, Found = found, NED = ned, ERRMSG = errmsg,
   idx=where(strpos(Result, 'Number of objects') ne -1, nlines)
   if nlines eq 1 then begin
      reads, strmid(Result[idx], 20), cnt
+     ;;but cnt is a string, want it to be an int
+     cnt = fix(cnt)
      print, 'number of returned objects', cnt
   endif
   
   if cnt GE 1 then begin
       if cnt GT 1 then begin 
           if ~keyword_set(SILENT) then $
-            message,/INF,'Warning - More than one match found for name '  + name
+            message,/INF,'Warning - More than one match found for position '  + ra + dec
           idx = idx[0]
       endif 	
       found=1   
-;      ra = 0.0d & de = 0.0d
-      reads,strmid(Result[idx],2),ra,de
 
-      if N_params() GT 3 then begin 
-          
-          idx2= where(strpos(Result, '%I.0 ') ne -1,cnt)
-          if cnt GT 0 then id = strtrim(strmid(Result[idx2],4),2) else $
-            if ~keyword_set(SILENT) then $
-            message,'Warning - could not determine primary ID',/inf 
-      endif	    
+      ;;now pull the name of the first star in the list
+      id2 = where(strpos(Result, '1|') ne -1, nlines)
+      reads,strmid(Result[id2],12,25),starname
+      ;;and remove some blank spaces
+      starname = strtrim(starname)
 
-      ; Get V mag if present
-      vi = where(strpos(Result, '%M.V ') ne -1,vcnt)
-      if vcnt GE 1 then reads,strmid(Result[vi],4),vmag
-
-      ; Get J mag if present
-      ji = where(strpos(Result, '%M.J ') ne -1,jcnt)
-      if jcnt GE 1 then reads,strmid(Result[ji],4),jmag
-
-      ; Get H mag if present
-      hi = where(strpos(Result, '%M.H ') ne -1,hcnt)
-      if hcnt GE 1 then reads,strmid(Result[hi],4),hmag
-
-      ; Get K mag if present
-      ki = where(strpos(Result, '%M.K ') ne -1,kcnt)
-      if kcnt GE 1 then reads,strmid(Result[ki],4),kmag
-
-      ; Get parallax if present
-      plxi = where(strpos(Result, '%X ') ne -1,plxcnt)
-      if plxcnt GE 1 then reads,strmid(Result[plxi],2),parallax
+      print, 'starname', starname
       
+       
 
   ENDIF ELSE BEGIN 
       errmsg = ['No objects returned by SIMBAD.   The server answered:' , $
@@ -205,10 +164,29 @@ PRO QuerySimbad_jk, name, ra, de, id, Found = found, NED = ned, ERRMSG = errmsg,
 	 message,strjoin(result),/info
       endif	 
   ENDELSE
-  if found GT 0 && ((N_params() LT 2) || keyword_set(print)) then $
-       print,adstring(ra,de,1)
         
   
   return 
 END 
+  
+
+    ; Get V mag if present
+;;      vi = where(strpos(Result, '%M.V ') ne -1,vcnt)
+;;      if vcnt GE 1 then reads,strmid(Result[vi],4),vmag
+
+      ; Get J mag if present
+;;      ji = where(strpos(Result, '%M.J ') ne -1,jcnt)
+;;      if jcnt GE 1 then reads,strmid(Result[ji],4),jmag
+
+      ; Get H mag if present
+;;      hi = where(strpos(Result, '%M.H ') ne -1,hcnt)
+;;      if hcnt GE 1 then reads,strmid(Result[hi],4),hmag
+
+      ; Get K mag if present
+;;      ki = where(strpos(Result, '%M.K ') ne -1,kcnt)
+;;      if kcnt GE 1 then reads,strmid(Result[ki],4),kmag
+
+      ; Get parallax if present
+;;      plxi = where(strpos(Result, '%X ') ne -1,plxcnt)
+;;      if plxcnt GE 1 then reads,strmid(Result[plxi],2),parallax
   
