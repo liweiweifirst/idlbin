@@ -1,4 +1,4 @@
-PRO QuerySimbad_jk,  ra, dec, name, Found = found, ERRMSG = errmsg, $
+Function QuerySimbad_jk,  ra, dec, Found = found, ERRMSG = errmsg, simbad = simbad, $
     Verbose = verbose,  Print = print,Vmag=Vmag,Jmag=Jmag,Hmag=Hmag,Kmag=Kmag,parallax=parallax
 ;+
 ; NAME: 
@@ -90,73 +90,65 @@ PRO QuerySimbad_jk,  ra, dec, name, Found = found, ERRMSG = errmsg, $
 ;     a parallax - jswift, Jan 2014
 ;-
 
-  compile_opt idl2
-  if N_params() LT 1 then begin
-     print,'Syntax - QuerySimbad, name, ra, dec, [ id, ]'
-     print,'                 Found=, /CFA, /NED, ERRMSG=, /VERBOSE]'
-     print,'   Input - object name, scalar string'
-     print,'   Output -  Ra, dec of object (degrees)'
-     return
-  endif
+;  compile_opt idl2
+;  if N_params() LT 1 then begin
+;     print,'Syntax - QuerySimbad, name, ra, dec, [ id, ]'
+;     print,'                 Found=, /CFA, /NED, ERRMSG=, /VERBOSE]'
+;     print,'   Input - object name, scalar string'
+;     print,'   Output -  Ra, dec of object (degrees)'
+;     return
+;  endif
   
   Catch, theError
   IF theError NE 0 THEN BEGIN
      Catch,/CANCEL
      void = cgErrorMsg(/Quiet)
-     RETURN
+;     RETURN
   ENDIF   
   ;;
   printerr = ~arg_present(errmsg)
   if ~printerr  then errmsg = ''
 
-
-  base1 = "http://simbad.u-strasbg.fr/simbad/sim-coo?Coord="
-  base2 = "&Radius=5&Radius.unit=arcmin&output.format=ASCII&coodisp1=d"
-;;  ra = 208.9279
-;;  dec = -32.1597
-
-  QueryURL = strcompress(base1 + string(ra) + string(dec) + base2,/remove)
+  ;;to search SIMBAD
+  ;;------------------------------------------------------
+  if keyword_set(simbad) then begin
+     base1 = "http://simbad.u-strasbg.fr/simbad/sim-coo?Coord="
+     base2 = "&Radius=2&Radius.unit=arcmin&output.format=ASCII&coodisp1=d"
+     QueryURL = strcompress(base1 + string(ra) +  string(dec) + base2,/remove)
   
-;;  endelse
-  ;;
+
   if keyword_set(verbose) then print,queryURL
   Result = webget(QueryURL)
   found = 0
   ;;
   if keyword_set(Verbose) then print, Result.Text
-  
   Result=Result.Text
-  help, Result
- ;;  if arg_present(server) then $ 
- ;;       server = strmid(result[1],2,1)
-; look for J2000 coords
+
   idx=where(strpos(Result, 'Number of objects') ne -1, nlines)
   if nlines eq 1 then begin
-     reads, strmid(Result[idx], 20), cnt
+     cnt = strmid(Result[idx], 20)
      ;;but cnt is a string, want it to be an int
      cnt = fix(cnt)
-     print, 'number of returned objects', cnt
+;     print, 'number of returned objects', cnt
   endif
   
   if cnt GE 1 then begin
-      if cnt GT 1 then begin 
-          if ~keyword_set(SILENT) then $
-            message,/INF,'Warning - More than one match found for position '  + ra + dec
-          idx = idx[0]
-      endif 	
-      found=1   
+     if cnt GT 1 then begin 
+        message,/INF,strcompress('Warning - '+ string(cnt)+ ' matches found for position '  )
+     endif 	
+     found=1   
 
-      ;;now pull the name of the first star in the list
-      id2 = where(strpos(Result, '1|') ne -1, nlines)
-      reads,strmid(Result[id2],12,25),starname
+     ;;now pull the name of the first star in the list
+     id2 = where(strpos(Result, '1|') ne -1, nlines)
+     print, 'nlines 1', nlines
+     print, 'Result: ', Result[id2]
+     starname = strmid(Result[id2[0]],13,25)
       ;;and remove some blank spaces
-      starname = strtrim(starname)
+     starname = strtrim(starname)
 
-      print, 'starname', starname
-      
-       
+      if keyword_set(Verbose) then print, 'Nearest star: ', starname
 
-  ENDIF ELSE BEGIN 
+   ENDIF ELSE BEGIN 
       errmsg = ['No objects returned by SIMBAD.   The server answered:' , $
                  strjoin(result)]
       if printerr then begin
@@ -164,9 +156,40 @@ PRO QuerySimbad_jk,  ra, dec, name, Found = found, ERRMSG = errmsg, $
 	 message,strjoin(result),/info
       endif	 
   ENDELSE
-        
+
+
+  endif
   
-  return 
+  ;;to search NEXSCI
+  ;;------------------------------------------------------
+  
+  base1 = "http://exoplanetarchive.ipac.caltech.edu/cgi-bin/nstedAPI/nph-nstedAPI?table=exoplanets&ra="
+  base2 = "&dec="
+  base3 = "&radius=2%20minutes&select=pl_hostname"
+  QueryURL = strcompress(base1 + string(ra) + base2 + string(dec) + base3,/remove_all)
+  if keyword_set(verbose) then print,queryURL
+
+  Result = webget(QueryURL)
+  found = 0
+  ;;Result=Result.Text
+  if keyword_set(Verbose) then print, Result
+  
+  cnt = n_elements(strlen(result.text))
+  if cnt ge 2 then begin
+     if cnt gt 2 then print, strcompress('Warning - '+ string(cnt)+ ' matches found for position '  )
+     firstline = strsplit(result.text[1],',',/extract)
+     starname = firstline[0]
+
+  endif else begin
+       errmsg = ['No objects returned by SIMBAD.   The server answered:' , $
+                 strjoin(result)]
+      if printerr then begin
+         message, errmsg[0], /info	
+	 message,strjoin(result),/info
+      endif	 
+  ENDELSE
+
+  return, starname
 END 
   
 
