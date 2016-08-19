@@ -3,9 +3,9 @@ function find_chname, dirname
   ch2 = 0
   ch1 = 0
 
-  ch2 = file_test(dirname + 'ch2', /Directory)
-  ch1 = file_test(dirname + 'ch1', /Directory)
-  
+  ch2 = file_test(strcompress(dirname + '/ch2',/remove_all), /Directory)
+  ch1 = file_test(strcompress(dirname + '/ch1',/remove_all), /Directory)
+
   if ch1 eq 1 then chname = 'ch1'
   if ch2 eq 1 then chname = 'ch2'
   if ch1 eq 1 and ch2 eq 1 then chname = ['ch1', 'ch2']
