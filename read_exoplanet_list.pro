@@ -6,11 +6,13 @@ function read_exoplanet_list, calculate = calculate
   planets = planets.text[22:*]
   aorname = strmid(planets, 106, 8)  ;; will be screwed if format of this file changes
   min_dur = strmid(planets, 71, 6)
-
+  start_time = strmid(planets, 79, 21)
+  
   ;;pare down to only include those longer than some threshold
   thresh = 120  ;two hours seems appropriate for now
   longstare = where(min_dur gt thresh, n_longstare)
   aorname = aorname(longstare)
+  start_time = start_time(longstare)
   
   if keyword_set(calculate) then begin
      ;;do a few calculations
