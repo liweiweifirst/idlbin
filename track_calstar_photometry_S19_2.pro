@@ -1,6 +1,6 @@
 pro track_calstar_photometry_S19_2, savefilename,ch, make_plot = make_plot, binning = binning
-;;track_calstar_photometry,'/Users/jkrick/irac_warm/calstars/track_calstar_ch2.sav',2, /make_plot,/binning
-;;  track_calstar_photometry,'/Users/jkrick/irac_warm/calstars/track_calstar_ch1.sav', 1, /make_plot,/binning
+;;track_calstar_photometry_S19_2,'/Users/jkrick/irac_warm/calstars/track_calstar_ch2.sav',2, /make_plot,/binning
+;;  track_calstar_photometry_S19_2,'/Users/jkrick/irac_warm/calstars/track_calstar_ch1.sav', 1, /make_plot,/binning
  st1 = systime(1)
 
                                 ;am I using the right corrections for
@@ -15,16 +15,16 @@ if ch eq 2 then fits_read, '/Users/jkrick/irac_warm/calstars/arrayloccorr/ch2_ph
  
    
 ;;make a list of all directories and read that in
-topdir = '/Users/jkrick/irac_warm/calstars/S19_2/'
+topdir = '/Users/jkrick/external/irac_warm/calstars/S19_2/'
 command  = strcompress('ls ' + topdir +' > dirlist.txt')
 spawn, command
 readcol,strcompress(topdir + 'dirlist.txt'), dirlist, format = '(A)'
 
 for gi = 1, n_elements(dirlist) - 1 do begin   
-   dirname = strcompress('/Users/jkrick/irac_warm/calstars/S19_2/' +dirlist(gi),/remove_all)
-   print, 'dirname ', dirname
+   dirname = strcompress('/Users/jkrick/external/irac_warm/calstars/S19_2/' +dirlist(gi),/remove_all)
+;;   print, 'dirname ', dirname
 ;      print, 'starting photometry', systime(1) - st1
-      junk = do_calstar_photometry(ch, dirname)
+      junk = do_calstar_photometry(ch, dirname, 'SHA')
 ;      print, 'finished photometry', systime(1) - st1
 
       if gi eq 1 then begin ;;+ 100
@@ -173,11 +173,17 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
 ;                             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', title = 'Ch' + string(ch), xmajor = 7 ) ;,- bigtimearr(0))/60./60./ 24.
               dummy = LABEL_DATE(DATE_FORMAT=['%D-%M-%Y'])
               print, min(bin_time), 'min(bin_time)'
-              pb = errorplot(bin_time , bin_corrflux/median(bin_corrflux[0:10]), $
-                             bin_fluxerrarr/median(bin_corrflux), '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
-                             sym_filled = 1, ytitle = 'Binned Corrected Flux',color = colornames(n), overplot = pb,$
+;;              pb = errorplot(bin_time , bin_corrflux/median(bin_corrflux[0:10]), $
+;;                             bin_fluxerrarr/median(bin_corrflux), '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
+;;                             sym_filled = 1, ytitle = 'Binned Corrected Flux Density',color = colornames(n), overplot = pb,$
+;;                             yrange = [0.95,1.05], xrange = [2456293, max(bin_time) + 300.],  XTICKUNITS = ['Time'], $ ;xrange = [min(bin_time),max(bin_time) + 300.], 2.45714e+06
+;;                             XTICKFORMAT='LABEL_DATE', title = 'Ch' + string(ch),  xminor = 11, errorbar_capsize = 0.1, /buffer) ;,  xtickinterval = 1, xmajor = 7,- bigtimearr(0))/60./60./ 24.
+
+              pb = plot(bin_time , bin_corrflux/median(bin_corrflux[0:10]), $
+                             '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
+                             sym_filled = 1, ytitle = 'Binned Corrected Flux Density',color = colornames(n), overplot = pb,$
                              yrange = [0.95,1.05], xrange = [2456293, max(bin_time) + 300.],  XTICKUNITS = ['Time'], $ ;xrange = [min(bin_time),max(bin_time) + 300.], 2.45714e+06
-                             XTICKFORMAT='LABEL_DATE', title = 'Ch' + string(ch),  xminor = 11, errorbar_capsize = 0.1, /buffer) ;,  xtickinterval = 1, xmajor = 7,- bigtimearr(0))/60./60./ 24.
+                             XTICKFORMAT='LABEL_DATE', title = 'Ch' + string(ch),  xminor = 11) ;,  xtickinterval = 1, xmajor = 7,- bigtimearr(0))/60./60./ 24.
 
               pbl = plot(bin_time, intarr(n_elements(bin_time)) + 1.0, overplot = pb)
 
@@ -234,7 +240,7 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
      
   endif
 basedir = '/Volumes/IRAC/Calibration/Trending/'
-plotname = strcompress(basedir + 'ch' + string(ch) + '_track_binned.png',/remove_all)
+plotname = strcompress(basedir + 'ch' + string(ch) + '_track_binned_test.png',/remove_all)
 if keyword_set(binning) then begin
    pb.save, plotname
    plotname = strcompress(basedir + 'ch' + string(ch) + '_track_corrected.png',/remove_all)

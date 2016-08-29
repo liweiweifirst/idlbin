@@ -39,11 +39,11 @@ endelse
 good_dir = 1
 ;once I successfully make the save file with all S19.2 calstars up to
 ;June 2016, can just start there and move forward.
-ti = 42200
+;ti = 42600
 print, 'ti to start', ti
 while good_dir eq 1 do begin    ; while there is data to work with, and not an empty directory
 ;;   if (ti ) eq 41000 then ti = 41100
-   if (ti ) eq 42700 then ti = 43300
+   if (ti ) eq 42700 then ti = 43100
 ;;   endif else begin
 ;;      ti =ti + 100
 ;;   endelse
@@ -122,13 +122,13 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
 
 ;;     loadct, 42, ncolors = n_elements(names), RGB_TABLE = colornames
      normvals = fltarr(n_elements(names))
-     for n = 0, n_elements(names) - 1 do begin
+     for n = 0,  n_elements(names) - 1 do begin
         
         an = where(bigstarnamearr eq names(n), count)
         if count gt 10 then begin
            print, 'n, name, color', n, names(n), colornames(n), n_elements(bigtimearr(an))
            
-           if n eq 0 then print, 'bigtimearr', bigtimearr(an)
+           ;;if n eq 0 then print, 'bigtimearr', bigtimearr(an)
                                               
            ;check normalization
            junkcorr = bigcorrfluxarr(an)
@@ -207,12 +207,20 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
 ;                             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', title = 'Ch' + string(ch), xmajor = 7 ) ;,- bigtimearr(0))/60./60./ 24.
               dummy = LABEL_DATE(DATE_FORMAT=['%D-%M-%Y'])
               print, min(bin_time), 'min(bin_time)'
-              pb = errorplot(bin_time , bin_corrflux/median(bin_corrflux[0:9]), $
+              if n_elements(bin_corrflux) lt 30 then nend = n_elements(bin_corrflux) - 1 else nend = 30
+              pb = errorplot(bin_time , bin_corrflux/median(bin_corrflux[0:nend]), $
                              bin_fluxerrarr/median(bin_corrflux), '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
                              sym_filled = 1, ytitle = 'Binned Corrected Flux',color = colornames(n), overplot = pb,$
                              yrange = [0.95,1.05], xrange = [2456293, max(bin_time) + 300.],  XTICKUNITS = ['Time'], $ ;xrange = [min(bin_time),max(bin_time) + 300.], 2.45714e+06
                              XTICKFORMAT='LABEL_DATE', title = 'Ch' + string(ch),  xminor = 11, errorbar_capsize = 0.1, /buffer) ;,  xtickinterval = 1, xmajor = 7,- bigtimearr(0))/60./60./ 24.
 
+;;              pb = plot(bin_time , bin_corrflux/median(bin_corrflux[0:nend]), $
+;;                        '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
+;;                        sym_filled = 1, ytitle = 'Binned Corrected Flux Density',color = colornames(n), overplot = pb,$
+;;                        yrange = [0.95,1.05], xrange = [2456293, max(bin_time) + 300.],  XTICKUNITS = ['Time'], $ ;xrange = [min(bin_time),max(bin_time) + 300.], 2.45714e+06
+;;                        XTICKFORMAT='LABEL_DATE', title = 'Ch' + string(ch),  xminor = 11) ;,  xtickinterval = 1, xmajor = 7,- bigtimearr(0))/60./60./ 24.
+
+               
               pbl = plot(bin_time, intarr(n_elements(bin_time)) + 1.0, overplot = pb)
 
                             ;;add lines to the plot for May 1 2015 and Sep 17 2015
@@ -226,8 +234,8 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
               ;;print, 'S19.2 Julian', julian
               x = fltarr(5) + Julian
               y = findgen(5)
-              pbll = plot(x, y, overplot = pb, thick = 2)
-              t = text(Julian- 55., 0.960, 'S19.2',orientation = 50,/data, overplot = pb)
+;;              pbll = plot(x, y, overplot = pb, thick = 2)
+;;              t = text(Julian- 55., 0.960, 'S19.2',orientation = 50,/data, overplot = pb)
 
 
               JDCNV, 2015, 10, 2,0., Julian
