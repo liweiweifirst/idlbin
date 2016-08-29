@@ -65,7 +65,7 @@ Function exoplanet_SNR, Kmag, sp_type, ch, transit_depth, bin_scale, eclipse = e
 
   ;;need to calculate frame time best suited for this target
   exptime = find_exptime(source_mJy, ch)
-;  print, 'exptime', exptime
+  print, 'exptime', exptime
   ;;given frame time; how many frames = input binning scale 
   n_frames = fix(bin_scale*60./exptime) 
 
