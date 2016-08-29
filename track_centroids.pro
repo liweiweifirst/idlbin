@@ -2,8 +2,16 @@ pro track_centroids
 ;main code to automatically track centroids as a function of pitch
 ;angle for all warm mission long stares
 
-;;  COMMON centroid_block, data, header
+;;need the AOR_keys and campaign numbers of long stares
+  ;;AND need the ra and dec of the AORs that are 30min prior to those
+  ;;observations
+  
+  ;;warning: be careful of earth point and s2pcals and other
+  ;;non-listed observations which could occur directly before a long stare
 
+
+
+  
   ;;find which AORs need to be examined
   aorname = read_exoplanet_list()
   ;; for now just focus on one AOR
