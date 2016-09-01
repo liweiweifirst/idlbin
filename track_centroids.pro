@@ -1,7 +1,7 @@
 pro track_centroids
 ;main code to automatically track centroids as a function of pitch
 ;angle for all warm mission long stares
-
+  COMMON centroid_block, aordictionary
 ;;need the AOR_keys and campaign numbers of long stares
   ;;AND need the ra and dec of the AORs that are 30min prior to those
   ;;observations
@@ -13,15 +13,19 @@ pro track_centroids
 
   
   ;;find which AORs need to be examined
-  aorname = read_exoplanet_list()
+  ;;need to also return JD and campaign
+  zero = read_exoplanet_list()
+  print, aorname(0), start_jd(0)
+
   ;; for now just focus on one AOR
-  aorname = '45675776'
+  aorname = aorname(0)
   
   ;;will need to figure out which ones are new
-  ;;read in old list: need to be saving these
-  ;;is it the same?  array_equal
-  ;;if not then find the new ones: ??? sort on AORname and look for
-  ;;greater numbers, but this won't always work.
+  ;;compare JD of new lists
+
+  ;;will need to get this AOR from the archive
+  ;;fake it for now
+  aorname = '45675776'
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/WASP-15b/r'
   dirname = strcompress(basedir + aorname,/remove_all)
   ;;find which channels are in this AOR
