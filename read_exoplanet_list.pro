@@ -29,51 +29,65 @@ function read_exoplanet_list, calculate = calculate
   ;;make an array which holds the previous 1 hour of AORnames, ra,
   ;;dec, and start times
   ;;make this a pointer array so that the number of elements can vary
-  ;;since we don't know ahead of time how many AORs will fill that 1 hour
-  preaor = ptrarr(n_elements(start_jd),/allocate_heap)
-  prera = ptrarr(n_elements(start_jd),/allocate_heap)
-  predec =ptrarr(n_elements(start_jd),/allocate_heap)
-  prejd = ptrarr(n_elements(start_jd),/allocate_heap)
+  ;;since we don't know ahead of time how many AORs will fill
+  ;;that 1 hour
+  ;;maybe I really want a list
+  preaor = list(length=n_elements(start_jd));ptrarr(n_elements(start_jd),/allocate_heap)
+  prera = list(length=n_elements(start_jd)); ptrarr(n_elements(start_jd),/allocate_heap)
+  predec = list(length=n_elements(start_jd));ptrarr(n_elements(start_jd),/allocate_heap)
+  prejd = list(length=n_elements(start_jd));ptrarr(n_elements(start_jd),/allocate_heap)
 
   ;;these first two are set
-  *preaor[0] = 0  
-  *preaor[1] = aorname[0]
-  *prera[0] = 0               
-  *prera[1] = ra[0]
-  *predec[0] = 0               
-  *predec[1] = dec[0]
-  *prejd[0] = 0               
-  *prejd[1] = start_jd[0]
+  ;;*preaor[0] = 0  
+  ;;*preaor[1] = aorname[0]
+  ;;*prera[0] = 0               
+  ;;*prera[1] = ra[0]
+  ;;*predec[0] = 0               
+  ;;*predec[1] = dec[0]
+  ;;*prejd[0] = 0               
+  ;;*prejd[1] = start_jd[0]
+  preaor[0] = 0  
+  preaor[1] = aorname[0]
+  prera[0] = 0               
+  prera[1] = ra[0]
+  predec[0] = 0               
+  predec[1] = dec[0]
+  prejd[0] = 0               
+  prejd[1] = start_jd[0]
 
   for j = 2, n_elements(start_jd) -1 do begin
      pre = where(start_jd gt start_jd(j) - 0.05 and start_jd lt start_jd(j), n_pre)
      if n_pre gt 0 then begin
-        *preaor[j] = aorname(pre)
-        *prera[j] = ra(pre)
-        *predec[j] = dec(pre)
-        *prejd[j] = start_jd(pre)
+        preaor[j] = aorname(pre)
+        prera[j] = ra(pre)
+        predec[j] = dec(pre)
+        prejd[j] = start_jd(pre)
      endif else begin
         ;;just use the previous single AOR - just means the one before
         ;;                                   it is longer than 1 hour.
-        *preaor[j] = aorname(j-1)
-        *prera[j] = ra(j-1)
-        *predec[j] = dec(j-1)
-        *prejd[j] = start_jd(j-1)
+        preaor[j] = aorname(j-1)
+        prera[j] = ra(j-1)
+        predec[j] = dec(j-1)
+        prejd[j] = start_jd(j-1)
      endelse
      
   endfor
 
   ;;pare down to only include those longer than some threshold
   thresh = 120  ;two hours seems appropriate for now
-  longstare = where(min_dur gt thresh, n_longstare)
+  longstare = where(min_dur gt thresh, n_longstare, complement = tooshort)
   aorname = aorname(longstare)
   start_jd = start_jd(longstare)
   campaign_name = campaign_name(longstare)
   pid = pid(longstare)
-  *preaor = *preaor(longstare)
-  *prera = *prera(longstare)
-  *predec = *predec(longstare)
-  *prejd = *prejd(longstare)
+  preaor.remove, tooshort
+  prera.remove, tooshort
+  predec.remove, tooshort
+  prejd.remove, tooshort
+  ;;*preaor = *preaor(longstare)
+  ;;*prera = *prera(longstare)
+  ;;*predec = *predec(longstare)
+  ;;*prejd = *prejd(longstare)
   
   ;;and want to make sure they really are stares and not dithers
   ;;so compare to Elena's list of exoplanet and BD pids and
@@ -87,11 +101,10 @@ function read_exoplanet_list, calculate = calculate
   endfor
   print, starepid
   bad = where(starepid lt 1, nbad)
-  print, 'bad', pid(bad)
-  print, 'nbad', nbad
-  if nbad gt 0 then remove, bad, pid, campaign_name, start_jd, aorname, *preaor, *prera, *predec, *prejd
+  if nbad gt 0 then remove, bad, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd
   
-    
+
+  ;;look at how much total data/time we are talking about here
   if keyword_set(calculate) then begin
      ;;do a few calculations
      ;;print, TargetName(longstare)
