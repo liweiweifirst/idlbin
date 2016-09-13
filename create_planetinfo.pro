@@ -665,7 +665,84 @@ chname = 0
 
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'EPIC_203776696b'
+  ra_ref = 246.61125000
+  dec_ref = -24.97000000
+  aorname_ch2= [ 'r57769472'] 
 
+  basedir ='~/external/irac_warm/k2/' 
+ 
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
+  planetname = 'EPIC_204890128b'
+  ra_ref = 244.141815
+  dec_ref = -20.400534
+  aorname_ch2= [ 'r57767936'] 
+
+  basedir ='~/external/irac_warm/k2/' 
+ 
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
+  planetname = 'EPIC_205084841b'
+  ra_ref = 248.399277
+  dec_ref = -19.479185
+  aorname_ch2= [ 'r57766144'] 
+
+  basedir ='~/external/irac_warm/k2/' 
+ 
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
+  planetname = 'EPIC_210558622b'
+  ra_ref = 60.79283333
+  dec_ref = 16.34744722
+  aorname_ch2= [ 'r58854912'] 
+
+  basedir ='~/external/irac_warm/k2/' 
+ 
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
+  planetname = 'EPIC_210731500b'
+  ra_ref = 66.23620833       
+  dec_ref = 18.82741667 
+  aorname_ch2= [ 'r58852864'] 
+
+  basedir ='~/external/irac_warm/k2/' 
+ 
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
+  planetname = 'EPIC_210968143b'
+  ra_ref = 59.15241667       
+  dec_ref = 22.47263056  
+  aorname_ch2= [ 'r58854144'] 
+
+  basedir ='~/external/irac_warm/k2/' 
+ 
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
+  planetname = 'EPIC_212154564b'
+  ra_ref = 133.641182
+  dec_ref =  23.13289
+  aorname_ch2= [ 'r59268352'] 
+
+  basedir ='~/external/irac_warm/k2/' 
+ 
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
 ;---
   planetname = 'epic202083828'
   ra_ref = 94.206066
