@@ -11,7 +11,7 @@ function read_exoplanet_list, calculate = calculate
 ;;  start_time = strmid(planets, 79, 21)
 
 
-  readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/week749_test.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec, format = '(L10, I10, A, A, F10.4, D10.6, D10.6 )', delimiter='|', skipline = 1
+  readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/week749_test.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, I10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline = 1
   
   start_year = fix(strmid(startUTC, 0,4))
   start_month = fix(strmid(startUTC, 5,2))
@@ -24,7 +24,12 @@ function read_exoplanet_list, calculate = calculate
 
   ;;convert 3 digit campaign number to string
   campaign_name = strcompress('IRAC0'+ campaign + '00',/remove_all)
-  
+
+  ;;check if full or subarray
+  naxis = strarr(n_elements(readoutfull))
+  for r = 0, n_elements(readoutfull) - 1 do begin
+     if readoutfull[r] eq 't' then naxis[r] ='2' else naxis[r] ='3'
+  endfor
 
   ;;make an array which holds the previous 1 hour of AORnames, ra,
   ;;dec, and start times
@@ -80,6 +85,7 @@ function read_exoplanet_list, calculate = calculate
   start_jd = start_jd(longstare)
   campaign_name = campaign_name(longstare)
   pid = pid(longstare)
+  naxis = naxis(longstare)
   preaor.remove, tooshort
   prera.remove, tooshort
   predec.remove, tooshort
@@ -101,7 +107,8 @@ function read_exoplanet_list, calculate = calculate
   endfor
   print, starepid
   bad = where(starepid lt 1, nbad)
-  if nbad gt 0 then remove, bad, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd
+
+  if nbad gt 0 then remove, bad, pid, campaign_name, start_jd, aorname, naxis, preaor, prera, predec, prejd
   
 
   ;;look at how much total data/time we are talking about here
@@ -120,7 +127,6 @@ function read_exoplanet_list, calculate = calculate
      print, 'total size', total_size /1E6, 'G'
      
   endif
-  
 return, 0
   
 end
