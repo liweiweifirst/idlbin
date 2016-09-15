@@ -1,5 +1,6 @@
 pro phot_exoplanet_aor, planetname, apradius,chname, hybrid = hybrid, rawfile = rawfile, simulated = simulated
-;do photometry on any IRAC staring mode exoplanet data
+COMMON centroid_block
+;do photometry on any IRAC staring mode AOR
  t1 = systime(1)
 
 ;convert aperture radius in pixels into what get_centroids_for_calstar_jk uses 
@@ -36,37 +37,8 @@ print, 'using pmap file', pmapfile, apval
 
 exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
 ;exosystem = planetname
-if planetname eq 'WASP-13b' then exosystem = 'WASP-13 b'
-if planetname eq 'WASP-14b' then exosystem = 'WASP-14 b'
-if planetname eq 'WASP-15b' then exosystem = 'WASP-15 b'
-if planetname eq 'WASP-16b' then exosystem = 'WASP-16 b'
-if planetname eq 'WASP-38b' then exosystem = 'WASP-38 b'
-if planetname eq 'WASP-62b' then exosystem = 'WASP-62 b'
-if planetname eq 'WASP-52b' then exosystem = 'WASP-52 b'
-if planetname eq 'HAT-P-22' then exosystem = 'HAT-P-22 b'
-if planetname eq 'GJ1214' then exosystem = 'GJ 1214 b'
-if planetname eq '55Cnc' then exosystem = '55 Cnc e'
-if planetname eq 'HD209458' then exosystem = 'HD 209458 b'
-if planetname eq 'Kepler-5' then exosystem = 'Kepler-5 b'
-if planetname eq 'Kepler-17' then exosystem = 'Kepler-17 b'
-if planetname eq 'upsandb' then exosystem = 'upsilon And b'
-if planetname eq 'XO3' then exosystem = 'XO-3 b' 
-if planetname eq 'simul_XO3' then exosystem = 'XO-3 b' 
-if planetname eq 'tres2' then exosystem = 'TrES-2 b'
-if planetname eq 'WASP-63b' then exosystem = 'WASP-63 b'
-if planetname eq 'KOI069' then exosystem = 'Kepler-93 b'
 
 ;print, exosystem, 'exosystem'
-if planetname eq 'WASP-52b' then teq_p = 1315
-if planetname eq 'HD 7924 b' then begin
-   inclination = 85.
-   rp_rstar = 0.001
-endif
-if planetname eq 'upsandb' then begin
-   inclination = 90.
-   rp_rstar = 0.001  ;made up
-   mjd_transit = 0.
-endif
 
 if chname eq '2' then lambdaname  = '4.5'
 if chname eq '1' then lambdaname  = '3.6'
@@ -74,15 +46,10 @@ get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=tra
                        TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
                        INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra,DEC=dec,VMAG=vmag,$
                        DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose
-;ra = 1000.
+;;xx make sure ra and dec are coming from the track_centroids, not
+;;here
+;;but use this as needed for the other parameters.
 
-  print, 'parameters from create_planetinfo'
-   ra_ref = planetinfo[planetname, 'ra']
-   dec_ref = planetinfo[planetname, 'dec']
-   utmjd_center = planetinfo[planetname, 'utmjd_center']
-   period = planetinfo[planetname, 'period']
-   ra = ra_ref
-print, 'ra', ra_ref, 'dec', dec_ref
 if ra lt 400. then begin  ; that means get_exoplanet_data actually found the target
   ; ra_ref = double(ra)*15.D       ; comes in hours!;
   ; help, ra_ref
