@@ -2,6 +2,8 @@ pro track_centroids
 ;main code to automatically track centroids as a function of pitch
 ;angle for all warm mission long stares
   COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, spitzer_jd, ra_string, dec_string,  naxis
+
+  apradius = 2.25 ;;fix this for now
   
   ;;read in the ephemeris file of Spitzer positions only once 
   readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/spitzer_warm_ephemeris.txt',date, spitzer_jd, blank, blank, ra_string, dec_string, skipline = 74, delimiter = ',', format = '(A, D10, A, A, A, A )'
@@ -55,6 +57,7 @@ pro track_centroids
            print, 'pitch angle', pitchangle
 
            ;;do photometry
+           phot_exoplanet_aor,starname, apradius,strmid(chname[c],2), ra, dec, /hybrid 
         endif
         
      endfor                     ; for each channel
