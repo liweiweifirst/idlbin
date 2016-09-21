@@ -353,7 +353,7 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
 
 ;pick the normalization
   phase0 = planethash[aorname(0),'phase']
-  corrflux0 = planethash[aorname(1),'corrflux_d']
+  corrflux0 = planethash[aorname(0),'corrflux_d']
   se = where(phase0 gt 0.47 and phase0 lt 0.51)
   
   plot_corrnorm =  mean(corrflux0,/nan)

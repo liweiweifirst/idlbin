@@ -42,9 +42,7 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
 
   ;print, 'testing phase', (planethash[aorname(0),'phase'] )[0:10], (planethash[aorname(0),'phase'] )[600:610]
 
- xsweet = 15.12
- ysweet = 15.00
- 
+
 
 ;setup some arrays to hold binned values
   bin_corrfluxfinal = fltarr(n_elements(aorname))
@@ -86,17 +84,22 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
      xcen = planethash[aorname(a),'xcen']
      ycen = planethash[aorname(a),'ycen']
      flux = planethash[aorname(a),'flux']
+     mx =mean(xcen,/nan)
+     my =mean(ycen,/nan)
+     yposrange = [my - 0.2, my + 0.2]
+     xposrange = [mx - 0.2, mx + 0.2]
+     
 ;     print, 'first', xcen[350:360], ycen[350:360], flux[350:360]
 ;     print, 'second', xcen[6395:6405], ycen[6395:6405], flux[6395:6405]
 ;------------------------------------------------------
      print, 'n_elements time', n_elements(bin_timearr), n_elements(bin_xcen), n_elements(bin_phase)
      if keyword_set(timeplot) then begin ;make the plot as a function of time
         print, 'making plot as a function of time'
-        plotx = (bin_timearr-  time_0)/60./60./24.
+        plotx = (bin_timearr-  time_0)/60./60.
       
         plotx2 =(bin_timearr - bin_timearr(0))/60./60.
 ;;        help, bin_timearr
-;;        print,bin_timearr
+        print,'plotx', plotx
         if planetname eq 'WASP-14b' then begin
 ;;           plotx = plotx2
 ;;           setxrange = [0,359]
@@ -106,15 +109,17 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
            print, 'large plotx', plotx(0)
            plotx = plotx - (7800./24.)
            setxrange = [0, 900/24.]
-        endif
-        ending = 'time'
+           
+           ending = 'time'
         
-     endif else begin
-        plotx =  bin_phase ;;-1.09
-        setxrange =    [-0.5,1.5];[0.5,0.65]; [0.45,0.67];
-        ending = 'phase'
-     endelse
-     
+        endif else begin
+           ;plotx =  bin_phase     ;;-1.09
+           ;setxrange =    [-0.5,1.5] ;[0.5,0.65]; [0.45,0.67];
+           setxrange = [plotx(0), plotx(n_elements(plotx) - 1)]
+
+           ending = 'phase'
+        endelse
+     endif
      
      extra={xthick: 2, ythick:2, margin: 0.2, sym_size: 0.2,   sym_filled: 1, xstyle:1}
      corrnormoffset = 0         ;0.02
@@ -135,10 +140,10 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         bkgd_norm =  mean(bin_bkgd,/nan)
 ;           print, 'bin_xcen', bin_xcen
         print, 'plot_corrnorm', plot_corrnorm, mean(bin_corrfluxp)
-        pp = plot(plotx, bin_xcen, '1s',  $ ;title = planetname, $
+        pp = plot(plotx, bin_xcen, '1s',  title = planetname, $
                   color = colorarr[a], ytitle = 'X position', position = [0.2,0.78,0.9,0.91], ytickinterval = 0.1, $
                   xshowtext = 0, ytickformat = '(F10.2)', dimensions = [600, 900], _extra = extra, yminor = 0,$
-                  xrange = setxrange, yrange = [15.0,15.4]);, title = planetname ) ;, $, ymajor = 4 [22.85, 23.2]
+                  xrange = setxrange, yrange = xposrange);, title = planetname ) ;, $, ymajor = 4 [22.85, 23.2]
         
                                 ;turn off refreshing to make this quicker hopefully
 ;           pp.Refresh, /Disable
@@ -147,7 +152,7 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         pq= plot(plotx, bin_ycen, '1s',  color = colorarr[a], $
                  ytitle = 'Y position',  position = [0.2, 0.64, 0.9, 0.77],/current,  ytickinterval = 0.1,$
                  xshowtext = 0,ytickformat = '(F10.2)', _extra = extra, yminor = 0,$
-                 xrange = setxrange, yrange = [14.9,15.5]) ;, $, title = planetname , ymajor = 4
+                 xrange = setxrange, yrange = yposrange) ;, $, title = planetname , ymajor = 4
                                 ;xrange = setxrange); [230.85,231.15]
         
          pxy = plot(plotx, bin_xfwhm, '1s', color = 'blue', $
@@ -166,8 +171,8 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
         
         pt = plot(plotx, bin_bkgd/ bkgd_norm, '1s' , color = colorarr[a], $
                   ytitle = 'Norm. Bkgd',  margin = 0.2,position = [0.2, 0.22, 0.9, 0.35] , /current, xshowtext = 0,$
-                  ytickformat = '(F10.2)', _extra = extra, ytickinterval = .2, yminor = 0,$ 
-                  xrange = setxrange, yrange = [0.70, 1.4])  ;, $ title = planetname,ymajor = 4, position = [0.2, 0.36, 0.9, 0.49]
+                  ytickformat = '(F10.2)', _extra = extra, ytickinterval = .05, yminor = 0,$ 
+                  xrange = setxrange, yrange = [0.95, 1.05])  ;, $ title = planetname,ymajor = 4, position = [0.2, 0.36, 0.9, 0.49]
         
         
         pr = plot(plotx, bin_flux/plot_norm, '1s',  $
@@ -260,7 +265,7 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
      endif
      
 ;;      pr.xtitle = 'Time(Days)'
-pr.xtitle = 'Time(hours)'
+     pr.xtitle = 'Time(hours)'
   endif
 
  ;; pp.save, dirname +'multiplot_ch'+chname+'_'+ending+'.eps'
