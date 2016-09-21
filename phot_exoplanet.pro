@@ -391,12 +391,20 @@ for a =startaor,  stopaor do begin
 ;         abcdflux[0], ch, xfwhm[0], yfwhm[0], npcentroids[0]
          ;;read in a list of indices for rejecting some of the pmap
          ;;data points
+         if naxis eq 3 then begin
+            corrflux = pmap_correct(x_center,y_center,abcdflux,ch,xfwhm,yfwhm,NP = npcentroids,$
+                                    FUNC=fs,CORR_UNC=corrfluxerr, DATAFILE=pmapfile,NNEAREST=nn, $
+                                    R_USE = apradius, USE_PMAP = IMAIN) ;,/VERBOSE
+         endif else begin
+            corrflux = pmap_correct(x_center,y_center,abcdflux,ch,xfwhm,yfwhm,NP = npcentroids,$
+                                    FUNC=fs,CORR_UNC=corrfluxerr, DATAFILE=pmapfile,NNEAREST=nn, $
+                                    R_USE = apradius, USE_PMAP = IMAIN,/full) ;,/VERBOSE
+         endelse
+         
 
-         corrflux = pmap_correct(x_center,y_center,abcdflux,ch,xfwhm,yfwhm,NP = npcentroids,$
-                                 FUNC=fs,CORR_UNC=corrfluxerr, DATAFILE=pmapfile,NNEAREST=nn, $
-                                 R_USE = apradius, USE_PMAP = IMAIN) ;,/VERBOSE
+            
 ;         print, 'corrflux', corrflux[0:10]
-         ;corrflux = pmap_correct(x_center,y_center,abcdflux,ch,npcentroids,occdata, corr_unc = corrfluxerr, func = fs,$
+                                ;corrflux = pmap_correct(x_center,y_center,abcdflux,ch,npcentroids,occdata, corr_unc = corrfluxerr, func = fs,$
          ;                       datafile =pmapfile,/threshold_occ,/use_np) 
       endif else begin
                                 ;make up some junk for corrflux, so I can keep it as a variable in the rest of this
