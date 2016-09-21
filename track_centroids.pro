@@ -1,10 +1,10 @@
 pro track_centroids
 ;main code to automatically track centroids as a function of pitch
 ;angle for all warm mission long stares
-  COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, spitzer_jd, ra_string, dec_string,  naxis
-
+  COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, spitzer_jd, ra_string, dec_string,  naxis, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, bmjd,  backarr, backerrarr, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d
   apradius = 2.25 ;;fix this for now
-  
+  planethash = hash()  
+
   ;;read in the ephemeris file of Spitzer positions only once 
   readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/spitzer_warm_ephemeris.txt',date, spitzer_jd, blank, blank, ra_string, dec_string, skipline = 74, delimiter = ',', format = '(A, D10, A, A, A, A )'
 
@@ -54,15 +54,29 @@ pro track_centroids
            
            ;;calculate pitch angle of the ra and dec
            pitchangle = calcpitch(ra, dec, start_jd(na))
-           print, 'pitch angle', pitchangle
+           print, 'pitch angle ', pitchangle
 
+           ;;calculate pitch angle of previous aors
+           prepitchangle = calcpitch(prera, predec, prejd)
+           print, 'prior pitch angle(s) ', prepitchangle
+           print, 'is this working for multiple aors, should be ', n_elements(prera)
+           
            ;;do photometry
            phot_exoplanet_aor,starname, apradius,strmid(chname[c],2), ra, dec, /hybrid 
         endif
         
      endfor                     ; for each channel
      
+     ;;fill in that hash of hashes
+     ;;can only be one channel per AOR with this saving technique
+     keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor']
+     values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,starname,naxis,apradius,prera, predec, prejd, preaor)
+     planethash[aorname(na)] = HASH(keys, values)
+
   endfor                        ; for each AOR
-  
-  
+
+  ;;save
+  savename = '/Users/jkrick/external/irac_warm/trending/track_centroids.sav'
+  save, planethash, filename=savename
+
 end
