@@ -1,9 +1,7 @@
 pro phot_exoplanet_aor, planetname, apradius,chname, ra, dec, hybrid = hybrid, simulated = simulated, phase = phase
   ;do photometry on any IRAC staring mode AOR
-  print, 'planetname at top', apradius
 COMMON centroid_block
  t1 = systime(1)
- planethash = hash()  ;;XXXwait want to make this a dictionary?
 
 ;convert aperture radius in pixels into what get_centroids_for_calstar_jk uses 
 case apradius of
@@ -347,22 +345,10 @@ for a =startaor,  stopaor do begin
    degrade = factor*deltatime
    corrflux_d =  corrfluxarr +(corrfluxarr* degrade)
    
-;--------------------------------
-;fill in that hash of hases
-;--------------------------------
 
-
-      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'aor', 'bmjdarr', 'bkgd', 'bkgderr','np','phase', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','pixvals','corrflux_d']
-      values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, aorname(a), bmjd,  backarr, backerrarr, nparr, phase, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr,piarr, corrflux_d)
-      planethash[aorname(a)] = HASH(keys, values)
 endfor                          ;for each AOR
 
 
-   pmapname = strmid(pmapfile, 9, 6,/reverse_offset)
-   savename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_' + pmapname + '.sav',/remove_all)
-
-   save, planethash, filename=savename
-   print, 'saving planethash', savename
    print, 'time check', systime(1) - t1
 
 
