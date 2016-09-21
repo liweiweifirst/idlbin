@@ -17,11 +17,11 @@ function scpdata, aorname, campaign_name, chname
 
   remotebunc = strcompress('jkrick@sscdev100.ipac.caltech.edu:/sha/archive/proc/'+campaign_name + '/r' + string(aorname) + '/' + chname + '/bcd/\*bunc.fits',/remove_all)
   scpbunc = 'scp '+ remotebunc + '  .'
-  spawn, scpbunc
+ ; spawn, scpbunc
 
   remoteraw = strcompress('jkrick@sscdev100.ipac.caltech.edu:/stage/sha/archive/raw/campaign/'+campaign_name + '/r' + string(aorname) + '/' + chname + '/raw/\*dce.fits',/remove_all)
   scpraw = 'scp '+ remoteraw + '  .'
-  spawn, scpraw
+ ; spawn, scpraw
   
   return, 0
 end
