@@ -671,7 +671,7 @@ chname = 0
   dec_ref = -24.97000000
   aorname_ch2= [ 'r57769472'] 
 
-  basedir ='~/external/irac_warm/k2/' 
+  basedir ='/Volumes/Backup2/jk/irac_warm/k2/' 
  
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
@@ -682,7 +682,7 @@ chname = 0
   dec_ref = -20.400534
   aorname_ch2= [ 'r57767936'] 
 
-  basedir ='~/external/irac_warm/k2/' 
+  basedir ='/Volumes/Backup2/jk/irac_warm/k2/' 
  
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
@@ -693,7 +693,7 @@ chname = 0
   dec_ref = -19.479185
   aorname_ch2= [ 'r57766144'] 
 
-  basedir ='~/external/irac_warm/k2/' 
+  basedir ='/Volumes/Backup2/jk/irac_warm/k2/' 
  
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
@@ -704,7 +704,7 @@ chname = 0
   dec_ref = 16.34744722
   aorname_ch2= [ 'r58854912'] 
 
-  basedir ='~/external/irac_warm/k2/' 
+  basedir ='/Volumes/Backup2/jk/irac_warm/k2/' 
  
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
@@ -715,7 +715,7 @@ chname = 0
   dec_ref = 18.82741667 
   aorname_ch2= [ 'r58852864'] 
 
-  basedir ='~/external/irac_warm/k2/' 
+  basedir ='/Volumes/Backup2/jk/irac_warm/k2/' 
  
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
@@ -726,7 +726,7 @@ chname = 0
   dec_ref = 22.47263056  
   aorname_ch2= [ 'r58854144'] 
 
-  basedir ='~/external/irac_warm/k2/' 
+  basedir ='/Volumes/Backup2/jk/irac_warm/k2/' 
  
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
@@ -737,7 +737,7 @@ chname = 0
   dec_ref =  23.13289
   aorname_ch2= [ 'r59268352'] 
 
-  basedir ='~/external/irac_warm/k2/' 
+  basedir ='/Volumes/Backup2/jk/irac_warm/k2/' 
  
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)

@@ -3,6 +3,7 @@ dirname =  '/Users/jkrick/irac_warm/calstars/pmap_star_' + chname + '/'
 if chname eq 'ch2' then starname = 'bd67_1044' else starname = 'KF09T1'
 
 savename = strcompress(dirname + starname + '_phot_'+chname+'.sav',/remove_all)
+print, 'savename', savename
 restore, savename
 
 cd,dirname
