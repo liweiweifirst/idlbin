@@ -41,16 +41,8 @@ function read_exoplanet_list, calculate = calculate
   prera = list(length=n_elements(start_jd)); ptrarr(n_elements(start_jd),/allocate_heap)
   predec = list(length=n_elements(start_jd));ptrarr(n_elements(start_jd),/allocate_heap)
   prejd = list(length=n_elements(start_jd));ptrarr(n_elements(start_jd),/allocate_heap)
-
-  ;;these first two are set
-  ;;*preaor[0] = 0  
-  ;;*preaor[1] = aorname[0]
-  ;;*prera[0] = 0               
-  ;;*prera[1] = ra[0]
-  ;;*predec[0] = 0               
-  ;;*predec[1] = dec[0]
-  ;;*prejd[0] = 0               
-  ;;*prejd[1] = start_jd[0]
+  prepid =  list(length=n_elements(start_jd))
+  
   preaor[0] = 0  
   preaor[1] = aorname[0]
   prera[0] = 0               
@@ -59,14 +51,17 @@ function read_exoplanet_list, calculate = calculate
   predec[1] = dec[0]
   prejd[0] = 0               
   prejd[1] = start_jd[0]
+  prepid[0] = 0               
+  prepid[1] = pid[0]
 
   for j = 2, n_elements(start_jd) -1 do begin
-     pre = where(start_jd gt start_jd(j) - 0.05 and start_jd lt start_jd(j), n_pre)
+     pre = where(start_jd gt start_jd(j) - 0.0625 and start_jd lt start_jd(j), n_pre)
      if n_pre gt 0 then begin
         preaor[j] = aorname(pre)
         prera[j] = ra(pre)
         predec[j] = dec(pre)
         prejd[j] = start_jd(pre)
+        prepid[j] = pid(pre)
      endif else begin
         ;;just use the previous single AOR - just means the one before
         ;;                                   it is longer than 1 hour.
@@ -74,6 +69,7 @@ function read_exoplanet_list, calculate = calculate
         prera[j] = ra(j-1)
         predec[j] = dec(j-1)
         prejd[j] = start_jd(j-1)
+        prepid[j] = pid(j-1)
      endelse
      
   endfor
@@ -90,10 +86,7 @@ function read_exoplanet_list, calculate = calculate
   prera.remove, tooshort
   predec.remove, tooshort
   prejd.remove, tooshort
-  ;;*preaor = *preaor(longstare)
-  ;;*prera = *prera(longstare)
-  ;;*predec = *predec(longstare)
-  ;;*prejd = *prejd(longstare)
+  prepid.remove, tooshort
   
   ;;and want to make sure they really are stares and not dithers
   ;;so compare to Elena's list of exoplanet and BD pids and
@@ -108,7 +101,7 @@ function read_exoplanet_list, calculate = calculate
   print, starepid
   bad = where(starepid lt 1, nbad)
 
-  if nbad gt 0 then remove, bad, pid, campaign_name, start_jd, aorname, naxis, preaor, prera, predec, prejd
+  if nbad gt 0 then remove, bad, pid, campaign_name, start_jd, aorname, naxis, preaor, prera, predec, prejd, prepid
   
 
   ;;look at how much total data/time we are talking about here
