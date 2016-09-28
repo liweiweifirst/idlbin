@@ -1,5 +1,5 @@
 function dntojansky, dn, flux_conv, exptime, pixel_scale
-;flux_conv = .1198, .1443 Mjy/sr  /  Dn/s
+;flux_conv = .1198, .1447 Mjy/sr  /  Dn/s
 ;pixel_scale = 1.22
 
 mjypersr = dn*flux_conv/exptime
