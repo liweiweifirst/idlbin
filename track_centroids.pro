@@ -1,7 +1,7 @@
 pro track_centroids
 ;main code to automatically track centroids as a function of pitch
 ;angle for all warm mission long stares
-  COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, spitzer_jd, ra_string, dec_string,  naxis, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, bmjd,  backarr, backerrarr, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d
+  COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, prepid, spitzer_jd, ra_string, dec_string,  naxis, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, bmjd,  backarr, backerrarr, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d
   apradius = 2.25 ;;fix this for now
   planethash = hash()  
 
@@ -57,22 +57,46 @@ pro track_centroids
            print, 'pitch angle ', pitchangle
 
            ;;calculate pitch angle of previous aors
-           prepitchangle = calcpitch(prera, predec, prejd)
+           ppra = prera[na]
+           ppdec = predec[na]
+           ppjd = prejd[na]
+           prepitchangle = fltarr(n_elements(ppra))
+           for pp = 0, n_elements(prera[na]) - 1 do begin
+              prepitchangle[pp] = calcpitch(ppra[pp], ppdec[pp], ppjd[pp])
+           endfor
+           
            print, 'prior pitch angle(s) ', prepitchangle
-           print, 'is this working for multiple aors, should be ', n_elements(prera)
            
            ;;do photometry
-           phot_exoplanet_aor,starname, apradius,strmid(chname[c],2), ra, dec, /hybrid 
-        endif
-        
-     endfor                     ; for each channel
-     
-     ;;fill in that hash of hashes
-     ;;can only be one channel per AOR with this saving technique
+           phot_exoplanet_aor,starname, apradius,strmid(chname[c],2), ra, dec, aorname(na);, /hybrid
+
+           ;;do photometry on the previous AOR if it is the same
+           ;;target/pid
+           pppid = prepid[na]
+           ppaor = preaor[na]
+           print, 'testing pppid', pppid(n_elements(pppid) - 1),  pid[na], ppaor(n_elements(pppid) - 1)
+           if pppid(n_elements(pppid) - 1) eq pid[na] then begin
+              ;;scp over this aor from the archive
+              junk = scpdata(ppaor(n_elements(pppid) - 1), campaign_name(na), chname(c))
+
+              ;;do the photometry
+              phot_exoplanet_aor,starname, apradius,strmid(chname[c],2), ra, dec, ppaor(n_elements(pppid) - 1);, /hybrid
+           endif
+           
+        endif ;starname is a real name
+
+            ;;fill in that hash of hashes
+        ;;can only be one channel per AOR with this saving technique
+        ;;make sure new prepid, etc are in here
+        ;;and make sure this is savign all AORs of photometry
+        ;;including the preaorXXX
      keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor']
      values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,starname,naxis,apradius,prera, predec, prejd, preaor)
      planethash[aorname(na)] = HASH(keys, values)
 
+     endfor                     ; for each channel
+     
+ 
   endfor                        ; for each AOR
 
   ;;save
