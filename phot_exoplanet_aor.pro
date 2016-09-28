@@ -1,4 +1,4 @@
-pro phot_exoplanet_aor, planetname, apradius,chname, ra, dec, hybrid = hybrid, simulated = simulated, phase = phase
+pro phot_exoplanet_aor, planetname, apradius,chname, ra, dec, thisaor, hybrid = hybrid, simulated = simulated, phase = phase
   ;do photometry on any IRAC staring mode AOR
 COMMON centroid_block
  t1 = systime(1)
@@ -49,7 +49,8 @@ get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=tra
 
 
 ;---------------
-dirname = '/Users/jkrick/external/irac_warm/trending/'
+;dirname = '/Users/jkrick/external/irac_warm/trending/'
+dirname = '/Volumes/Backup2/jk/irac_warm/trending/' ;temporary while changing disks
 
 
 
@@ -57,12 +58,9 @@ if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pm
 else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
 fits_read,occ_filename, occdata, occheader
 
-startaor = 0
-stopaor =   n_elements(aorname) - 1
-for a =startaor,  stopaor do begin
    print, '----------------------------'
-   print, 'working on ',a, ' ', aorname(a)
-   dir = strcompress(dirname+ 'r' + string(aorname(a) ) ,/remove_all)
+   print, 'working on ', thisaor
+   dir = strcompress(dirname+ 'r' + string(thisaor ) ,/remove_all)
    CD, dir                      ; change directories to the correct AOR directory
    pwd
 
@@ -86,7 +84,7 @@ for a =startaor,  stopaor do begin
 
 
    for i =startfits, n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
-;       print, 'working on ', fitsname(i)         
+       print, 'working on ', fitsname(i)         
       header = headfits(fitsname(i)) ;
       sclk_obs= sxpar(header, 'SCLK_OBS')
       frametime = sxpar(header, 'FRAMTIME')
@@ -287,9 +285,9 @@ for a =startaor,  stopaor do begin
          peakpixDNarr[i] = peakpixDN
       endif
 
-      if a eq startaor and i eq startfits then begin
+     ;; if a eq startaor and i eq startfits then begin
          time_0 = bmjdarr(0)
-      endif
+     ;; endif
 
    endfor; for each fits file in the AOR
 
@@ -346,7 +344,6 @@ for a =startaor,  stopaor do begin
    corrflux_d =  corrfluxarr +(corrfluxarr* degrade)
    
 
-endfor                          ;for each AOR
 
 
    print, 'time check', systime(1) - t1
