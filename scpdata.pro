@@ -2,8 +2,8 @@ function scpdata, aorname, campaign_name, chname
   ;;copy data from sscdev100 archive to my machine
   
   ;;start with making the directory to house it
-  ;;  basedir = '/Volumes/external/'
-  basedir = '/Volumes/Backup2/jk/'  ;temporary while changing disks
+  basedir = '/Volumes/external/'
+  
   localname =strcompress(basedir +'irac_warm/trending/r' + string(aorname),/remove_all)
   print, 'localname ', localname
   spawn, 'mkdir '+ localname
@@ -12,22 +12,22 @@ function scpdata, aorname, campaign_name, chname
   cd, chname
   spawn, 'mkdir bcd'
   cd, 'bcd'
-
   if file_test('*bcd.fits') lt 1 then begin
      remotename = strcompress('jkrick@sscdev100.ipac.caltech.edu:/sha/archive/proc/'+campaign_name + '/r' + string(aorname) + '/' + chname + '/bcd/\*bcd.fits',/remove_all)
-     scpcommand = 'scp '+ remotename + '  .'
+     scpcommand = 'scp -q '+ remotename + '  .'
+     print, 'scp command', scpcommand
      spawn, scpcommand
   endif
   
   if file_test('*bunc.fits') lt 1 then begin
      remotebunc = strcompress('jkrick@sscdev100.ipac.caltech.edu:/sha/archive/proc/'+campaign_name + '/r' + string(aorname) + '/' + chname + '/bcd/\*bunc.fits',/remove_all)
-     scpbunc = 'scp '+ remotebunc + '  .'
+     scpbunc = 'scp -q '+ remotebunc + '  .'
      spawn, scpbunc
   endif
   
   if file_test('*dce.fits') lt 1 then begin
      remoteraw = strcompress('jkrick@sscdev100.ipac.caltech.edu:/stage/sha/archive/raw/campaign/'+campaign_name + '/r' + string(aorname) + '/' + chname + '/raw/\*dce.fits',/remove_all)
-     scpraw = 'scp '+ remoteraw + '  .'
+     scpraw = 'scp -q '+ remoteraw + '  .'
      spawn, scpraw
   endif
   
