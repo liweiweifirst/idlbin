@@ -49,8 +49,8 @@ get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=tra
 
 
 ;---------------
-;dirname = '/Users/jkrick/external/irac_warm/trending/'
-dirname = '/Volumes/Backup2/jk/irac_warm/trending/' ;temporary while changing disks
+dirname = '/Users/jkrick/external/irac_warm/trending/'
+
 
 
 
@@ -84,7 +84,7 @@ fits_read,occ_filename, occdata, occheader
 
 
    for i =startfits, n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
-       print, 'working on ', fitsname(i)         
+      ;; print, 'working on ', fitsname(i)         
       header = headfits(fitsname(i)) ;
       sclk_obs= sxpar(header, 'SCLK_OBS')
       frametime = sxpar(header, 'FRAMTIME')
