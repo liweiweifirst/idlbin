@@ -31,6 +31,10 @@ function read_exoplanet_list, calculate = calculate
      if readoutfull[r] eq 't' then naxis[r] ='2' else naxis[r] ='3'
   endfor
 
+  ;;convert aorname from long to a string for compatability with phot_exoplanet.pro
+  aorname = string(aorname)
+  aorname = strtrim(aorname, 1)  ;remove leading whitespaces
+  
   ;;make an array which holds the previous 1 hour of AORnames, ra,
   ;;dec, and start times
   ;;make this a pointer array so that the number of elements can vary
@@ -82,6 +86,8 @@ function read_exoplanet_list, calculate = calculate
   campaign_name = campaign_name(longstare)
   pid = pid(longstare)
   naxis = naxis(longstare)
+  datacollect36 =datacollect36(longstare)
+  datacollect45 =datacollect45(longstare)
   preaor.remove, tooshort
   prera.remove, tooshort
   predec.remove, tooshort
@@ -101,7 +107,7 @@ function read_exoplanet_list, calculate = calculate
   print, starepid
   bad = where(starepid lt 1, nbad)
 
-  if nbad gt 0 then remove, bad, pid, campaign_name, start_jd, aorname, naxis, preaor, prera, predec, prejd, prepid
+  if nbad gt 0 then remove, bad, pid, campaign_name, start_jd, aorname, naxis, preaor, prera, predec, prejd, prepid, datacollect36, datacollect45
   
 
   ;;look at how much total data/time we are talking about here
