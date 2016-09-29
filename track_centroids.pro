@@ -34,7 +34,6 @@ pro track_centroids
         
         ;;choose the first image to examine the header
         command  = strcompress( "find . -name 'SPITZER*_bcd.fits' > bcdlist.txt")
-        print, 'command', command
         spawn, command
         readcol,'bcdlist.txt',fitsname, format = 'A', /silent
         
@@ -43,10 +42,10 @@ pro track_centroids
            header = headfits(fitsname(0))
            ra = sxpar(header, 'RA_RQST')  ;need to use these so that I know when there is a blank channel
            dec = sxpar(header, 'DEC_RQST')
-           ;naxis = sxpar(header, 'NAXIS')
+           naxishere = sxpar(header, 'NAXIS')
            
            ;;figure out what the target of the AOR likely is:
-           starname = Query_starid( ra, dec,naxis(na), /Verbose)
+           starname = Query_starid( ra, dec,naxishere, /Verbose)
            print, 'starname: ', starname
 
          endif
