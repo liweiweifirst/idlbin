@@ -184,11 +184,13 @@ Function Query_starid,  ra, dec, naxis, Found = found, ERRMSG = errmsg, simbad =
       base3 = "&Radius.unit=arcmin&output.format=ASCII&coodisp1=d"
       if naxis eq '2' then narcmin = 2 else narcmin = 0.4
       QueryURL = strcompress(base1 + string(ra) +  string(dec) + base2 + string(narcmin) + base3,/remove)
+      print, 'query', QueryURL
       Result = webget(QueryURL)
       Result = Result.text
       if keyword_set(Verbose) then print, Result
       ;;how many objects did SIMBAD return?
       idx=where(strpos(Result, 'Number of objects') ne -1, nlines)
+      ;xxx figure out what to do here for just one object
       if nlines eq 1 then begin
          scnt = strmid(Result[idx], 20)
          ;;but cnt is a string, want it to be an int
