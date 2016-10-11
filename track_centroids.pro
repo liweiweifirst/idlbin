@@ -15,14 +15,14 @@ pro track_centroids
   ;;find which AORs need to be examined
   ;;need to also return JD and campaign
   zero = read_exoplanet_list()
-  print, 'aor', campaign_name(0), aorname(0)
+  print, n_elements(aorname),  'aors: ',  aorname
    
   ;;will need to figure out which ones are new
   ;;compare JD of new lists
   
   chname = ['ch1','ch2']
 
-  for na = 1,n_elements(aorname) - 1 do begin
+  for na = 2,n_elements(aorname) - 1 do begin
      print, 'starting on ',aorname(na)
 
      if datacollect36(na) eq 'f' then chname = ['ch2']
@@ -52,8 +52,7 @@ pro track_centroids
 
         
         if starname ne 'nostar' then begin  ;;got a live one
-           
-           
+                     
            ;;calculate pitch angle of the ra and dec
            pitchangle = calcpitch(ra, dec, start_jd(na))
            print, 'pitch angle ', pitchangle
@@ -77,6 +76,7 @@ pro track_centroids
            keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid']
            values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na], predec[na], prejd[na], preaor[na], prepid[na])
            planethash[aorname(na)] = dictionary(keys, values)
+              print, 'storing planethash for ', aorname(na)
 
      
            ;;do photometry on the previous AOR if it is the same
@@ -95,16 +95,15 @@ pro track_centroids
               ;;save relevant info
               ;;can only be one channel per AOR with this saving technique    
               values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle[0:(n_elements(pp) - 2)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 2)], ppdec[0:(n_elements(pp) - 2)], ppjd[0:(n_elements(pp) - 2)], ppaor[0:(n_elements(pp) - 2)], pppid[0:(n_elements(pp) - 2)])
-              planethash[preaorname ] = dictionary(keys, values)
-
+              planethash[preaorname] = dictionary(keys, values)
+              print, 'storing planethash for pre', preaorname
               
-           endif
+           endif                ; pre aor photometry
            
-        endif ;starname is a real name
+        endif                   ; starname is a real name
 
      endfor                     ; for each channel
      
-
   endfor                        ; for each AOR
 
   ;;save
