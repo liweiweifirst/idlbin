@@ -22,7 +22,7 @@ pro track_centroids
   
   chname = ['ch1','ch2']
 
-  for na = 2,n_elements(aorname) - 1 do begin
+  for na = 0,n_elements(aorname) - 1 do begin
      print, 'starting on ',aorname(na)
 
      if datacollect36(na) eq 'f' then chname = ['ch2']
