@@ -13,14 +13,14 @@ function scpdata, aorname, campaign_name, chname
   spawn, 'mkdir bcd'
   cd, 'bcd'
   if file_test('*bcd.fits') lt 1 then begin
-     remotename = strcompress('jkrick@sscdev100.ipac.caltech.edu:/sha/archive/proc/'+campaign_name + '/r' + string(aorname) + '/' + chname + '/bcd/\*bcd.fits',/remove_all)
+     remotename = strcompress('jkrick@sscdev100.ipac.caltech.edu:/sha/archive/proc/'+campaign_name + '/r' + string(aorname) + '/' + chname + '/bcd/\*_bcd.fits',/remove_all)
      scpcommand = 'scp -q '+ remotename + '  .'
      print, 'scp command', scpcommand
      spawn, scpcommand
   endif
   
   if file_test('*bunc.fits') lt 1 then begin
-     remotebunc = strcompress('jkrick@sscdev100.ipac.caltech.edu:/sha/archive/proc/'+campaign_name + '/r' + string(aorname) + '/' + chname + '/bcd/\*bunc.fits',/remove_all)
+     remotebunc = strcompress('jkrick@sscdev100.ipac.caltech.edu:/sha/archive/proc/'+campaign_name + '/r' + string(aorname) + '/' + chname + '/bcd/\*_bunc.fits',/remove_all)
      scpbunc = 'scp -q '+ remotebunc + '  .'
      spawn, scpbunc
   endif
