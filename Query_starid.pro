@@ -169,65 +169,74 @@ Function Query_starid,  ra, dec, naxis, Found = found, ERRMSG = errmsg, simbad =
      if cnt gt 2 then print, strcompress('Warning - '+ string(cnt)+ ' matches found for position '  )
      firstline = strsplit(result.text[1],',',/extract)
      starname = firstline[0]
-
-  ;;didn't find an object 
+     
+     ;;didn't find an object 
   endif else begin
-       print, 'No objects returned by NExScI. Searching SIMBAD';  The server answered:'+ (result)]
-      
-      
-      ;;need to then pick some other star in the field of view...
-      ;;either it is not a confirmed planet, or it's the off field of view
-      ;;search SIMBAD
-      
-      base1 = "http://simbad.u-strasbg.fr/simbad/sim-coo?Coord="
-      base2 = "&Radius="
-      base3 = "&Radius.unit=arcmin&output.format=ASCII&coodisp1=d"
-      if naxis eq '2' then narcmin = 2 else narcmin = 0.4
-      QueryURL = strcompress(base1 + string(ra) +  string(dec) + base2 + string(narcmin) + base3,/remove)
-      print, 'query', QueryURL
-      Result = webget(QueryURL)
-      Result = Result.text
-      if keyword_set(Verbose) then print, Result
-      ;;how many objects did SIMBAD return?
-      idx=where(strpos(Result, 'Number of objects') ne -1, nlines)
-      ;xxx figure out what to do here for just one object
-      if nlines eq 1 then begin
-         scnt = strmid(Result[idx], 20)
-         ;;but cnt is a string, want it to be an int
-         scnt = fix(scnt)
-         if keyword_set(Verbose) then print, 'SIMBAD number of matches: ', scnt
-
-         if scnt GT 1 then begin 
-            print,strcompress('Warning - '+ string(cnt)+ ' SIMBAD matches found for position '  )
-         endif 	
-         found=1   
-         
-         ;;now pull the name of the first star in the list
-         ;;may want to change this to pick something in good
-         ;;brightness range - but fact that it is in SIMBAD may be
-         ;;                   good enough
-         id2 = where(strpos(Result, '1|') ne -1, nlines)
-         ;;print, 'nlines 1', nlines
-         ;;print, 'Result: ', Result[id2]
-         starname = strmid(Result[id2[0]],13,25)
-         ;;and remove some blank spaces
-         starname = strtrim(starname)
-         
-         if keyword_set(Verbose) then print, 'Nearest star: ', starname      
-         
-      ENDIF ELSE BEGIN  ;;SIMBAD didn't find anything, now what??
-         print, ['No objects returned by SIMBAD.   The server answered:' , $
-                 strjoin(result)]
-         ;;
-         ;;figure out how to exit the program if the fov is blank
-         ;;(ie. subarray off FOV)
-         starname = 'nostar'
-      ENDELSE
-      
-   ENDELSE
+     print, 'No objects returned by NExScI. Searching SIMBAD' ;  The server answered:'+ (result)]
+     
+     
+     ;;need to then pick some other star in the field of view...
+     ;;either it is not a confirmed planet, or it's the off field of view
+     ;;search SIMBAD
+     
+     base1 = "http://simbad.u-strasbg.fr/simbad/sim-coo?Coord="
+     base2 = "&Radius="
+     base3 = "&Radius.unit=arcmin&output.format=ASCII&coodisp1=d"
+     if naxis eq '2' then narcmin = 2 else narcmin = 0.4
+     ;;dec needs to have a sign attached
+     if dec lt 0 then sdec = string(dec) else sdec = strcompress('+'+string(dec),/remove)
+     QueryURL = strcompress(base1 + string(ra) +  sdec + base2 + string(narcmin) + base3,/remove)
+     print, 'query', QueryURL
+     Result = webget(QueryURL)
+     Result = Result.text
+     if keyword_set(Verbose) then print, Result
+     ;;how many objects did SIMBAD return?
+     idx=where(strpos(Result, 'Number of objects') ne -1, nlines)
+                                ;xxx figure out what to do here for just one object
+     if nlines eq 1 then begin  ;got more than one object
+        scnt = strmid(Result[idx], 20)
+        ;;but cnt is a string, want it to be an int
+        scnt = fix(scnt)
+        if keyword_set(Verbose) then print, 'SIMBAD number of matches: ', scnt
+        
+        if scnt GT 1 then begin 
+           print,strcompress('Warning - '+ string(cnt)+ ' SIMBAD matches found for position '  )
+        endif 	
+        found=1   
+        
+        ;;now pull the name of the first star in the list
+        ;;may want to change this to pick something in good
+        ;;brightness range - but fact that it is in SIMBAD may be
+        ;;                   good enough
+        id2 = where(strpos(Result, '1|') ne -1, nlines)
+        ;;print, 'nlines 1', nlines
+        ;;print, 'Result: ', Result[id2]
+        starname = strmid(Result[id2[0]],13,25)
+        ;;and remove some blank spaces
+        starname = strtrim(starname)
+        
+        if keyword_set(Verbose) then print, 'Nearest star: ', starname      
+        
+     ENDIF ELSE BEGIN  ;;SIMBAD found either one star, or didn't find anything, now what??
+        
+        ;;check for single star
+        id1=where(strpos(Result, 'Object') ne -1, nlines)
+        if nlines eq 1 then begin
+           starname = strmid(Result[id1],7,9)
+        endif else begin
+           print, ['No objects returned by SIMBAD.   The server answered:' , $
+                   strjoin(result)]
+           ;;
+           ;;figure out how to exit the program if the fov is blank
+           ;;(ie. subarray off FOV)
+           starname = 'nostar'
+        ENDELSE
+        
+     ENDELSE
+  endelse
   
-  return, starname
-END 
+     return, starname
+  END 
   
 
     ; Get V mag if present
