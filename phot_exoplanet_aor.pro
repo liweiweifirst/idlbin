@@ -125,6 +125,8 @@ fits_read,occ_filename, occdata, occheader
          xfwhmarr = xarr
          yfwhmarr = xarr
          peakpixDNarr = xarr
+         piarr = fltarr(64*n_elements(fitsname),9*9)
+
       endif
       if i eq startfits and naxis ne 3 then begin
          xarr = fltarr(n_elements(fitsname))
@@ -142,6 +144,8 @@ fits_read,occ_filename, occdata, occheader
          xfwhmarr = xarr
          yfwhmarr = xarr
          peakpixDNarr = xarr
+         piarr = fltarr(n_elements(fitsname),9*9)
+
       endif
       fdarr = fltarr(n_elements(fitsname))
       fdarr[i] = framedly
@@ -210,6 +214,28 @@ fits_read,occ_filename, occdata, occheader
          peakpixDN = max(rawdata[21:24,229:232])
       endelse
       
+      ;;track the values of the 9x9 pixel box around the centroid
+      ;;        pi = track_box(im, x_center, y_center)   ; tb now a 25 x 64 element array
+      if naxis eq 3 then begin
+         if i eq startfits then nframe = 0
+         for subframe = 0, 63 do begin
+            earr = fltarr(81)
+            c = 0
+            
+            for xcoord = 11, 19 do begin
+               for ycoord = 11, 19 do begin
+                  ;;if xcoord eq 11 and ycoord eq 11 and subframe eq 0 then print, '[11, 11, 0]', im[xcoord, ycoord, subframe]
+                  earr[c] =  im[xcoord, ycoord, subframe]
+                  c++
+               endfor
+            endfor
+;            if subframe eq 0 then print, 'earr', earr
+            piarr[nframe,*] =earr
+            nframe++
+         endfor
+      endif
+
+      if naxis eq 2 then pi = im[(fix(x_center) - 4):(fix(x_center+4)), (fix(y_center) - 4):(fix(y_center+4))] ; now a 9x9x64 element array
 
      
 ;---------------------------------
@@ -251,21 +277,21 @@ fits_read,occ_filename, occdata, occheader
 ;---------------------------------
 
       if naxis eq 3 then begin  ; and i eq 0 then begin
-         xarr[i*63] = x_center[1:*]
-         yarr[i*63] = y_center[1:*]
-         fluxarr[i*63] = abcdflux[1:*]
-         fluxerrarr[i*63] = fs[1:*]
-         corrfluxarr[i*63] = corrflux[1:*]
-         corrfluxerrarr[i*63] = corrfluxerr[1:*]
-         timearr[i*63] = sclkarr[1:*]        
-         bmjd[i*63] = bmjdarr[1:*]
-         backarr[i*63] = back[1:*]
-         backerrarr[i*63] = backerr[1:*]
-         nparr[i*63] = np[1:*]
-         npcentroidsarr[i*63] = npcentroids[1:*]
-         xfwhmarr[i*63] = xfwhm[1:*]
-         yfwhmarr[i*63] = yfwhm[1:*]
-         peakpixDNarr[i*63] = peakpixDN[1:*]
+         xarr[i*64] = x_center[0:*]
+         yarr[i*64] = y_center[0:*]
+         fluxarr[i*64] = abcdflux[0:*]
+         fluxerrarr[i*64] = fs[0:*]
+         corrfluxarr[i*64] = corrflux[0:*]
+         corrfluxerrarr[i*64] = corrfluxerr[0:*]
+         timearr[i*64] = sclkarr[0:*]        
+         bmjd[i*64] = bmjdarr[0:*]
+         backarr[i*64] = back[0:*]
+         backerrarr[i*64] = backerr[0:*]
+         nparr[i*64] = np[0:*]
+         npcentroidsarr[i*64] = npcentroids[0:*]
+         xfwhmarr[i*64] = xfwhm[0:*]
+         yfwhmarr[i*64] = yfwhm[0:*]
+         peakpixDNarr[i*64] = peakpixDN[0:*]
       endif 
       if naxis eq 2 then begin; and i eq 0 then begin
          xarr[i] = x_center
@@ -283,6 +309,7 @@ fits_read,occ_filename, occdata, occheader
          xfwhmarr[i] = xfwhm
          yfwhmarr[i] = yfwhm
          peakpixDNarr[i] = peakpixDN
+         piarr[i,*] = pi
       endif
 
      ;; if a eq startaor and i eq startfits then begin

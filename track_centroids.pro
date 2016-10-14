@@ -1,7 +1,8 @@
-pro track_centroids
+pro track_centroids, pixval=pixval
+  
 ;main code to automatically track centroids as a function of pitch
 ;angle for all warm mission long stares
-  COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, prepid, spitzer_jd, ra_string, dec_string,  naxis, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, bmjd,  backarr, backerrarr, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, datacollect36, datacollect45
+  COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, prepid, spitzer_jd, ra_string, dec_string,  naxis, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr, bmjd,  backarr, backerrarr, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, datacollect36, datacollect45, piarr
   apradius = 2.25 ;;fix this for now
   planethash = hash()  
 
@@ -43,6 +44,12 @@ pro track_centroids
            ra = sxpar(header, 'RA_RQST')  ;need to use these so that I know when there is a blank channel
            dec = sxpar(header, 'DEC_RQST')
            naxishere = sxpar(header, 'NAXIS')
+
+           if naxishere eq 2 then begin
+              ;;full array, want to search around the sweet spot
+              ;;pixel, not the central pixel.
+              xyad, header, 24., 232., ra, dec
+           endif
            
            ;;figure out what the target of the AOR likely is:
            starname = Query_starid( ra, dec,naxishere, /Verbose)
@@ -72,19 +79,28 @@ pro track_centroids
            phot_exoplanet_aor,starname, apradius,strmid(chname[c],2), ra, dec, aorname(na);, /hybrid
 
            ;;save relevant info
-           ;;can only be one channel per AOR with this saving technique    
-           keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid']
-           values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na], predec[na], prejd[na], preaor[na], prepid[na])
-           planethash[aorname(na)] = dictionary(keys, values)
-              print, 'storing planethash for ', aorname(na)
+           ;;can only be one channel per AOR with this saving
+           ;;technique
 
+           if keyword_set(pixval) then begin
+              ;;keep track of central pixel values for PLD type analysis
+              keys_long =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid','piarr']
+
+              values_long = list( ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na], predec[na], prejd[na], preaor[na], prepid[na], piarr)
+              planethash[aorname(na)] = dictionary(keys_long, values_long)
+
+           endif else begin
+              keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'sclktime_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid']
+              values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na], predec[na], prejd[na], preaor[na], prepid[na])
+              planethash[aorname(na)] = dictionary(keys, values)
+           endelse
+           
      
            ;;do photometry on the previous AOR if it is the same
            ;;target/pid
            pppid = prepid[na]
            ppaor = preaor[na]
            preaorname = ppaor(n_elements(pppid) - 1)
-           print, 'testing pppid', pppid(n_elements(pppid) - 1),  pid[na], preaorname
            if pppid(n_elements(pppid) - 1) eq pid[na] then begin
               ;;scp over this aor from the archive
               junk = scpdata(ppaor(n_elements(pppid) - 1), campaign_name(na), chname(c))
@@ -96,7 +112,6 @@ pro track_centroids
               ;;can only be one channel per AOR with this saving technique    
               values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, sclk_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle[0:(n_elements(pp) - 2)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 2)], ppdec[0:(n_elements(pp) - 2)], ppjd[0:(n_elements(pp) - 2)], ppaor[0:(n_elements(pp) - 2)], pppid[0:(n_elements(pp) - 2)])
               planethash[preaorname] = dictionary(keys, values)
-              print, 'storing planethash for pre', preaorname
               
            endif                ; pre aor photometry
            
