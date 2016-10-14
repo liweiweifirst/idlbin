@@ -11,7 +11,7 @@ function read_exoplanet_list, calculate = calculate
 ;;  start_time = strmid(planets, 79, 21)
 
 
-  readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/week749_test.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, I10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline = 1
+  readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/weeks456_553_666_749_768.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, I10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline = 1
   
   start_year = fix(strmid(startUTC, 0,4))
   start_month = fix(strmid(startUTC, 5,2))
@@ -104,7 +104,7 @@ function read_exoplanet_list, calculate = calculate
      a = where(pid(i) eq spid, good)
      starepid[i] = good
   endfor
-  print, starepid
+ ;; print, starepid
   bad = where(starepid lt 1, nbad)
 
   if nbad gt 0 then remove, bad, pid, campaign_name, start_jd, aorname, naxis, preaor, prera, predec, prejd, prepid, datacollect36, datacollect45

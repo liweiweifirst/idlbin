@@ -32,13 +32,13 @@ case apradius of
 endcase
 
 if keyword_set(simulated) then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_sim_data_ch2_rmulti_s3_7_0p1sx4_151030.sav'
-print, 'using pmap file', pmapfile, apval
+;;print, 'using pmap file', pmapfile, apval
 
 
 exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
 exosystem = planetname
 
-print, exosystem, 'exosystem'
+;;print, exosystem, 'exosystem'
 
 if chname eq '2' then lambdaname  = '4.5'
 if chname eq '1' then lambdaname  = '3.6'
@@ -58,11 +58,11 @@ if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pm
 else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
 fits_read,occ_filename, occdata, occheader
 
-   print, '----------------------------'
-   print, 'working on ', thisaor
+;;   print, '----------------------------'
+;;   print, 'working on ', thisaor
    dir = strcompress(dirname+ 'r' + string(thisaor ) ,/remove_all)
    CD, dir                      ; change directories to the correct AOR directory
-   pwd
+;;   pwd
 
    command  = strcompress( 'find ch'+chname+"/bcd -name 'SPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
    spawn, command
@@ -111,14 +111,14 @@ fits_read,occ_filename, occdata, occheader
 
 
       if i eq startfits and naxis eq 3 then begin
-         xarr = fltarr(63*(n_elements(fitsname)))
+         xarr = fltarr(64*(n_elements(fitsname)))
          yarr = xarr
          fluxarr = xarr
          fluxerrarr = xarr
          corrfluxarr = xarr
          corrfluxerrarr = xarr
-         timearr =  dblarr(63*(n_elements(fitsname)))
-         bmjd = dblarr(63*(n_elements(fitsname)))
+         timearr =  dblarr(64*(n_elements(fitsname)))
+         bmjd = dblarr(64*(n_elements(fitsname)))
          backarr = xarr
          backerrarr = xarr
          nparr = xarr

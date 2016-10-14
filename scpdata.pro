@@ -5,7 +5,7 @@ function scpdata, aorname, campaign_name, chname
   basedir = '/Volumes/external/'
   
   localname =strcompress(basedir +'irac_warm/trending/r' + string(aorname),/remove_all)
-  print, 'localname ', localname
+;;  print, 'localname ', localname
   spawn, 'mkdir '+ localname
   cd, localname
   spawn, 'mkdir '+ chname
