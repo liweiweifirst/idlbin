@@ -16,7 +16,7 @@ pro track_centroids, pixval=pixval
   ;;find which AORs need to be examined
   ;;need to also return JD and campaign
   zero = read_exoplanet_list()
-  print, n_elements(aorname),  'aors: ',  aorname
+  print, string(n_elements(aorname)),  ' aors: ',  aorname
    
   ;;will need to figure out which ones are new
   ;;compare JD of new lists
@@ -24,7 +24,9 @@ pro track_centroids, pixval=pixval
   chname = ['ch1','ch2']
 
   for na = 0,n_elements(aorname) - 1 do begin
+     print, '---------------'
      print, 'starting on ',aorname(na)
+     chname = ['ch1','ch2']
 
      if datacollect36(na) eq 'f' then chname = ['ch2']
      if datacollect45(na) eq 'f' then chname = ['ch1']
@@ -52,7 +54,7 @@ pro track_centroids, pixval=pixval
            endif
            
            ;;figure out what the target of the AOR likely is:
-           starname = Query_starid( ra, dec,naxishere, /Verbose)
+           starname = Query_starid( ra, dec,naxishere);, /Verbose)
            print, 'starname: ', starname
 
          endif
