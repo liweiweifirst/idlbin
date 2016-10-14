@@ -82,6 +82,7 @@ fits_read,occ_filename, occdata, occheader
    
    startfits = 0L
 
+   
 
    for i =startfits, n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
       ;; print, 'working on ', fitsname(i)         
