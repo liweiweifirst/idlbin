@@ -113,7 +113,10 @@ CASE 1 OF
             exoplanet_get_database,exoplanet_data_file
             exodata = READ_CSV_JIM(exoplanet_data_file,count=count)
          ENDIF
-         iuse = WHERE(exodata.NAME EQ EXOSYSTEM,nuse)
+         ;;try to get more matches on the exosystem name matching - JK
+         exonamesearch = strjoin(strsplit(exosystem, " ,-_",/extract), '?') + ' b'
+         iuse = where(strmatch(exodata.NAME, exonamesearch,/FOLD_CASE) eq 1, nuse)
+         ;iuse = WHERE(exodata.NAME EQ exonamesearch,nuse)
          IF NUSE EQ 0 THEN BEGIN
             print,'GET_EXOPLANET_DATA: Cannot find "'+exosystem+'" .  Returning.'
             return
