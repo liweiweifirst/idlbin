@@ -8,55 +8,162 @@ pro plot_track_centroids
   xjd = sigmax
   xdrift = sigmax
   ydrift = sigmax
-  pa = sigmax
-  for n = 0, n_elements(aorlist) - 1 do begin
+  dpa = sigmax
+  pkperiod = fltarr(n_elements(aorlist), 3)
+  pkstrength = pkperiod
+  for n = 0, 1 do begin; n_elements(aorlist) - 1 do begin
+     print, '--------------'
      print, 'working on ', aorlist(n), n_elements(planethash[aorlist(n)].xcen)
      ;;sigmax & sigmay &sigmaxy vs. time
      ;;not sure what sigmaxy is?
-     ;;plothist, planethash[aorlist(n)].xcen, xhist, yhist, bin = 0.05,/noplot
+     sigmax[n] = stddev(planethash[aorlist(n)].xcen,/nan)
+     sigmay[n] = stddev(planethash[aorlist(n)].ycen,/nan)
+     print, 'sigma x, y ', sigmax[n], sigmay[n]
+     timearr = planethash[aorlist(n)].timearr
+     bmjdarr = planethash[aorlist(n)].bmjdarr
+     xjd[n] = bmjdarr(0) + 2400000.5
+     time0 = timearr(0)
+     timearr = (timearr - time0)/60./60. ; now in hours instead of sclk
+
+     ;;-------------------------------------
+     ;;initial xdrift vs.& y drift
+     start = [.05,15.0]
+     ;;don't have errors in position, instead, fake it.
+     noise = fltarr(n_elements(planethash[aorlist(n)].xcen))
+     noise = noise + 1.
+     xcenfit= MPFITFUN('linear',timearr, planethash[aorlist(n)].xcen, noise, start,/Quiet)
+     xdrift[n] = xcenfit(0)
+     ycenfit= MPFITFUN('linear',timearr, planethash[aorlist(n)].ycen, noise, start,/Quiet)
+     ydrift[n] = ycenfit(0)
+     ;;do some quick paring down of the data
+     xnum = findgen(n_elements(timearr))
+     i = where(xnum mod 10 lt 1) ;pick out the odd numbers only
+     tx = timearr(i)
+     ycen = planethash[aorlist(n)].ycen
+     ty = ycen(i)
+     ;;pl = plot(tx, ty, title = aorlist(n), xtitle = 'time(hrs)', yrange = [mean(planethash[aorlist(n)].ycen,/nan) -0.5, mean(planethash[aorlist(n)].ycen,/nan) +0.5])
+    ;; pl = plot(timearr, ycenfit(0)*timearr + ycenfit(1), color = 'red', overplot = pl)
+     ;;XX don't want to keep this value if dithered.
+     
+     ;;-------------------------------------
+     ;;delta pitch angle
+     prepitchangle = planethash[aorlist(n)].prepitchangle
+     dpa[n] = prepitchangle(n_elements(prepitchangle) - 2) - planethash[aorlist(n)].pitchangle
+
+     ;;-------------------------------------
+     ;;width of the peak in the power spectrim at 30min
+     ;;don't need to do this for pre-AORs
+     ;;periodogram
+     if max(timearr) gt 1.2 then begin
+        xday = timearr*60.      ;in minutes             
+        ycen = planethash[aorlist(n)].ycen
+        xnum = findgen(n_elements(xday))
+        i = where(xnum mod 10 lt 1) ;pick out the odd numbers only
+;;        xday = xday(i)
+;;        ycen = ycen(i)
+     ;;pl = plot(tx, ty, title = aorlist(n), xtitle = 'time(hrs)', yrange = [mean(planethash[aorlist(n)].ycen,/nan) -0.5, mean(planethash[aorlist(n)
+        result = LNP_TEST(xday, ycen,/double, WK1 = wk1, WK2 = wk2, JMAX = jmax)
+        ;;b = plot(1/wk1, wk2, xtitle = 'Frequency(minutes)', ytitle = 'Power', xrange =[0,100],$
+        ;;         thick = 2, color = 'red',name = 'Y centroids', title = 'Y centroids', yrange = [0, max(wk2[10:100])])
+        ;;print, 'LNP result', result
+        ;;test = where(1/wk1 gt 40 and 1/wk1 lt 50,ntest)
+        ;;if ntest gt 0 then print, 'values around 45', wk2[test]
+        ;;want to know if there is a real peak between 30 - 50 minutes
+        ;;try monte carloing the noise periodogram
+        ;;randomize the order of the photometry while keeping the time
+        ;;information the same.
+        ;;nwk2 = n_elements(wk2)  ;which is bin_flux cut down
+        ny2= n_elements(ycen)
+        ;;make a randomly ordered array with nel elements
+        nmc = 3
+        final_max = fltarr(nmc)
+
+        for rcount = 0, nmc - 1 do begin
+           rand = randomu(seed, ny2)
+           ;;now use that as the pointer/orderer for the photometry
+           randflux = ycen[sort(rand)]
+           rr = LNP_TEST(xday, randflux, /double,  WK1 = rrwk1, WK2 = rrwk2, JMAX = jmax)
+           ;;print, 'random result', rr
+           final_max(rcount) = rr(0)
+           ;;randp = plot(wk1, wk2,overplot=b, color = 'gray')
+        endfor
+        print, 'max finalmax', max(final_max)  ;; this is the same as max(rr(0))
+
+        ;;find the peaks above N* the random level
+        ;;but N appears to be a function of the number of data points.
+        d0 = wk2 - shift(wk2, 1)
+        d1 = wk2 - shift(wk2, -1)
+        pk = where(d0 gt 0 and d1 gt 0, npk)
+        peakheight = wk2[pk]
+        peakfreq = wk1[pk]
+        peakperiod = 1/peakfreq
+        print, 'npk', npk
+
+        ;;define significance relative to other peaks below 60 minutes
+        short = where(peakperiod gt 5 and peakperiod lt 60)
+        peakheight = peakheight(short)
+        peakfreq = peakfreq(short)
+        peakperiod = peakperiod(short)
+        plothist, peakheight, xhist, yhist, bin = 0.1, /noplot
+        pb = barplot(xhist, yhist, xtitle = 'peakheight', xrange = [0, 10])
+        mn = robust_mean(peakheight, 4)
+        sig = robust_sigma(peakheight)
+        nsig = 3
+        realpk = where(peakheight gt mn + nsig*sig and peakperiod gt 30. and peakperiod le 50., nrealpk)
+                                ;realpk = where(peakheight gt
+                                ;5.*max(final_max)  and peakperiod gt
+                                ;30. and peakperiod le 50.,nrealpk)
+        print, 'mean ,sig', mn , sig
+        print, 'nrealpk', nrealpk
+        print, 'periods'
+        print,peakperiod(realpk)
+        print, 'strengths'
+        print,peakheight(realpk) / (mn +nsig*sig)
+        ;;want to keep the period and strength of these peaks
+        if nrealpk gt 0 then begin
+           pkperiod(n) = peakperiod(realpk)
+           pkstrength(n) =peakheight(realpk) ;in units of some sort of significance
+        endif else begin
+           pkperiod(n) = 0
+           pkstrength(n) = 0
+        endelse
+        
+     endif
+     
+  endfor
+  
+  
+  ;;sigmax & sigmay &sigmaxy vs. time
+  ;;psx = plot(xjd, sigmax,'1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'X Size of cloud (stddev in position)', $
+  ;;            XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = 'months', yrange = [0, 1])
+  ;;psy = plot(xjd, sigmay,'1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'Y Size of cloud (stddev in position)', $
+  ;;           XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = 'months', yrange = [0, 1])
+
+  ;;initial xdrift vs.& y drift vs. time
+  ;;pxydrift = plot(xdrift, ydrift,  '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Y drift',  xtitle = 'X drift',$
+  ;;              yrange = [-1, 1], xrange =[-1,1])
+  ;;pdrift = plot(xjd, xdrift, '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Drift',  xtitle = 'Time (sclk)',$
+  ;;              yrange = [-1, 1], color = 'blue')
+  ;;pdrift = plot(xjd, ydrift, '1s', sym_size = 0.5,   sym_filled = 1,  overplot = pdrift, color = 'red')
+
+  ;;delta pitch angle
+  ;;pdpa = plot(xdrift, dpa, '1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'Change in pitch angle from previous observation', $
+  ;;            xtitle = 'Drift', color = 'blue')
+  ;;pdpa = plot(ydrift, dpa, '1s', sym_size = 0.5,   sym_filled = 1,
+  ;;overplot = pdpa, color = 'red')
+
+  ;;periodogram fun
+  ;;XXXdo I need to worry about more than one peak?
+  
+  ;;pperiod = plot(xjd, pkperiod, '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Period of the power spectrum peaks (min)',  xtitle = 'Time (sclk)')
+  ;;pstrength =  plot(xjd, pkstrength, '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Strength of the power spectrum peaks (significance)',  xtitle = 'Time (sclk)')
+end
+
+
+
+    ;;plothist, planethash[aorlist(n)].xcen, xhist, yhist, bin = 0.05,/noplot
      ;;pg = barplot(xhist, yhist, title = aorlist(n))
      ;;start = [0.,10., 2.]
      ;;noise = fltarr(n_elements(yhist))
      ;;noise[*] = 1                                              ;equally weight the values
      ;;result= MPFITFUN('mygauss',xhist,yhist, noise, start) ;/quiet   ; fit a gaussian to the histogram sorted data
-     sigmax[n] = stddev(planethash[aorlist(n)].xcen,/nan)
-     sigmay[n] = stddev(planethash[aorlist(n)].ycen,/nan)
-     print, 'sigma x, y ', sigmax[n], sigmay[n]
-     timearr = planethash[aorlist(n)].timearr
-     xjd[n] = timearr(0)
-     time0 = timearr(0)
-     timearr = (timearr - time0)/60./60. ; now in hours instead of sclk
-          
-      ;;initial xdrift vs.& y drift
-     ;;XXXwant this to be a fit to x vs. time over the preAOR if there is
-     ;;one, or over the long AOR if there isn't a preAOR
-     start = [.05,15.0]
-     ;;don't have errors in position, instead, fake it.
-     noise = fltarr(n_elements(planethash[aorlist(n)].xcen))
-     noise = noise + 1.
-     xcenfit= MPFITFUN('linear',timearr, planethash[aorlist(n)].xcen, noise, start)
-     xdrift[n] = xcenfit(0)
-     ycenfit= MPFITFUN('linear',timearr, planethash[aorlist(n)].ycen, noise, start)
-     ydrift[n] = ycenfit(0)
-     ;;make some plots to make sure this is working
-    ;; pl = plot(timearr, planethash[aorlist(n)].ycen, '1s', sym_size = 0.5,   sym_filled = 1, title = aorlist(n), xtitle = 'time(hrs)', yrange = [mean(planethash[aorlist(n)].ycen,/nan) -1, mean(planethash[aorlist(n)].ycen,/nan) +1])
-    ;; pl = plot(timearr, ycenfit(0)*timearr + ycenfit(1), color = 'red', overplot = pl)
-     ;;XX don't want to keep this value if dithered.
-     
-     ;;delta pitch angle
-     ;;really want change in pitch angle from 30 min prior, but watch
-     ;;out for pre-AORXXX
-     ;;XXhow does Carl calculate this?
-    ;; pa[n] = planethash[aorlist(n)].prepitchangle - planethash[aorlist(n)].pitchangle
-  endfor
-  
-  psx = plot(xjd, sigmax,'1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'X Size of cloud (stddev in position)', $
-             xtitle = 'Time (sclk)', yrange = [0, 1])
-  psy = plot(xjd, sigmay,'1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'Y Size of cloud (stddev in position)', $
-             xtitle = 'Time (sclk)', yrange = [0, 1])
-
-  pxdrift = plot(xjd, xdrift, '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'X drift',  xtitle = 'Time (sclk)',$
-                yrange = [-1, 1])
-  pxdrift = plot(xjd, ydrift, '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Y drift',  xtitle = 'Time (sclk)',$
-                yrange = [-1, 1])
-end
