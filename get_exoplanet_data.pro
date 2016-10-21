@@ -116,7 +116,7 @@ CASE 1 OF
          ;;try to get more matches on the exosystem name matching - JK
          exonamesearch = strjoin(strsplit(exosystem, " ,-_",/extract), '?') + ' b'
          iuse = where(strmatch(exodata.NAME, exonamesearch,/FOLD_CASE) eq 1, nuse)
-         ;iuse = WHERE(exodata.NAME EQ exonamesearch,nuse)
+         ;;iuse = WHERE(exodata.NAME EQ exonamesearch,nuse)
          IF NUSE EQ 0 THEN BEGIN
             print,'GET_EXOPLANET_DATA: Cannot find "'+exosystem+'" .  Returning.'
             return
