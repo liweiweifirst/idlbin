@@ -9,8 +9,9 @@ pro plot_track_centroids
   xdrift = sigmax
   ydrift = sigmax
   dpa = sigmax
-  pkperiod = fltarr(n_elements(aorlist), 3)
-  pkstrength = pkperiod
+  pkperiod = list(length=2)     ;n_elements(aorlist))
+  pkstrength =  list(length=2) 
+  pktime = list(length=2) 
   for n = 0, 1 do begin; n_elements(aorlist) - 1 do begin
      print, '--------------'
      print, 'working on ', aorlist(n), n_elements(planethash[aorlist(n)].xcen)
@@ -57,38 +58,8 @@ pro plot_track_centroids
      if max(timearr) gt 1.2 then begin
         xday = timearr*60.      ;in minutes             
         ycen = planethash[aorlist(n)].ycen
-        xnum = findgen(n_elements(xday))
-        i = where(xnum mod 10 lt 1) ;pick out the odd numbers only
-;;        xday = xday(i)
-;;        ycen = ycen(i)
-     ;;pl = plot(tx, ty, title = aorlist(n), xtitle = 'time(hrs)', yrange = [mean(planethash[aorlist(n)].ycen,/nan) -0.5, mean(planethash[aorlist(n)
         result = LNP_TEST(xday, ycen,/double, WK1 = wk1, WK2 = wk2, JMAX = jmax)
-        ;;b = plot(1/wk1, wk2, xtitle = 'Frequency(minutes)', ytitle = 'Power', xrange =[0,100],$
-        ;;         thick = 2, color = 'red',name = 'Y centroids', title = 'Y centroids', yrange = [0, max(wk2[10:100])])
-        ;;print, 'LNP result', result
-        ;;test = where(1/wk1 gt 40 and 1/wk1 lt 50,ntest)
-        ;;if ntest gt 0 then print, 'values around 45', wk2[test]
-        ;;want to know if there is a real peak between 30 - 50 minutes
-        ;;try monte carloing the noise periodogram
-        ;;randomize the order of the photometry while keeping the time
-        ;;information the same.
-        ;;nwk2 = n_elements(wk2)  ;which is bin_flux cut down
-        ny2= n_elements(ycen)
-        ;;make a randomly ordered array with nel elements
-        nmc = 3
-        final_max = fltarr(nmc)
-
-        for rcount = 0, nmc - 1 do begin
-           rand = randomu(seed, ny2)
-           ;;now use that as the pointer/orderer for the photometry
-           randflux = ycen[sort(rand)]
-           rr = LNP_TEST(xday, randflux, /double,  WK1 = rrwk1, WK2 = rrwk2, JMAX = jmax)
-           ;;print, 'random result', rr
-           final_max(rcount) = rr(0)
-           ;;randp = plot(wk1, wk2,overplot=b, color = 'gray')
-        endfor
-        print, 'max finalmax', max(final_max)  ;; this is the same as max(rr(0))
-
+ 
         ;;find the peaks above N* the random level
         ;;but N appears to be a function of the number of data points.
         d0 = wk2 - shift(wk2, 1)
@@ -97,35 +68,45 @@ pro plot_track_centroids
         peakheight = wk2[pk]
         peakfreq = wk1[pk]
         peakperiod = 1/peakfreq
-        print, 'npk', npk
+        ;;print, 'npk', npk
 
-        ;;define significance relative to other peaks below 60 minutes
+        ;;define significance relative to other peaks between 5 -  60 minutes
         short = where(peakperiod gt 5 and peakperiod lt 60)
         peakheight = peakheight(short)
         peakfreq = peakfreq(short)
         peakperiod = peakperiod(short)
-        plothist, peakheight, xhist, yhist, bin = 0.1, /noplot
-        pb = barplot(xhist, yhist, xtitle = 'peakheight', xrange = [0, 10])
         mn = robust_mean(peakheight, 4)
         sig = robust_sigma(peakheight)
         nsig = 3
         realpk = where(peakheight gt mn + nsig*sig and peakperiod gt 30. and peakperiod le 50., nrealpk)
-                                ;realpk = where(peakheight gt
-                                ;5.*max(final_max)  and peakperiod gt
-                                ;30. and peakperiod le 50.,nrealpk)
-        print, 'mean ,sig', mn , sig
-        print, 'nrealpk', nrealpk
-        print, 'periods'
-        print,peakperiod(realpk)
-        print, 'strengths'
-        print,peakheight(realpk) / (mn +nsig*sig)
-        ;;want to keep the period and strength of these peaks
-        if nrealpk gt 0 then begin
-           pkperiod(n) = peakperiod(realpk)
-           pkstrength(n) =peakheight(realpk) ;in units of some sort of significance
+
+        ;;concatenating arrays- messy, but not sure how else to do it
+        if n eq 0 then begin
+           if nrealpk gt 0 then begin
+              pkperiod = peakperiod(realpk)
+              pkstrength =(peakheight(realpk) -mn) /sig ;in units of some sort of significance
+              pt = fltarr(nrealpk)
+              pt(*) = xjd(n)
+              pktime = pt
+           endif else begin
+              pkperiod = 0
+              pkstrength = 0
+              pktime = xjd(n)
+           endelse
         endif else begin
-           pkperiod(n) = 0
-           pkstrength(n) = 0
+           if nrealpk gt 0 then begin
+              pkperiod = [pkperiod, peakperiod(realpk)]
+              pkstrength =[pkstrength, (peakheight(realpk) -mn) /sig ];in units of some sort of significance
+              pt = fltarr(nrealpk)
+              pt(*) = xjd(n)
+              pktime = [pktime, pt]
+           endif else begin
+              pkperiod =[pkperiod, 0]
+              pkstrength = [pkstrength,0]
+              pktime = [pktime, xjd(n)]
+           endelse
+           
+
         endelse
         
      endif
@@ -153,10 +134,11 @@ pro plot_track_centroids
   ;;overplot = pdpa, color = 'red')
 
   ;;periodogram fun
-  ;;XXXdo I need to worry about more than one peak?
+  ;;how do I collapse a list into a single array?
+  pperiod = bubbleplot(pktime, pkperiod, /shaded, magnitude = pkstrength , exponent = 0.5, ytitle = 'Period of the power spectrum peaks (min)',  xtitle = 'Time (sclk)')
+     
+     
   
-  ;;pperiod = plot(xjd, pkperiod, '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Period of the power spectrum peaks (min)',  xtitle = 'Time (sclk)')
-  ;;pstrength =  plot(xjd, pkstrength, '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Strength of the power spectrum peaks (significance)',  xtitle = 'Time (sclk)')
 end
 
 
@@ -167,3 +149,48 @@ end
      ;;noise = fltarr(n_elements(yhist))
      ;;noise[*] = 1                                              ;equally weight the values
      ;;result= MPFITFUN('mygauss',xhist,yhist, noise, start) ;/quiet   ; fit a gaussian to the histogram sorted data
+
+
+       ;; xnum = findgen(n_elements(xday))
+       ;; i = where(xnum mod 10 lt 1) ;pick out the odd numbers only
+;;        xday = xday(i)
+;;        ycen = ycen(i)
+     ;;pl = plot(tx, ty, title = aorlist(n), xtitle = 'time(hrs)', yrange = [mean(planethash[aorlist(n)].ycen,/nan) -0.5, mean(planethash[aorlist(n)
+       ;;b = plot(1/wk1, wk2, xtitle = 'Frequency(minutes)', ytitle = 'Power', xrange =[0,100],$
+        ;;         thick = 2, color = 'red',name = 'Y centroids', title = 'Y centroids', yrange = [0, max(wk2[10:100])])
+        ;;print, 'LNP result', result
+        ;;test = where(1/wk1 gt 40 and 1/wk1 lt 50,ntest)
+        ;;if ntest gt 0 then print, 'values around 45', wk2[test]
+        ;;want to know if there is a real peak between 30 - 50 minutes
+        ;;try monte carloing the noise periodogram
+        ;;randomize the order of the photometry while keeping the time
+        ;;information the same.
+        ;;nwk2 = n_elements(wk2)  ;which is bin_flux cut down
+        ;;ny2= n_elements(ycen)
+        ;;make a randomly ordered array with nel elements
+        ;;nmc = 3
+        ;;final_max = fltarr(nmc)
+
+        ;;for rcount = 0, nmc - 1 do begin
+        ;;   rand = randomu(seed, ny2)
+           ;;now use that as the pointer/orderer for the photometry
+        ;;   randflux = ycen[sort(rand)]
+        ;;   rr = LNP_TEST(xday, randflux, /double,  WK1 = rrwk1, WK2 = rrwk2, JMAX = jmax)
+           ;;print, 'random result', rr
+        ;;   final_max(rcount) = rr(0)
+           ;;randp = plot(wk1, wk2,overplot=b, color = 'gray')
+        ;;endfor
+;;print, 'max finalmax', max(final_max)  ;; this is the same as
+;;max(rr(0))
+ ;realpk = where(peakheight gt
+                                ;5.*max(final_max)  and peakperiod gt
+                                ;30. and peakperiod le 50.,nrealpk)
+ ;;plothist, peakheight, xhist, yhist, bin = 0.1, /noplot
+        ;;pb = barplot(xhist, yhist, xtitle = 'peakheight', xrange = [0, 10])
+        ;;print, 'mean ,sig', mn , sig
+        ;;print, 'nrealpk', nrealpk
+        ;;print, 'periods'
+        ;;print,peakperiod(realpk)
+        ;;print, 'strengths'
+        ;;print,(peakheight(realpk) -mn) /sig
+        ;;want to keep the period and strength of these peaks
