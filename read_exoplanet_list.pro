@@ -37,10 +37,6 @@ function read_exoplanet_list, calculate = calculate
   
   ;;make an array which holds the previous 1 hour of AORnames, ra,
   ;;dec, and start times
-  ;;make this a pointer array so that the number of elements can vary
-  ;;since we don't know ahead of time how many AORs will fill
-  ;;that 1 hour
-  ;;maybe I really want a list
   preaor = list(length=n_elements(start_jd));ptrarr(n_elements(start_jd),/allocate_heap)
   prera = list(length=n_elements(start_jd)); ptrarr(n_elements(start_jd),/allocate_heap)
   predec = list(length=n_elements(start_jd));ptrarr(n_elements(start_jd),/allocate_heap)
@@ -59,7 +55,7 @@ function read_exoplanet_list, calculate = calculate
   prepid[1] = pid[0]
 
   for j = 2, n_elements(start_jd) -1 do begin
-     pre = where(start_jd gt start_jd(j) - 0.0625 and start_jd lt start_jd(j), n_pre)
+     pre = where(start_jd gt start_jd(j) - 0.1 and start_jd lt start_jd(j), n_pre)
      if n_pre gt 0 then begin
         preaor[j] = aorname(pre)
         prera[j] = ra(pre)
