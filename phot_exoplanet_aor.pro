@@ -106,7 +106,7 @@ fits_read,occ_filename, occdata, occheader
 
       if i eq startfits then begin
          ;print, 'ronoise', ronoise, gain, fluxconv, exptime, ra_ref, dec_ref, naxis
-         sclk_0 = sclk_obs
+         bmjd_0 = bmjd_obs
       endif
 
 
