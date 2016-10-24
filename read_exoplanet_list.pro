@@ -11,8 +11,11 @@ function read_exoplanet_list, calculate = calculate
 ;;  start_time = strmid(planets, 79, 21)
 
 
-  readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/weeks456_553_666_749_768.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, I10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline = 1
-  
+  ;;readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/weeks456_553_666_749_768.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, I10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline = 1
+
+
+  readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/out_centroiding_allWarmMissionToDate.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, I10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline = 1
+
   start_year = fix(strmid(startUTC, 0,4))
   start_month = fix(strmid(startUTC, 5,2))
   start_day = fix(strmid(startUTC, 8,2))
@@ -21,8 +24,14 @@ function read_exoplanet_list, calculate = calculate
   ;;convert times to JD in order to compare later
   start_jd = julday(start_month, start_day, start_year, start_hr, start_min)
 
-
-  ;;convert 3 digit campaign number to string
+  ;;which of these have already been analyzed?
+  restore,'/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids.sav'
+  done = planethash[*].bmjd_0
+  last_time_jd = max(done)
+  old = where(start_jd lt last_time_jd, nold)
+  if nold gt 0 then remove, old, aorname,pid,start_jd,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45
+  
+    ;;convert 3 digit campaign number to string
   campaign_name = strcompress('IRAC0'+ campaign + '00',/remove_all)
 
   ;;check if full or subarray
