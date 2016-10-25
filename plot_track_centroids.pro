@@ -12,7 +12,7 @@ pro plot_track_centroids
   pkperiod = list(length=2)     ;n_elements(aorlist))
   pkstrength =  list(length=2) 
   pktime = list(length=2) 
-  for n = 0, 1 do begin; n_elements(aorlist) - 1 do begin
+  for n = 0, n_elements(aorlist) - 1 do begin
      print, '--------------'
      print, 'working on ', aorlist(n), n_elements(planethash[aorlist(n)].xcen)
      ;;sigmax & sigmay &sigmaxy vs. time
