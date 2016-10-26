@@ -2,7 +2,7 @@ pro track_centroids, pixval=pixval
   
 ;main code to automatically track centroids as a function of pitch
 ;angle for all warm mission long stares
-  COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, prepid, spitzer_jd, ra_string, dec_string,  naxis, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr, bmjd,  backarr, backerrarr, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, datacollect36, datacollect45, piarr
+  COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, prepid, spitzer_jd, ra_string, dec_string,  naxis, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr, bmjd,  backarr, backerrarr, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, datacollect36, datacollect45, piarr, pre36, pre45
   apradius = 2.25 ;;fix this for now
   planethash = hash()  
 
@@ -25,11 +25,12 @@ pro track_centroids, pixval=pixval
   
   chname = ['ch1','ch2']
 
-  for na = 0, 100 - 1 do begin ;n_elements(aorname) 
+  for na = 0, 2 - 1 do begin ;n_elements(aorname) 
      print, '---------------'
-     print, 'starting on ',aorname(na)
+     print, 'starting on ',aorname(na), ' ', na
      chname = ['ch1','ch2']
-
+     pchname = ['ch1','ch2']
+     
      if datacollect36(na) eq 'f' then chname = ['ch2']
      if datacollect45(na) eq 'f' then chname = ['ch1']
      for c = 0, n_elements(chname) - 1 do begin
@@ -45,10 +46,11 @@ pro track_centroids, pixval=pixval
         ;;get what I need from the header
         if n_elements(fitsname) gt 0 then begin  ;there is data in that channel
            header = headfits(fitsname(0))
-           ra = sxpar(header, 'RA_RQST')  ;need to use these so that I know when there is a blank channel
-           dec = sxpar(header, 'DEC_RQST')
+           ra_rqst = sxpar(header, 'RA_RQST')  ;need to use these so that I know when there is a blank channel
+           dec_rqst = sxpar(header, 'DEC_RQST')
            naxishere = sxpar(header, 'NAXIS')
-
+           ra = ra_rqst
+           dec = dec_rqst
            if naxishere eq 2 then begin
               ;;full array, want to search around the sweet spot
               ;;pixel, not the central pixel.
@@ -56,7 +58,7 @@ pro track_centroids, pixval=pixval
            endif
            
            ;;figure out what the target of the AOR likely is:
-           starname = Query_starid( ra, dec,naxishere);, /Verbose)
+           starname = Query_starid( ra, dec,naxishere, ra_rqst, dec_rqst);, /Verbose)
            print, 'starname: ', starname
 
          endif
@@ -106,15 +108,20 @@ pro track_centroids, pixval=pixval
            ppaor = preaor[na]
            preaorname = ppaor(n_elements(pppid) - 1)
            if pppid(n_elements(pppid) - 1) eq pid[na] then begin
+
+              ;;figure out which channel it is.
+              if pre36(n_elements(pppid) - 1) eq 'f' then pchname = ['ch2']
+              if pre45(n_elements(pppid) - 1) eq 'f' then pchname = ['ch1']
+
               ;;scp over this aor from the archive
-              junk = scpdata(ppaor(n_elements(pppid) - 1), campaign_name(na), chname(c))
+              junk = scpdata(ppaor(n_elements(pppid) - 1), campaign_name(na), pchname)
 
               ;;do the photometry
-              phot_exoplanet_aor,starname, apradius,strmid(chname[c],2), ra, dec, preaorname ;, /hybrid
+              phot_exoplanet_aor,starname, apradius,strmid(pchname,2), ra, dec, preaorname ;, /hybrid
 
               ;;save relevant info
               ;;can only be one channel per AOR with this saving technique    
-              values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle[0:(n_elements(pp) - 2)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 2)], ppdec[0:(n_elements(pp) - 2)], ppjd[0:(n_elements(pp) - 2)], ppaor[0:(n_elements(pp) - 2)], pppid[0:(n_elements(pp) - 2)], pid)
+              values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,prepitchangle[0:(n_elements(pp) - 2)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 2)], ppdec[0:(n_elements(pp) - 2)], ppjd[0:(n_elements(pp) - 2)], ppaor[0:(n_elements(pp) - 2)], pppid[0:(n_elements(pp) - 2)], pid)
               planethash[preaorname] = dictionary(keys, values)
               
            endif                ; pre aor photometry
