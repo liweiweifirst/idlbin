@@ -154,9 +154,11 @@ CASE 1 OF
                                        '                          T14:'+STRNG(t14)+'(dy); MJD (transit):'+STRNG(mjd_transit)+'(dy); i:'+STRNG(inclination)+'(deg)']
          ENDIF ELSE BEGIN
             INFO_STRING = [INFO_STRING,'No observed transit for this target.']
-            b_impact = ar_semimaj * cos(inclination/!radeg)
+            ;;removing this because inclination is not defined if
+            ;;there is no observed transit - JK
+            ;;b_impact = ar_semimaj * cos(inclination/!radeg)
             IF KEYWORD_SET(transit_DEPTH) THEN RP_RSTAR=SQRT(transit_depth)
-            t14 = P_ORBIT/!dpi * ACOS(SQRT(1 - (1+rp_rstar)^2/ar_semimaj^2)/SIN(inclination/!radeg))
+            ;;t14 = P_ORBIT/!dpi * ACOS(SQRT(1 - (1+rp_rstar)^2/ar_semimaj^2)/SIN(inclination/!radeg))
          ENDELSE
          IF ~SKIP_SECONDARY THEN BEGIN
             known_secondary = exodata.SE[iuse[0]]
