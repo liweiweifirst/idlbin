@@ -1,4 +1,4 @@
-Function Query_starid,  ra, dec, naxis, Found = found, ERRMSG = errmsg, simbad = simbad, $
+Function Query_starid,  ra, dec, naxis, ra_rqst, dec_rqst, Found = found, ERRMSG = errmsg, simbad = simbad, $
     Verbose = verbose,  Print = print,Vmag=Vmag,Jmag=Jmag,Hmag=Hmag,Kmag=Kmag,parallax=parallax
 ;+
 ; NAME: 
@@ -99,7 +99,7 @@ Function Query_starid,  ra, dec, naxis, Found = found, ERRMSG = errmsg, simbad =
 ;     return
 ;  endif
   
- 
+ print, 'dec rqst', dec_rqst
   ;;to search SIMBAD
   ;;------------------------------------------------------
   if keyword_set(simbad) then begin
@@ -182,7 +182,8 @@ Function Query_starid,  ra, dec, naxis, Found = found, ERRMSG = errmsg, simbad =
      base1 = "http://simbad.u-strasbg.fr/simbad/sim-coo?Coord="
      base2 = "&Radius="
      base3 = "&Radius.unit=arcmin&output.format=ASCII&coodisp1=d"
-     if naxis eq '2' then narcmin = 2 else narcmin = 0.4
+     ;;if naxis eq '2' then narcmin = 2 else narcmin = 0.4
+     narcmin = 0.4
      ;;dec needs to have a sign attached
      if dec lt 0 then sdec = string(dec) else sdec = strcompress('+'+string(dec),/remove)
      QueryURL = strcompress(base1 + string(ra) +  sdec + base2 + string(narcmin) + base3,/remove)
@@ -226,10 +227,39 @@ Function Query_starid,  ra, dec, naxis, Found = found, ERRMSG = errmsg, simbad =
         endif else begin
            print, ['No objects returned by SIMBAD.   The server answered:' , $
                    strjoin(result)]
+
+           ;;not at the sweet spot, but maybe at the center of the
+           ;;array
+           if dec_rqst lt 0 then sdec_rqst = string(dec_rqst) else sdec_rqst = strcompress('+'+string(dec_rqst),/remove)
+           narcmin = 2.0
+           QueryURL = strcompress(base1 + string(ra_rqst) +  sdec_rqst + base2 + string(narcmin) + base3,/remove)
+           print, 'query', QueryURL
+           Result = webget(QueryURL)
+           Result = Result.text
+           idx=where(strpos(Result, 'Number of objects') ne -1, nlines)                               
+           if nlines eq 1 then begin ;got more than one object
+              scnt = strmid(Result[idx], 20)
+              ;;but cnt is a string, want it to be an int
+              scnt = fix(scnt)
+              found=1   
+        
+              ;;now pull the name of the first star in the list
+              ;;may want to change this to pick something in good
+              ;;brightness range - but fact that it is in SIMBAD may be
+              ;;                   good enough
+              id2 = where(strpos(Result, '1|') ne -1, nlines)
+              ;;print, 'nlines 1', nlines
+              ;;print, 'Result: ', Result[id2]
+              starname = strmid(Result[id2[0]],13,25)
+              ;;and remove some blank spaces
+              starname = strtrim(starname)
+           endif
+           
+           
            ;;
            ;;figure out how to exit the program if the fov is blank
            ;;(ie. subarray off FOV)
-           starname = 'nostar'
+ ;;          starname = 'nostar'
         ENDELSE
         
      ENDELSE
