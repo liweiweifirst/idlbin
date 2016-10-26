@@ -1,4 +1,4 @@
-pro phot_exoplanet_aor, planetname, apradius,chname, ra, dec, thisaor, hybrid = hybrid, simulated = simulated, phase = phase
+pro phot_exoplanet_aor, planetname, apradius,chname, ra, dec, thisaor, hybrid = hybrid, simulated = simulated, phase = phase, pixval = pixval
   ;do photometry on any IRAC staring mode AOR
 COMMON centroid_block
  t1 = systime(1)
@@ -42,11 +42,12 @@ exosystem = planetname
 
 if chname eq '2' then lambdaname  = '4.5'
 if chname eq '1' then lambdaname  = '3.6'
-get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
-                       TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
-                       INCLINATION=inclination,MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra_exosystem,DEC=dec_exosystem,VMAG=vmag,$
-                       DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose
 
+;;causing problems wit undefined inclinations. remove for now.
+;;get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
+;;                       TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
+;;                       MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra_exosystem,DEC=dec_exosystem,VMAG=vmag,$
+;;                       DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose ;INCLINATION=inclination,
 
 ;---------------
 dirname = '/Users/jkrick/external/irac_warm/trending/'
@@ -216,29 +217,32 @@ fits_read,occ_filename, occdata, occheader
       endelse
       
       ;;track the values of the 9x9 pixel box around the centroid
-      ;;        pi = track_box(im, x_center, y_center)   ; tb now a 25 x 64 element array
-      if naxis eq 3 then begin
-         if i eq startfits then nframe = 0
-         for subframe = 0, 63 do begin
-            earr = fltarr(81)
-            c = 0
-            
-            for xcoord = 11, 19 do begin
-               for ycoord = 11, 19 do begin
-                  ;;if xcoord eq 11 and ycoord eq 11 and subframe eq 0 then print, '[11, 11, 0]', im[xcoord, ycoord, subframe]
-                  earr[c] =  im[xcoord, ycoord, subframe]
-                  c++
+      ;;        pi = track_box(im, x_center, y_center)   ; tb now a 25
+      ;;        x 64 element array
+      if keyword_set(pixval) then begin
+         if naxis eq 3 then begin
+            if i eq startfits then nframe = 0
+            for subframe = 0, 63 do begin
+               earr = fltarr(81)
+               c = 0
+               
+               for xcoord = 11, 19 do begin
+                  for ycoord = 11, 19 do begin
+                     ;;if xcoord eq 11 and ycoord eq 11 and subframe eq 0 then print, '[11, 11, 0]', im[xcoord, ycoord, subframe]
+                     earr[c] =  im[xcoord, ycoord, subframe]
+                     c++
+                  endfor
                endfor
-            endfor
 ;            if subframe eq 0 then print, 'earr', earr
-            piarr[nframe,*] =earr
-            nframe++
-         endfor
-      endif
-
-      if naxis eq 2 then pi = im[(fix(x_center) - 4):(fix(x_center+4)), (fix(y_center) - 4):(fix(y_center+4))] ; now a 9x9x64 element array
-
-     
+               piarr[nframe,*] =earr
+               nframe++
+            endfor
+         endif
+         
+         if naxis eq 2 then pi = im[(fix(x_center) - 4):(fix(x_center+4)), (fix(y_center) - 4):(fix(y_center+4))] ; now a 9x9x64 element array
+         
+      endif ;keyword_set pixval
+      
 ;---------------------------------
 ;use pmap data to find nearest neighbors in pmap dataset and find a
 ;correction based on those neighbors.  
@@ -310,7 +314,7 @@ fits_read,occ_filename, occdata, occheader
          xfwhmarr[i] = xfwhm
          yfwhmarr[i] = yfwhm
          peakpixDNarr[i] = peakpixDN
-         piarr[i,*] = pi
+         if keyword_set(pixval) then piarr[i,*] = pi
       endif
 
      ;; if a eq startaor and i eq startfits then begin
