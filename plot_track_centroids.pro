@@ -1,6 +1,7 @@
 pro plot_track_centroids
 
-  restore, '/Users/jkrick/external/irac_warm/trending/track_centroids.sav'
+  ;;restore, '/Users/jkrick/external/irac_warm/trending/track_centroids.sav'
+  restore, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids.sav'
 
   aorlist = planethash.keys()
   sigmax = fltarr(n_elements(aorlist))
@@ -115,10 +116,10 @@ pro plot_track_centroids
   
   
   ;;sigmax & sigmay &sigmaxy vs. time
-  ;;psx = plot(xjd, sigmax,'1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'X Size of cloud (stddev in position)', $
-  ;;            XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = 'months', yrange = [0, 1])
-  ;;psy = plot(xjd, sigmay,'1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'Y Size of cloud (stddev in position)', $
-  ;;           XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = 'months', yrange = [0, 1])
+  psx = plot(xjd, sigmax,'1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'X Size of cloud (stddev in position)', $
+              XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, yrange = [0, 1])
+  psy = plot(xjd, sigmay,'1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'Y Size of cloud (stddev in position)', $
+             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = ['Time'], xminor = 11, yrange = [0, 1])
 
   ;;initial xdrift vs.& y drift vs. time
   ;;pxydrift = plot(xdrift, ydrift,  '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Y drift',  xtitle = 'X drift',$
@@ -135,7 +136,7 @@ pro plot_track_centroids
 
   ;;periodogram fun
   ;;how do I collapse a list into a single array?
-  pperiod = bubbleplot(pktime, pkperiod, /shaded, magnitude = pkstrength , exponent = 0.5, ytitle = 'Period of the power spectrum peaks (min)',  xtitle = 'Time (sclk)')
+  ;;pperiod = bubbleplot(pktime, pkperiod, /shaded, magnitude = pkstrength , exponent = 0.5, ytitle = 'Period of the power spectrum peaks (min)',  xtitle = 'Time (sclk)')
      
      
   

@@ -2,12 +2,12 @@ pro track_centroids, pixval=pixval
   
 ;main code to automatically track centroids as a function of pitch
 ;angle for all warm mission long stares
-  COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, prepid, spitzer_jd, ra_string, dec_string,  naxis, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr, bmjd,  backarr, backerrarr, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, datacollect36, datacollect45, piarr, pre36, pre45
+  COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, prepid, spitzer_jd, ra_string, dec_string,  naxis, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr, bmjd,  backarr, backerrarr, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, datacollect36, datacollect45, piarr, pre36, pre45, planethash, ra, dec
   apradius = 2.25 ;;fix this for now
-  planethash = hash()  
+  ;;planethash = hash()  
 
   tic
-  
+  journal,  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_out.txt'
   ;;read in the ephemeris file of Spitzer positions only once 
   readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/spitzer_warm_ephemeris.txt',date, spitzer_jd, blank, blank, ra_string, dec_string, skipline = 74, delimiter = ',', format = '(A, D10, A, A, A, A )'
 
@@ -19,13 +19,12 @@ pro track_centroids, pixval=pixval
   ;;need to also return JD and campaign
   zero = read_exoplanet_list(/calculate)
  ;; print, string(n_elements(aorname)),  ' aors: ',  aorname
-   
-  ;;will need to figure out which ones are new
+   ;;will need to figure out which ones are new
   ;;compare JD of new lists
   
   chname = ['ch1','ch2']
 
-  for na = 0, 2 - 1 do begin ;n_elements(aorname) 
+  for na = 0, 1 - 1 do begin ;n_elements(aorname) 
      print, '---------------'
      print, 'starting on ',aorname(na), ' ', na
      chname = ['ch1','ch2']
@@ -58,7 +57,9 @@ pro track_centroids, pixval=pixval
            endif
            
            ;;figure out what the target of the AOR likely is:
-           starname = Query_starid( ra, dec,naxishere, ra_rqst, dec_rqst);, /Verbose)
+           ;;ra and dec are in the common block so don't need
+           ;;to send them here
+           starname = Query_starid( naxishere, ra_rqst, dec_rqst);, /Verbose)
            print, 'starname: ', starname
 
          endif
@@ -82,7 +83,7 @@ pro track_centroids, pixval=pixval
            print, 'prior pitch angle(s) ', prepitchangle
            
            ;;do photometry
-           phot_exoplanet_aor,starname, apradius,strmid(chname[c],2), ra, dec, aorname(na);, /hybrid
+           phot_exoplanet_aor,starname, apradius,strmid(chname[c],2), aorname(na);, /hybrid
 
            ;;save relevant info
            ;;can only be one channel per AOR with this saving
@@ -138,4 +139,5 @@ pro track_centroids, pixval=pixval
   save, planethash, filename=savename
 
   toc
+  journal
 end

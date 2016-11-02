@@ -1,8 +1,8 @@
-pro phot_exoplanet_aor, planetname, apradius,chname, ra, dec, thisaor, hybrid = hybrid, simulated = simulated, phase = phase, pixval = pixval
+pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, simulated = simulated, phase = phase, pixval = pixval
   ;do photometry on any IRAC staring mode AOR
 COMMON centroid_block
  t1 = systime(1)
-
+ print, 'ra', ra, ' dec', dec
 ;convert aperture radius in pixels into what get_centroids_for_calstar_jk uses 
 case apradius of
    1.5: apval = 0
@@ -173,7 +173,7 @@ fits_read,occ_filename, occdata, occheader
       ;;calculate a background manually
  ;     bkgd = calc_bkgd(im, h, ra_ref, dec_ref)
 
-      ;run the centroiding and photometry
+      ;;run the centroiding and photometry
       get_centroids_for_calstar_jk,im, h, unc, ra, dec,  t, dt, hjd, xft, x3, y3, $
                                    x5, y5, x7, y7, xg, yg, xh, yh, f, b, x3s, y3s, x5s, y5s, $
                                    x7s, y7s, fs, bs, xp3, yp3, xp5, yp5, xp7, yp7, xp3s, yp3s, $
@@ -181,7 +181,6 @@ fits_read,occ_filename, occdata, occheader
                                    xfwhm, yfwhm,  /WARM
       nanfound = where(FINITE(np) lt 1, nancount)
       if nancount gt 0 then print, 'NAN: ', fitsname(i), nanfound
-      
       x_center = temporary(x3)
       y_center = temporary(y3)
      ;choose the requested pixel aperture

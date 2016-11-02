@@ -1,4 +1,4 @@
-Function Query_starid,  ra, dec, naxis, ra_rqst, dec_rqst, Found = found, ERRMSG = errmsg, simbad = simbad, $
+Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = errmsg, simbad = simbad, $
     Verbose = verbose,  Print = print,Vmag=Vmag,Jmag=Jmag,Hmag=Hmag,Kmag=Kmag,parallax=parallax
 ;+
 ; NAME: 
@@ -98,8 +98,9 @@ Function Query_starid,  ra, dec, naxis, ra_rqst, dec_rqst, Found = found, ERRMSG
 ;     print,'   Output -  Ra, dec of object (degrees)'
 ;     return
 ;  endif
-  
- print, 'dec rqst', dec_rqst
+
+  COMMON centroid_block
+  print, 'dec rqst', dec_rqst
   ;;to search SIMBAD
   ;;------------------------------------------------------
   if keyword_set(simbad) then begin
@@ -153,7 +154,7 @@ Function Query_starid,  ra, dec, naxis, ra_rqst, dec_rqst, Found = found, ERRMSG
   
   base1 = "http://exoplanetarchive.ipac.caltech.edu/cgi-bin/nstedAPI/nph-nstedAPI?table=exoplanets&ra="
   base2 = "&dec="
-  base3 = "&radius=2%20minutes&select=pl_hostname"
+  base3 = "&radius=2%20minutes&select=pl_hostname,st_pmra, st_pmdec"
   QueryURL = strcompress(base1 + string(ra) + base2 + string(dec) + base3,/remove_all)
   if keyword_set(verbose) then print,queryURL
   
@@ -169,6 +170,16 @@ Function Query_starid,  ra, dec, naxis, ra_rqst, dec_rqst, Found = found, ERRMSG
      if cnt gt 2 then print, strcompress('Warning - '+ string(cnt)+ ' matches found for position '  )
      firstline = strsplit(result.text[1],',',/extract)
      starname = firstline[0]
+     ra = firstline[3]
+     dec = firstline[4]
+     pmra = firstline[1]  ;mas/yr
+     pmdec = firstline[2] ;mas/yr
+     ;;assume 2013 as the 'middle' of the warm mission to get
+     ;;posistions closer
+     pmra = pmra*13/1000./60./60. ;arsec
+     pmdec = pmdec*13/1000./60./60. ;arcsec
+     ra = ra + pmra
+     dec = dec + pmdec
      
      ;;didn't find an object 
   endif else begin
@@ -215,6 +226,21 @@ Function Query_starid,  ra, dec, naxis, ra_rqst, dec_rqst, Found = found, ERRMSG
         starname = strmid(Result[id2[0]],13,25)
         ;;and remove some blank spaces
         starname = strtrim(starname)
+        ;;need to keep the found ra and dec
+        pos = strmid(Result[id2[0]],43,20)
+        pos = strtrim(pos)
+        minus = pos.Contains('-')
+        if minus gt 0 then begin
+           negdec = pos.Split('\-')
+           ra = float(negdec[0])
+           dec = float(negdec[1])
+           dec = dec*(-1)
+        endif else begin
+           posdec = pos.Split('\+')
+           ra = float(posdec[0])
+           dec = float(negdec[1])
+        endelse
+        
         
         if keyword_set(Verbose) then print, 'Nearest star: ', starname      
         
@@ -231,7 +257,7 @@ Function Query_starid,  ra, dec, naxis, ra_rqst, dec_rqst, Found = found, ERRMSG
            ;;not at the sweet spot, but maybe at the center of the
            ;;array
            if dec_rqst lt 0 then sdec_rqst = string(dec_rqst) else sdec_rqst = strcompress('+'+string(dec_rqst),/remove)
-           narcmin = 2.0
+           narcmin = 1.4
            QueryURL = strcompress(base1 + string(ra_rqst) +  sdec_rqst + base2 + string(narcmin) + base3,/remove)
            print, 'query', QueryURL
            Result = webget(QueryURL)
@@ -253,6 +279,22 @@ Function Query_starid,  ra, dec, naxis, ra_rqst, dec_rqst, Found = found, ERRMSG
               starname = strmid(Result[id2[0]],13,25)
               ;;and remove some blank spaces
               starname = strtrim(starname)
+                     ;;need to keep the found ra and dec
+              pos = strmid(Result[id2[0]],43,20)
+              pos = strtrim(pos)
+              print, 'pos', pos
+              minus = pos.Contains('-')
+              if minus gt 0 then begin
+                 negdec = pos.Split('\-')
+                 ra = float(negdec[0])
+                 dec = float(negdec[1])
+                 dec = dec*(-1)
+              endif else begin
+                 posdec = pos.Split('\+')
+                 ra = float(posdec[0])
+                 dec = float(posdec[1])
+              endelse
+              
            endif
            
            

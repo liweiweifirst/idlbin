@@ -2,15 +2,7 @@ function read_exoplanet_list, calculate = calculate
   COMMON centroid_block
   ;;figure out where the exoplanet stares are.
 
-  ;;using the webpage that Elena maintains, but this doesn't
-  ;;have campaign name which I need to access the data in the archive
-;;  planets = webget("http://ssc.spitzer.caltech.edu/warmmission/scheduling/observinglogs/extrasolarplanetsWarm.txt")
-;;  planets = planets.text[22:*]
-;;  aorname = strmid(planets, 106, 8)  ;; will be screwed if format of this file changes
-;;  min_dur = strmid(planets, 71, 6)
-;;  start_time = strmid(planets, 79, 21)
-
-
+ 
 ;;  readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/weeks456_553_666_749_768.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, I10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline = 1
 
   
@@ -24,7 +16,7 @@ function read_exoplanet_list, calculate = calculate
   start_jd = julday(start_month, start_day, start_year, start_hr, start_min)
 
   ;;which of these have already been analyzed?
-  ;;check for the save file first XX
+  ;;check for the save file first 
   savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids.sav'
   savecheck = file_test(savename)
   if savecheck gt 0 then begin
@@ -150,3 +142,13 @@ end
 ;;     endelse
      
 ;;  endfor
+
+
+ ;;using the webpage that Elena maintains, but this doesn't
+  ;;have campaign name which I need to access the data in the archive
+;;  planets = webget("http://ssc.spitzer.caltech.edu/warmmission/scheduling/observinglogs/extrasolarplanetsWarm.txt")
+;;  planets = planets.text[22:*]
+;;  aorname = strmid(planets, 106, 8)  ;; will be screwed if format of this file changes
+;;  min_dur = strmid(planets, 71, 6)
+;;  start_time = strmid(planets, 79, 21)
+
