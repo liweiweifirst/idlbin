@@ -242,6 +242,22 @@ chname = 0
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 ;---
+  planetname = 'KOI246'  ;kepler 37 don't know if b, c, or d
+  ra_ref = 291.0323
+  dec_ref = 49.040266
+  aorname_ch1 = []  ;ch1
+  aorname_ch2 = ['r39371008']  ;ch2 
+  basedir = '/Users/jkrick/external/irac_warm/' 
+  exptime = [12.]
+  stareaor = 0
+  mask = 'no'
+  plot_norm = 1.
+  plot_corrnorm = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+;---
   planetname = 'HD158460'   ; !!!This is a standard star, ie should have a flat light curve
   ra_ref = 261.42213
   dec_ref = 60.048479
