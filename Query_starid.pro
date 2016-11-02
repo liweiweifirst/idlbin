@@ -1,4 +1,4 @@
-Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = errmsg, simbad = simbad, $
+Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = errmsg, $
     Verbose = verbose,  Print = print,Vmag=Vmag,Jmag=Jmag,Hmag=Hmag,Kmag=Kmag,parallax=parallax
 ;+
 ; NAME: 
@@ -100,56 +100,8 @@ Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = err
 ;  endif
 
   COMMON centroid_block
-  print, 'dec rqst', dec_rqst
-  ;;to search SIMBAD
-  ;;------------------------------------------------------
-  if keyword_set(simbad) then begin
-     base1 = "http://simbad.u-strasbg.fr/simbad/sim-coo?Coord="
-     base2 = "&Radius=2&Radius.unit=arcmin&output.format=ASCII&coodisp1=d"
-     QueryURL = strcompress(base1 + string(ra) +  string(dec) + base2,/remove)
   
-
-     if keyword_set(verbose) then print,queryURL
-     Result = webget(QueryURL)
-     found = 0
-     ;;
-     if keyword_set(Verbose) then print, Result.Text
-     Result=Result.Text
-     
-     idx=where(strpos(Result, 'Number of objects') ne -1, nlines)
-     if nlines eq 1 then begin
-        cnt = strmid(Result[idx], 20)
-        ;;but cnt is a string, want it to be an int
-        cnt = fix(cnt)
-;     print, 'number of returned objects', cnt
-     endif
-     
-     if cnt GE 1 then begin
-        if cnt GT 1 then begin 
-           message,/INF,strcompress('Warning - '+ string(cnt)+ ' matches found for position '  )
-        endif 	
-        found=1   
-        
-        ;;now pull the name of the first star in the list
-        id2 = where(strpos(Result, '1|') ne -1, nlines)
-        print, 'nlines 1', nlines
-        print, 'Result: ', Result[id2]
-        starname = strmid(Result[id2[0]],13,25)
-        ;;and remove some blank spaces
-        starname = strtrim(starname)
-        
-        if keyword_set(Verbose) then print, 'Nearest star: ', starname
-        
-     ENDIF ELSE BEGIN 
-        print,  ['No objects returned by SIMBAD.   The server answered:' , $
-                  strjoin(result)]
-        
-     ENDELSE
-     
-     
-  endif
-  
-  ;;to search NEXSCI
+  ;;First search NEXSCI
   ;;------------------------------------------------------
   
   base1 = "http://exoplanetarchive.ipac.caltech.edu/cgi-bin/nstedAPI/nph-nstedAPI?table=exoplanets&ra="
@@ -202,9 +154,9 @@ Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = err
      Result = webget(QueryURL)
      Result = Result.text
      if keyword_set(Verbose) then print, Result
+     
      ;;how many objects did SIMBAD return?
      idx=where(strpos(Result, 'Number of objects') ne -1, nlines)
-                                ;xxx figure out what to do here for just one object
      if nlines eq 1 then begin  ;got more than one object
         scnt = strmid(Result[idx], 20)
         ;;but cnt is a string, want it to be an int
@@ -217,12 +169,13 @@ Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = err
         found=1   
         
         ;;now pull the name of the first star in the list
-        ;;may want to change this to pick something in good
-        ;;brightness range - but fact that it is in SIMBAD may be
-        ;;                   good enough
         id2 = where(strpos(Result, '1|') ne -1, nlines)
-        ;;print, 'nlines 1', nlines
-        ;;print, 'Result: ', Result[id2]
+        firstline = Result[id2[0]]
+        firstsplit = firstline.Split('\|')
+        starname = firstplit[2]
+        pos = firstsplit[4]
+        pm = firstsplit[5]  ;mas/yr
+        print, 'from split', starname, 'pos ', pos, 'pm ', pm
         starname = strmid(Result[id2[0]],13,25)
         ;;and remove some blank spaces
         starname = strtrim(starname)
@@ -241,7 +194,14 @@ Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = err
            dec = float(negdec[1])
         endelse
         
-        
+        ;;apply the proper motions
+        ;;assume 2013 as the 'middle' of the warm mission to get
+        ;;posistions closer
+        pmra = pmra*13/1000./60./60. ;arsec
+        pmdec = pmdec*13/1000./60./60. ;arcsec
+        ra = ra + pmra
+        dec = dec + pmdec
+
         if keyword_set(Verbose) then print, 'Nearest star: ', starname      
         
      ENDIF ELSE BEGIN  ;;SIMBAD found either one star, or didn't find anything, now what??
