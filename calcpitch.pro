@@ -1,4 +1,4 @@
-function calcpitch, ra, dec, startjd
+function calcpitch, pitchra, pitchdec, startjd
 
   common centroid_block
   ;;convert those ra and decs into useful format
@@ -15,8 +15,8 @@ function calcpitch, ra, dec, startjd
   ;;do some spherical astronomy
   ;;taken from John Stauffer's code
   raddeg = 360.0/(2.0*!PI)
-  ra1 = ra/raddeg
-  dec1 = dec/raddeg
+  ra1 = pitchra/raddeg
+  dec1 = pitchdec/raddeg
   ra2 = tel_ra/raddeg
   dec2 = tel_dec/raddeg
   cd1 = cos(dec1)
