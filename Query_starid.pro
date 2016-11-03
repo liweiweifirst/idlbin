@@ -135,12 +135,8 @@ Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = err
      
      ;;didn't find an object 
   endif else begin
-     print, 'No objects returned by NExScI. Searching SIMBAD' ;  The server answered:'+ (result)]
-     
-     
-     ;;need to then pick some other star in the field of view...
-     ;;either it is not a confirmed planet, or it's the off field of view
-     ;;search SIMBAD
+     ;;-----------------------------------------------------------------------------------------
+     print, 'No objects returned by NExScI. Searching SIMBAD in sweet spot' ;  The server answered:'+ (result)]
      
      base1 = "http://simbad.u-strasbg.fr/simbad/sim-coo?Coord="
      base2 = "&Radius="
@@ -171,28 +167,25 @@ Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = err
         ;;now pull the name of the first star in the list
         id2 = where(strpos(Result, '1|') ne -1, nlines)
         firstline = Result[id2[0]]
-        firstsplit = firstline.Split('\|')
-        starname = firstplit[2]
-        pos = firstsplit[4]
-        pm = firstsplit[5]  ;mas/yr
+        splitsimbadstring(firstline, starname=starname, ra=ra, dec=dec, pmra=pmra, pmdec=pmdec)
         print, 'from split', starname, 'pos ', pos, 'pm ', pm
-        starname = strmid(Result[id2[0]],13,25)
-        ;;and remove some blank spaces
-        starname = strtrim(starname)
-        ;;need to keep the found ra and dec
-        pos = strmid(Result[id2[0]],43,20)
-        pos = strtrim(pos)
-        minus = pos.Contains('-')
-        if minus gt 0 then begin
-           negdec = pos.Split('\-')
-           ra = float(negdec[0])
-           dec = float(negdec[1])
-           dec = dec*(-1)
-        endif else begin
-           posdec = pos.Split('\+')
-           ra = float(posdec[0])
-           dec = float(negdec[1])
-        endelse
+;;        starname = strmid(Result[id2[0]],13,25)
+;;        ;;and remove some blank spaces
+;;        starname = strtrim(starname)
+;;        ;;need to keep the found ra and dec
+;;        pos = strmid(Result[id2[0]],43,20)
+;;        pos = strtrim(pos)
+;;        minus = pos.Contains('-')
+;;        if minus gt 0 then begin
+;;           negdec = pos.Split('\-')
+;;           ra = float(negdec[0])
+;;           dec = float(negdec[1])
+;;           dec = dec*(-1)
+;;        endif else begin
+;;           posdec = pos.Split('\+')
+;;           ra = float(posdec[0])
+;;           dec = float(posdec[1])
+;;        endelse
         
         ;;apply the proper motions
         ;;assume 2013 as the 'middle' of the warm mission to get
@@ -230,30 +223,30 @@ Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = err
               found=1   
         
               ;;now pull the name of the first star in the list
-              ;;may want to change this to pick something in good
-              ;;brightness range - but fact that it is in SIMBAD may be
-              ;;                   good enough
               id2 = where(strpos(Result, '1|') ne -1, nlines)
               ;;print, 'nlines 1', nlines
-              ;;print, 'Result: ', Result[id2]
-              starname = strmid(Result[id2[0]],13,25)
-              ;;and remove some blank spaces
-              starname = strtrim(starname)
-                     ;;need to keep the found ra and dec
-              pos = strmid(Result[id2[0]],43,20)
-              pos = strtrim(pos)
-              print, 'pos', pos
-              minus = pos.Contains('-')
-              if minus gt 0 then begin
-                 negdec = pos.Split('\-')
-                 ra = float(negdec[0])
-                 dec = float(negdec[1])
-                 dec = dec*(-1)
-              endif else begin
-                 posdec = pos.Split('\+')
-                 ra = float(posdec[0])
-                 dec = float(posdec[1])
-              endelse
+              firstline = Result[id2]
+              splitsimbadstring(firstline, starname=starname, ra=ra, dec=dec, pmra=pmra, pmdec=pmdec)
+              print, 'from split', starname, 'pos ', pos, 'pm ', pm
+
+;;              starname = strmid(Result[id2[0]],13,25)
+;;              ;;and remove some blank spaces
+;;              starname = strtrim(starname)
+;;                     ;;need to keep the found ra and dec
+;;              pos = strmid(Result[id2[0]],43,20)
+;;              pos = strtrim(pos)
+;;              print, 'pos', pos
+;;              minus = pos.Contains('-')
+;;              if minus gt 0 then begin
+;;                 negdec = pos.Split('\-')
+;;                 ra = float(negdec[0])
+;;                 dec = float(negdec[1])
+;;                 dec = dec*(-1)
+;;              endif else begin
+;;                 posdec = pos.Split('\+')
+;;                 ra = float(posdec[0])
+;;                 dec = float(posdec[1])
+;;              endelse
               
            endif
            
@@ -267,8 +260,8 @@ Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = err
      ENDELSE
   endelse
   
-     return, starname
-  END 
+  return, starname
+END 
   
 
     ; Get V mag if present
