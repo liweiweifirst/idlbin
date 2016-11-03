@@ -140,7 +140,7 @@ Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = err
      
      base1 = "http://simbad.u-strasbg.fr/simbad/sim-coo?Coord="
      base2 = "&Radius="
-     base3 = "&Radius.unit=arcmin&output.format=ASCII&coodisp1=d"
+     base3 = "&Radius.unit=arcmin&output.format=ASCII&coodisp1=d&list.pmsel=on"
      ;;if naxis eq '2' then narcmin = 2 else narcmin = 0.4
      narcmin = 0.4
      ;;dec needs to have a sign attached
@@ -165,27 +165,9 @@ Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = err
         found=1   
         
         ;;now pull the name of the first star in the list
-        id2 = where(strpos(Result, '1|') ne -1, nlines)
+        id2 = where(Result.StartsWith('1|'), nlines)
         firstline = Result[id2[0]]
-        splitsimbadstring(firstline, starname=starname, ra=ra, dec=dec, pmra=pmra, pmdec=pmdec)
-        print, 'from split', starname, 'pos ', pos, 'pm ', pm
-;;        starname = strmid(Result[id2[0]],13,25)
-;;        ;;and remove some blank spaces
-;;        starname = strtrim(starname)
-;;        ;;need to keep the found ra and dec
-;;        pos = strmid(Result[id2[0]],43,20)
-;;        pos = strtrim(pos)
-;;        minus = pos.Contains('-')
-;;        if minus gt 0 then begin
-;;           negdec = pos.Split('\-')
-;;           ra = float(negdec[0])
-;;           dec = float(negdec[1])
-;;           dec = dec*(-1)
-;;        endif else begin
-;;           posdec = pos.Split('\+')
-;;           ra = float(posdec[0])
-;;           dec = float(posdec[1])
-;;        endelse
+        junk = splitsimbadstring(firstline, starname=starname, ra=ra, dec=dec, pmra=pmra, pmdec=pmdec)
         
         ;;apply the proper motions
         ;;assume 2013 as the 'middle' of the warm mission to get
@@ -202,7 +184,13 @@ Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = err
         ;;check for single star
         id1=where(strpos(Result, 'Object') ne -1, nlines)
         if nlines eq 1 then begin
-           starname = strmid(Result[id1],7,9)
+           starname = strmid(Result[id1],7,11)
+           idcoo = where(Result.StartsWith('Coordinates(ICRS'))
+           cooline = Result[idcoo]
+           pos = cooline.split(' ')
+           ra = pos[1]
+           dec = pos[2]
+           
         endif else begin
            print, ['No objects returned by SIMBAD.   The server answered:' , $
                    strjoin(result)]
@@ -223,11 +211,10 @@ Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = err
               found=1   
         
               ;;now pull the name of the first star in the list
-              id2 = where(strpos(Result, '1|') ne -1, nlines)
+              id2 = where(Result.StartsWith('1|'), nlines)
               ;;print, 'nlines 1', nlines
               firstline = Result[id2]
-              splitsimbadstring(firstline, starname=starname, ra=ra, dec=dec, pmra=pmra, pmdec=pmdec)
-              print, 'from split', starname, 'pos ', pos, 'pm ', pm
+              junk = splitsimbadstring(firstline, starname=starname, ra=ra, dec=dec, pmra=pmra, pmdec=pmdec)
 
 ;;              starname = strmid(Result[id2[0]],13,25)
 ;;              ;;and remove some blank spaces
@@ -284,3 +271,20 @@ END
 ;;      plxi = where(strpos(Result, '%X ') ne -1,plxcnt)
 ;;      if plxcnt GE 1 then reads,strmid(Result[plxi],2),parallax
   
+;;        starname = strmid(Result[id2[0]],13,25)
+;;        ;;and remove some blank spaces
+;;        starname = strtrim(starname)
+;;        ;;need to keep the found ra and dec
+;;        pos = strmid(Result[id2[0]],43,20)
+;;        pos = strtrim(pos)
+;;        minus = pos.Contains('-')
+;;        if minus gt 0 then begin
+;;           negdec = pos.Split('\-')
+;;           ra = float(negdec[0])
+;;           dec = float(negdec[1])
+;;           dec = dec*(-1)
+;;        endif else begin
+;;           posdec = pos.Split('\+')
+;;           ra = float(posdec[0])
+;;           dec = float(posdec[1])
+;;        endelse

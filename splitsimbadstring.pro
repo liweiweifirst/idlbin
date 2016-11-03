@@ -1,4 +1,4 @@
-pro splitsimbadstring, firstline, starname = starname, ra = ra, dec = dec, pmra = pmra, pmdec = pmdec
+function splitsimbadstring, firstline, starname = starname, ra = ra, dec = dec, pmra = pmra, pmdec = pmdec
      ;;firstline = '1|      0.99|KOI-157.02               |Pl |297.1150-41.9092           |            ~ ~ |     ~|     ~|     ~|     ~|     ~|~              |  67|   1'
 
      firstsplit = firstline.Split('\|')
@@ -27,7 +27,8 @@ pro splitsimbadstring, firstline, starname = starname, ra = ra, dec = dec, pmra 
         pmra = 0
         pmdec = 0
      endelse
-     
+
+     return, 0
   end
 
   
