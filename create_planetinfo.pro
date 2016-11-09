@@ -419,10 +419,10 @@ chname = 0
 ;---
   planetname = 'gj436'
   ra_ref = 175.5493
-  dec_ref = 26.704311
+  dec_ref = 26.7036
   aorname_ch2 = ['r38702592' ,'r38808064', 'r40848128','r42614016' ] 
-  aorname_ch1 = ['r0000000000']
-  basedir = '/Users/jkrick/irac_warm/' 
+  aorname_ch1 = ['r38807296']
+  basedir = '/Users/jkrick/external/irac_warm/trending/' 
   utmjd_center = 55221.47190D
   transit_duration=96.300
   period = 2.64385

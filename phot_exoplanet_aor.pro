@@ -1,91 +1,91 @@
 pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, simulated = simulated, phase = phase, pixval = pixval
   ;do photometry on any IRAC staring mode AOR
-COMMON centroid_block
- t1 = systime(1)
- print, 'ra', ra, ' dec', dec
+  COMMON centroid_block
+  t1 = systime(1)
+  print, 'ra', ra, ' dec', dec
 ;convert aperture radius in pixels into what get_centroids_for_calstar_jk uses 
-case apradius of
-   1.5: apval = 0
-   2.0: begin
-      apval = 0
-      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_150226.sav'
-      if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p00_s3_7_0p4s_140314.sav'
-   end
-   2.25: begin
-      apval = 1
-      if chname eq '2' then begin
-         pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_15_0p1s_x4_160126.sav'
-      endif
-
-      if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_rmulti_s3_7_sd_0p4s_sdark_150722.sav'
-   end
-   2.5: begin
-      apval = 2
-      if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_sdark_150223.sav'
-      if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p50_s3_7_0p4s_140314.sav'
-   end
-   2.75: apval = 2
-   3.25: apval = 2
-   3: apval = 3
-
-   Else: apval = 2              ; if no decision, then choose an apradius = 2.5 pixels
-endcase
-
-if keyword_set(simulated) then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_sim_data_ch2_rmulti_s3_7_0p1sx4_151030.sav'
+  case apradius of
+     1.5: apval = 0
+     2.0: begin
+        apval = 0
+        if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_150226.sav'
+        if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p00_s3_7_0p4s_140314.sav'
+     end
+     2.25: begin
+        apval = 1
+        if chname eq '2' then begin
+           pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_15_0p1s_x4_160126.sav'
+        endif
+        
+        if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_rmulti_s3_7_sd_0p4s_sdark_150722.sav'
+     end
+     2.5: begin
+        apval = 2
+        if chname eq '2' then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch2_rmulti_s3_7_0p1s_x4_sdark_150223.sav'
+        if chname eq '1' then pmapfile =  '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_data_ch1_r2p50_s3_7_0p4s_140314.sav'
+     end
+     2.75: apval = 2
+     3.25: apval = 2
+     3: apval = 3
+     
+     Else: apval = 2            ; if no decision, then choose an apradius = 2.5 pixels
+  endcase
+  
+  if keyword_set(simulated) then pmapfile = '/Users/jkrick/irac_warm/pcrs_planets/pmap_phot/pmap_sim_data_ch2_rmulti_s3_7_0p1sx4_151030.sav'
 ;;print, 'using pmap file', pmapfile, apval
-
-
-exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
-exosystem = planetname
-
+  
+  
+  exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
+  exosystem = planetname
+  
 ;;print, exosystem, 'exosystem'
-
-if chname eq '2' then lambdaname  = '4.5'
-if chname eq '1' then lambdaname  = '3.6'
-
+  
+  if chname eq '2' then lambdaname  = '4.5'
+  if chname eq '1' then lambdaname  = '3.6'
+  
 ;;causing problems wit undefined inclinations. remove for now.
 ;;get_exoplanet_data,EXOSYSTEM=exosystem,MSINI=msini,MSTAR=mstar,TRANSIT_DEPTH=transit_depth,RP_RSTAR=rp_rstar,AR_SEMIMAJ=ar_semimaj,$
 ;;                       TEQ_P=1315,TEFF_STAR=teff_star,SECONDARY_DEPTH=secondary_depth,SECONDARY_LAMBDA=lambdaname,$
 ;;                       MJD_TRANSIT=mjd_transit,P_ORBIT=p_orbit,EXODATA=exodata,RA=ra_exosystem,DEC=dec_exosystem,VMAG=vmag,$
 ;;                       DISTANCE=distance,ECC=ecc,T14=t14,F36=f36,F45=f45,FP_FSTAR0=fp_fstar0,/verbose ;INCLINATION=inclination,
-
+  
 ;---------------
-dirname = '/Users/jkrick/external/irac_warm/trending/'
-
-
-
-
-if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_120827_occthresh.fits'$
-else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
-fits_read,occ_filename, occdata, occheader
-
+  dirname = '/Users/jkrick/external/irac_warm/trending/'
+  
+  
+  
+  
+  if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_120827_occthresh.fits'$
+  else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
+  fits_read,occ_filename, occdata, occheader
+  
 ;;   print, '----------------------------'
 ;;   print, 'working on ', thisaor
-   dir = strcompress(dirname+ 'r' + string(thisaor ) ,/remove_all)
-   CD, dir                      ; change directories to the correct AOR directory
+  dir = strcompress(dirname+ 'r' + string(thisaor ) ,/remove_all)
+  CD, dir                       ; change directories to the correct AOR directory
 ;;   pwd
+  
+  command  = strcompress( 'find ch'+chname+"/bcd -name 'SPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
+  spawn, command
+  
+  command2 =  strcompress('find ch'+chname+"/bcd -name '*bunc.fits' > "+dirname + 'bunclist.txt')
+  spawn, command2
+  
+  command3 =  strcompress('find ch'+chname+"/bcd -name '*dce.fits' > "+dirname + 'dcelist.txt')
+  spawn, command3
+  
+  readcol,strcompress(dirname +'bcdlist.txt'),fitsname, format = 'A', /silent
+  readcol,strcompress(dirname+'bunclist.txt'),buncname, format = 'A', /silent
+  readcol,strcompress(dirname+'dcelist.txt'),rawname, format = 'A', /silent
+  
+  print,'n_elements(fitsname)', n_elements(fitsname)
+  
+  
+  startfits = 0L
+  
+  
 
-   command  = strcompress( 'find ch'+chname+"/bcd -name 'SPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
-   spawn, command
-
-   command2 =  strcompress('find ch'+chname+"/bcd -name '*bunc.fits' > "+dirname + 'bunclist.txt')
-   spawn, command2
-
-   command3 =  strcompress('find ch'+chname+"/bcd -name '*dce.fits' > "+dirname + 'dcelist.txt')
-   spawn, command3
- 
-   readcol,strcompress(dirname +'bcdlist.txt'),fitsname, format = 'A', /silent
-   readcol,strcompress(dirname+'bunclist.txt'),buncname, format = 'A', /silent
-   readcol,strcompress(dirname+'dcelist.txt'),rawname, format = 'A', /silent
-
-   print,'n_elements(fitsname)', n_elements(fitsname)
-
-   
-   startfits = 0L
-
-   
-
-   for i =startfits, n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
+   for i =startfits,  n_elements(fitsname) - 1  do begin ;read each bcd file, find centroid, keep track
       ;; print, 'working on ', fitsname(i)         
       header = headfits(fitsname(i)) ;
       sclk_obs= sxpar(header, 'SCLK_OBS')
