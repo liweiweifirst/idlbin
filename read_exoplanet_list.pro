@@ -39,14 +39,15 @@ function read_exoplanet_list, calculate = calculate
      if readoutfull[r] eq 't' then naxis[r] ='2' else naxis[r] ='3'
   endfor
 
-  ;;convert aorname from long to a string for compatability with phot_exoplanet.pro
+  ;;convert aorname from long to a string for compatability with
+  ;;phot_exoplanet.pro
   aorname = string(aorname)
   aorname = strtrim(aorname, 1)  ;remove leading whitespaces
 
   ;;make an array which holds the previous 1 hour of AORnames, ra,
   ;;dec, and start times
   ;;takes too long, just keep the previous 5 AORs.
-  preaor = fltarr(n_elements(start_jd), 5) ;;list(length=n_elements(start_jd));ptrarr(n_elements(start_jd),/allocate_heap)
+  preaor = strarr(n_elements(start_jd), 5) ;;list(length=n_elements(start_jd));ptrarr(n_elements(start_jd),/allocate_heap)
   prera = fltarr(n_elements(start_jd), 5)
   predec = fltarr(n_elements(start_jd), 5)
   prejd = fltarr(n_elements(start_jd), 5)
@@ -54,7 +55,7 @@ function read_exoplanet_list, calculate = calculate
   pre36= strarr(n_elements(start_jd), 5)
   pre45= strarr(n_elements(start_jd), 5)
   
-  preaor[0:4] = 0  
+  preaor[0:4] = '0' 
   prera[0:4] = 0               
   predec[0:4] = 0               
   prejd[0:4] = 0               
@@ -76,7 +77,17 @@ function read_exoplanet_list, calculate = calculate
   thresh = 120                  ;two hours seems appropriate for now
   longstare = where(min_dur gt thresh, n_longstare, complement = tooshort)
   print, 'number of long AORs', n_longstare
-  if n_longstare gt 0 then remove, tooshort, pid, campaign_name, start_jd, aorname, naxis, preaor, prera, predec, prejd, prepid, datacollect36, datacollect45, pre36, pre45, min_dur
+  if n_longstare gt 0 then remove, tooshort, pid, campaign_name, start_jd, aorname, naxis, datacollect36, datacollect45, min_dur
+  ;;need to also remove those from the multi-dimensional arrays which
+  ;;remove can't handle
+  preaor = preaor[longstare, *]
+  prera = prera[longstare, *]
+  predec = predec[longstare, *]
+  prejd = prejd[longstare, *]
+  prepid = prepid[longstare, *]
+  pre36 = pre36[longstare, *]
+  pre45 = pre45[longstare, *]
+  
   ;;and want to make sure they really are stares and not dithers
   ;;so compare to Elena's list of exoplanet and BD pids and
   ;;remove those pid's not on the list
@@ -87,11 +98,22 @@ function read_exoplanet_list, calculate = calculate
      starepid[i] = good
   endfor
  ;; print, starepid
-  bad = where(starepid lt 1, nbad)
+  bad = where(starepid lt 1, nbad, complement = goodstare)
   badpids = pid(bad)
   b = badpids[UNIQ(badpids, SORT(badpids))]
   
-  if nbad gt 0 then remove, bad, pid, campaign_name, start_jd, aorname, naxis, preaor, prera, predec, prejd, prepid, datacollect36, datacollect45, pre36, pre45, min_dur
+  if nbad gt 0 then begin
+     remove, bad, pid, campaign_name, start_jd, aorname, naxis, datacollect36, datacollect45, min_dur
+     preaor = preaor[goodstare, *]
+     prera = prera[goodstare, *]
+     predec = predec[goodstare, *]
+     prejd = prejd[goodstare, *]
+     prepid = prepid[goodstare, *]
+     pre36 = pre36[goodstare, *]
+     pre45 = pre45[goodstare, *]
+     
+  endif
+  
   print, 'number of staring, long AORs' ,n_elements(start_jd)
   
   ;;look at how much total data/time we are talking about here
