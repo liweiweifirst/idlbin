@@ -13,8 +13,9 @@ pro plot_track_centroids, run_data = run_data
      dpa = sigmax
      pkperiod = list(length=2)  ;n_elements(aorlist))
      pkstrength =  list(length=2) 
-     pktime = list(length=2) 
-     for n = 0, 17 do begin     ; n_elements(aorlist) - 1 do begin
+     pktime = list(length=2)
+     
+     for n = 0,  10 do begin; n_elements(aorlist) - 1 do begin
         print, '--------------'
         print, 'working on ',n, ' ',aorlist(n), n_elements(planethash[aorlist(n)].xcen)
         ;;sigmax & sigmay &sigmaxy vs. time
@@ -29,7 +30,7 @@ pro plot_track_centroids, run_data = run_data
         timearr = (timearr - time0)/60./60. ; now in hours instead of sclk
         
         ;;-------------------------------------
-        ;;initial xdrift vs.& y drift
+        ;;long term xdrift vs.& y drift
         start = [.05,15.0]
         ;;don't have errors in position, instead, fake it.
         noise = fltarr(n_elements(planethash[aorlist(n)].xcen))
@@ -44,10 +45,16 @@ pro plot_track_centroids, run_data = run_data
         tx = timearr(i)
         ycen = planethash[aorlist(n)].ycen
         ty = ycen(i)
-        ;;pl = plot(tx, ty, title = aorlist(n), xtitle = 'time(hrs)', yrange = [mean(planethash[aorlist(n)].ycen,/nan) -0.5, mean(planethash[aorlist(n)].ycen,/nan) +0.5])
-        ;; pl = plot(timearr, ycenfit(0)*timearr + ycenfit(1), color = 'red', overplot = pl)
+        pl = plot(tx, ty, title = aorlist(n), xtitle = 'time(hrs)', yrange = [mean(planethash[aorlist(n)].ycen,/nan) -0.5, mean(planethash[aorlist(n)].ycen,/nan) +0.5])
+        pl = plot(timearr, ycenfit(0)*timearr + ycenfit(1), color = 'red', overplot = pl)
         ;;XX don't want to keep this value if dithered.
         
+        ;;-------------------------------------
+        ;;short term drift
+        ;;want duration and slope.
+
+
+
         ;;-------------------------------------
         ;;delta pitch angle
         prepitchangle = planethash[aorlist(n)].prepitchangle
@@ -62,7 +69,8 @@ pro plot_track_centroids, run_data = run_data
            ycen = planethash[aorlist(n)].ycen
            bad = where(finite(ycen) lt 1,nbad)
            print, 'number of nans ', nbad
-           if nbad gt 0 and nbad lt n_elements(ycen) then remove, bad, xday, ycen
+           if nbad eq n_elements(ycen) then CONTINUE  ; no good data points
+           if nbad gt 0  then remove, bad, xday, ycen
            result = LNP_TEST(xday, ycen,/double, WK1 = wk1, WK2 = wk2, JMAX = jmax)
            
            ;;find the peaks above N* the random level
@@ -132,22 +140,25 @@ pro plot_track_centroids, run_data = run_data
   dpa = dpa[0:n-1]
   
   psx = plot(xjd, sigmax,'1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'X Size of cloud (stddev in position)', $
-              XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, yrange = [0, 1])
+              XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, yrange = [0, 0.2])
   psy = plot(xjd, sigmay,'1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'Y Size of cloud (stddev in position)', $
-             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = ['Time'], xminor = 11, yrange = [0, 1])
+             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = ['Time'], xminor = 11, yrange = [0, 0.2])
 
-  ;;initial xdrift vs.& y drift vs. time
-  pxydrift = plot(xdrift, ydrift,  '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Y drift',  xtitle = 'X drift',$
-                yrange = [-1, 1], xrange =[-1,1])
-  pdrift = plot(xjd, xdrift, '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Drift', yrange = [-0.2, 0.2],$
-                color = 'blue', XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11)
-  pdrift = plot(xjd, ydrift, '1s', sym_size = 0.5,   sym_filled = 1,  overplot = pdrift, color = 'red')
+  ;;Long term xdrift vs.& y drift vs. time
+  maxdrift = 0.05
+  pxydrift = plot(xdrift, ydrift,  '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Long Term Y drift (px/hr)', $
+                  xtitle = 'Long Term X drift (px/hr)', yrange = [-1*maxdrift, maxdrift], xrange =[-1*maxdrift,maxdrift])
+  pdrift = plot(xjd, xdrift, '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Long Term Drift (px/hr)', yrange = [-1*maxdrift, maxdrift],$
+                color = 'blue', XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, name='xdrift')
+  pdrift2 = plot(xjd, ydrift, '1s', sym_size = 0.5,   sym_filled = 1,  overplot = pdrift, color = 'red', name = 'ydrift')
+  lpd = legend(target = [pdrift, pdrift2], /auto_text_color, position = [xjd[20], maxdrift-0.01],/data)
 
   ;;delta pitch angle
-  pdpa = plot(xdrift, dpa, '1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'Change in pitch angle from previous observation', $
-              xtitle = 'Drift', color = 'blue',xrange = [-0.1,0.1])
-  pdpa = plot(ydrift, dpa, '1s', sym_size = 0.5,   sym_filled = 1, overplot = pdpa, color = 'red')
-
+  pdpa = plot( dpa, xdrift, '1s', sym_size = 0.5,   sym_filled = 1, xtitle = 'Change in pitch angle from previous observation', $
+              ytitle = 'Long Term Drift (px/hr)', color = 'blue',yrange = [-1*maxdrift,maxdrift], name = 'xdrift')
+  pdpa2 = plot(dpa, ydrift,'1s', sym_size = 0.5,   sym_filled = 1, overplot = pdpa, color = 'red', name = 'ydrift')
+  ldpa = legend(target = [pdpa, pdpa2], /auto_text_color, position = [dpa[20], maxdrift-0.01],/data)
+  
   ;;periodogram fun
   ;;how do I collapse a list into a single array?
   pperiod = bubbleplot(pktime, pkperiod, /shaded, magnitude = pkstrength , exponent = 0.5, $
