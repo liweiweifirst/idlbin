@@ -120,12 +120,13 @@ Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = err
   ;;found at least one object
   if cnt ge 2 then begin
      if cnt gt 2 then print, strcompress('Warning - '+ string(cnt)+ ' matches found for position '  )
-     firstline = strsplit(result.text[1],',',/extract)
+     firstline = strsplit(result.text[1],',',/extract,/preserve_null)
      starname = firstline[0]
      ra = firstline[3]
      dec = firstline[4]
      pmra = firstline[1]  ;mas/yr
      pmdec = firstline[2] ;mas/yr
+     print, 'pmra and dec', pmra, pmdec
      ;;assume 2013 as the 'middle' of the warm mission to get
      ;;posistions closer
      pmra = pmra*13/1000./60./60. ;arsec
@@ -216,32 +217,38 @@ Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = err
               firstline = Result[id2]
               junk = splitsimbadstring(firstline, starname=starname, ra=ra, dec=dec, pmra=pmra, pmdec=pmdec)
 
-;;              starname = strmid(Result[id2[0]],13,25)
-;;              ;;and remove some blank spaces
-;;              starname = strtrim(starname)
-;;                     ;;need to keep the found ra and dec
-;;              pos = strmid(Result[id2[0]],43,20)
-;;              pos = strtrim(pos)
-;;              print, 'pos', pos
-;;              minus = pos.Contains('-')
-;;              if minus gt 0 then begin
-;;                 negdec = pos.Split('\-')
-;;                 ra = float(negdec[0])
-;;                 dec = float(negdec[1])
-;;                 dec = dec*(-1)
-;;              endif else begin
-;;                 posdec = pos.Split('\+')
-;;                 ra = float(posdec[0])
-;;                 dec = float(posdec[1])
-;;              endelse
-              
+              ;;apply the proper motions
+              ;;assume 2013 as the 'middle' of the warm mission to get
+              ;;posistions closer
+              pmra = pmra*13/1000./60./60. ;arsec
+              pmdec = pmdec*13/1000./60./60. ;arcsec
+              ra = ra + pmra
+              dec = dec + pmdec
+              print, 'ra, dec', ra, dec
            endif
+           ;;check for single star
+           id1=where(strpos(Result, 'Object') ne -1, nlines)
+           if nlines eq 1 then begin
+              starname = strmid(Result[id1],7,11)
+              idcoo = where(Result.StartsWith('Coordinates(ICRS'))
+              cooline = Result[idcoo]
+              pos = cooline.split(' ')
+              ra = pos[1]
+              dec = pos[2]
+           endif
+
            
-           
-           ;;
            ;;figure out how to exit the program if the fov is blank
            ;;(ie. subarray off FOV)
- ;;          starname = 'nostar'
+           
+           none = where(strpos(Result, 'No astronomical') ne -1, nlines)
+           if nlines eq 1 then begin
+              found = 0
+              starname = 'nostar'
+           endif
+           
+              
+              ;;
         ENDELSE
         
      ENDELSE
@@ -288,3 +295,22 @@ END
 ;;           ra = float(posdec[0])
 ;;           dec = float(posdec[1])
 ;;        endelse
+
+;;              starname = strmid(Result[id2[0]],13,25)
+;;              ;;and remove some blank spaces
+;;              starname = strtrim(starname)
+;;                     ;;need to keep the found ra and dec
+;;              pos = strmid(Result[id2[0]],43,20)
+;;              pos = strtrim(pos)
+;;              print, 'pos', pos
+;;              minus = pos.Contains('-')
+;;              if minus gt 0 then begin
+;;                 negdec = pos.Split('\-')
+;;                 ra = float(negdec[0])
+;;                 dec = float(negdec[1])
+;;                 dec = dec*(-1)
+;;              endif else begin
+;;                 posdec = pos.Split('\+')
+;;                 ra = float(posdec[0])
+;;                 dec = float(posdec[1])
+;;              endelse
