@@ -137,7 +137,7 @@ endif
 ;---------------
 
 ;print, 'ut_mjd',utmjd_center
-dirname = strcompress(basedir + planetname +'/')
+dirname = strcompress(basedir );+ planetname +'/')
 planethash = hash()
 
 
