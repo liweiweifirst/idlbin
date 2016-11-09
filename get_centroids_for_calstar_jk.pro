@@ -369,7 +369,8 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ;           xmax = xmax
 ;           ymax = ymax 
 ; Only continue with images that have a source that not 5 pixels from edge
-           xedge = nx - edge - 1.
+          ;; xedge = nx - edge - 1.
+           xedge = nx - edge + 1.  ;;jk changing to allow closer to edge.
            if (xmax lt edge or xmax gt xedge or ymax lt edge or ymax gt xedge)  then begin ;   or eflux[nch-1] gt sat_levels[nch-1, findex])
 		    
 		    ;if (eflux[nch-1] gt sat_levels[nch-1, findex]) then begin
@@ -379,6 +380,7 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 		  ;	endif
               if (xmax lt edge or xmax gt xedge or ymax lt edge or ymax gt xedge) then begin 
                  expid =  sxpar(h, 'EXPID')
+                 ;;print, 'xmax, xedge, edge, ymax', xmax, xedge, edge, ymax
                  if not keyword_set(silent) then print, 'Source outside array for image number ', expid
                  flag[0:ns-1] = -2
               endif 
