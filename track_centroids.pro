@@ -4,7 +4,7 @@ pro track_centroids, pixval=pixval
 ;angle for all warm mission long stares
   COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, prepid, spitzer_jd, ra_string, dec_string,  naxis, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr, bmjd,  backarr, backerrarr, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, datacollect36, datacollect45, piarr, pre36, pre45, planethash, ra, dec
   apradius = 2.25 ;;fix this for now
-  ;;planethash = hash()  
+  planethash = hash()  
 
   tic
   journal,  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_out.txt'
@@ -24,15 +24,15 @@ pro track_centroids, pixval=pixval
   
   chname = ['ch1','ch2']
 
-  for na = 0,300 - 1 do begin ;n_elements(aorname) 
+  for na = 0, 150 - 1 do begin; n_elements(aorname) 
      print, '---------------'
      print, 'starting on ',aorname(na), ' ', na
      chname = ['ch1','ch2']
      pchname = ['ch1','ch2']
-     
      if datacollect36(na) eq 'f' then chname = ['ch2']
      if datacollect45(na) eq 'f' then chname = ['ch1']
-     for c = 0, n_elements(chname) - 1 do begin
+     ;;for now just work on one channel
+     for c = 0,1 -1 do begin;  n_elements(chname) - 1 do begin
         ;;will need to get this AOR from the archive
         junk = scpdata(aorname(na), campaign_name(na), chname(c))
         
@@ -59,8 +59,8 @@ pro track_centroids, pixval=pixval
            ;;figure out what the target of the AOR likely is:
            ;;ra and dec are in the common block so don't need
            ;;to send them here
-           starname = Query_starid( naxishere, ra_rqst, dec_rqst);, /Verbose)
-           print, 'starname: ', starname
+           starname = Query_starid( naxishere, ra_rqst, dec_rqst, /Verbose)
+           print, 'starname: ', starname, ra, dec
 
          endif
 
@@ -105,29 +105,31 @@ pro track_centroids, pixval=pixval
      
            ;;do photometry on the previous AOR if it is the same
            ;;target/pid
-           pppid = prepid[na]
-           ppaor = preaor[na]
-           preaorname = ppaor(n_elements(pppid) - 1)
+           pppid = prepid[na,*]
+           preaorname = preaor[na,*]
+           ppre36 = pre36[na, *]
+           ppre45 = pre45[na, *]
            if pppid(n_elements(pppid) - 1) eq pid[na] then begin
 
               ;;figure out which channel it is.
-              if pre36(n_elements(pppid) - 1) eq 'f' then pchname = ['ch2']
-              if pre45(n_elements(pppid) - 1) eq 'f' then pchname = ['ch1']
+              if ppre36(n_elements(pppid) - 1) eq 'f' then pchname = ['ch2']
+              if ppre45(n_elements(pppid) - 1) eq 'f' then pchname = ['ch1']
 
               ;;scp over this aor from the archive
-              junk = scpdata(ppaor(n_elements(pppid) - 1), campaign_name(na), pchname)
+              junk = scpdata(preaorname(n_elements(pppid) - 1), campaign_name(na), pchname)
 
               ;;do the photometry
-              phot_exoplanet_aor,starname, apradius,strmid(pchname,2), ra, dec, preaorname ;, /hybrid
+              phot_exoplanet_aor,starname, apradius, pchname.Substring(-1), preaorname(n_elements(pppid) - 1) ;, /hybrid
 
               ;;save relevant info
               ;;can only be one channel per AOR with this saving technique    
-              values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,prepitchangle[0:(n_elements(pp) - 2)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 2)], ppdec[0:(n_elements(pp) - 2)], ppjd[0:(n_elements(pp) - 2)], ppaor[0:(n_elements(pp) - 2)], pppid[0:(n_elements(pp) - 2)], pid)
-              planethash[preaorname] = dictionary(keys, values)
+              values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,prepitchangle[0:(n_elements(pp) - 2)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 2)], ppdec[0:(n_elements(pp) - 2)], ppjd[0:(n_elements(pp) - 2)], preaorname[0:(n_elements(pp) - 2)], pppid[0:(n_elements(pp) - 2)], pid)
+              thepreaorname = preaorname(n_elements(pppid) - 1)
+              planethash[thepreaorname] = dictionary(keys, values)
               
            endif                ; pre aor photometry
            
-        endif                   ; starname is a real name
+        Endif                   ; starname is a real name
 
      endfor                     ; for each channel
      
