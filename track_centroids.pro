@@ -24,7 +24,7 @@ pro track_centroids, pixval=pixval
   
   chname = ['ch1','ch2']
 
-  for na = 0,20 do begin; n_elements(aorname) 
+  for na = 0, n_elements(aorname) -1 do begin
      print, '---------------'
      print, 'starting on ',aorname(na), ' ', na
      chname = ['ch1','ch2']
