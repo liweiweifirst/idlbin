@@ -209,6 +209,7 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
               print, min(bin_time), 'min(bin_time)'
               if n_elements(bin_corrflux) lt 30 then nend = n_elements(bin_corrflux) - 1 else nend = 29
               print,'testing nend and n_elements(bin_corrflux): ', nend, n_elements(bin_corrflux)
+              print, 'testing more', n_elements(bin_time), n_elements(bin_corrflux), n_elements(bin_fluxerrarr)
               pb = errorplot(bin_time , bin_corrflux/median(bin_corrflux[0:nend]), $
                              bin_fluxerrarr/median(bin_corrflux), '1s', sym_size = 0.5, ERRORBAR_COLOR = colornames(n),$
                              sym_filled = 1, ytitle = 'Binned Corrected Flux',color = colornames(n), overplot = pb,$
