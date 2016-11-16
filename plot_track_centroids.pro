@@ -1,6 +1,6 @@
 pro plot_track_centroids, run_data = run_data
 
-  if keyword_set(run_data) then begin
+   if keyword_set(run_data) then begin
      
      restore, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids.sav'
      
@@ -11,11 +11,12 @@ pro plot_track_centroids, run_data = run_data
      xdrift = sigmax
      ydrift = sigmax
      dpa = sigmax
+     exptimearr = sigmax
      pkperiod = list(length=2)  ;n_elements(aorlist))
      pkstrength =  list(length=2) 
      pktime = list(length=2)
      
-     for n = 0,  10 do begin; n_elements(aorlist) - 1 do begin
+     for n = 0, 20 do begin;  n_elements(aorlist) - 1 do begin
         print, '--------------'
         print, 'working on ',n, ' ',aorlist(n), n_elements(planethash[aorlist(n)].xcen)
         ;;sigmax & sigmay &sigmaxy vs. time
@@ -29,6 +30,7 @@ pro plot_track_centroids, run_data = run_data
         time0 = timearr(0)
         timearr = (timearr - time0)/60./60. ; now in hours instead of sclk
         
+        exptimearr[n] = planethash[aorlist(n)].exptime
         ;;-------------------------------------
         ;;long term xdrift vs.& y drift
         start = [.05,15.0]
@@ -45,7 +47,7 @@ pro plot_track_centroids, run_data = run_data
         tx = timearr(i)
         ycen = planethash[aorlist(n)].ycen
         ty = ycen(i)
-        pl = plot(tx, ty, title = aorlist(n), xtitle = 'time(hrs)', yrange = [mean(planethash[aorlist(n)].ycen,/nan) -0.5, mean(planethash[aorlist(n)].ycen,/nan) +0.5])
+        pl = plot(timearr, ycen, title = aorlist(n), xtitle = 'time(hrs)', yrange = [mean(planethash[aorlist(n)].ycen,/nan) -0.5, mean(planethash[aorlist(n)].ycen,/nan) +0.5])
         pl = plot(timearr, ycenfit(0)*timearr + ycenfit(1), color = 'red', overplot = pl)
         ;;XX don't want to keep this value if dithered.
         
@@ -138,32 +140,57 @@ pro plot_track_centroids, run_data = run_data
   xdrift = xdrift[0:n-1]
   ydrift = ydrift[0:n-1]
   dpa = dpa[0:n-1]
+  exptimearr = exptimearr[0:n-1]
+
+  zerop02 = where(exptimearr lt 0.05 and exptimearr gt 0., n0p02)
+  zerop1 = where(exptimearr lt 0.2 and exptimearr gt 0.05,n0p1)
+  zerop4 = where(exptimearr lt 0.4 and exptimearr gt 0.3,n0p4)
+  twop0 = where(exptimearr gt 1.0 and exptimearr lt 2.0, n2p0)
+  sixp0 = where(exptimearr gt 4.0 and exptimearr lt 7.0, n6p0)
+  twelve = where(exptimearr gt 9.0 and exptimearr lt 15,n12)
+  thirty = where(exptimearr gt 20 and exptimearr lt 90,n30)
+  hundred = where(exptimearr gt 50 and exptimearr lt 200, n100)
+  colorarr = intarr(3, n_elements(exptimearr))
+
   
-  psx = plot(xjd, sigmax,'1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'X Size of cloud (stddev in position)', $
-              XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, yrange = [0, 0.2])
+  for c = 0, n0p02 - 1 do colorarr[*,zerop02(c)] = [128,0,0];'maroon'
+  for c = 0, n0p1 - 1 do colorarr[*,zerop1(c)] = [255,0,0];'red'
+  for c = 0, n0p4 - 1 do colorarr[*,zerop4(c)] = [255,69,0];'orange_red'
+  for c = 0, n2p0 - 1 do colorarr[*,twop0(c)] = [238,118,33];'dark_orange'
+  for c = 0, n6p0 - 1 do colorarr[*,sixp0(c)] = [127,255,0];'lime_green'
+  for c = 0, n12 - 1 do colorarr[*,twelve(c)] =[64,224,208]; 'aqua'
+  for c = 0, n30 - 1 do colorarr[*,thirty(c)] = [0,0,255];'blue'
+  for c = 0, n100 - 1 do colorarr[*,hundred(c)] = [155,48,255];'Purple'
+  
+  psx = plot(xjd, sigmax,'1s', sym_size = 0.5,   /sym_filled , ytitle = 'X Size of cloud (stddev in position)', $
+             XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, yrange = [0, 0.2],$
+             vert_colors = colorarr)
   psy = plot(xjd, sigmay,'1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'Y Size of cloud (stddev in position)', $
-             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = ['Time'], xminor = 11, yrange = [0, 0.2])
+             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = ['Time'], xminor = 11, yrange = [0, 0.2],$
+            vert_colors = colorarr)
 
   ;;Long term xdrift vs.& y drift vs. time
   maxdrift = 0.05
   pxydrift = plot(xdrift, ydrift,  '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Long Term Y drift (px/hr)', $
-                  xtitle = 'Long Term X drift (px/hr)', yrange = [-1*maxdrift, maxdrift], xrange =[-1*maxdrift,maxdrift])
-  pdrift = plot(xjd, xdrift, '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Long Term Drift (px/hr)', yrange = [-1*maxdrift, maxdrift],$
+                  xtitle = 'Long Term X drift (px/hr)', yrange = [-1*maxdrift, maxdrift], xrange =[-1*maxdrift,maxdrift],$
+                 vert_colors = colorarr)
+  pdrift = plot(xjd, xdrift, '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Long Term Drift (px/hr)', $
+                yrange = [-1*maxdrift, maxdrift],$
                 color = 'blue', XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, name='xdrift')
   pdrift2 = plot(xjd, ydrift, '1s', sym_size = 0.5,   sym_filled = 1,  overplot = pdrift, color = 'red', name = 'ydrift')
   lpd = legend(target = [pdrift, pdrift2], /auto_text_color, position = [xjd[20], maxdrift-0.01],/data)
 
   ;;delta pitch angle
-  pdpa = plot( dpa, xdrift, '1s', sym_size = 0.5,   sym_filled = 1, xtitle = 'Change in pitch angle from previous observation', $
-              ytitle = 'Long Term Drift (px/hr)', color = 'blue',yrange = [-1*maxdrift,maxdrift], name = 'xdrift')
-  pdpa2 = plot(dpa, ydrift,'1s', sym_size = 0.5,   sym_filled = 1, overplot = pdpa, color = 'red', name = 'ydrift')
-  ldpa = legend(target = [pdpa, pdpa2], /auto_text_color, position = [dpa[20], maxdrift-0.01],/data)
+  ;;pdpa = plot( dpa, xdrift, '1s', sym_size = 0.5,   sym_filled = 1, xtitle = 'Change in pitch angle from previous observation', $
+  ;;            ytitle = 'Long Term Drift (px/hr)', color = 'blue',yrange = [-1*maxdrift,maxdrift], name = 'xdrift')
+  ;;pdpa2 = plot(dpa, ydrift,'1s', sym_size = 0.5,   sym_filled = 1, overplot = pdpa, color = 'red', name = 'ydrift')
+  ;;ldpa = legend(target = [pdpa, pdpa2], /auto_text_color, position = [dpa[20], maxdrift-0.01],/data)
   
   ;;periodogram fun
   ;;how do I collapse a list into a single array?
-  pperiod = bubbleplot(pktime, pkperiod, /shaded, magnitude = pkstrength , exponent = 0.5, $
-                       ytitle = 'Period of the power spectrum peaks (min)',XTICKFORMAT='(C(CMoA,1x,CYI))', $
-                       xtickunits = ['Time'], xminor =11 , yrange = [20,60])
+  ;;pperiod = bubbleplot(pktime, pkperiod, /shaded, magnitude = pkstrength , exponent = 0.5, $
+  ;;                     ytitle = 'Period of the power spectrum peaks (min)',XTICKFORMAT='(C(CMoA,1x,CYI))', $
+  ;;                     xtickunits = ['Time'], xminor =11 , yrange = [20,60])
      
 
   save, /variables, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
