@@ -1,7 +1,6 @@
 function splitsimbadstring, firstline, starname = starname, ra = ra, dec = dec, pmra = pmra, pmdec = pmdec
      ;;firstline = '1|      0.99|KOI-157.02               |Pl |297.1150-41.9092           |            ~ ~ |     ~|     ~|     ~|     ~|     ~|~              |  67|   1'
-
-     firstsplit = firstline.Split('\|')
+  firstsplit = firstline.Split('\|')
      starname = firstsplit[2]
      starname = starname.Compress()
      pos = firstsplit[4]
