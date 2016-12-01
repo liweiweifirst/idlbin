@@ -24,7 +24,7 @@ pro track_centroids, pixval=pixval
   
   chname = ['ch1','ch2']
 
-  for na = 0, n_elements(aorname) -1 do begin
+  for na =400,470 do begin; n_elements(aorname) -1 do begin
      print, '---------------'
      print, 'starting on ',aorname(na), ' ', na
      chname = ['ch1','ch2']
@@ -36,7 +36,7 @@ pro track_centroids, pixval=pixval
         ;;will need to get this AOR from the archive
         junk = scpdata(aorname(na), campaign_name(na), chname(c))
         
-        
+ 
         ;;choose the first image to examine the header
         command  = strcompress( "find . -name 'SPITZER*_bcd.fits' > bcdlist.txt")
         spawn, command
@@ -72,11 +72,11 @@ pro track_centroids, pixval=pixval
            print, 'pitch angle ', pitchangle
 
            ;;calculate pitch angle of previous aors
-           ppra = prera[na]
-           ppdec = predec[na]
-           ppjd = prejd[na]
+           ppra = prera[na,*]
+           ppdec = predec[na,*]
+           ppjd = prejd[na,*]
            prepitchangle = fltarr(n_elements(ppra))
-           for pp = 0, n_elements(prera[na]) - 1 do begin
+           for pp = 0, n_elements(ppra) - 1 do begin
               prepitchangle[pp] = calcpitch(ppra[pp], ppdec[pp], ppjd[pp])
            endfor
            
@@ -93,13 +93,13 @@ pro track_centroids, pixval=pixval
               ;;keep track of central pixel values for PLD type analysis
               keys_long =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'bmjd_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid','piarr','pid']
 
-              values_long = list( ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na], predec[na], prejd[na], preaor[na], prepid[na], piarr,pid[na])
+              values_long = list( ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], piarr,pid[na])
               planethash[aorname(na)] = dictionary(keys_long, values_long)
 
            endif else begin
               print,na, 'pid at end', pid[na]
               keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'bmjd_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid','pid']
-              values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na], predec[na], prejd[na], preaor[na], prepid[na], pid[na])
+              values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], pid[na])
               planethash[aorname(na)] = dictionary(keys, values)
            endelse
            
@@ -110,21 +110,22 @@ pro track_centroids, pixval=pixval
            preaorname = preaor[na,*]
            ppre36 = pre36[na, *]
            ppre45 = pre45[na, *]
+           pppitch = prepitchangle
            if pppid(n_elements(pppid) - 1) eq pid[na] then begin
 
               ;;figure out which channel it is.
               if ppre36(n_elements(pppid) - 1) eq 'f' then pchname = ['ch2']
               if ppre45(n_elements(pppid) - 1) eq 'f' then pchname = ['ch1']
-
+              if n_elements(chname) gt 1 then pchname = 'ch1' ;just guess
               ;;scp over this aor from the archive
               junk = scpdata(preaorname(n_elements(pppid) - 1), campaign_name(na), pchname)
 
               ;;do the photometry
+              print, 'about to do photometry on preaor'
               phot_exoplanet_aor,starname, apradius, pchname.Substring(-1), preaorname(n_elements(pppid) - 1) ;, /hybrid
 
               ;;save relevant info
-              ;;can only be one channel per AOR with this saving technique    
-              values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,prepitchangle[0:(n_elements(pp) - 2)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 2)], ppdec[0:(n_elements(pp) - 2)], ppjd[0:(n_elements(pp) - 2)], preaorname[0:(n_elements(pp) - 2)], pppid[0:(n_elements(pp) - 2)], pid)
+              values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,pppitch[0:(n_elements(pp) - 3)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 3)], ppdec[0:(n_elements(pp) - 3)], ppjd[0:(n_elements(pp) - 3)], preaorname[0:(n_elements(pp) - 3)], pppid[0:(n_elements(pp) - 3)], pid[na])
               thepreaorname = preaorname(n_elements(pppid) - 1)
               planethash[thepreaorname] = dictionary(keys, values)
               
