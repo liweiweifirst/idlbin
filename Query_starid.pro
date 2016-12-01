@@ -204,7 +204,8 @@ Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = err
            print, 'query', QueryURL
            Result = webget(QueryURL)
            Result = Result.text
-           idx=where(strpos(Result, 'Number of objects') ne -1, nlines)                               
+           idx=where(strpos(Result, 'Number of objects') ne -1, nlines)
+                         
            if nlines eq 1 then begin ;got more than one object
               scnt = strmid(Result[idx], 20)
               ;;but cnt is a string, want it to be an int
@@ -212,8 +213,7 @@ Function Query_starid, naxishere, ra_rqst, dec_rqst, Found = found, ERRMSG = err
               found=1   
         
               ;;now pull the name of the first star in the list
-              id2 = where(Result.StartsWith('1|'), nlines)
-              ;;print, 'nlines 1', nlines
+              id2 = where(Result.StartsWith('1|') OR Result.StartsWith('1 |'), nlines)
               firstline = Result[id2]
               junk = splitsimbadstring(firstline, starname=starname, ra=ra, dec=dec, pmra=pmra, pmdec=pmdec)
 
