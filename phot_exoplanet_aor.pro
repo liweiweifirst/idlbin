@@ -375,7 +375,7 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
    corrflux_d =  corrfluxarr +(corrfluxarr* degrade)
    
 
-
+   print, 'yarr', yarr[0:10]
 
    print, 'time check', systime(1) - t1
 
