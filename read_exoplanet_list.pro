@@ -20,6 +20,7 @@ function read_exoplanet_list, calculate = calculate
   savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids.sav'
   savecheck = file_test(savename)
   if savecheck gt 0 then begin
+     print, 'restoring previous save file'
      restore,savename
      k = planethash.keys()
      done = fltarr(n_elements(k))
@@ -54,8 +55,8 @@ function read_exoplanet_list, calculate = calculate
   prepid =  fltarr(n_elements(start_jd), 5)
   pre36= strarr(n_elements(start_jd), 5)
   pre45= strarr(n_elements(start_jd), 5)
-  
-  preaor[0,*] = 0 
+
+  preaor[0,*] = '0'
   prera[0,*] = 0               
   predec[0,*] = 0               
   prejd[0,*] = 0               
@@ -72,9 +73,10 @@ function read_exoplanet_list, calculate = calculate
      pre45[j,*] = datacollect45[j-5:j-1]
 
   endfor
-  
+
+ 
   ;;pare down to only include those longer than some threshold
-  thresh = 120                  ;two hours seems appropriate for now
+  thresh = 130                 ;two hours seems appropriate for now
   longstare = where(min_dur gt thresh, n_longstare, complement = tooshort)
   print, 'number of long AORs', n_longstare
   if n_longstare gt 0 then remove, tooshort, pid, campaign_name, start_jd, aorname, naxis, datacollect36, datacollect45, min_dur
@@ -87,7 +89,7 @@ function read_exoplanet_list, calculate = calculate
   prepid = prepid[longstare, *]
   pre36 = pre36[longstare, *]
   pre45 = pre45[longstare, *]
-  
+
   ;;and want to make sure they really are stares and not dithers
   ;;so compare to Elena's list of exoplanet and BD pids and
   ;;remove those pid's not on the list
@@ -113,9 +115,7 @@ function read_exoplanet_list, calculate = calculate
      pre45 = pre45[goodstare, *]
      
   endif
-  
   print, 'number of staring, long AORs' ,n_elements(start_jd)
-  
   ;;look at how much total data/time we are talking about here
   if keyword_set(calculate) then begin
      ;;do a few calculations
