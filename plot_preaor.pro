@@ -13,9 +13,7 @@ pro plot_preaor
      prepid=planethash[aorlist(n)].prepid
      preaor = planethash[aorlist(n)].preaor
      piarr =  planethash[aorlist(n)].piarr
-     help, piarr
      print,n,  ' testing piarr', piarr[10,10]
-     if n eq 4 then print, piarr
      ;;print, n,aorlist(n), ' pid ', pid, 'prepid', prepid
      ;p1 = plot(timearr, ycen, xtitle = 'time', ytitle = 'ycen','1s', sym_size = 0.5, /sym_filled,$
      ;          yrange = [mean(ycen,/nan) -0.5, mean(ycen,/nan) +0.5], title = pid)
