@@ -2,7 +2,7 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
   ;do photometry on any IRAC staring mode AOR
   COMMON centroid_block
   t1 = systime(1)
-  print, 'ra', ra, ' dec', dec
+;;  print, 'ra', ra, ' dec', dec
 ;convert aperture radius in pixels into what get_centroids_for_calstar_jk uses 
   case apradius of
      1.5: apval = 0
@@ -232,7 +232,7 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
                      c++
                   endfor
                endfor
-;            if subframe eq 0 then print, 'earr', earr
+;;            if subframe eq 0 then print, 'earr', earr
                piarr[nframe,*] =earr
                nframe++
             endfor
@@ -375,7 +375,7 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
    corrflux_d =  corrfluxarr +(corrfluxarr* degrade)
    
 
-   print, 'yarr', yarr[0:10]
+;   print, 'yarr', yarr[0:10]
 
    print, 'time check', systime(1) - t1
 
