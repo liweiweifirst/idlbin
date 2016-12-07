@@ -24,7 +24,7 @@ pro track_centroids, pixval=pixval
   
   chname = ['ch1','ch2']
 
-  for na =400,470 do begin; n_elements(aorname) -1 do begin
+  for na =0,500 do begin; n_elements(aorname) -1 do begin
      print, '---------------'
      print, 'starting on ',aorname(na), ' ', na
      chname = ['ch1','ch2']
@@ -59,7 +59,7 @@ pro track_centroids, pixval=pixval
            ;;figure out what the target of the AOR likely is:
            ;;ra and dec are in the common block so don't need
            ;;to send them here
-           starname = Query_starid( naxishere, ra_rqst, dec_rqst, /Verbose)
+           starname = Query_starid( naxishere, ra_rqst, dec_rqst);, /Verbose)
            print, 'starname: ', starname, ra, dec
 
          endif
@@ -83,24 +83,27 @@ pro track_centroids, pixval=pixval
            print, 'prior pitch angle(s) ', prepitchangle
            
            ;;do photometry
-           phot_exoplanet_aor,starname, apradius,strmid(chname[c],2), aorname(na);, /hybrid
-
+           if keyword_set(pixval) then phot_exoplanet_aor,starname, apradius,strmid(chname[c],2), aorname(na),/pixval $
+           else phot_exoplanet_aor,starname, apradius,strmid(chname[c],2), aorname(na) ;, /hybrid
+           
            ;;save relevant info
            ;;can only be one channel per AOR with this saving
            ;;technique
 
            if keyword_set(pixval) then begin
               ;;keep track of central pixel values for PLD type analysis
-              keys_long =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'bmjd_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid','piarr','pid']
+              keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'bmjd_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid','piarr','pid']
 
-              values_long = list( ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], piarr,pid[na])
-              planethash[aorname(na)] = dictionary(keys_long, values_long)
-
+              values = list( ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], piarr,pid[na])
+              planethash[aorname(na)] = dictionary(keys, values)
+              savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav'
            endif else begin
-              print,na, 'pid at end', pid[na]
+;;              print,na, 'pid at end', pid[na]
               keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'bmjd_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid','pid']
               values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], pid[na])
               planethash[aorname(na)] = dictionary(keys, values)
+              savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids.sav'
+
            endelse
            
      
@@ -125,7 +128,12 @@ pro track_centroids, pixval=pixval
               phot_exoplanet_aor,starname, apradius, pchname.Substring(-1), preaorname(n_elements(pppid) - 1) ;, /hybrid
 
               ;;save relevant info
-              values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,pppitch[0:(n_elements(pp) - 3)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 3)], ppdec[0:(n_elements(pp) - 3)], ppjd[0:(n_elements(pp) - 3)], preaorname[0:(n_elements(pp) - 3)], pppid[0:(n_elements(pp) - 3)], pid[na])
+              if keyword_set(pixval) then begin
+                 values =list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,pppitch[0:(n_elements(pp) - 3)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 3)], ppdec[0:(n_elements(pp) - 3)], ppjd[0:(n_elements(pp) - 3)], preaorname[0:(n_elements(pp) - 3)], pppid[0:(n_elements(pp) - 3)], piarr,pid[na])
+              endif else begin
+                 values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,pppitch[0:(n_elements(pp) - 3)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 3)], ppdec[0:(n_elements(pp) - 3)], ppjd[0:(n_elements(pp) - 3)], preaorname[0:(n_elements(pp) - 3)], pppid[0:(n_elements(pp) - 3)], pid[na])
+              endelse
+              
               thepreaorname = preaorname(n_elements(pppid) - 1)
               planethash[thepreaorname] = dictionary(keys, values)
               
@@ -138,7 +146,6 @@ pro track_centroids, pixval=pixval
   endfor                        ; for each AOR
 
   ;;save
-  savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids.sav'
  ;; savename = '/Users/jkrick/track_centroids.sav'
   save, planethash, filename=savename
 
