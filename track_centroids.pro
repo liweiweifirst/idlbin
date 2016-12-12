@@ -50,20 +50,23 @@ pro track_centroids, pixval=pixval
            naxishere = sxpar(header, 'NAXIS')
            ra = ra_rqst
            dec = dec_rqst
-           if naxishere eq 2 then begin
+           ;;if naxishere eq 2 then begin
               ;;full array, want to search around the sweet spot
               ;;pixel, not the central pixel.
-              xyad, header, 24., 232., ra, dec
-           endif
+           ;;   xyad, header, 24., 232., ra, dec
+           ;;endif
            
            ;;figure out what the target of the AOR likely is:
            ;;ra and dec are in the common block so don't need
            ;;to send them here
-           starname = Query_starid( naxishere, ra_rqst, dec_rqst);, /Verbose)
+;;           starname = Query_starid_v2( naxishere, ra_rqst, dec_rqst, /Verbose)
+           starname = Query_starid_v2( header, /Verbose)
            print, 'starname: ', starname, ra, dec
 
          endif
 
+        ;testing query_starid
+        starname = 'nostar'
         
         if starname ne 'nostar' then begin  ;;got a live one
                      
