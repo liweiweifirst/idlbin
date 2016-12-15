@@ -2,7 +2,7 @@ pro track_centroids, pixval=pixval
   
 ;main code to automatically track centroids as a function of pitch
 ;angle for all warm mission long stares
-  COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, prepid, spitzer_jd, ra_string, dec_string,  naxis, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr, bmjd,  backarr, backerrarr, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, datacollect36, datacollect45, piarr, pre36, pre45, planethash, ra, dec
+  COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, prepid, spitzer_jd, ra_string, dec_string,  naxis, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr, bmjd,  backarr, backerrarr, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, datacollect36, datacollect45, piarr, pre36, pre45, planethash, ra, dec, startnaor
   apradius = 2.25 ;;fix this for now
   planethash = hash()  
 
@@ -14,7 +14,7 @@ pro track_centroids, pixval=pixval
   ;;warning: be careful of earth point and s2pcals and other
   ;;non-listed observations which could occur directly before a long stare
 
-  
+  startnaor = 0  ;; start at the beginning unless this gets changed in read_exoplanet_list
   ;;find which AORs need to be examined
   ;;need to also return JD and campaign
   zero = read_exoplanet_list(/calculate)
@@ -24,7 +24,7 @@ pro track_centroids, pixval=pixval
   
   chname = ['ch1','ch2']
 
-  for na =0,500 do begin; n_elements(aorname) -1 do begin
+  for na =startnaor,200 do begin; n_elements(aorname) -1 do begin
      print, '---------------'
      print, 'starting on ',aorname(na), ' ', na
      chname = ['ch1','ch2']
@@ -50,23 +50,10 @@ pro track_centroids, pixval=pixval
            naxishere = sxpar(header, 'NAXIS')
            ra = ra_rqst
            dec = dec_rqst
-           ;;if naxishere eq 2 then begin
-              ;;full array, want to search around the sweet spot
-              ;;pixel, not the central pixel.
-           ;;   xyad, header, 24., 232., ra, dec
-           ;;endif
-           
-           ;;figure out what the target of the AOR likely is:
-           ;;ra and dec are in the common block so don't need
-           ;;to send them here
-;;           starname = Query_starid_v2( naxishere, ra_rqst, dec_rqst, /Verbose)
            starname = Query_starid_v2( header, /Verbose)
            print, 'starname: ', starname, ra, dec
 
          endif
-
-        ;testing query_starid
-        starname = 'nostar'
         
         if starname ne 'nostar' then begin  ;;got a live one
                      
@@ -95,15 +82,15 @@ pro track_centroids, pixval=pixval
 
            if keyword_set(pixval) then begin
               ;;keep track of central pixel values for PLD type analysis
-              keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'bmjd_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid','piarr','pid']
+              keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'bmjd_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid','piarr','pid', 'naor_index']
 
-              values = list( ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], piarr,pid[na])
+              values = list( ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], piarr,pid[na],na)
               planethash[aorname(na)] = dictionary(keys, values)
               savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav'
            endif else begin
 ;;              print,na, 'pid at end', pid[na]
-              keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'bmjd_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid','pid']
-              values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], pid[na])
+              keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'bmjd_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid','pid','naor_index']
+              values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], pid[na],na)
               planethash[aorname(na)] = dictionary(keys, values)
               savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids.sav'
 
@@ -132,9 +119,9 @@ pro track_centroids, pixval=pixval
 
               ;;save relevant info
               if keyword_set(pixval) then begin
-                 values =list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,pppitch[0:(n_elements(pp) - 3)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 3)], ppdec[0:(n_elements(pp) - 3)], ppjd[0:(n_elements(pp) - 3)], preaorname[0:(n_elements(pp) - 3)], pppid[0:(n_elements(pp) - 3)], piarr,pid[na])
+                 values =list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,pppitch[0:(n_elements(pp) - 3)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 3)], ppdec[0:(n_elements(pp) - 3)], ppjd[0:(n_elements(pp) - 3)], preaorname[0:(n_elements(pp) - 3)], pppid[0:(n_elements(pp) - 3)], piarr,pid[na],na)
               endif else begin
-                 values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,pppitch[0:(n_elements(pp) - 3)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 3)], ppdec[0:(n_elements(pp) - 3)], ppjd[0:(n_elements(pp) - 3)], preaorname[0:(n_elements(pp) - 3)], pppid[0:(n_elements(pp) - 3)], pid[na])
+                 values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,pppitch[0:(n_elements(pp) - 3)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 3)], ppdec[0:(n_elements(pp) - 3)], ppjd[0:(n_elements(pp) - 3)], preaorname[0:(n_elements(pp) - 3)], pppid[0:(n_elements(pp) - 3)], pid[na],na)
               endelse
               
               thepreaorname = preaorname(n_elements(pppid) - 1)
@@ -145,7 +132,9 @@ pro track_centroids, pixval=pixval
         Endif                   ; starname is a real name
 
      endfor                     ; for each channel
-     
+
+     ;;periodically save so that we have a copy if this crashes
+     if na mod 20 eq 0 then  save, planethash, filename=savename
   endfor                        ; for each AOR
 
   ;;save
