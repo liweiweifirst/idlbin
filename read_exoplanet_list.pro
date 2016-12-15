@@ -23,13 +23,14 @@ function read_exoplanet_list, calculate = calculate
   if savecheck gt 0 then begin
      print, 'restoring previous save file'
      restore,savename
-     k = planethash.keys()
-     done = fltarr(n_elements(k))
-     for i = 0, n_elements(k) -1 do done(i) = planethash[k(i)].bmjd_0 + 2400000.5
-     last_time_jd = max(done)
-     old = where(start_jd lt last_time_jd, nold)
-     print, 'nold', nold
-     if nold gt 0 then remove, old, aorname,pid,start_jd,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45
+     aorlist = planethash.keys()
+     naor = intarr(n_elements(aorlist))
+     for i = 0, n_elements(aorlist) - 1 do  naor(i) = planethash[aorlist(i)].naor_index
+     ;;print, naor
+     snaor = naor(sort(naor))
+     ;;print, max(snaor)
+     startnaor = max(snaor) + 1
+     
   endif
   
     ;;convert 3 digit campaign number to string
