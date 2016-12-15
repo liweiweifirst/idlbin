@@ -1,7 +1,7 @@
 pro plot_preaor
 
 
-  restore, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_copy.sav'
+  restore, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav'
   aorlist = planethash.keys()
   print, 'n_elements aorlist', n_elements(aorlist)
   for n =0,5 do begin
@@ -24,7 +24,7 @@ pro plot_preaor
         allycen = [planethash[preaor].ycen, ycen]
         time0 = alltime(0)
                                 ;alltime = (alltime - time0)/60./60. ;
-                                ;                     now in hours instead of sclk
+                                ;                     now in hours instead WINDOW, 0, XSIZE=400, YSIZE=400of sclk
         print, 'alltime 0', n_elements(alltime)
         plot,(alltime - time0)/60./60., allycen,psym = 3,color = 'black',xtitle = 'time(hr)', ytitle = 'ycen', title = aorlist(n), yrange = [mean(ycen,/nan) -1.5, mean(ycen,/nan) +1.5]
         oplot,(planethash[preaor].timearr - time0)/60./60.,planethash[preaor].ycen,psym=3,color = 'red'
