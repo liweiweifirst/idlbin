@@ -28,7 +28,7 @@ Function Query_starid_v2,header, Found = found, ERRMSG = errmsg, $
   base1 = "http://exoplanetarchive.ipac.caltech.edu/cgi-bin/nstedAPI/nph-nstedAPI?table=exoplanets&ra="
   base2 = "&dec="
   base3 = "&radius="
-  base4 = "%20minutes&select=pl_hostname,st_pmra, st_pmdec&order=dist"
+  base4 = "%20minutes&select=pl_hostname,st_pmra, st_pmdec";&order=dist"
   if naxishere eq 2 then dist = 4
   if naxishere eq 3 then dist = 0.4
   QueryURL = strcompress(base1 + string(ra) + base2 + string(dec) + base3 + string(dist) + base4,/remove_all)
@@ -44,12 +44,19 @@ Function Query_starid_v2,header, Found = found, ERRMSG = errmsg, $
   ;;found at least one object
   if cnt ge 2 then begin
      if cnt gt 2 then print, strcompress('Warning - '+ string(cnt)+ ' matches found for position '  )
-     firstline = strsplit(result.text[1],',',/extract,/preserve_null)
-     starname = firstline[0]
-     ra = firstline[3]
-     dec = firstline[4]
-     pmra = firstline[1]  ;mas/yr
-     pmdec = firstline[2] ;mas/yr
+        
+     row = strarr(cnt-1, 7)
+     for i = 1, cnt - 1 do  row[i-1,*]=strsplit(result.text[i],',',/extract,/preserve_null)
+     
+     dist = row[*,5]
+     dist = float(dist)
+     mindist = dist.Min(c)
+     
+     starname = row[c,0]        ;firstline[0]
+     ra = row[c,3]              ;firstline[3]
+     dec = row[c,4]             ;firstline[4]
+     pmra = row[c,1]            ;firstline[1]  ;mas/yr
+     pmdec = row[c,2]           ;firstline[2] ;mas/yr
      print, 'pmra and dec', pmra, pmdec
      ;;assume 2013 as the 'middle' of the warm mission to get
      ;;posistions closer
@@ -189,7 +196,8 @@ END
 
  function frame_check, header, ra, dec, found
   ;;check that the star is on the frame:  
-    adxy, header, ra, dec, maybex, maybey
+   adxy, header, ra, dec, maybex, maybey
+   naxishere = sxpar(header, 'NAXIS')
     if naxishere eq 2 then begin
        xmax = 256 & ymax = 256
     endif else begin
