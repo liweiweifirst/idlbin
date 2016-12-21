@@ -187,7 +187,8 @@ Function Query_starid_v2,header, Found = found, ERRMSG = errmsg, $
      ENDELSE
   endelse
 
-  
+     found = frame_check(header, ra, dec, found)
+     if found eq 0 then starname = 'nostar'
   
   
   return, starname
@@ -199,12 +200,12 @@ END
    adxy, header, ra, dec, maybex, maybey
    naxishere = sxpar(header, 'NAXIS')
     if naxishere eq 2 then begin
-       xmax = 256 & ymax = 256
+       xmax = 256-11 & ymax = 256-11
     endif else begin
-       xmax = 32 & ymax = 32
+       xmax = 32-11 & ymax = 32-11
     endelse
   
-    if (maybex lt 0) or (maybex gt xmax) or (maybey lt 0) or(maybey gt ymax) then begin
+    if (maybex lt 10) or (maybex gt xmax) or (maybey lt 10) or(maybey gt ymax) then begin
        found = 0
        starname = 'nostar'
     endif
