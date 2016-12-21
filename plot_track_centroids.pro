@@ -2,54 +2,58 @@ pro plot_track_centroids, run_data = run_data
 
    if keyword_set(run_data) then begin
      
-     restore, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids.sav'
+     restore, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav'
      
      aorlist = planethash.keys()
-     sigmax = fltarr(n_elements(aorlist))
+     sigmax = fltarr(n_elements(aorlist))*alog10(-1)
      sigmay = sigmax
      xjd = sigmax
-     xdrift = sigmax
-     ydrift = sigmax
+     xdrift = sigmax; *alog10(-1)
+     ydrift = sigmax;*alog10(-1)
      dpa = sigmax
      exptimearr = sigmax
      pkperiod = list(length=2)  ;n_elements(aorlist))
      pkstrength =  list(length=2) 
      pktime = list(length=2)
      
-     for n = 0, 20 do begin;  n_elements(aorlist) - 1 do begin
+     for n = 0,  n_elements(aorlist) - 1 do begin
         print, '--------------'
         print, 'working on ',n, ' ',aorlist(n), n_elements(planethash[aorlist(n)].xcen)
-        ;;sigmax & sigmay &sigmaxy vs. time
-        ;;not sure what sigmaxy is?
-        sigmax[n] = stddev(planethash[aorlist(n)].xcen,/nan)
-        sigmay[n] = stddev(planethash[aorlist(n)].ycen,/nan)
-        print, 'sigma x, y ', sigmax[n], sigmay[n]
         timearr = planethash[aorlist(n)].timearr
         bmjdarr = planethash[aorlist(n)].bmjdarr
         xjd[n] = bmjdarr(0) + 2400000.5
         time0 = timearr(0)
         timearr = (timearr - time0)/60./60. ; now in hours instead of sclk
-        
         exptimearr[n] = planethash[aorlist(n)].exptime
+
+        ;;-------------------------------------
+        ;;sigmax & sigmay &sigmaxy vs. time
+        ;;not sure what sigmaxy is?
+       if max(timearr) gt 1.2 then begin
+          sigmax[n] = stddev(planethash[aorlist(n)].xcen,/nan)
+          sigmay[n] = stddev(planethash[aorlist(n)].ycen,/nan)
+          print, 'sigma x, y ', sigmax[n], sigmay[n]
+
         ;;-------------------------------------
         ;;long term xdrift vs.& y drift
-        start = [.05,15.0]
+           start = [.05,15.0]
         ;;don't have errors in position, instead, fake it.
-        noise = fltarr(n_elements(planethash[aorlist(n)].xcen))
-        noise = noise + 1.
-        xcenfit= MPFITFUN('linear',timearr, planethash[aorlist(n)].xcen, noise, start,/Quiet)
-        xdrift[n] = xcenfit(0)
-        ycenfit= MPFITFUN('linear',timearr, planethash[aorlist(n)].ycen, noise, start,/Quiet)
-        ydrift[n] = ycenfit(0)
-        ;;do some quick paring down of the data
-        xnum = findgen(n_elements(timearr))
-        i = where(xnum mod 10 lt 1) ;pick out the odd numbers only
-        tx = timearr(i)
-        ycen = planethash[aorlist(n)].ycen
-        ty = ycen(i)
-        pl = plot(timearr, ycen, title = aorlist(n), xtitle = 'time(hrs)', yrange = [mean(planethash[aorlist(n)].ycen,/nan) -0.5, mean(planethash[aorlist(n)].ycen,/nan) +0.5])
-        pl = plot(timearr, ycenfit(0)*timearr + ycenfit(1), color = 'red', overplot = pl)
+           noise = fltarr(n_elements(planethash[aorlist(n)].xcen))
+           noise = noise + 1.
+           xcenfit= MPFITFUN('linear',timearr, planethash[aorlist(n)].xcen, noise, start,/Quiet)
+           xdrift[n] = xcenfit(0)
+           ycenfit= MPFITFUN('linear',timearr, planethash[aorlist(n)].ycen, noise, start,/Quiet)
+           ydrift[n] = ycenfit(0)
+           ;;do some quick paring down of the data
+           xnum = findgen(n_elements(timearr))
+           i = where(xnum mod 10 lt 1) ;pick out the odd numbers only
+           tx = timearr(i)
+           ycen = planethash[aorlist(n)].ycen
+           ty = ycen(i)
+        ;;pl = plot(timearr, ycen, title = aorlist(n), xtitle = 'time(hrs)', yrange = [mean(planethash[aorlist(n)].ycen,/nan) -0.5, mean(planethash[aorlist(n)].ycen,/nan) +0.5])
+        ;;pl = plot(timearr, ycenfit(0)*timearr + ycenfit(1), color = 'red', overplot = pl)
         ;;XX don't want to keep this value if dithered.
+        endif
         
         ;;-------------------------------------
         ;;short term drift
@@ -92,7 +96,7 @@ pro plot_track_centroids, run_data = run_data
            peakperiod = peakperiod(short)
            mn = robust_mean(peakheight, 4)
            sig = robust_sigma(peakheight)
-           nsig = 3
+           nsig = 5
            realpk = where(peakheight gt mn + nsig*sig and peakperiod gt 30. and peakperiod le 50., nrealpk)
            
            ;;concatenating arrays- messy, but not sure how else to do it
@@ -120,7 +124,6 @@ pro plot_track_centroids, run_data = run_data
                  pkstrength = [pkstrength,0]
                  pktime = [pktime, xjd(n)]
               endelse
-              
               
            endelse
            
@@ -163,21 +166,60 @@ pro plot_track_centroids, run_data = run_data
   for c = 0, n100 - 1 do colorarr[*,hundred(c)] = [155,48,255];'Purple'
   
   psx = plot(xjd, sigmax,'1s', sym_size = 0.5,   /sym_filled , ytitle = 'X Size of cloud (stddev in position)', $
-             XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, yrange = [0, 0.2],$
+             XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, yrange = [0, 0.2],$`
              vert_colors = colorarr)
   psy = plot(xjd, sigmay,'1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'Y Size of cloud (stddev in position)', $
              XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = ['Time'], xminor = 11, yrange = [0, 0.2],$
             vert_colors = colorarr)
 
-  ;;Long term xdrift vs.& y drift vs. time
+  ;;Long term xdrift vs.& y drift
   maxdrift = 0.05
   pxydrift = plot(xdrift, ydrift,  '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Long Term Y drift (px/hr)', $
-                  xtitle = 'Long Term X drift (px/hr)', yrange = [-1*maxdrift, maxdrift], xrange =[-1*maxdrift,maxdrift],$
-                 vert_colors = colorarr)
-  pdrift = plot(xjd, xdrift, '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Long Term Drift (px/hr)', $
-                yrange = [-1*maxdrift, maxdrift],$
+                  xtitle = 'Long Term X drift (px/hr)', yrange = [-0.04, 0.04], xrange =[-0.04,0.04],$;[-1*maxdrift,maxdrift],$
+                  vert_colors = colorarr)
+  t1 =text(0.02,0.034, '0.02s', color = [128,0,0],/data)
+  t1 =text(0.02,0.029, '0.1s',  color= [255,0,0],/data)    ;'red'
+  t1 =text(0.02,0.024, '0.4s',  color= [255,69,0] ,/data)  ;'orange_red'
+  t1 =text(0.02,0.019, '2.0s',  color= [238,118,33],/data) ;'dark_orange'
+  t1 =text(0.02,0.014, '6.0s',  color= [127,255,0],/data)  ;'lime_green'
+  t1 =text(0.02,0.009, '12s',  color=[64,224,208] ,/data) ; 'aqua'
+  t1 =text(0.02,0.004, '30s',  color= [0,0,255] ,/data)   ;'blue'
+  t1 =text(0.02,-0.001, '100s',  color= [155,48,255],/data) ;'Purple'
+  pl1 = polyline([0.0,0.0], [-0.04, 0.04], /data, target = pxydrift, color = 'black')
+  pl1 = polyline( [-0.04, 0.04], [0.0,0.0], /data, target = pxydrift, color = 'black')
+
+  ;;Long term xdrift & y drift vs. time
+  ;;first get rid of outliers
+  ;print, 'xdrift', xdrift
+  meanclip,xdrift,  mean, meansig;3 Sigma clipping
+  gx = where(xdrift gt (mean - 3*meansig) and xdrift lt (mean + 3*meansig), ngood)
+  print, 'num good out of total',ngood, n_elements(xdrift)
+  xjdgx = xjd(gx)
+  xdriftgx = xdrift(gx)
+  meanclip,ydrift,  mean, meansig ;3 Sigma clipping
+  gy = where(ydrift gt (mean - 3*meansig) and ydrift lt (mean + 3*meansig), ngood)
+  print, 'num, ngood',ngood, n_elements(ydrift)
+  xjdgy = xjd(gy)
+  ydriftgy = ydrift(gy)
+
+  
+  pdrift = plot(xjdgx, xdriftgx, '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Long Term Drift (px/hr)', $
+                yrange = [-0.06, 0.06],$;[-1*maxdrift, maxdrift+0.01],$
                 color = 'blue', XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, name='xdrift')
-  pdrift2 = plot(xjd, ydrift, '1s', sym_size = 0.5,   sym_filled = 1,  overplot = pdrift, color = 'red', name = 'ydrift')
+  pdrift2 = plot(xjdgy, ydriftgy, '1s', sym_size = 0.5,   sym_filled = 1,  overplot = pdrift, color = 'red', name = 'ydrift')
+
+  ;;fit a linear function to these data.
+  start = [.0005,0.00001]
+        ;;don't have errors in drift, instead, fake it.
+  xnoise = fltarr(n_elements(xdriftgx))
+  xnoise = xnoise + 1.
+  xdriftfit= MPFITFUN('linear',xjdgx, xdriftgx, xnoise, start);,/Quiet)
+  pdrift3 = plot(xjdgx, xdriftfit(0)*xjdgx + xdriftfit(1), color = 'blue', overplot = pdrift)
+  ynoise = fltarr(n_elements(ydriftgy))
+  ynoise = ynoise + 1.
+  ydriftfit= MPFITFUN('linear',xjdgy, ydriftgy, ynoise, start);,/Quiet)
+  pdrift4 = plot(xjdgy, ydriftfit(0)*xjdgy + ydriftfit(1), color = 'red', overplot = pdrift)
+
   lpd = legend(target = [pdrift, pdrift2], /auto_text_color, position = [xjd[20], maxdrift-0.01],/data)
 
   ;;delta pitch angle
@@ -188,12 +230,12 @@ pro plot_track_centroids, run_data = run_data
   
   ;;periodogram fun
   ;;how do I collapse a list into a single array?
-  ;;pperiod = bubbleplot(pktime, pkperiod, /shaded, magnitude = pkstrength , exponent = 0.5, $
-  ;;                     ytitle = 'Period of the power spectrum peaks (min)',XTICKFORMAT='(C(CMoA,1x,CYI))', $
-  ;;                     xtickunits = ['Time'], xminor =11 , yrange = [20,60])
+ ;; pperiod = bubbleplot(pktime, pkperiod, /shaded, magnitude = pkstrength , exponent = 0.5, $
+ ;;                      ytitle = 'Period of the power spectrum peaks (min)',XTICKFORMAT='(C(CMoA,1x,CYI))', $
+ ;;                      xtickunits = ['Time'], xminor =11 , yrange = [20,60])
      
 
-  save, /variables, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
+  if keyword_set(run_data) then save, /variables, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
   
 end
 
