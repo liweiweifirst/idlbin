@@ -15,9 +15,28 @@ function read_exoplanet_list, calculate = calculate
   ;;convert times to JD in order to compare later
   start_jd = julday(start_month, start_day, start_year, start_hr, start_min)
 
+  ;;set up for saving files
+  ;;needs to be in a loop or something 
+  ;;case start_year of
+  ;;   2009: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_01'
+  ;;   2010: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_01'
+  ;;   2011: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_01'
+  ;;   2012: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_02'
+  ;;   2013: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_02'
+  ;;   2014: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_03'
+  ;;   2015: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_03'
+  ;;   2016: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_04'
+  ;;   2017: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_04'
+  ;;   2018: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_05'
+     
+  ;;endcase
+
+
+  
   ;;which of these have already been analyzed?
   ;;check for the save file first 
   savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav'
+  ;;savename = savename + '_pixval.sav'
   savecheck = file_test(savename)
   print, 'savecheck', savecheck
   if savecheck gt 0 then begin
