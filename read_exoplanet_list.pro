@@ -16,6 +16,8 @@ function read_exoplanet_list, calculate = calculate
   start_jd = julday(start_month, start_day, start_year, start_hr, start_min)
 
   ;;set up for saving files
+  catra = RA
+  catdec = Dec
   ;;needs to be in a loop or something 
   ;;case start_year of
   ;;   2009: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_01'
