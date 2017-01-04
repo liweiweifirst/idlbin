@@ -21,7 +21,7 @@ pro track_centroids, pixval=pixval
  ;; print, string(n_elements(aorname)),  ' aors: ',  aorname
    ;;will need to figure out which ones are new
   ;;compare JD of new lists
-  
+  startnaor = 0 ;;;remove when done testingXXXXXX
   chname = ['ch1','ch2']
 
   for na =startnaor,200 do begin; n_elements(aorname) -1 do begin
