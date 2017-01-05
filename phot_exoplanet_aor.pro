@@ -102,7 +102,9 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
       ;;print, 'aintbeg, atimeend', aintbeg, atimeend
       naxis = sxpar(header, 'NAXIS')
       framedly = sxpar(header, 'FRAMEDLY')
- 
+      ra_rqst = sxpar(header, 'RA_RQST') ;need to use these so that I know when there is a blank channel
+      dec_rqst = sxpar(header, 'DEC_RQST')
+      
       if ch eq '2' and frametime eq 2 then ronoise = 12.1
 
       if i eq startfits then begin
