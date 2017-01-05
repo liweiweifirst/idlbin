@@ -5,7 +5,7 @@ pro plot_preaor
   aorlist = planethash.keys()
   print, 'n_elements aorlist', n_elements(aorlist)
   loadct, 5
-  for n =0,100 do begin
+  for n =0,n_elements(aorlist) - 1 do begin
      print, '--------------------------'
      timearr = planethash[aorlist(n)].timearr
      bmjdarr = planethash[aorlist(n)].bmjdarr
@@ -13,13 +13,17 @@ pro plot_preaor
      pid = planethash[aorlist(n)].pid
      prepid=planethash[aorlist(n)].prepid
      preaor = planethash[aorlist(n)].preaor
-     print, 'timearrr 0', n_elements(timearr)
-     print, 'aors', aorlist(n), ' ',preaor(4)
+     np = n_elements(preaor) - 1
+     print, 'aors ', aorlist(n), ' ',preaor
      if prepid[-1] eq pid then begin
-        print, 'pre ra', planethash[preaor(4)].ra, planethash[preaor(4)].dec
+        print, 'got a matched pid set', pid, ' ', aorlist(n)
+        ppmin_dur = planethash[preaor(np)].min_dur
+        
+        print, 'preaor min_dur', ppmin_dur(n_elements(ppmin_dur) - 1), planethash[aorlist(n)].min_dur
+        
         print, 'ra',  planethash[aorlist(n)].ra, planethash[aorlist(n)].dec
-       if planethash[preaor(4)].ra eq planethash[aorlist(n)].ra and planethash[preaor(4)].dec eq planethash[aorlist(n)].dec then begin
-           print, 'got a matched pair', n,' ', aorlist(n)
+        print, 'pre ra', planethash[preaor(4)].ra ;, planethash[preaor(4)].dec
+       if abs(planethash[preaor(np)].ra - planethash[aorlist(n)].ra) lt 0.001 and abs(planethash[preaor(np)].dec - planethash[aorlist(n)].dec) lt 0.001 and ppmin_dur(n_elements(ppmin_dur) - 1) lt 60. and ppmin_dur(n_elements(ppmin_dur) - 1) gt 9 then begin
            preaor = preaor[-1]
            alltime = [planethash[preaor].timearr, timearr]
            allycen = [planethash[preaor].ycen, ycen]

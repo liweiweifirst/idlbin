@@ -78,14 +78,17 @@ function read_exoplanet_list, calculate = calculate
   prepid =  fltarr(n_elements(start_jd), 5)
   pre36= strarr(n_elements(start_jd), 5)
   pre45= strarr(n_elements(start_jd), 5)
-
+  premin_dur = fltarr(n_elements(start_jd), 5)
+  
   preaor[0,*] = '0'
   prera[0,*] = 0               
   predec[0,*] = 0               
   prejd[0,*] = 0               
   prepid[0,*] = 0               
-  pre36[0,*] = 0
-  pre45[0,*] = 0
+  pre36[0,*] = '0'
+  pre45[0,*] = '0'
+  premin_dur[0,*] = 0
+  
   for j = 5, n_elements(start_jd) - 1 do begin
      preaor[j,*] = aorname[j-5:j-1]
      prera[j,*] = ra[j-5:j-1]
@@ -94,7 +97,7 @@ function read_exoplanet_list, calculate = calculate
      prepid[j,*] = pid[j-5:j-1]
      pre36[j,*] = datacollect36[j-5:j-1]
      pre45[j,*] = datacollect45[j-5:j-1]
-
+     premin_dur[j,*] = min_dur[j-5:j-1]
   endfor
 
  
@@ -112,7 +115,8 @@ function read_exoplanet_list, calculate = calculate
   prepid = prepid[longstare, *]
   pre36 = pre36[longstare, *]
   pre45 = pre45[longstare, *]
-
+  premin_dur = premin_dur[longstare, *]
+  
   ;;and want to make sure they really are stares and not dithers
   ;;so compare to Elena's list of exoplanet and BD pids and
   ;;remove those pid's not on the list
@@ -136,7 +140,7 @@ function read_exoplanet_list, calculate = calculate
      prepid = prepid[goodstare, *]
      pre36 = pre36[goodstare, *]
      pre45 = pre45[goodstare, *]
-     
+     premin_dur = premin_dur[goodstare, *]
   endif
   print, 'number of staring, long AORs' ,n_elements(start_jd)
   ;;look at how much total data/time we are talking about here
