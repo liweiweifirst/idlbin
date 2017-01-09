@@ -14,41 +14,58 @@ pro plot_preaor
      prepid=planethash[aorlist(n)].prepid
      preaor = planethash[aorlist(n)].preaor
      np = n_elements(preaor) - 1
-     print, 'aors ', aorlist(n), ' ',preaor
+     print, 'n, aors ', n, ' ', aorlist(n), ' ',preaor
+     print, 'aor min_dur',  planethash[aorlist(n)].min_dur
+     
      if prepid[-1] eq pid then begin
-        print, 'got a matched pid set', pid, ' ', aorlist(n)
-        ppmin_dur = planethash[preaor(np)].min_dur
-        
-        print, 'preaor min_dur', ppmin_dur(n_elements(ppmin_dur) - 1), planethash[aorlist(n)].min_dur
-        
-        print, 'ra',  planethash[aorlist(n)].ra, planethash[aorlist(n)].dec
-        print, 'pre ra', planethash[preaor(4)].ra ;, planethash[preaor(4)].dec
-       if abs(planethash[preaor(np)].ra - planethash[aorlist(n)].ra) lt 0.001 and abs(planethash[preaor(np)].dec - planethash[aorlist(n)].dec) lt 0.001 and ppmin_dur(n_elements(ppmin_dur) - 1) lt 60. and ppmin_dur(n_elements(ppmin_dur) - 1) gt 9 then begin
+        if  planethash[aorlist(n)].min_dur gt 60. then begin
+           
+           ;;make sure we are not looking at the pre-aor itself.
+           print, 'got a matched pid set', pid, ' ', aorlist(n)
+           ppmin_dur = planethash[preaor(np)].min_dur
+           
+;;        print, 'preaor min_dur', ppmin_dur(n_elements(ppmin_dur) -1 ), planethash[aorlist(n)].min_dur
+;;        print, 'ra, dec',  planethash[aorlist(n)].ra, planethash[aorlist(n)].dec
+;;        print, 'pre ra', planethash[preaor(4)].ra , planethash[preaor(4)].dec
+           ;; if abs(planethash[preaor(np)].ra - planethash[aorlist(n)].ra) lt 0.001 and abs(planethash[preaor(np)].dec - planethash[aorlist(n)].dec) lt 0.001 and ppmin_dur(n_elements(ppmin_dur) - 1) lt 60.  then begin ;and ppmin_dur(n_elements(ppmin_dur) - 1) gt 9
            preaor = preaor[-1]
            alltime = [planethash[preaor].timearr, timearr]
            allycen = [planethash[preaor].ycen, ycen]
            time0 = alltime(0)
-                                ;alltime = (alltime - time0)/60./60. ;
-                                ;                     now in hours
-                                ;                     instead WINDOW,
-                                ;                     0, XSIZE=400,
-                                ;                     YSIZE=400of sclk
-           print, 'n pre', n_elements(planethash[preaor].timearr), 'n science', n_elements(timearr)
-           print, 'alltime 0', n_elements(alltime)
-                                ;print, 'science y', ycen[0:10]
-                                ;print, 'pre y', planethash[preaor].ycen
+           
            plot,(alltime - time0)/60./60., allycen,psym = 3,xtitle = 'time(hr)', ytitle = 'ycen', title = aorlist(n), yrange = [mean(ycen,/nan) -1.1, mean(ycen,/nan) +1.1], ystyle = 1
            oplot,(planethash[preaor].timearr - time0)/60./60.,planethash[preaor].ycen,psym=1, color = 80 ;,color = 'red'
                                 ;p1.Save, plotname,/append,bitmap = 1
            CURSOR, X1, Y1, /DOWN,/DATA
-           print, 'cursor position', X1, Y1
-           if X1 gt 0 then planethash[aorlist(n)].short_drift = X1
+           CURSOR, X2, Y2, /DOWN,/DATA
+           
+           print, 'cursor position pre-aor', X1, Y1, X2, Y2
+           if X1 gt 0 then begin
+              planethash[aorlist(n)].short_drift = X2 - X1
+              slope = (Y2-Y1) / (X2 - X1) ; preserve direction - could be negative
+              planethash[aorlist(n)].slope_drift = slope
+           endif
+           
         endif
+        
      endif
+     
+     ;;just plot single AOR
+     plot,(timearr - timearr(0))/60./60., ycen,psym = 3,xtitle = 'time(hr)', ytitle = 'ycen', title = aorlist(n), yrange = [mean(ycen,/nan) -1.1, mean(ycen,/nan) +1.1], ystyle = 1
+     CURSOR, X1, Y1, /DOWN,/DATA
+     CURSOR, X2, Y2, /DOWN,/DATA
+     print, 'cursor position single', X1, Y1, X2, Y2
+     if X1 gt 0 then begin
+        planethash[aorlist(n)].short_drift = X2 - X1
+        slope = (Y2-Y1) / (X2 - X1) ; preserve direction - could be negative
+        planethash[aorlist(n)].slope_drift = slope
+     endif
+     
+
      
   endfor
                                 ;p1.Save, plotname, /close
-  ;;save, planethash, filename=savename
+  save, planethash, filename=savename
 end
 
 
