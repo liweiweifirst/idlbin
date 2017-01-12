@@ -11,7 +11,10 @@ pro plot_track_centroids, run_data = run_data
      xdrift = sigmax; *alog10(-1)
      ydrift = sigmax;*alog10(-1)
      dpa = sigmax
+     pa = sigmax
      exptimearr = sigmax
+     short_drift = sigmax
+     slope_drift = sigmax
      pkperiod = list(length=2)  ;n_elements(aorlist))
      pkstrength =  list(length=2) 
      pktime = list(length=2)
@@ -21,6 +24,10 @@ pro plot_track_centroids, run_data = run_data
         print, 'working on ',n, ' ',aorlist(n), n_elements(planethash[aorlist(n)].xcen)
         timearr = planethash[aorlist(n)].timearr
         bmjdarr = planethash[aorlist(n)].bmjdarr
+        short_drift[n] =  planethash[aorlist(n)].short_drift
+        ;;slope_drift[n] =  planethash[aorlist(n)].slope_drift
+        if planethash[aorlist(n)].haskey('slope_drift') gt 0 then slope_drift[n] =  planethash[aorlist(n)].slope_drift else slope_drift[n] = alog10(-1)
+        print, 'slope drift', slope_drift[n]
         xjd[n] = bmjdarr(0) + 2400000.5
         time0 = timearr(0)
         timearr = (timearr - time0)/60./60. ; now in hours instead of sclk
@@ -65,6 +72,7 @@ pro plot_track_centroids, run_data = run_data
         ;;delta pitch angle
         prepitchangle = planethash[aorlist(n)].prepitchangle
         dpa[n] = prepitchangle(n_elements(prepitchangle) - 2) - planethash[aorlist(n)].pitchangle
+        pa[n] = planethash[aorlist(n)].pitchangle
         
         ;;-------------------------------------
         ;;width of the peak in the power spectrim at 30min
@@ -130,21 +138,22 @@ pro plot_track_centroids, run_data = run_data
         endif
         
      endfor
-     
+     save, /variables, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
   endif else begin;;keyword_set run_data
      restore, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
 
   endelse
-  
-  ;;sigmax & sigmay &sigmaxy vs. time
   xjd = xjd[0:n-1]
   sigmax = sigmax[0:n-1]
   sigmay = sigmay[0:n-1]
   xdrift = xdrift[0:n-1]
   ydrift = ydrift[0:n-1]
   dpa = dpa[0:n-1]
+  pa = pa[0:n-1]
   exptimearr = exptimearr[0:n-1]
-
+  short_drift = short_drift[0:n-1]
+  slope_drift = slope_drift[0:n-1]
+  
   zerop02 = where(exptimearr lt 0.05 and exptimearr gt 0., n0p02)
   zerop1 = where(exptimearr lt 0.2 and exptimearr gt 0.05,n0p1)
   zerop4 = where(exptimearr lt 0.4 and exptimearr gt 0.3,n0p4)
@@ -164,15 +173,22 @@ pro plot_track_centroids, run_data = run_data
   for c = 0, n12 - 1 do colorarr[*,twelve(c)] =[64,224,208]; 'aqua'
   for c = 0, n30 - 1 do colorarr[*,thirty(c)] = [0,0,255];'blue'
   for c = 0, n100 - 1 do colorarr[*,hundred(c)] = [155,48,255];'Purple'
-  
-  psx = plot(xjd, sigmax,'1s', sym_size = 0.5,   /sym_filled , ytitle = 'X Size of cloud (stddev in position)', $
-             XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, yrange = [0, 0.2],$`
-             vert_colors = colorarr)
-  psy = plot(xjd, sigmay,'1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'Y Size of cloud (stddev in position)', $
-             XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = ['Time'], xminor = 11, yrange = [0, 0.2],$
-            vert_colors = colorarr)
 
-  ;;Long term xdrift vs.& y drift
+  ;;------------------------------------------------
+  ;;sigmax & sigmay &sigmaxy vs. time
+  ;;------------------------------------------------
+
+  ;;psx = plot(xjd, sigmax,'1s', sym_size = 0.5,   /sym_filled , ytitle = 'X Size of cloud (stddev in position)', $
+  ;;           XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, yrange = [0, 0.2],$`
+  ;;           vert_colors = colorarr)
+  ;;psy = plot(xjd, sigmay,'1s', sym_size = 0.5,   sym_filled = 1, ytitle = 'Y Size of cloud (stddev in position)', $
+  ;;           XTICKFORMAT='(C(CDI,1x,CMoA,1x,CYI))', xtickunits = ['Time'], xminor = 11, yrange = [0, 0.2],$
+  ;;          vert_colors = colorarr)
+  
+  ;;------------------------------------------------
+  ;;Long term xdrift vs. ydrift
+  ;;------------------------------------------------
+  
   maxdrift = 0.05
   pxydrift = plot(xdrift, ydrift,  '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Long Term Y drift (px/hr)', $
                   xtitle = 'Long Term X drift (px/hr)', yrange = [-0.04, 0.04], xrange =[-0.04,0.04],$;[-1*maxdrift,maxdrift],$
@@ -188,7 +204,10 @@ pro plot_track_centroids, run_data = run_data
   pl1 = polyline([0.0,0.0], [-0.04, 0.04], /data, target = pxydrift, color = 'black')
   pl1 = polyline( [-0.04, 0.04], [0.0,0.0], /data, target = pxydrift, color = 'black')
 
+  ;;------------------------------------------------
   ;;Long term xdrift & y drift vs. time
+  ;;------------------------------------------------
+
   ;;first get rid of outliers
   ;print, 'xdrift', xdrift
   meanclip,xdrift,  mean, meansig;3 Sigma clipping
@@ -203,10 +222,10 @@ pro plot_track_centroids, run_data = run_data
   ydriftgy = ydrift(gy)
 
   
-  pdrift = plot(xjdgx, xdriftgx, '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Long Term Drift (px/hr)', $
-                yrange = [-0.06, 0.06],$;[-1*maxdrift, maxdrift+0.01],$
+  pdrift = plot(xjdgx, xdriftgx, '1s', sym_size = 0.7,   sym_filled = 1,  ytitle = 'Long Term Drift (px/hr)', $
+                yrange = [-0.04, 0.04],$;[-1*maxdrift, maxdrift+0.01],$
                 color = 'blue', XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, name='xdrift')
-  pdrift2 = plot(xjdgy, ydriftgy, '1s', sym_size = 0.5,   sym_filled = 1,  overplot = pdrift, color = 'red', name = 'ydrift')
+  pdrift2 = plot(xjdgy, ydriftgy, '1s', sym_size = 0.7,   sym_filled = 1,  overplot = pdrift, color = 'red', name = 'ydrift')
 
   ;;fit a linear function to these data.
   start = [.0005,0.00001]
@@ -221,8 +240,10 @@ pro plot_track_centroids, run_data = run_data
   pdrift4 = plot(xjdgy, ydriftfit(0)*xjdgy + ydriftfit(1), color = 'red', overplot = pdrift)
 
   lpd = legend(target = [pdrift, pdrift2], /auto_text_color, position = [xjd[20], maxdrift-0.01],/data)
-
+  ;;------------------------------------------------
   ;;delta pitch angle
+  ;;------------------------------------------------
+
   ;;pdpa = plot( dpa, xdrift, '1s', sym_size = 0.5,   sym_filled = 1, xtitle = 'Change in pitch angle from previous observation', $
   ;;            ytitle = 'Long Term Drift (px/hr)', color = 'blue',yrange = [-1*maxdrift,maxdrift], name = 'xdrift')
   ;;pdpa2 = plot(dpa, ydrift,'1s', sym_size = 0.5,   sym_filled = 1, overplot = pdpa, color = 'red', name = 'ydrift')
@@ -235,7 +256,54 @@ pro plot_track_centroids, run_data = run_data
  ;;                      xtickunits = ['Time'], xminor =11 , yrange = [20,60])
      
 
-  if keyword_set(run_data) then save, /variables, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
+  ;;------------------------------------------------
+  ;;short term drift plotting
+  ;;------------------------------------------------
+  ;;worry about zero vs. nan vs. negative.
+  drift_dist = slope_drift * short_drift  ;;oops this is what Carl plots
+
+  timeshortdrift = plot(xjd, short_drift, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Duration (hours)', $
+                        XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,ytickinterval = 0.4,$
+                        xshowtext =0, position = [0.2,0.65,0.9,0.9], title = 'Ycen Short Term Drift')
+  timedriftdist = plot(xjd, drift_dist, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
+                       XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,$
+                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3)
+  timeslopedrift = plot(xjd, slope_drift, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
+                        XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,$
+                        /current, position = [0.2,0.11, 0.9,0.36])
+  
+  timeshortdrift = plot(pa, short_drift, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Duration (hours)', $
+                        xshowtext =0, position = [0.2,0.65,0.9,0.9], ytickinterval = 0.4,title = 'Ycen Short Term Drift')
+  timedriftdist = plot(pa, drift_dist, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
+                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3)
+  timeslopedrift = plot(pa, slope_drift, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
+                        /current, position = [0.2,0.11, 0.9,0.36], xtitle = 'Pitch Angle')
+
+  timeshortdrift = plot(dpa, short_drift, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Duration (hours)', $
+                        xshowtext =0, position = [0.2,0.65,0.9,0.9], ytickinterval = 0.4, title = 'Ycen Short Term Drift')
+  timedriftdist = plot(dpa, drift_dist, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
+                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3)
+  timeslopedrift = plot(dpa, slope_drift, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
+                        /current, position = [0.2,0.11, 0.9,0.36], xtitle = 'Delta Pitch Angle')
+
+  
+  ;;sdrift = plot(dpa, short_drift, '1s', sym_size = 0.5,   /sym_filled , ytitle = 'duration of ycen short term drift', $
+  ;;              xtitle = 'Change in pitch angle from previous observation', vert_colors = colorarr)
+  ;;sdrift = plot(pa, short_drift, '1s', sym_size = 0.5,   /sym_filled , ytitle = 'duration of ycen short term drift', $
+  ;;              xtitle = 'Pitch angle', vert_colors = colorarr)
+  ;;sdrift = plot(dpa, slope_drift, '1s', sym_size = 0.5,   /sym_filled , ytitle = 'slope of ycen short term drift', $
+  ;;              xtitle = 'Change in pitch angle from previous observation', vert_colors = colorarr)
+  ;;sdrift = plot(pa, slope_drift, '1s', sym_size = 0.5,   /sym_filled , ytitle = 'slope of ycen short term drift', $
+  ;;              xtitle = 'Pitch angle', vert_colors = colorarr)
+
+  ;;sdrift = plot(dpa, drift_dist, '1s', sym_size = 0.5,   /sym_filled , ytitle = 'total drift (pixels)', $
+  ;;              xtitle = 'Change in pitch angle from previous observation', vert_colors = colorarr)
+  ;;sdrift = plot(pa, drift_dist, '1s', sym_size = 0.5,   /sym_filled , ytitle = 'total drift (pixels)', $
+  ;;              xtitle = 'Pitch angle', vert_colors = colorarr)
+
+  
+  
+  ;;if keyword_set(run_data) then save, /variables, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
   
 end
 
