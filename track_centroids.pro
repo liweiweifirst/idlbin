@@ -2,7 +2,7 @@ pro track_centroids, pixval=pixval
   
 ;main code to automatically track centroids as a function of pitch
 ;angle for all warm mission long stares
-  COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, prepid, spitzer_jd, ra_string, dec_string,  naxis, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr, bmjd,  backarr, backerrarr, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, datacollect36, datacollect45, piarr, pre36, pre45, premin_dur, planethash, ra, dec, startnaor, min_dur, ra_rqst, dec_rqst
+  COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, prepid, spitzer_jd, ra_string, dec_string,  naxis, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr, bmjd,  backarr, backerrarr, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, datacollect36, datacollect45, piarr, pre36, pre45, premin_dur, planethash, ra, dec, startnaor, min_dur, ra_rqst, dec_rqst, start_year
   apradius = 2.25 ;;fix this for now
   planethash = hash()  
 
@@ -21,10 +21,10 @@ pro track_centroids, pixval=pixval
  ;; print, string(n_elements(aorname)),  ' aors: ',  aorname
    ;;will need to figure out which ones are new
   ;;compare JD of new lists
-  startnaor = 0 ;;;remove when done testingXXXXXX
+  ;;startnaor = 0 ;;;remove when done testingXXXXXX
   chname = ['ch1','ch2']
-
-  for na =startnaor,200 do begin; n_elements(aorname) -1 do begin
+  print, 'aorname', aorname[195:230]
+  for na =startnaor,400 do begin; n_elements(aorname) -1 do begin
      print, '---------------'
      print, 'starting on ',aorname(na), ' ', na
      chname = ['ch1','ch2']
@@ -88,7 +88,22 @@ pro track_centroids, pixval=pixval
 
               values = list( ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], piarr,pid[na],na, alog10(-1),alog10(-1), min_dur(na))
               planethash[aorname(na)] = dictionary(keys, values)
-              savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav'
+              savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2.sav'
+              ;;figure out dates and save file names
+;;              caldat, bmjd_0 + 2400000.5, jmonth, jday, jyear
+;;              case 1 of
+;;                 (jyear = 2010) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2010.sav'
+;;                 (jyear = 2011) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2011.sav'
+;;                 (jyear = 2012) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2012.sav'
+;;                 (jyear = 2013) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2013.sav'
+;;                 (jyear = 2014) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2014.sav'
+;;                 (jyear = 2015) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2015.sav'
+;;                 (jyear = 2016) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2016.sav'
+;;                 (jyear = 2017) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2017.sav'
+;;                 (jyear = 2018) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2018.sav'
+;;                 (jyear = 2019) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2019.sav'
+                 
+;;              endcase
 
               ;;savename =  savename + '_pixval.sav'
            endif else begin
