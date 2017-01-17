@@ -1,6 +1,6 @@
 pro plot_preaor
 
-  savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav'
+  savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2.sav'
   restore, savename
   plotname = '/Users/jkrick/external/irac_warm/trending/centroiding_ycen.pdf'
 

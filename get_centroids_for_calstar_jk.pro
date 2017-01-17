@@ -408,7 +408,6 @@ pro get_centroids_for_calstar_jk, im, h, unc, ra, dec, t, dt, hjd, xft, x3, y3, 
 ; 3 pixel half-width, use smallest aperture for FWHM
 ;                print, 'starting box_centroider ', xmax, ymax
                 expid = sxpar(h, 'EXPID')
-
                 box_centroider, slice, sigma2, xmax, ymax, 3, 6,3, tx, ty, tf, tb, $
                                 txs, tys, tfs, tbs, tc, tcb, tnp, xfwhm, yfwhm, expid,/twopass
 

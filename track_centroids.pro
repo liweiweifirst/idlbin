@@ -23,7 +23,6 @@ pro track_centroids, pixval=pixval
   ;;compare JD of new lists
   ;;startnaor = 0 ;;;remove when done testingXXXXXX
   chname = ['ch1','ch2']
-  print, 'aorname', aorname[195:230]
   for na =startnaor,400 do begin; n_elements(aorname) -1 do begin
      print, '---------------'
      print, 'starting on ',aorname(na), ' ', na
@@ -157,6 +156,25 @@ pro track_centroids, pixval=pixval
      if na mod 20 eq 0 then  save, planethash, filename=savename
   endfor                        ; for each AOR
 
+  ;;use the original list of AORs to set the observation durations
+  ;;into planethash
+  aorlist = planethash.keys()
+  print, 'n_elements aorlist', n_elements(aorlist)
+  
+  readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/out_centroiding_allWarmMissionToDate.txt', aorname,pid,startUTC,campaign,min_dur_cat,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, L10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline =7520
+  
+  for n =1, n_elements(aorlist) - 1 do begin
+     a = where(aorname eq aorlist(n))
+     print, aorlist(n), aorname(a)
+     premin_dur = min_dur_cat(a-1)
+     ;; print, 'a, min_dur, premin_dur', a, min_dur_cat(a), premin_dur
+     planethash[aorlist(n)].min_dur = min_dur_cat(a)
+  endfor
+  
+
+
+
+  
   ;;save
  ;; savename = '/Users/jkrick/track_centroids.sav'
   save, planethash, filename=savename

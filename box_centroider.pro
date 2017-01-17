@@ -121,13 +121,19 @@ pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
 ;    
 ;-
   IF KEYWORD_SET(TWOPASS) THEN BEGIN
+;;     print, 'twopass'
      box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
-      backboxwidth, boxborder, newxmax, newymax, MMM=mmm
-      xmax = newxmax
-      ymax = newymax
+                     backboxwidth, boxborder, newxmax, newymax, MMM=mmm
+     if xmax gt 0 and ymax gt 0 then begin
+        xmax = newxmax
+        ymax = newymax
+     endif
+     
   ENDIF
+  
 ; Copy input image to working image
-	image = input_image
+  image = input_image
+ 
 ; Set sigma clipping threshold
 	sigma = 3
 
@@ -208,14 +214,15 @@ pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
 
 	min_good_pixels_in_aperture = 0.5 * npixels_in_box
 ; Perform centroid in 2*boxwidth+1 pixel box centered on peak pixel
-	gptr = where(mask eq 1 and image eq image, gcount)
+        gptr = where(mask eq 1 and image eq image, gcount)
+;;        print,'gptr', image[gptr]
 ; Only calculate centroid if more than 50% of pixels in source aperture are good	
 	if (gcount gt min_good_pixels_in_aperture) then begin
 		fluxsum = total(image[gptr])
 		flux2sum = total(image[gptr] * image[gptr])
 		fluxsum2 = fluxsum * fluxsum
 		x0 = total(xx[gptr] * float(image[gptr])) / fluxsum
-		y0 = total(yy[gptr] * float(image[gptr])) / fluxsum
+                y0 = total(yy[gptr] * float(image[gptr])) / fluxsum
 		f0 = fluxsum   ;; Added 13 Aug 2013 JGI
 ; Now calculate the variance 
 ; note for normal distributions, fwhm = 2*sqrt(2 * ln 2) sigma ~ 2.35482 sigma
