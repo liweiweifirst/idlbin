@@ -15,6 +15,7 @@ pro plot_track_centroids, run_data = run_data
      exptimearr = sigmax
      short_drift = sigmax
      slope_drift = sigmax
+     startyear = sigmax
      pkperiod = list(length=2)  ;n_elements(aorlist))
      pkstrength =  list(length=2) 
      pktime = list(length=2)
@@ -29,6 +30,9 @@ pro plot_track_centroids, run_data = run_data
         if planethash[aorlist(n)].haskey('slope_drift') gt 0 then slope_drift[n] =  planethash[aorlist(n)].slope_drift else slope_drift[n] = alog10(-1)
         print, 'slope drift', slope_drift[n]
         xjd[n] = bmjdarr(0) + 2400000.5
+        CALDAT, xjd[n], Month, Day, year
+        startyear[n] = year
+        
         time0 = timearr(0)
         timearr = (timearr - time0)/60./60. ; now in hours instead of sclk
         exptimearr[n] = planethash[aorlist(n)].exptime
@@ -139,9 +143,10 @@ pro plot_track_centroids, run_data = run_data
         
      endfor
      save, /variables, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
-  endif else begin;;keyword_set run_data
+  endif else begin ;;keyword_set run_data
+     print, 'restoring data'
      restore, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
-
+     
   endelse
   xjd = xjd[0:n-1]
   sigmax = sigmax[0:n-1]
@@ -153,7 +158,10 @@ pro plot_track_centroids, run_data = run_data
   exptimearr = exptimearr[0:n-1]
   short_drift = short_drift[0:n-1]
   slope_drift = slope_drift[0:n-1]
-  
+  startyear = startyear[0:n-1]
+
+  ;;set up color coding by exposure time
+  colorarr = intarr(3, n_elements(exptimearr))
   zerop02 = where(exptimearr lt 0.05 and exptimearr gt 0., n0p02)
   zerop1 = where(exptimearr lt 0.2 and exptimearr gt 0.05,n0p1)
   zerop4 = where(exptimearr lt 0.4 and exptimearr gt 0.3,n0p4)
@@ -162,9 +170,6 @@ pro plot_track_centroids, run_data = run_data
   twelve = where(exptimearr gt 9.0 and exptimearr lt 15,n12)
   thirty = where(exptimearr gt 20 and exptimearr lt 90,n30)
   hundred = where(exptimearr gt 50 and exptimearr lt 200, n100)
-  colorarr = intarr(3, n_elements(exptimearr))
-
-  
   for c = 0, n0p02 - 1 do colorarr[*,zerop02(c)] = [128,0,0];'maroon'
   for c = 0, n0p1 - 1 do colorarr[*,zerop1(c)] = [255,0,0];'red'
   for c = 0, n0p4 - 1 do colorarr[*,zerop4(c)] = [255,69,0];'orange_red'
@@ -174,6 +179,30 @@ pro plot_track_centroids, run_data = run_data
   for c = 0, n30 - 1 do colorarr[*,thirty(c)] = [0,0,255];'blue'
   for c = 0, n100 - 1 do colorarr[*,hundred(c)] = [155,48,255];'Purple'
 
+  print, 'set up colorarr'
+  ;;set up color coding by year of observation
+  coloryear = intarr(3, n_elements(exptimearr))
+  twenty10 = where(startyear eq 2010, n2010)
+  twenty11 = where(startyear eq 2011, n2011)
+  twenty12 = where(startyear eq 2012, n2012)
+  twenty13 = where(startyear eq 2013, n2013)
+  twenty14 = where(startyear eq 2014, n2014)
+  twenty15 = where(startyear eq 2015, n2015)
+  twenty16 = where(startyear eq 2016, n2016)
+  twenty17 = where(startyear eq 2017, n2017)
+  twenty18 = where(startyear eq 2018, n2018)
+  
+  for c = 0, n2010 - 1 do coloryear[*,twenty10(c)] = [128,0,0]   ;'maroon'
+  for c = 0, n2011 - 1 do coloryear[*,twenty11(c)] = [255,0,0];'red'
+  for c = 0, n2012 - 1 do coloryear[*,twenty12(c)] = [255,69,0];'orange_red'
+  for c = 0, n2013 - 1 do coloryear[*,twenty13(c)] = [238,118,33];'dark_orange'
+  for c = 0, n2014 - 1 do coloryear[*,twenty14(c)] = [127,255,0];'lime_green'
+  for c = 0, n2015 - 1 do coloryear[*,twenty15(c)] =[64,224,208]; 'aqua'
+  for c = 0, n2016 - 1 do coloryear[*,twenty16(c)] = [0,0,255];'blue'
+  for c = 0, n2017 - 1 do coloryear[*,twenty17(c)] = [155,48,255];'Purple'
+  for c = 0, n2018 - 1 do coloryear[*,twenty18(c)] = [51,0,102];'Purple'
+
+  print, 'set up coloryear'
   ;;------------------------------------------------
   ;;sigmax & sigmay &sigmaxy vs. time
   ;;------------------------------------------------
@@ -190,9 +219,12 @@ pro plot_track_centroids, run_data = run_data
   ;;------------------------------------------------
   
   maxdrift = 0.05
+  help, xdrift
+  help, ydrift
   pxydrift = plot(xdrift, ydrift,  '1s', sym_size = 0.5,   sym_filled = 1,  ytitle = 'Long Term Y drift (px/hr)', $
                   xtitle = 'Long Term X drift (px/hr)', yrange = [-0.04, 0.04], xrange =[-0.04,0.04],$;[-1*maxdrift,maxdrift],$
                   vert_colors = colorarr)
+  print, 'done plot'
   t1 =text(0.02,0.034, '0.02s', color = [128,0,0],/data)
   t1 =text(0.02,0.029, '0.1s',  color= [255,0,0],/data)    ;'red'
   t1 =text(0.02,0.024, '0.4s',  color= [255,69,0] ,/data)  ;'orange_red'
@@ -201,9 +233,10 @@ pro plot_track_centroids, run_data = run_data
   t1 =text(0.02,0.009, '12s',  color=[64,224,208] ,/data) ; 'aqua'
   t1 =text(0.02,0.004, '30s',  color= [0,0,255] ,/data)   ;'blue'
   t1 =text(0.02,-0.001, '100s',  color= [155,48,255],/data) ;'Purple'
+  print, 'done text'
   pl1 = polyline([0.0,0.0], [-0.04, 0.04], /data, target = pxydrift, color = 'black')
   pl1 = polyline( [-0.04, 0.04], [0.0,0.0], /data, target = pxydrift, color = 'black')
-
+  print, 'done long term xdrift vs. ydrift'
   ;;------------------------------------------------
   ;;Long term xdrift & y drift vs. time
   ;;------------------------------------------------
@@ -264,13 +297,13 @@ pro plot_track_centroids, run_data = run_data
 
   timeshortdrift = plot(xjd, short_drift, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Duration (hours)', $
                         XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,ytickinterval = 0.4,$
-                        xshowtext =0, position = [0.2,0.65,0.9,0.9], title = 'Ycen Short Term Drift')
+                        xshowtext =0, position = [0.2,0.65,0.9,0.9], title = 'Ycen Short Term Drift',vertcolors = coloryear)
   timedriftdist = plot(xjd, drift_dist, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
                        XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,$
-                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3)
+                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3,vertcolors = coloryear)
   timeslopedrift = plot(xjd, slope_drift, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
                         XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,$
-                        /current, position = [0.2,0.11, 0.9,0.36])
+                        /current, position = [0.2,0.11, 0.9,0.36],vertcolors = coloryear)
   
   timeshortdrift = plot(pa, short_drift, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Duration (hours)', $
                         xshowtext =0, position = [0.2,0.65,0.9,0.9], ytickinterval = 0.4,title = 'Ycen Short Term Drift')
