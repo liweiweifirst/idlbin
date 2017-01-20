@@ -86,7 +86,7 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
   
 
    for i =startfits,  n_elements(fitsname) - 1  do begin ;read each bcd file, find centroid, keep track
-      ;; print, 'working on ', fitsname(i)         
+       ;;print, 'working on ', fitsname(i)         
       header = headfits(fitsname(i)) ;
       sclk_obs= sxpar(header, 'SCLK_OBS')
       frametime = sxpar(header, 'FRAMTIME')

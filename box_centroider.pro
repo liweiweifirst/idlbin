@@ -1,6 +1,6 @@
 pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
                     backboxwidth, boxborder, x0, y0, f0, b, xs, ys, fs, bs, $
-                    c, cb, np, xfwhm, yfwhm, xys, xycov, TWOPASS=twopass, MMM=mmm
+                    c, cb, np, xfwhm, yfwhm, xys, xycov, TWOPASS=twopass, MMM=mmm, verbose = verbose
 ;+
 ; NAME:
 ;    BOX_CENTROIDER
@@ -121,16 +121,16 @@ pro box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
 ;    
 ;-
   IF KEYWORD_SET(TWOPASS) THEN BEGIN
-;;     print, 'twopass'
+     ;;print, 'twopass'
      box_centroider, input_image, sigma2, xmax, ymax, halfboxwidth, $
                      backboxwidth, boxborder, newxmax, newymax, MMM=mmm
-     if xmax gt 0 and ymax gt 0 then begin
+     if newxmax gt 0 and newymax gt 0 then begin
         xmax = newxmax
         ymax = newymax
      endif
-     
+     ;;if keyword_set(verbose) print, 'xmax, ymax ', xmax, ymax
+ 
   ENDIF
-  
 ; Copy input image to working image
   image = input_image
  

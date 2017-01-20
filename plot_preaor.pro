@@ -93,6 +93,7 @@ pro plot_preaor
   endfor
   ;;p1.Save, plotname, /close
   ;;save, planethash, filename=savename
+  save, sd, slope, filename = '/Users/jkrick/external/irac_warm/trending/short_drift_2.sav'
 end
 
 

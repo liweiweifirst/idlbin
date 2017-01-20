@@ -1,148 +1,157 @@
 pro plot_track_centroids, run_data = run_data
 
    if keyword_set(run_data) then begin
-     
-     restore, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav'
-     
-     aorlist = planethash.keys()
-     sigmax = fltarr(n_elements(aorlist))*alog10(-1)
-     sigmay = sigmax
-     xjd = sigmax
-     xdrift = sigmax; *alog10(-1)
-     ydrift = sigmax;*alog10(-1)
-     dpa = sigmax
-     pa = sigmax
-     exptimearr = sigmax
-     short_drift = sigmax
-     slope_drift = sigmax
-     startyear = sigmax
-     pkperiod = list(length=2)  ;n_elements(aorlist))
-     pkstrength =  list(length=2) 
-     pktime = list(length=2)
-     
-     for n = 0,  n_elements(aorlist) - 1 do begin
-        print, '--------------'
-        print, 'working on ',n, ' ',aorlist(n), n_elements(planethash[aorlist(n)].xcen)
-        timearr = planethash[aorlist(n)].timearr
-        bmjdarr = planethash[aorlist(n)].bmjdarr
-        short_drift[n] =  planethash[aorlist(n)].short_drift
-        ;;slope_drift[n] =  planethash[aorlist(n)].slope_drift
-        if planethash[aorlist(n)].haskey('slope_drift') gt 0 then slope_drift[n] =  planethash[aorlist(n)].slope_drift else slope_drift[n] = alog10(-1)
-        print, 'slope drift', slope_drift[n]
-        xjd[n] = bmjdarr(0) + 2400000.5
-        CALDAT, xjd[n], Month, Day, year
-        startyear[n] = year
+
+     savenames = ['/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav', '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2.sav']
+
+     for s = 1, 1 do begin
+        restore, savenames(s)
+        print, 'planethhash at beginning'
+        help, planethash
+        aorlist = planethash.keys()
+        sigmax = fltarr(n_elements(aorlist))*alog10(-1)
+        sigmay = sigmax
+        xjd = sigmax
+        xdrift = sigmax         ; *alog10(-1)
+        ydrift = sigmax         ;*alog10(-1)
+        dpa = sigmax
+        pa = sigmax
+        exptimearr = sigmax
+        short_drift = sigmax
+        slope_drift = sigmax
+        startyear = sigmax
+        pkperiod = list(length=2) ;n_elements(aorlist))
+        pkstrength =  list(length=2) 
+        pktime = list(length=2)
         
-        time0 = timearr(0)
-        timearr = (timearr - time0)/60./60. ; now in hours instead of sclk
-        exptimearr[n] = planethash[aorlist(n)].exptime
-
-        ;;-------------------------------------
-        ;;sigmax & sigmay &sigmaxy vs. time
-        ;;not sure what sigmaxy is?
-       if max(timearr) gt 1.2 then begin
-          sigmax[n] = stddev(planethash[aorlist(n)].xcen,/nan)
-          sigmay[n] = stddev(planethash[aorlist(n)].ycen,/nan)
-          print, 'sigma x, y ', sigmax[n], sigmay[n]
-
-        ;;-------------------------------------
-        ;;long term xdrift vs.& y drift
-           start = [.05,15.0]
-        ;;don't have errors in position, instead, fake it.
-           noise = fltarr(n_elements(planethash[aorlist(n)].xcen))
-           noise = noise + 1.
-           xcenfit= MPFITFUN('linear',timearr, planethash[aorlist(n)].xcen, noise, start,/Quiet)
-           xdrift[n] = xcenfit(0)
-           ycenfit= MPFITFUN('linear',timearr, planethash[aorlist(n)].ycen, noise, start,/Quiet)
-           ydrift[n] = ycenfit(0)
-           ;;do some quick paring down of the data
-           xnum = findgen(n_elements(timearr))
-           i = where(xnum mod 10 lt 1) ;pick out the odd numbers only
-           tx = timearr(i)
-           ycen = planethash[aorlist(n)].ycen
-           ty = ycen(i)
-        ;;pl = plot(timearr, ycen, title = aorlist(n), xtitle = 'time(hrs)', yrange = [mean(planethash[aorlist(n)].ycen,/nan) -0.5, mean(planethash[aorlist(n)].ycen,/nan) +0.5])
-        ;;pl = plot(timearr, ycenfit(0)*timearr + ycenfit(1), color = 'red', overplot = pl)
-        ;;XX don't want to keep this value if dithered.
-        endif
-        
-        ;;-------------------------------------
-        ;;short term drift
-        ;;want duration and slope.
-
-
-
-        ;;-------------------------------------
-        ;;delta pitch angle
-        prepitchangle = planethash[aorlist(n)].prepitchangle
-        dpa[n] = prepitchangle(n_elements(prepitchangle) - 2) - planethash[aorlist(n)].pitchangle
-        pa[n] = planethash[aorlist(n)].pitchangle
-        
-        ;;-------------------------------------
-        ;;width of the peak in the power spectrim at 30min
-        ;;don't need to do this for pre-AORs
-        ;;periodogram
-        if max(timearr) gt 1.2 then begin
-           xday = timearr*60.   ;in minutes             
-           ycen = planethash[aorlist(n)].ycen
-           bad = where(finite(ycen) lt 1,nbad)
-           print, 'number of nans ', nbad
-           if nbad eq n_elements(ycen) then CONTINUE  ; no good data points
-           if nbad gt 0  then remove, bad, xday, ycen
-           result = LNP_TEST(xday, ycen,/double, WK1 = wk1, WK2 = wk2, JMAX = jmax)
+        for n = 0,  n_elements(aorlist) - 1 do begin
+           print, '--------------'
+           print, 'working on ',n, ' ',aorlist(n), n_elements(planethash[aorlist(n)].xcen)
+           timearr = planethash[aorlist(n)].timearr
+           bmjdarr = planethash[aorlist(n)].bmjdarr
+           short_drift[n] =  planethash[aorlist(n)].short_drift
+           ;;slope_drift[n] =  planethash[aorlist(n)].slope_drift
+           if planethash[aorlist(n)].haskey('slope_drift') gt 0 then slope_drift[n] =  planethash[aorlist(n)].slope_drift else slope_drift[n] = alog10(-1)
+           print, 'slope drift', slope_drift[n]
+           xjd[n] = bmjdarr(0) + 2400000.5
+           CALDAT, xjd[n], Month, Day, year
+           startyear[n] = year
            
-           ;;find the peaks above N* the random level
-           ;;but N appears to be a function of the number of data points.
-           d0 = wk2 - shift(wk2, 1)
-           d1 = wk2 - shift(wk2, -1)
-           pk = where(d0 gt 0 and d1 gt 0, npk)
-           peakheight = wk2[pk]
-           peakfreq = wk1[pk]
-           peakperiod = 1/peakfreq
-           ;;print, 'npk', npk
+           time0 = timearr(0)
+           timearr = (timearr - time0)/60./60. ; now in hours instead of sclk
+           exptimearr[n] = planethash[aorlist(n)].exptime
            
-           ;;define significance relative to other peaks between 5 -  60 minutes
-           short = where(peakperiod gt 5 and peakperiod lt 60)
-           peakheight = peakheight(short)
-           peakfreq = peakfreq(short)
-           peakperiod = peakperiod(short)
-           mn = robust_mean(peakheight, 4)
-           sig = robust_sigma(peakheight)
-           nsig = 5
-           realpk = where(peakheight gt mn + nsig*sig and peakperiod gt 30. and peakperiod le 50., nrealpk)
+           ;;-------------------------------------
+           ;;sigmax & sigmay &sigmaxy vs. time
+           ;;not sure what sigmaxy is?
+           if max(timearr) gt 1.2 then begin
+              sigmax[n] = stddev(planethash[aorlist(n)].xcen,/nan)
+              sigmay[n] = stddev(planethash[aorlist(n)].ycen,/nan)
+              print, 'sigma x, y ', sigmax[n], sigmay[n]
+              
+              ;;-------------------------------------
+              ;;long term xdrift vs.& y drift
+              start = [.05,15.0]
+              ;;don't have errors in position, instead, fake it.
+              noise = fltarr(n_elements(planethash[aorlist(n)].xcen))
+              noise = noise + 1.
+              xcenfit= MPFITFUN('linear',timearr, planethash[aorlist(n)].xcen, noise, start,/Quiet)
+              xdrift[n] = xcenfit(0)
+              ycenfit= MPFITFUN('linear',timearr, planethash[aorlist(n)].ycen, noise, start,/Quiet)
+              ydrift[n] = ycenfit(0)
+              ;;do some quick paring down of the data
+              xnum = findgen(n_elements(timearr))
+              i = where(xnum mod 10 lt 1) ;pick out the odd numbers only
+              tx = timearr(i)
+              ycen = planethash[aorlist(n)].ycen
+              ty = ycen(i)
+              ;;pl = plot(timearr, ycen, title = aorlist(n), xtitle = 'time(hrs)', yrange = [mean(planethash[aorlist(n)].ycen,/nan) -0.5, mean(planethash[aorlist(n)].ycen,/nan) +0.5])
+              ;;pl = plot(timearr, ycenfit(0)*timearr + ycenfit(1), color = 'red', overplot = pl)
+              ;;XX don't want to keep this value if dithered.
+           endif
            
-           ;;concatenating arrays- messy, but not sure how else to do it
-           if n eq 0 then begin
-              if nrealpk gt 0 then begin
-                 pkperiod = peakperiod(realpk)
-                 pkstrength =(peakheight(realpk) -mn) /sig ;in units of some sort of significance
-                 pt = fltarr(nrealpk)
-                 pt(*) = xjd(n)
-                 pktime = pt
+           ;;-------------------------------------
+           ;;short term drift
+           ;;want duration and slope.
+           
+           
+           
+           ;;-------------------------------------
+           ;;delta pitch angle
+           prepitchangle = planethash[aorlist(n)].prepitchangle
+           dpa[n] = prepitchangle(n_elements(prepitchangle) - 2) - planethash[aorlist(n)].pitchangle
+           pa[n] = planethash[aorlist(n)].pitchangle
+           
+           ;;-------------------------------------
+           ;;width of the peak in the power spectrim at 30min
+           ;;don't need to do this for pre-AORs
+           ;;periodogram
+           if max(timearr) gt 1.2 then begin
+              xday = timearr*60. ;in minutes             
+              ycen = planethash[aorlist(n)].ycen
+              bad = where(finite(ycen) lt 1,nbad)
+              print, 'number of nans ', nbad
+              if nbad eq n_elements(ycen) then CONTINUE ; no good data points
+              if nbad gt 0  then remove, bad, xday, ycen
+              result = LNP_TEST(xday, ycen,/double, WK1 = wk1, WK2 = wk2, JMAX = jmax)
+              
+              ;;find the peaks above N* the random level
+              ;;but N appears to be a function of the number of data points.
+              d0 = wk2 - shift(wk2, 1)
+              d1 = wk2 - shift(wk2, -1)
+              pk = where(d0 gt 0 and d1 gt 0, npk)
+              peakheight = wk2[pk]
+              peakfreq = wk1[pk]
+              peakperiod = 1/peakfreq
+              ;;print, 'npk', npk
+              
+              ;;define significance relative to other peaks between 5 -  60 minutes
+              short = where(peakperiod gt 5 and peakperiod lt 60)
+              peakheight = peakheight(short)
+              peakfreq = peakfreq(short)
+              peakperiod = peakperiod(short)
+              mn = robust_mean(peakheight, 4)
+              sig = robust_sigma(peakheight)
+              nsig = 5
+              realpk = where(peakheight gt mn + nsig*sig and peakperiod gt 30. and peakperiod le 50., nrealpk)
+              
+              ;;concatenating arrays- messy, but not sure how else to do it
+              if n eq 0 then begin
+                 if nrealpk gt 0 then begin
+                    pkperiod = peakperiod(realpk)
+                    pkstrength =(peakheight(realpk) -mn) /sig ;in units of some sort of significance
+                    pt = fltarr(nrealpk)
+                    pt(*) = xjd(n)
+                    pktime = pt
+                 endif else begin
+                    pkperiod = 0
+                    pkstrength = 0
+                    pktime = xjd(n)
+                 endelse
               endif else begin
-                 pkperiod = 0
-                 pkstrength = 0
-                 pktime = xjd(n)
-              endelse
-           endif else begin
-              if nrealpk gt 0 then begin
-                 pkperiod = [pkperiod, peakperiod(realpk)]
-                 pkstrength =[pkstrength, (peakheight(realpk) -mn) /sig ] ;in units of some sort of significance
-                 pt = fltarr(nrealpk)
-                 pt(*) = xjd(n)
-                 pktime = [pktime, pt]
-              endif else begin
-                 pkperiod =[pkperiod, 0]
-                 pkstrength = [pkstrength,0]
-                 pktime = [pktime, xjd(n)]
+                 if nrealpk gt 0 then begin
+                    pkperiod = [pkperiod, peakperiod(realpk)]
+                    pkstrength =[pkstrength, (peakheight(realpk) -mn) /sig ] ;in units of some sort of significance
+                    pt = fltarr(nrealpk)
+                    pt(*) = xjd(n)
+                    pktime = [pktime, pt]
+                 endif else begin
+                    pkperiod =[pkperiod, 0]
+                    pkstrength = [pkstrength,0]
+                    pktime = [pktime, xjd(n)]
+                 endelse
+                 
               endelse
               
-           endelse
+           endif
            
-        endif
-        
-     endfor
-     save, /variables, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
+        endfor
+        save, sigmax, sigmay, xjd, xdrift, ydrift, dpa, pa, exptimearr, short_drift, slope_drift, startyear, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
+        help, planethash
+        print, planethash.remove(/all)
+        help, planethash
+     endfor                     ; for each save file
+     
   endif else begin ;;keyword_set run_data
      print, 'restoring data'
      restore, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
@@ -181,7 +190,8 @@ pro plot_track_centroids, run_data = run_data
 
   print, 'set up colorarr'
   ;;set up color coding by year of observation
-  coloryear = intarr(3, n_elements(exptimearr))
+  ;;coloryear = bytarr(3, n_elements(exptimearr))
+  coloryear = strarr( n_elements(exptimearr))
   twenty10 = where(startyear eq 2010, n2010)
   twenty11 = where(startyear eq 2011, n2011)
   twenty12 = where(startyear eq 2012, n2012)
@@ -192,17 +202,18 @@ pro plot_track_centroids, run_data = run_data
   twenty17 = where(startyear eq 2017, n2017)
   twenty18 = where(startyear eq 2018, n2018)
   
-  for c = 0, n2010 - 1 do coloryear[*,twenty10(c)] = [128,0,0]   ;'maroon'
-  for c = 0, n2011 - 1 do coloryear[*,twenty11(c)] = [255,0,0];'red'
-  for c = 0, n2012 - 1 do coloryear[*,twenty12(c)] = [255,69,0];'orange_red'
-  for c = 0, n2013 - 1 do coloryear[*,twenty13(c)] = [238,118,33];'dark_orange'
-  for c = 0, n2014 - 1 do coloryear[*,twenty14(c)] = [127,255,0];'lime_green'
-  for c = 0, n2015 - 1 do coloryear[*,twenty15(c)] =[64,224,208]; 'aqua'
-  for c = 0, n2016 - 1 do coloryear[*,twenty16(c)] = [0,0,255];'blue'
-  for c = 0, n2017 - 1 do coloryear[*,twenty17(c)] = [155,48,255];'Purple'
-  for c = 0, n2018 - 1 do coloryear[*,twenty18(c)] = [51,0,102];'Purple'
-
-  print, 'set up coloryear'
+  ;;for c = 0, n2010 - 1 do coloryear[*,twenty10(c)] = [128,0,0]   ;'maroon'
+  ;;for c = 0, n2011 - 1 do coloryear[*,twenty11(c)] = [255,0,0];'red'
+  ;;for c = 0, n2012 - 1 do coloryear[*,twenty12(c)] = [255,69,0];'orange_red'
+  ;;for c = 0, n2013 - 1 do coloryear[*,twenty13(c)] = [238,118,33];'dark_orange'
+  ;;for c = 0, n2014 - 1 do coloryear[*,twenty14(c)] = [127,255,0];'lime_green'
+  ;;for c = 0, n2015 - 1 do coloryear[*,twenty15(c)] =[64,224,208]; 'aqua'
+  ;;for c = 0, n2016 - 1 do coloryear[*,twenty16(c)] = [0,0,255];'blue'
+  ;;for c = 0, n2017 - 1 do coloryear[*,twenty17(c)] = [155,48,255];'Purple'
+  ;;for c = 0, n2018 - 1 do coloryear[*,twenty18(c)] = [51,0,102];'Purple'
+  coloryear(twenty10) = 'black'
+  coloryear(twenty11) = 'blue'
+  for ci = 0, n_elements(startyear) - 1 do print, 'year, color ', startyear(ci), xjd(ci), coloryear(ci)
   ;;------------------------------------------------
   ;;sigmax & sigmay &sigmaxy vs. time
   ;;------------------------------------------------
@@ -295,30 +306,78 @@ pro plot_track_centroids, run_data = run_data
   ;;worry about zero vs. nan vs. negative.
   drift_dist = slope_drift * short_drift  ;;oops this is what Carl plots
 
-  timeshortdrift = plot(xjd, short_drift, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Duration (hours)', $
+  ;;testplot = plot(xjd, startyear, '1D', xtitle = 'xjd', ytitle = 'startyear')
+  timeshortdrift = plot(xjd(twenty10), short_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Duration (hours)', $
                         XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,ytickinterval = 0.4,$
-                        xshowtext =0, position = [0.2,0.65,0.9,0.9], title = 'Ycen Short Term Drift',vertcolors = coloryear)
-  timedriftdist = plot(xjd, drift_dist, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
-                       XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,$
-                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3,vertcolors = coloryear)
-  timeslopedrift = plot(xjd, slope_drift, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
-                        XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,$
-                        /current, position = [0.2,0.11, 0.9,0.36],vertcolors = coloryear)
+                        xshowtext =0, position = [0.2,0.65,0.9,0.9], title = 'Ycen Short Term Drift',color = 'sky blue' )
+  timeshortdrift = plot(xjd(twenty11), short_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled , color = 'deep sky blue', $
+                        overplot = timeshortdrift )
+ timeshortdrift = plot(xjd(twenty12), short_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled , color = 'royal blue', $
+                        overplot = timeshortdrift )
   
-  timeshortdrift = plot(pa, short_drift, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Duration (hours)', $
-                        xshowtext =0, position = [0.2,0.65,0.9,0.9], ytickinterval = 0.4,title = 'Ycen Short Term Drift')
-  timedriftdist = plot(pa, drift_dist, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
-                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3)
-  timeslopedrift = plot(pa, slope_drift, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
-                        /current, position = [0.2,0.11, 0.9,0.36], xtitle = 'Pitch Angle')
-
-  timeshortdrift = plot(dpa, short_drift, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Duration (hours)', $
-                        xshowtext =0, position = [0.2,0.65,0.9,0.9], ytickinterval = 0.4, title = 'Ycen Short Term Drift')
-  timedriftdist = plot(dpa, drift_dist, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
-                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3)
-  timeslopedrift = plot(dpa, slope_drift, '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
-                        /current, position = [0.2,0.11, 0.9,0.36], xtitle = 'Delta Pitch Angle')
-
+  timedriftdist = plot(xjd(twenty10), drift_dist(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
+                       XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,$
+                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3,color = 'sky blue')
+  timedriftdist = plot(xjd(twenty11), drift_dist(twenty11), '1D', sym_size = 1.0,   /sym_filled ,overplot = timedriftdist, $
+                       color = 'deep sky blue')
+  timedriftdist = plot(xjd(twenty12), drift_dist(twenty12), '1D', sym_size = 1.0,   /sym_filled ,overplot = timedriftdist, $
+                       color = 'royal blue')
+  
+  timeslopedrift = plot(xjd(twenty10), slope_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
+                        XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,$
+                        /current, position = [0.2,0.11, 0.9,0.36])
+  timeslopedrift = plot(xjd(twenty11), slope_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                        color = 'deep sky blue')
+  timeslopedrift = plot(xjd(twenty12), slope_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                        color = 'royal blue')
+ 
+  ;;-------------
+  timeshortdrift = plot(pa(twenty10), short_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Duration (hours)', $
+                        xshowtext =0, position = [0.2,0.65,0.9,0.9], ytickinterval = 0.4,title = 'Ycen Short Term Drift', $
+                        color = 'black')
+  timeshortdrift = plot(pa(twenty11), short_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
+                        color = 'deep sky blue' )
+  timeshortdrift = plot(pa(twenty12), short_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
+                        color = 'royal blue' )
+ 
+  timedriftdist = plot(pa(twenty10), drift_dist(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
+                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3, color = 'black')
+  timedriftdist = plot(pa(twenty11), drift_dist(twenty11), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist, $
+                       color = 'deep sky blue')
+   timedriftdist = plot(pa(twenty12), drift_dist(twenty12), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist, $
+                       color = 'royal blue')
+ 
+  timeslopedrift = plot(pa(twenty10), slope_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
+                        /current, position = [0.2,0.11, 0.9,0.36], xtitle = 'Pitch Angle', color = 'black')
+  timeslopedrift = plot(pa(twenty11), slope_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                        color = 'deep sky blue')
+  timeslopedrift = plot(pa(twenty12), slope_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                        color = 'royal blue')
+ 
+  ;;--------------
+  
+  timeshortdrift = plot(dpa(twenty10), short_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Duration (hours)', $
+                        xshowtext =0, position = [0.2,0.65,0.9,0.9], ytickinterval = 0.4, title = 'Ycen Short Term Drift', $
+                        color = 'black')
+  timeshortdrift = plot(dpa(twenty11), short_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
+                        color = 'deep sky blue')
+  timeshortdrift = plot(dpa(twenty12), short_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
+                        color = 'royal blue')
+ 
+  timedriftdist = plot(dpa(twenty10), drift_dist(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
+                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3, color = 'black')
+  timedriftdist = plot(dpa(twenty11), drift_dist(twenty11), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist,$
+                       color = 'deep sky blue')
+  timedriftdist = plot(dpa(twenty12), drift_dist(twenty12), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist,$
+                       color = 'royal blue')
+  
+  timeslopedrift = plot(dpa(twenty10), slope_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
+                        /current, position = [0.2,0.11, 0.9,0.36], xtitle = 'Delta Pitch Angle', color = 'black')
+  timeslopedrift = plot(dpa(twenty11), slope_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                        color = 'deep sky blue')
+   timeslopedrift = plot(dpa(twenty12), slope_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                        color = 'royal blue')
+  
   
   ;;sdrift = plot(dpa, short_drift, '1s', sym_size = 0.5,   /sym_filled , ytitle = 'duration of ycen short term drift', $
   ;;              xtitle = 'Change in pitch angle from previous observation', vert_colors = colorarr)
