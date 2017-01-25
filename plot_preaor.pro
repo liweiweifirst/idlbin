@@ -3,11 +3,14 @@ pro plot_preaor
   savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2.sav'
   restore, savename
   plotname = '/Users/jkrick/external/irac_warm/trending/centroiding_ycen.pdf'
-
+  
   aorlist = planethash.keys()
   print, 'n_elements aorlist', n_elements(aorlist)
   loadct, 5
-  for n =0,n_elements(aorlist) - 1 do begin
+  short_driftarr = fltarr(n_elements(aorlist))
+  slope_driftarr = short_driftarr
+  
+  for n =200,n_elements(aorlist) - 1 do begin
      print, '--------------------------'
      timearr = planethash[aorlist(n)].timearr
      bmjdarr = planethash[aorlist(n)].bmjdarr
@@ -59,6 +62,9 @@ pro plot_preaor
               print, 'slope', slope
               planethash[aorlist(n)].short_drift = sd
               planethash[aorlist(n)].slope_drift = slope
+              short_driftarr(n) = sd
+              slope_driftarr(n) = slope
+
            endif
            
         endif
@@ -92,8 +98,8 @@ pro plot_preaor
      
   endfor
   ;;p1.Save, plotname, /close
-  ;;save, planethash, filename=savename
-  save, sd, slope, filename = '/Users/jkrick/external/irac_warm/trending/short_drift_2.sav'
+  save, planethash, filename=savename
+  save, short_driftarr, slope_driftarr, filename = '/Users/jkrick/external/irac_warm/trending/short_drift_2.sav'
 end
 
 
