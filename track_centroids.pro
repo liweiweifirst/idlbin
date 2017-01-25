@@ -23,7 +23,16 @@ pro track_centroids, pixval=pixval
   ;;compare JD of new lists
   ;;startnaor = 0 ;;;remove when done testingXXXXXX
   chname = ['ch1','ch2']
-  for na =startnaor,400 do begin; n_elements(aorname) -1 do begin
+  for na =startnaor,600 do begin ; n_elements(aorname) -1 do begin
+     ;;delete current planethash so I don't have a huge huge
+     ;;file going forward.
+     if (na eq startnaor) and (startnaor ne 0) then begin
+        help, planethash
+        print, planethash.remove(/all)
+        help, planethash
+     endif
+     
+     
      print, '---------------'
      print, 'starting on ',aorname(na), ' ', na
      chname = ['ch1','ch2']
@@ -87,7 +96,7 @@ pro track_centroids, pixval=pixval
 
               values = list( ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], piarr,pid[na],na, alog10(-1),alog10(-1), min_dur(na))
               planethash[aorname(na)] = dictionary(keys, values)
-              savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2.sav'
+              savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_3.sav'
               ;;figure out dates and save file names
 ;;              caldat, bmjd_0 + 2400000.5, jmonth, jday, jyear
 ;;              case 1 of
@@ -110,7 +119,7 @@ pro track_centroids, pixval=pixval
               keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'bmjd_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid','pid','naor_index', 'short_drift', 'slope_drift',  'min_dur']
               values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], pid[na],na, alog10(-1), alog10(-1),min_dur(na))
               planethash[aorname(na)] = dictionary(keys, values)
-              savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids.sav'
+              savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_3.sav'
 
            endelse
            
@@ -128,8 +137,9 @@ pro track_centroids, pixval=pixval
               ;;figure out which channel it is.
               if ppre36(n_elements(pppid) - 1) eq 'f' then pchname = ['ch2']
               if ppre45(n_elements(pppid) - 1) eq 'f' then pchname = ['ch1']
-              if n_elements(chname) gt 1 then pchname = 'ch1' ;just guess
+              if n_elements(pchname) gt 1 then pchname = 'ch1' ;just guess
               ;;scp over this aor from the archive
+              ;;print, 'pchname', pchname, n_elements(chname), n_elements(pchname)
               junk = scpdata(preaorname(n_elements(pppid) - 1), campaign_name(na), pchname)
 
               ;;do the photometry
