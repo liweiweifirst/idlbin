@@ -1,16 +1,16 @@
 pro plot_preaor
 
-  savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2.sav'
+  savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_3.sav'
   restore, savename
   plotname = '/Users/jkrick/external/irac_warm/trending/centroiding_ycen.pdf'
   
   aorlist = planethash.keys()
   print, 'n_elements aorlist', n_elements(aorlist)
-  loadct, 5
+  ;;loadct, 5
   short_driftarr = fltarr(n_elements(aorlist))
   slope_driftarr = short_driftarr
   
-  for n =200,n_elements(aorlist) - 1 do begin
+  for n =0,n_elements(aorlist) - 1 do begin
      print, '--------------------------'
      timearr = planethash[aorlist(n)].timearr
      bmjdarr = planethash[aorlist(n)].bmjdarr
@@ -21,8 +21,9 @@ pro plot_preaor
      np = n_elements(preaor) - 1
      print, 'n, aors ', n, ' ', aorlist(n), ' ',preaor
      print, 'aor min_dur',  planethash[aorlist(n)].min_dur
+     print, 'pid', pid, prepid[-1]
      
-     if prepid[-1] eq pid then begin
+     if n gt 0 and prepid[-1] eq pid then begin
         if  planethash[aorlist(n)].min_dur gt 60. then begin
            
            ;;make sure we are not looking at the pre-aor itself.
@@ -99,7 +100,7 @@ pro plot_preaor
   endfor
   ;;p1.Save, plotname, /close
   save, planethash, filename=savename
-  save, short_driftarr, slope_driftarr, filename = '/Users/jkrick/external/irac_warm/trending/short_drift_2.sav'
+  save, short_driftarr, slope_driftarr, filename = '/Users/jkrick/external/irac_warm/trending/short_drift_3.sav'
 end
 
 
