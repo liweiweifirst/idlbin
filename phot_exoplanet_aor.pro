@@ -129,6 +129,8 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
          xfwhmarr = xarr
          yfwhmarr = xarr
          peakpixDNarr = xarr
+         xuncarr = xarr
+         yuncarr = xarr
          piarr = fltarr(64*n_elements(fitsname),9*9)
 
       endif
@@ -148,6 +150,8 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
          xfwhmarr = xarr
          yfwhmarr = xarr
          peakpixDNarr = xarr
+         xuncarr = xarr
+         yuncarr = yarr
          piarr = fltarr(n_elements(fitsname),9*9)
 
       endif
@@ -240,7 +244,12 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
             endfor
          endif
          
-         if naxis eq 2 then pi = im[(fix(x_center) - 4):(fix(x_center+4)), (fix(y_center) - 4):(fix(y_center+4))] ; now a 9x9x64 element array
+         if naxis eq 2 then begin
+            if x_center gt 4. and x_center lt 252. and y_center gt 4. and y_center lt 252. then begin
+               pi = im[(fix(x_center) - 4):(fix(x_center+4)), (fix(y_center) - 4):(fix(y_center+4))] ; now a 9x9x64 element array
+            endif
+            
+         endif
          
       endif ;keyword_set pixval
       
@@ -285,6 +294,8 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
       if naxis eq 3 then begin  ; and i eq 0 then begin
          xarr[i*64] = x_center[0:*]
          yarr[i*64] = y_center[0:*]
+         xuncarr[i*64] = x3s[0:*]
+         yuncarr[i*64] = y3s[0:*]
          fluxarr[i*64] = abcdflux[0:*]
          fluxerrarr[i*64] = fs[0:*]
          corrfluxarr[i*64] = corrflux[0:*]
@@ -302,6 +313,8 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
       if naxis eq 2 then begin; and i eq 0 then begin
          xarr[i] = x_center
          yarr[i]  =  y_center
+         xuncarr[i] = x3s
+         yuncarr[i] = y3s
          fluxarr[i]  =  abcdflux
          fluxerrarr[i]  =  fs
          corrfluxarr[i]  = corrflux
