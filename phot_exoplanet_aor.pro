@@ -225,6 +225,7 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
       ;;        pi = track_box(im, x_center, y_center)   ; tb now a 25
       ;;        x 64 element array
       if keyword_set(pixval) then begin
+        ;; print, 'inside pixval', naxis
          if naxis eq 3 then begin
             if i eq startfits then nframe = 0
             for subframe = 0, 63 do begin
@@ -245,9 +246,15 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
          endif
          
          if naxis eq 2 then begin
+            ;print, 'inside naxis eq 2', x_center, y_center
             if x_center gt 4. and x_center lt 252. and y_center gt 4. and y_center lt 252. then begin
+               ;print, 'setting pi'
                pi = im[(fix(x_center) - 4):(fix(x_center+4)), (fix(y_center) - 4):(fix(y_center+4))] ; now a 9x9x64 element array
-            endif
+            endif else begin
+               ;;set some nans into pi
+               pi = im[(fix(128) - 4):(fix(128+4)), (fix(128) - 4):(fix(128+4))]
+               pi[*] = alog10(-1)
+            endelse
             
          endif
          
