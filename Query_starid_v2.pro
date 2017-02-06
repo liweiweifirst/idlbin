@@ -116,6 +116,8 @@ Function Query_starid_v2,header, Found = found, ERRMSG = errmsg, $
         ;;check for single star
         id1=where(strpos(Result, 'Object') ne -1, nlines)
         if nlines eq 1 then begin
+           if keyword_set(Verbose) then print, 'Simbad found something'
+           found = 1
            starname = strmid(Result[id1],7,11)
            idcoo = where(Result.StartsWith('Coordinates(ICRS'))
            cooline = Result[idcoo]
@@ -186,34 +188,41 @@ Function Query_starid_v2,header, Found = found, ERRMSG = errmsg, $
         
      ENDELSE
   endelse
+  ;;if keyword_set(Verbose) then print, 'startname before frame_check: ',  found
+  found = frame_check(header, ra, dec, found)
+  if found eq 0 then starname = 'nostar'
+  ;;if keyword_set(Verbose) then print, 'startname after frame_check: ',  starname, found
 
-     found = frame_check(header, ra, dec, found)
-     if found eq 0 then starname = 'nostar'
-  
   
   return, starname
 END 
 
 
- function frame_check, header, ra, dec, found
-  ;;check that the star is on the frame:  
-   adxy, header, ra, dec, maybex, maybey
-   naxishere = sxpar(header, 'NAXIS')
-    if naxishere eq 2 then begin
-       xmax = 256-11 & ymax = 256-11
-    endif else begin
-       xmax = 32-11 & ymax = 32-11
-    endelse
-  
-    if (maybex lt 10) or (maybex gt xmax) or (maybey lt 10) or(maybey gt ymax) then begin
-       found = 0
-       starname = 'nostar'
-    endif
-    return, found
- end
- 
+function frame_check, header, ra, dec, found
+  ;;check that the star is on the frame:
+  ;;print, 'found starting frame check', found
+  adxy, header, ra, dec, maybex, maybey
+  naxishere = sxpar(header, 'NAXIS')
+  if naxishere eq 2 then begin
+     xmax = 256-11 & ymax = 256-11
+  endif else begin
+     xmax = 32-11 & ymax = 32-11
+  endelse
+  ;;print, 'framecheck maybex, maybey, naxishere', maybex, maybey, naxishere, xmax, ymax
+  ;;print, 'starname middle frame check', found
 
-    ; Get V mag if present
+  if (maybex lt 10) or (maybex gt xmax) or (maybey lt 10) or(maybey gt ymax) then begin
+     found = 0
+     starname = 'nostar'
+     print, 'star not on the frame => nostar'
+  endif
+    ;;print, 'starname ending frame check', found
+
+  return, found
+end
+
+
+                                ; Get V mag if present
 ;;      vi = where(strpos(Result, '%M.V ') ne -1,vcnt)
 ;;      if vcnt GE 1 then reads,strmid(Result[vi],4),vmag
 
