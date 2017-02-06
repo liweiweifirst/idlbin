@@ -7,6 +7,11 @@ function read_exoplanet_list, calculate = calculate
 
   
   readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/out_centroiding_allWarmMissionToDate.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, L10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline =7520
+
+  ;;start by removing a fantom AOR
+  fa = where(aorname eq '50670336')
+  remove, fa, aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45
+  
   start_year = fix(strmid(startUTC, 0,4))
   start_month = fix(strmid(startUTC, 5,2))
   start_day = fix(strmid(startUTC, 8,2))
@@ -37,7 +42,7 @@ function read_exoplanet_list, calculate = calculate
   
   ;;which of these have already been analyzed?
   ;;check for the save file first 
-  savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_3.sav'
+  savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_4.sav'
   ;;savename = savename + '_pixval.sav'
   savecheck = file_test(savename)
   print, 'savecheck', savecheck
