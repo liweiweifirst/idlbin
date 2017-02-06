@@ -42,7 +42,7 @@ function read_exoplanet_list, calculate = calculate
   
   ;;which of these have already been analyzed?
   ;;check for the save file first 
-  savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_4.sav'
+  savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_5.sav'
   ;;savename = savename + '_pixval.sav'
   savecheck = file_test(savename)
   print, 'savecheck', savecheck
