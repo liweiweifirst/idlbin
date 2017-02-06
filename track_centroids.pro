@@ -23,7 +23,7 @@ pro track_centroids, pixval=pixval
   ;;compare JD of new lists
   ;;startnaor = 0 ;;;remove when done testingXXXXXX
   chname = ['ch1','ch2']
-  for na =startnaor,1200 do begin ; n_elements(aorname) -1 do begin
+  for na =1000,1200 do begin ; n_elements(aorname) -1 do begin
      ;;delete current planethash so I don't have a huge huge
      ;;file going forward.
      if (na eq startnaor) and (startnaor ne 0) then begin
