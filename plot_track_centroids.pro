@@ -238,7 +238,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   twenty18 = where(startyear eq 2018, n2018)
 
   
-   print, 'set up coloryear'
+   print, 'set up coloryear',n_elements(twenty10), n_elements(twenty11), n_elements(twenty12), n_elements(twenty13), n_elements(twenty14), n_elements(twenty15), n_elements(twenty16)
   ;;------------------------------------------------
   ;;sigmax & sigmay &sigmaxy vs. time
   ;;------------------------------------------------
