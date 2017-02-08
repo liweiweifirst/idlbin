@@ -1,6 +1,6 @@
 pro plot_track_centroids, run_data = run_data, periodogram = periodogram
 
-  savenames = [ '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_3.sav'] ;'/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav',
+  savenames = [ '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_3.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_4.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_5.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_6.sav'] ;'/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav',
 
 
   
@@ -422,108 +422,133 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   ;;------------------------------------------------
   ;;worry about zero vs. nan vs. negative.
   drift_dist = slope_drift * short_drift  ;;oops this is what Carl plots
- 
+
+  tencolor = 'brown'
+  elevencolor = 'tan'
+  twelvecolor = 'cyan'
+  thirtcolor = 'blue'
+  fourtcolor = 'slate blue'
+  fiftcolor = 'dark violet'
+  sixtcolor = 'medium violet red'
 
   timeshortdrift = plot(xjd(twenty10), short_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Duration (hours)', $
                         XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,ytickinterval = 0.4,$
-                        xshowtext =0, position = [0.2,0.65,0.9,0.9], title = 'Ycen Short Term Drift',color = 'brown' )
-  timeshortdrift = plot(xjd(twenty11), short_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled , color = 'tan', $
+                        xshowtext =0, position = [0.2,0.65,0.9,0.9], title = 'Ycen Short Term Drift',color = tencolor )
+  timeshortdrift = plot(xjd(twenty11), short_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled , color = elevencolor, $
                         overplot = timeshortdrift )
- timeshortdrift = plot(xjd(twenty12), short_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled , color = 'cyan', $
+  timeshortdrift = plot(xjd(twenty12), short_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled , color = twelvecolor, $
                         overplot = timeshortdrift )
- timeshortdrift = plot(xjd(twenty13), short_drift(twenty13), '1D', sym_size = 1.0,   /sym_filled , color = 'blue', $
+  timeshortdrift = plot(xjd(twenty13), short_drift(twenty13), '1D', sym_size = 1.0,   /sym_filled , color = thirtcolor, $
+                        overplot = timeshortdrift )
+  timeshortdrift = plot(xjd(twenty14), short_drift(twenty14), '1D', sym_size = 1.0,   /sym_filled , color = fourtcolor, $
+                        overplot = timeshortdrift )
+  timeshortdrift = plot(xjd(twenty15), short_drift(twenty15), '1D', sym_size = 1.0,   /sym_filled , color = fiftcolor, $
+                        overplot = timeshortdrift )
+  timeshortdrift = plot(xjd(twenty16), short_drift(twenty16), '1D', sym_size = 1.0,   /sym_filled , color = sixtcolor, $
                         overplot = timeshortdrift )
   
   timedriftdist = plot(xjd(twenty10), drift_dist(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
                        XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,$
-                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3,color = 'brown')
+                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3,color = tencolor)
   timedriftdist = plot(xjd(twenty11), drift_dist(twenty11), '1D', sym_size = 1.0,   /sym_filled ,overplot = timedriftdist, $
-                       color = 'tan')
- timedriftdist = plot(xjd(twenty12), drift_dist(twenty12), '1D', sym_size = 1.0,   /sym_filled ,overplot = timedriftdist, $
-                       color = 'cyan')
-timedriftdist = plot(xjd(twenty13), drift_dist(twenty13), '1D', sym_size = 1.0,   /sym_filled ,overplot = timedriftdist, $
-                       color = 'blue')
+                       color = elevencolor)
+  timedriftdist = plot(xjd(twenty12), drift_dist(twenty12), '1D', sym_size = 1.0,   /sym_filled ,overplot = timedriftdist, $
+                       color = twelvecolor)
+  timedriftdist = plot(xjd(twenty13), drift_dist(twenty13), '1D', sym_size = 1.0,   /sym_filled ,overplot = timedriftdist, $
+                       color = thirtcolor)
+  timedriftdist = plot(xjd(twenty14), drift_dist(twenty14), '1D', sym_size = 1.0,   /sym_filled ,overplot = timedriftdist, $
+                       color = fourtcolor)
+  timedriftdist = plot(xjd(twenty15), drift_dist(twenty15), '1D', sym_size = 1.0,   /sym_filled ,overplot = timedriftdist, $
+                       color = fiftcolor)
+  timedriftdist = plot(xjd(twenty16), drift_dist(twenty16), '1D', sym_size = 1.0,   /sym_filled ,overplot = timedriftdist, $
+                       color = sixtcolor)
   
   timeslopedrift = plot(xjd(twenty10), slope_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
-                        XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,color = 'brown',$
+                        XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,color = tencolor,$
                         /current, position = [0.2,0.11, 0.9,0.36])
   timeslopedrift = plot(xjd(twenty11), slope_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
-                        color = 'tan')
+                        color = elevencolor)
   timeslopedrift = plot(xjd(twenty12), slope_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
-                        color = 'cyan')
+                        color = twelvecolor)
   timeslopedrift = plot(xjd(twenty13), slope_drift(twenty13), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
-                        color = 'blue')
+                        color = thirtcolor)
+  timeslopedrift = plot(xjd(twenty14), slope_drift(twenty14), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                        color = fourtcolor)
+  timeslopedrift = plot(xjd(twenty15), slope_drift(twenty15), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                        color = fiftcolor)
+  timeslopedrift = plot(xjd(twenty16), slope_drift(twenty16), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                        color = sixtcolor)
  
   ;;-------------
   timeshortdrift = plot(pa(twenty10), short_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Duration (hours)', $
                         xshowtext =0, position = [0.2,0.65,0.9,0.9], ytickinterval = 0.4,title = 'Ycen Short Term Drift', $
-                        color = 'brown')
+                        color = tencolor)
   timeshortdrift = plot(pa(twenty11), short_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
-                        color = 'tan' )
+                        color = elevencolor )
   timeshortdrift = plot(pa(twenty12), short_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
-                        color = 'cyan' )
+                        color = twelvecolor )
  timeshortdrift = plot(pa(twenty13), short_drift(twenty13), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
-                        color = 'blue' )
+                        color = thirtcolor )
  
   timedriftdist = plot(pa(twenty10), drift_dist(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
-                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3, color = 'brown')
+                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3, color = tencolor)
   timedriftdist = plot(pa(twenty11), drift_dist(twenty11), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist, $
-                       color = 'tan')
+                       color = elevencolor)
    timedriftdist = plot(pa(twenty12), drift_dist(twenty12), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist, $
-                       color = 'cyan')
+                       color = twelvecolor)
    timedriftdist = plot(pa(twenty13), drift_dist(twenty13), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist, $
-                       color = 'blue')
+                       color = thirtcolor)
  
   timeslopedrift = plot(pa(twenty10), slope_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
-                        /current, position = [0.2,0.11, 0.9,0.36], xtitle = 'Pitch Angle', color = 'brown')
+                        /current, position = [0.2,0.11, 0.9,0.36], xtitle = 'Pitch Angle', color = tencolor)
   timeslopedrift = plot(pa(twenty11), slope_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
-                        color = 'tan')
+                        color = elevencolor)
   timeslopedrift = plot(pa(twenty12), slope_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
-                        color = 'cyan')
+                        color = twelvecolor)
   timeslopedrift = plot(pa(twenty13), slope_drift(twenty13), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
-                        color = 'blue')
+                        color = thirtcolor)
  
   ;;--------------
   
   timeshortdrift = plot(dpa(twenty10), short_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Duration (hours)', $
                         xshowtext =0, position = [0.2,0.65,0.9,0.9], ytickinterval = 0.4, title = 'Ycen Short Term Drift', $
-                        color = 'brown')
+                        color = tencolor)
   timeshortdrift = plot(dpa(twenty11), short_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
-                        color = 'tan')
+                        color = elevencolor)
   timeshortdrift = plot(dpa(twenty12), short_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
-                        color = 'cyan')
+                        color = twelvecolor)
   timeshortdrift = plot(dpa(twenty13), short_drift(twenty13), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
-                        color = 'blue')
+                        color = thirtcolor)
  
   timedriftdist = plot(dpa(twenty10), drift_dist(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
-                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3, color = 'brown')
+                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3, color = tencolor)
   timedriftdist = plot(dpa(twenty11), drift_dist(twenty11), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist,$
-                       color = 'tan')
+                       color = elevencolor)
   timedriftdist = plot(dpa(twenty12), drift_dist(twenty12), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist,$
-                       color = 'cyan')
+                       color = twelvecolor)
   timedriftdist = plot(dpa(twenty13), drift_dist(twenty13), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist,$
-                       color = 'blue')
+                       color = thirtcolor)
   
   timeslopedrift = plot(dpa(twenty10), slope_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
-                        /current, position = [0.2,0.11, 0.9,0.36], xtitle = 'Delta Pitch Angle', color ='brown')
+                        /current, position = [0.2,0.11, 0.9,0.36], xtitle = 'Delta Pitch Angle', color =tencolor)
   timeslopedrift = plot(dpa(twenty11), slope_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
-                        color = 'tan')
+                        color = elevencolor)
   timeslopedrift = plot(dpa(twenty12), slope_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
-                        color = 'cyan')
+                        color = twelvecolor)
  timeslopedrift = plot(dpa(twenty13), slope_drift(twenty13), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
-                       color = 'blue')
+                       color = thirtcolor)
 
 
 
 ;;make this for the SUP presentation
  supplot = plot(pa(twenty10), slope_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Short Term Drift Slope (pix/hr)', $
-                       xtitle = 'Pitch Angle', color = 'brown')
+                       xtitle = 'Pitch Angle', color = tencolor)
   supplot = plot(pa(twenty11), slope_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled ,overplot = supplot, $
-                        color = 'tan')
+                        color = elevencolor)
   supplot = plot(pa(twenty12), slope_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled ,overplot = supplot, $
-                        color = 'cyan')
+                        color = twelvecolor)
   supplot = plot(pa(twenty13), slope_drift(twenty13), '1D', sym_size = 1.0,   /sym_filled ,overplot = supplot, $
-                        color = 'blue')
+                        color = thirtcolor)
 
  ;;  
  ;;-------------
