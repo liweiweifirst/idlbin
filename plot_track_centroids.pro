@@ -580,10 +580,16 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
     slopeerr(s) = param_err(0)
 
  endfor
- splot = errorplot(indgen(n_elements(slope)) + 2010, slope, slopeerr,'1s', /sym_filled, sym_size = 0.5, $
-                   xtitle ='Year', ytitle = 'short term drift slope as a function of delta pitch', xminor = 0, $
-                  xtickinterval = 1, xrange = [2009.5, 2016])
-  
+ ;;splot = errorplot(indgen(n_elements(slope)) + 2010, slope, slopeerr,'1s', /sym_filled, sym_size = 0.5, $
+ ;;                  xtitle ='Year', ytitle = 'short term drift slope as a function of delta pitch', xminor = 0, $
+ ;;                 xtickinterval = 1, xrange = [2009.5, 2016])
+
+
+
+ ;;;;;;;;;;;;;;;;;;;;;;
+ basedir = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/'
+ psx.Save, strcompress(basedir + "stddevx_time.png",/remove_all)
+ psy.save, strcompress(basedir + "stddevy_time.png",/remove_all)
 end
 
     ;;plothist, planethash[aorlist(n)].xcen, xhist, yhist, bin = 0.05,/noplot
