@@ -15,7 +15,8 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
         aorlist = planethash.keys()
 
         if s eq starts then begin
-           sigmax = fltarr(2* (stops + 1 - starts) *n_elements(aorlist))*alog10(-1)  ; two is the fudge factor to make sure arrays are large enough
+           sigmax = fltarr(2* (stops + 1 - starts) *n_elements(aorlist))*alog10(-1) ; two is the fudge factor to make sure arrays are large enough
+           print, n_elements(sigmax)
            sigmay = sigmax
            xjd = sigmax
            xdrift = sigmax      ; *alog10(-1)
@@ -411,7 +412,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   ;;                     ytitle = 'Period of the power spectrum peaks (min)',XTICKFORMAT='(C(CMoA,1x,CYI))', $
   ;;                     xtickunits = ['Time'], xminor =11 , yrange =
   ;;                     [20,80])
-  print, 'pkperiod', n_elements(pkperiod), pkperiod
+  print, 'pkperiod', n_elements(pkperiod)
    pperiod = plot(pktime, pkperiod, '1s', /sym_filled, sym_size = 0.5, $
                        ytitle = 'Period of the power spectrum peaks (min)',XTICKFORMAT='(C(CMoA,1x,CYI))', $
                        xtickunits = ['Time'], xminor =11 , yrange = [20,80])
