@@ -80,7 +80,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
               ;;pl = plot(timearr, ycen, title = aorlist(n), xtitle = 'time(hrs)', yrange = [mean(planethash[aorlist(n)].ycen,/nan) -0.5, mean(planethash[aorlist(n)].ycen,/nan) +0.5])
               ;;pl = plot(timearr, ycenfit(0)*timearr + ycenfit(1), color = 'red', overplot = pl)
               ;;XX don't want to keep this value if dithered.
-           endif
+           ;endif
            
            ;;-------------------------------------
            ;;short term drift
@@ -99,7 +99,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
            ;;don't need to do this for pre-AORs
            ;;periodogram
            
-           if max(timearr) gt 1.2 and keyword_set(periodogram) then begin
+           ;if max(timearr) gt 1.2 and keyword_set(periodogram) then begin
               xday = timearr*60. ;in minutes             
               ycen = planethash[aorlist(n)].ycen
               bad = where(finite(ycen) lt 1,nbad)
@@ -174,9 +174,9 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
              ;;    endelse
              ;;    
              ;; endelse
-              
+              totalaorcount++  ;;keep track of the total number of aors processed
+
            endif
-           totalaorcount++  ;;keep track of the total number of aors processed
         endfor
      endfor   ; for each save file restored
      
