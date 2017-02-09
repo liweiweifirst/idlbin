@@ -226,6 +226,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
 
   print, 'set up colorarr', n_elements(startyear)
   print, 'startyear', startyear
+  print, 'exptimearr', exptimearr
   ;;set up color coding by year of observation
   ;;coloryear = intarr(3, n_elements(exptimearr))
   coloryear = strarr( n_elements(exptimearr))
