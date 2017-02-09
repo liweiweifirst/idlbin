@@ -224,7 +224,8 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   for c = 0, n30 - 1 do colorarr[*,thirty(c)] = [0,0,255];'blue'
   for c = 0, n100 - 1 do colorarr[*,hundred(c)] = [155,48,255];'Purple'
 
-  print, 'set up colorarr'
+  print, 'set up colorarr', n_elements(startyear)
+  print, 'startyear', startyear
   ;;set up color coding by year of observation
   ;;coloryear = intarr(3, n_elements(exptimearr))
   coloryear = strarr( n_elements(exptimearr))
@@ -239,7 +240,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   twenty18 = where(startyear eq 2018, n2018)
 
   
-   print, 'set up coloryear',n_elements(twenty10), n_elements(twenty11), n_elements(twenty12), n_elements(twenty13), n_elements(twenty14), n_elements(twenty15), n_elements(twenty16)
+   print, 'set up coloryear',n2010, n2011, n2012, n2013, n2014, n2015, n2016
   ;;------------------------------------------------
   ;;sigmax & sigmay &sigmaxy vs. time
   ;;------------------------------------------------
