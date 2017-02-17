@@ -101,7 +101,24 @@ chname = 0
   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 ;---
+;---
+  planetname = 'HD75289'
+  ra_ref = 131.91819
+  dec_ref = -41.73778
+ aorname_ch2 = ['r52584192', 'r52616448', 'r52617728', 'r52619008', 'r52620288', 'r52621568', 'r52647936', 'r52655616','r52608256', 'r52616704', 'r52617984', 'r52619264', 'r52620544', 'r52621824', 'r52649472','r52615680', 'r52616960', 'r52618240', 'r52619520', 'r52620800', 'r52622080', 'r52651008','r52615936', 'r52617216', 'r52618496', 'r52619776', 'r52621056', 'r52622336', 'r52652544','r52616192', 'r52617472', 'r52618752', 'r52620032', 'r52621312', 'r52622592', 'r52654080']  ; all ch2
+  basedir = '/Users/jkrick/external/irac_warm/HD75289/' 
+  utmjd_center = 51818.05045D; 55938.54133D; 55942.06608D
+  transit_duration=184.2 ; min
+  period = 3.50928           ;days intended_phase = 0.0
+  exptime = 0.1
+  intended_phase = 0
+  stareaor = 0
+  plot_norm = 1.0
+  plot_corrnorm = 1.0
 
+  values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
   planetname = 'WASP-62b'
   ra_ref = 87.139641
   dec_ref =-63.988068
