@@ -27,16 +27,15 @@ function read_exoplanet_list, calculate = calculate
   catdec = Dec
   ;;needs to be in a loop or something 
   ;;case start_year of
-  ;;   2009: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_01'
-  ;;   2010: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_01'
-  ;;   2011: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_01'
-  ;;   2012: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_02'
-  ;;   2013: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_02'
-  ;;   2014: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_03'
-  ;;   2015: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_03'
-  ;;   2016: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_04'
-  ;;   2017: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_04'
-  ;;   2018: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_05'
+  ;;   2010: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_10'
+  ;;   2011: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_11'
+  ;;   2012: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_12'
+  ;;   2013: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_13'
+  ;;   2014: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_14'
+  ;;   2015: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_15'
+  ;;   2016: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_16'
+  ;;   2017: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_17'
+  ;;   2018: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_18'
      
   ;;endcase
 
@@ -44,13 +43,14 @@ function read_exoplanet_list, calculate = calculate
   
   ;;which of these have already been analyzed?
   ;;check for the save file first 
-  savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_6.sav'
+  ;;savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_7.sav'
+  lastsave = find_newest_file()
   ;;savename = savename + '_pixval.sav'
-  savecheck = file_test(savename)
+  savecheck = file_test(lastsave)
   print, 'savecheck', savecheck
   if savecheck gt 0 then begin
      print, 'restoring previous save file'
-     restore,savename
+     restore,lastsave
      aorlist = planethash.keys()
      naor = intarr(n_elements(aorlist))
      for i = 0, n_elements(aorlist) - 1 do  naor(i) = planethash[aorlist(i)].naor_index
