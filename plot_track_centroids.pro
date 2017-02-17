@@ -1,19 +1,16 @@
 pro plot_track_centroids, run_data = run_data, periodogram = periodogram
 
-  savenames = [ '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_2.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_3.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_4.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_5.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_6.sav'] ;'/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav',
-
-
+  savenames = [ '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/oldbutgood/track_centroids_pixval_2.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/oldbutgood/track_centroids_pixval_3.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/oldbutgood/track_centroids_pixval_4.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/oldbutgood/track_centroids_pixval_5.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/oldbutgood/track_centroids_pixval_6.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/oldbutgood/track_centroids_pixval_7.sav'] ;'/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav',
   
   if keyword_set(run_data) then begin
      starts = 0
-     stops = n_elements(savenames) - 1
+     stops =  n_elements(savenames) - 1
      totalaorcount = 0
-     peraor = 0
      for s = starts, stops do begin
-
+        
         restore, savenames(s)
         aorlist = planethash.keys()
-
+        
         if s eq starts then begin
            sigmax = fltarr(2* (stops + 1 - starts) *n_elements(aorlist))*alog10(-1) ; two is the fudge factor to make sure arrays are large enough
            print, n_elements(sigmax)
@@ -36,30 +33,30 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
         
         for n = 0,  n_elements(aorlist) - 1 do begin
            print, '--------------'
-           print, 'working on ',n, ' ',aorlist(n), n_elements(planethash[aorlist(n)].xcen)
+           print, 'working on ',n, ' ', totalaorcount, ' ', aorlist(n), n_elements(planethash[aorlist(n)].xcen)
            timearr = planethash[aorlist(n)].timearr
            bmjdarr = planethash[aorlist(n)].bmjdarr
-           short_drift[n] =  planethash[aorlist(n)].short_drift
-           npmean[n] = mean(planethash[aorlist(n)].npcentroids,/nan)
-           npunc[n] = stddev(planethash[aorlist(n)].npcentroids,/nan)
-           ;;slope_drift[n] =  planethash[aorlist(n)].slope_drift
-           if planethash[aorlist(n)].haskey('slope_drift') gt 0 then slope_drift[n] =  planethash[aorlist(n)].slope_drift else slope_drift[n] = alog10(-1)
-           print, 'slope drift', slope_drift[n]
-           xjd[n] = bmjdarr(0) + 2400000.5
-           CALDAT, xjd[n], Month, Day, year
-           startyear[n] = year
+           short_drift[totalaorcount] =  planethash[aorlist(n)].short_drift
+           npmean[totalaorcount] = mean(planethash[aorlist(n)].npcentroids,/nan)
+           npunc[totalaorcount] = stddev(planethash[aorlist(n)].npcentroids,/nan)
+           ;;slope_drift[totalaorcount] =  planethash[aorlist(n)].slope_drift
+           if planethash[aorlist(n)].haskey('slope_drift') gt 0 then slope_drift[totalaorcount] =  planethash[aorlist(n)].slope_drift else slope_drift[totalaorcount] = alog10(-1)
+           print, 'slope drift', slope_drift[totalaorcount]
+           xjd[totalaorcount] = bmjdarr(0) + 2400000.5
+           CALDAT, xjd[totalaorcount], Month, Day, year
+           startyear[totalaorcount] = year
            
            time0 = timearr(0)
            timearr = (timearr - time0)/60./60. ; now in hours instead of sclk
-           exptimearr[n] = planethash[aorlist(n)].exptime
+           exptimearr[totalaorcount] = planethash[aorlist(n)].exptime
            
            ;;-------------------------------------
            ;;sigmax & sigmay &sigmaxy vs. time
            ;;not sure what sigmaxy is?
            if max(timearr) gt 1.2 then begin
-              sigmax[n] = stddev(planethash[aorlist(n)].xcen,/nan)
-              sigmay[n] = stddev(planethash[aorlist(n)].ycen,/nan)
-              print, 'sigma x, y ', sigmax[n], sigmay[n]
+              sigmax[totalaorcount] = stddev(planethash[aorlist(n)].xcen,/nan)
+              sigmay[totalaorcount] = stddev(planethash[aorlist(n)].ycen,/nan)
+              print, 'sigma x, y ', sigmax[totalaorcount], sigmay[totalaorcount]
               
               ;;-------------------------------------
               ;;long term xdrift vs.& y drift
@@ -68,9 +65,9 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
               noise = fltarr(n_elements(planethash[aorlist(n)].xcen))
               noise = noise + 1.
               xcenfit= MPFITFUN('linear',timearr, planethash[aorlist(n)].xcen, noise, start,/Quiet)
-              xdrift[n] = xcenfit(0)
+              xdrift[totalaorcount] = xcenfit(0)
               ycenfit= MPFITFUN('linear',timearr, planethash[aorlist(n)].ycen, noise, start,/Quiet)
-              ydrift[n] = ycenfit(0)
+              ydrift[totalaorcount] = ycenfit(0)
               ;;do some quick paring down of the data
               xnum = findgen(n_elements(timearr))
               i = where(xnum mod 10 lt 1) ;pick out the odd numbers only
@@ -80,26 +77,26 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
               ;;pl = plot(timearr, ycen, title = aorlist(n), xtitle = 'time(hrs)', yrange = [mean(planethash[aorlist(n)].ycen,/nan) -0.5, mean(planethash[aorlist(n)].ycen,/nan) +0.5])
               ;;pl = plot(timearr, ycenfit(0)*timearr + ycenfit(1), color = 'red', overplot = pl)
               ;;XX don't want to keep this value if dithered.
-           ;endif
-           
-           ;;-------------------------------------
-           ;;short term drift
-           ;;want duration and slope.
-           
-           
-           
-           ;;-------------------------------------
-           ;;delta pitch angle
-           prepitchangle = planethash[aorlist(n)].prepitchangle
-           dpa[n] = prepitchangle(n_elements(prepitchangle) - 2) - planethash[aorlist(n)].pitchangle
-           pa[n] = planethash[aorlist(n)].pitchangle
-           
-           ;;-------------------------------------
-           ;;width of the peak in the power spectrim at 30min
-           ;;don't need to do this for pre-AORs
-           ;;periodogram
-           
-           ;if max(timearr) gt 1.2 and keyword_set(periodogram) then begin
+                                ;endif
+              
+              ;;-------------------------------------
+              ;;short term drift
+              ;;want duration and slope.
+              
+              
+              
+              ;;-------------------------------------
+              ;;delta pitch angle
+              prepitchangle = planethash[aorlist(n)].prepitchangle
+              dpa[totalaorcount] = prepitchangle(n_elements(prepitchangle) - 2) - planethash[aorlist(n)].pitchangle
+              pa[totalaorcount] = planethash[aorlist(n)].pitchangle
+              
+              ;;-------------------------------------
+              ;;width of the peak in the power spectrim at 30min
+              ;;don't need to do this for pre-AORs
+              ;;periodogram
+              
+              ;;if max(timearr) gt 1.2 and keyword_set(periodogram) then begin
               xday = timearr*60. ;in minutes             
               ycen = planethash[aorlist(n)].ycen
               bad = where(finite(ycen) lt 1,nbad)
@@ -111,7 +108,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
               ;;         thick = 2, color = 'red',name = 'Y centroids', title = 'Y centroids', yrange = [0, max(wk2[10:100])])
               ;;b2 = plot(xday, ycen, '1s', sym_size = 0.5, /sym_filled, xtitle = 'time in minutes', ytitle = 'ycen')
               ;;print, 'LNP result', result
-
+              
               ;;find the peaks above N* the random level
               ;;but N appears to be a function of the number of data points.
               d0 = wk2 - shift(wk2, 1)
@@ -120,8 +117,8 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
               peakheight = wk2[pk]
               peakfreq = wk1[pk]
               peakperiod = 1/peakfreq
-
-               
+              
+              
               ;;define significance relative to other peaks between 5
               ;;-  60 minutes
               minpkper = 20.
@@ -142,10 +139,9 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
 
               ;;make this easy for now and take the biggest peak
               maxheight = max(peakheight,ppi)
-              pkperiod(peraor) = peakperiod(ppi)
-              pkstrength(peraor) = (maxheight - mn )/ sig
-              pktime(peraor) = xjd(n)
-              peraor++
+              pkperiod(totalaorcount) = peakperiod(ppi)
+              pkstrength(totalaorcount) = (maxheight - mn )/ sig
+              pktime(totalaorcount) = xjd[totalaorcount]
               ;;concatenating arrays- messy, but not sure how else to do it
               ;;if n eq 0 then begin
               ;;   if nrealpk gt 0 then begin
@@ -178,15 +174,15 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
 
            endif
         endfor
-     endfor   ; for each save file restored
+     endfor                     ; for each save file restored
      
-        save, /variables, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
-     endif else begin ;;keyword_set run_data
-        print, 'restoring data'
-        restore, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
+     save, /variables, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
+  endif else begin ;;keyword_set run_data
+     print, 'restoring data'
+     restore, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
      
-     endelse
-     print, 'totalaorcount', totalaorcount
+  endelse
+  print, 'totalaorcount', totalaorcount
      
   xjd = xjd[0:totalaorcount - 1]
   sigmax = sigmax[0:totalaorcount - 1]
@@ -201,10 +197,11 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   startyear = startyear[0:totalaorcount - 1]
   ;;nparr = nparr[0:totalaorcount - 1]
   
-  pkperiod = pkperiod[0:peraor - 1]
-  pkstrength = pkstrength[0:peraor-1]
-  pktime = pktime[0:peraor-1]
-  
+  pkperiod = pkperiod[0:totalaorcount - 1]
+  pkstrength = pkstrength[0:totalaorcount-1]
+  pktime = pktime[0:totalaorcount-1]
+
+
   ;;set up color coding by exposure time
   colorarr = intarr(3, n_elements(exptimearr))
   zerop02 = where(exptimearr lt 0.05 and exptimearr gt 0., n0p02)
@@ -224,10 +221,10 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   for c = 0, n30 - 1 do colorarr[*,thirty(c)] = [0,0,255];'blue'
   for c = 0, n100 - 1 do colorarr[*,hundred(c)] = [155,48,255];'Purple'
 
-  print, 'set up colorarr', n_elements(startyear)
+  print, 'set up colorarr', n_elements(startyear), totalaorcount
   print, 'startyear', startyear
-  print, 'exptimearr', exptimearr
-  ;;set up color coding by year of observation
+  print, 'pkperiod', pkperiod
+   ;;set up color coding by year of observation
   ;;coloryear = intarr(3, n_elements(exptimearr))
   coloryear = strarr( n_elements(exptimearr))
   twenty10 = where(startyear eq 2010, n2010)
@@ -241,7 +238,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   twenty18 = where(startyear eq 2018, n2018)
 
   
-   print, 'set up coloryear',n2010, n2011, n2012, n2013, n2014, n2015, n2016
+  print, 'set up coloryear',n2010, n2011, n2012, n2013, n2014, n2015, n2016
   ;;------------------------------------------------
   ;;sigmax & sigmay &sigmaxy vs. time
   ;;------------------------------------------------
@@ -415,9 +412,9 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   ;;                     xtickunits = ['Time'], xminor =11 , yrange =
   ;;                     [20,80])
   print, 'pkperiod', n_elements(pkperiod)
-   pperiod = plot(pktime, pkperiod, '1s', /sym_filled, sym_size = 0.5, $
-                       ytitle = 'Period of the power spectrum peaks (min)',XTICKFORMAT='(C(CMoA,1x,CYI))', $
-                       xtickunits = ['Time'], xminor =11 , yrange = [20,80])
+  pperiod = plot(pktime, pkperiod, '1s', /sym_filled, sym_size = 0.5, $
+                 ytitle = 'Period of the power spectrum peaks (min)',XTICKFORMAT='(C(CMoA,1x,CYI))', $
+                 xtickunits = ['Time'], xminor =11 , yrange = [20,80])
    
 
   ;;------------------------------------------------
@@ -490,17 +487,29 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
                         color = elevencolor )
   timeshortdrift = plot(pa(twenty12), short_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
                         color = twelvecolor )
- timeshortdrift = plot(pa(twenty13), short_drift(twenty13), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
+  timeshortdrift = plot(pa(twenty13), short_drift(twenty13), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
                         color = thirtcolor )
+ timeshortdrift = plot(pa(twenty14), short_drift(twenty14), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
+                        color = fourtcolor )
+ timeshortdrift = plot(pa(twenty15), short_drift(twenty15), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
+                        color = fiftcolor )
+ timeshortdrift = plot(pa(twenty16), short_drift(twenty16), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
+                        color = sixtcolor )
  
   timedriftdist = plot(pa(twenty10), drift_dist(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
-                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3, color = tencolor)
+                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.4, color = tencolor)
   timedriftdist = plot(pa(twenty11), drift_dist(twenty11), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist, $
                        color = elevencolor)
-   timedriftdist = plot(pa(twenty12), drift_dist(twenty12), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist, $
+  timedriftdist = plot(pa(twenty12), drift_dist(twenty12), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist, $
                        color = twelvecolor)
-   timedriftdist = plot(pa(twenty13), drift_dist(twenty13), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist, $
+  timedriftdist = plot(pa(twenty13), drift_dist(twenty13), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist, $
                        color = thirtcolor)
+ timedriftdist = plot(pa(twenty14), drift_dist(twenty14), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist, $
+                       color = fourtcolor)
+ timedriftdist = plot(pa(twenty15), drift_dist(twenty15), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist, $
+                       color = fiftcolor)
+ timedriftdist = plot(pa(twenty16), drift_dist(twenty16), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist, $
+                       color = sixtcolor)
  
   timeslopedrift = plot(pa(twenty10), slope_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
                         /current, position = [0.2,0.11, 0.9,0.36], xtitle = 'Pitch Angle', color = tencolor)
@@ -510,6 +519,12 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
                         color = twelvecolor)
   timeslopedrift = plot(pa(twenty13), slope_drift(twenty13), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
                         color = thirtcolor)
+ timeslopedrift = plot(pa(twenty14), slope_drift(twenty14), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                        color = fourtcolor)
+ timeslopedrift = plot(pa(twenty15), slope_drift(twenty15), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                        color = fiftcolor)
+ timeslopedrift = plot(pa(twenty16), slope_drift(twenty16), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                        color = sixtcolor)
  
   ;;--------------
   
@@ -522,6 +537,12 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
                         color = twelvecolor)
   timeshortdrift = plot(dpa(twenty13), short_drift(twenty13), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
                         color = thirtcolor)
+  timeshortdrift = plot(dpa(twenty14), short_drift(twenty14), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
+                        color = fourtcolor)
+  timeshortdrift = plot(dpa(twenty15), short_drift(twenty15), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
+                        color = fiftcolor)
+  timeshortdrift = plot(dpa(twenty16), short_drift(twenty16), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
+                        color = sixtcolor)
  
   timedriftdist = plot(dpa(twenty10), drift_dist(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
                        xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3, color = tencolor)
@@ -531,6 +552,12 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
                        color = twelvecolor)
   timedriftdist = plot(dpa(twenty13), drift_dist(twenty13), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist,$
                        color = thirtcolor)
+  timedriftdist = plot(dpa(twenty14), drift_dist(twenty14), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist,$
+                       color = fourtcolor)
+  timedriftdist = plot(dpa(twenty15), drift_dist(twenty15), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist,$
+                       color = fiftcolor)
+  timedriftdist = plot(dpa(twenty16), drift_dist(twenty16), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist,$
+                       color = sixtcolor)
   
   timeslopedrift = plot(dpa(twenty10), slope_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
                         /current, position = [0.2,0.11, 0.9,0.36], xtitle = 'Delta Pitch Angle', color =tencolor)
@@ -538,13 +565,19 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
                         color = elevencolor)
   timeslopedrift = plot(dpa(twenty12), slope_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
                         color = twelvecolor)
- timeslopedrift = plot(dpa(twenty13), slope_drift(twenty13), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+  timeslopedrift = plot(dpa(twenty13), slope_drift(twenty13), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
                        color = thirtcolor)
+ timeslopedrift = plot(dpa(twenty14), slope_drift(twenty14), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                       color = fourtcolor)
+ timeslopedrift = plot(dpa(twenty15), slope_drift(twenty15), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                       color = fiftcolor)
+ timeslopedrift = plot(dpa(twenty16), slope_drift(twenty16), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                       color = sixtcolor)
 
 
 
 ;;make this for the SUP presentation
- supplot = plot(pa(twenty10), slope_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Short Term Drift Slope (pix/hr)', $
+  supplot = plot(pa(twenty10), slope_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Short Term Drift Slope (pix/hr)', $
                        xtitle = 'Pitch Angle', color = tencolor)
   supplot = plot(pa(twenty11), slope_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled ,overplot = supplot, $
                         color = elevencolor)
@@ -581,7 +614,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
     param_err = perror*reduced_chi2
     slope(s) = lfitresult(0)
     slopeerr(s) = param_err(0)
-
+    
  endfor
  ;;splot = errorplot(indgen(n_elements(slope)) + 2010, slope, slopeerr,'1s', /sym_filled, sym_size = 0.5, $
  ;;                  xtitle ='Year', ytitle = 'short term drift slope as a function of delta pitch', xminor = 0, $
@@ -591,8 +624,8 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
 
  ;;;;;;;;;;;;;;;;;;;;;;
  basedir = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/'
- psx.Save, strcompress(basedir + "stddevx_time.png",/remove_all)
- psy.save, strcompress(basedir + "stddevy_time.png",/remove_all)
+ psx.Save,  strcompress(basedir + "stddevx_time.png")
+ psy.save, strcompress(basedir + "stddevy_time.png")
 end
 
     ;;plothist, planethash[aorlist(n)].xcen, xhist, yhist, bin = 0.05,/noplot
