@@ -26,6 +26,24 @@ function binning_function, a,bin_level, pmapcorr, ch,  set_nbins = set_nbins, n_
   xfwhmarr = [planethash[aorname(a),'xfwhm']]
   yfwhmarr = [planethash[aorname(a),'yfwhm']]
 
+
+;;;;;;;;;;;remove this if not HD75289
+   ;;fix HD75289 phase
+  utmjd_center = 57398.541D
+  period = 3.5091651
+  bmjd_dist =bmjd - utmjd_center ; how many UTC away from the transit center
+  phase =( bmjd_dist / period )- fix(bmjd_dist/period)
+   
+;   low = where(phase lt-0.5 and phase ge -1.0)
+;   phase(low) = phase(low) + 1.
+   phase = phase + (phase lt -0.5 and phase ge -1.0)
+   
+;   high = where(phase gt 0.5 and phase le 1.0)
+;   phase(high) = phase(high) - 1.0
+   phase = phase- (phase gt 0.5 and phase le 1.0)
+
+
+  
   ;-------------------------------------------------------------------------
   ;;remove outliers 
   ;;are there non-nan corrfluxes aka sweet spot
