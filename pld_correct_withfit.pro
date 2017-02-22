@@ -1,5 +1,5 @@
 FUNCTION pld_correct_withfit,pixgrid,flux,sigma_flux,SCALE=scale,REQKEY=reqkey,$
-         CORR_UNC=corr_unc,IFIT=ifit,_EXTRA=extra
+         CORR_UNC=corr_unc,IFIT=ifit,ORDER=order,_EXTRA=extra
 ;;
 ;;  corrected_flux = PLD_CORRECT_WITHFIT(pixgrid,flux,sigma_flux)
 ;;
@@ -19,10 +19,13 @@ FUNCTION pld_correct_withfit,pixgrid,flux,sigma_flux,SCALE=scale,REQKEY=reqkey,$
 ;;                     If entered, then separate fits and corrections will be carried out on each 
 ;;                     unique reqkey.  
 ;;             IFIT:  (nfit < ndat) -element vector giving the indices in the input data to be  
-;;                     used in the fit.  All data will be corrected, if possible.
+;;                     used in the fit.  All data will be corrected, if possible.  If not set then all data,
+;;                     with the exception of NaN's, will be used in the fit.
+;;             ORDER:  2 or 1 (default).  Gives the upper order of terms to keep in the pixel
+;;                     correlation equation.  
 ;;                     
 ndat_tot = N_ELEMENTS(flux)
-IF N_ELEMENTS(ifit) EQ 0 THEN ifit = LINDGEN(ndat_tot)
+IF N_ELEMENTS(ifit) EQ 0 THEN ifit = WHERE(finite(flux) AND finite(sigma_flux))
 IF N_ELEMENTS(REQKEY) EQ ndat_tot THEN BEGIN
   iuniq = UNIQ(reqkey,SORT(reqkey))
   nreq = N_ELEMENTS(iuniq)
@@ -50,8 +53,8 @@ FOR j = 0,nreq-1 DO BEGIN
       PRINT,'*** PLD_CORRECT_WITHFIT:  NO FITTING DATA FOR AOR '+STRNG(rk[j])+'.  VALUES WILL RETURN NaN.****'
       CONTINUE
    ENDIF
-   cj = fit_pld(pixgrid[*,*,ifit[irk_fit[j]]],flux[ifit[irk_fit[j]]],sigma_flux[ifit[irk_fit[j]]],sigma_coeffs=sigma_cj,SCALE=scale,/NOCONSTANT,_EXTRA=extra)
-   fcj = correct_pld(pixgrid[*,*,irk[j]],flux[irk[j]],cj,sigma_cj,sigma_flux=sigma_flux[irk[j]],sigma_correct=cuncj,/NOCONSTANT,_EXTRA=extra)
+   cj = pld_fit(pixgrid[*,*,ifit[irk_fit[j]]],flux[ifit[irk_fit[j]]],sigma_flux[ifit[irk_fit[j]]],sigma_coeffs=sigma_cj,SCALE=scale,/NOCONSTANT,ORDER=order,_EXTRA=extra)
+   fcj = pld_correct(pixgrid[*,*,irk[j]],flux[irk[j]],cj,sigma_cj,sigma_flux=sigma_flux[irk[j]],sigma_correct=cuncj,/NOCONSTANT,ORDER=order,_EXTRA=extra)
    fcorrect[irk[j]] = fcj
    corr_unc[irk[j]] = cuncj
 ENDFOR
