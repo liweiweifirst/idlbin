@@ -5,7 +5,7 @@ pro phot_exoplanet, planetname, apradius,chname, columntrack = columntrack, brea
 ;wait, 3600  ; waiting for another code to finish
 ;print, 'done waiting'
  t1 = systime(1)
-
+journal = '/Users/jkrick/external/irac_warm/HD75289/journal.txt'
 ;convert aperture radius in pixels into what get_centroids_for_calstar_jk uses 
 case apradius of
 ;[ 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25]
@@ -137,7 +137,7 @@ endif
 ;---------------
 
 ;print, 'ut_mjd',utmjd_center
-dirname = strcompress(basedir );+ planetname +'/')
+dirname = strcompress(basedir + planetname +'/')
 planethash = hash()
 
 
@@ -145,7 +145,7 @@ if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pm
 else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
 fits_read,occ_filename, occdata, occheader
 startaor = 0
-stopaor =   n_elements(aorname) - 1
+stopaor =  0;  n_elements(aorname) - 1
 for a =startaor,  stopaor do begin
    print, '----------------------------'
    print, 'working on ',a, ' ', aorname(a)
@@ -220,7 +220,7 @@ for a =startaor,  stopaor do begin
          xfwhmarr = xarr
          yfwhmarr = xarr
          peakpixDNarr = xarr
-         piarr = findgen(7,7,63*n_elements(fitsname))
+         piarr = findgen(7,7,63L*n_elements(fitsname))
       endif
       if i eq startfits and naxis ne 3 then begin
          xarr = fltarr(n_elements(fitsname))
@@ -343,7 +343,7 @@ for a =startaor,  stopaor do begin
 ;        pi = track_box(im, x_center, y_center)   ; tb now a 25 x 64 element array
       if naxis eq 3 then pi = im[12:18, 12:18,*] ; now a 7x7x64 element array
       if naxis eq 2 then pi = im[(fix(x_center) - 3):(fix(x_center+3)), (fix(y_center) - 3):(fix(y_center+3))] ; now a 7x7x64 element array
-
+      ;;print, 'im[15,15]', im[15,15,*]
 ;track the value of a column
       if keyword_set(columntrack) then begin 
          centerpixval1 = findgen(64)
@@ -437,7 +437,9 @@ for a =startaor,  stopaor do begin
          xfwhmarr[i*63] = xfwhm[1:*]
          yfwhmarr[i*63] = yfwhm[1:*]
          if keyword_set(rawfile) then peakpixDNarr[i*63] = peakpixDN[1:*]
-         piarr[i*63] = pi[*,*,1:*]
+         piarr[i*63L] = pi[*,*,1L:*]
+         ;;pi
+        ;; print, 'adding to piarr', pi[*,*,1:*]
  ;        help, bmjd
          if keyword_set(columntrack) then begin 
                                 ; I think I deleted more parts of this than I may have intended, so if it is not working, that may be why
@@ -560,7 +562,10 @@ save, planethash, filename=savename
 print, 'saving planethash', savename
 print, 'time check', systime(1) - t1
 
-
+  print, 'max piarr, min piarr', max(piarr), min(piarr)
+;;  b = barplot(xhist, yhist, title = 'my data')
+  a = where(piarr gt 22000, na, ncomplement = nc)
+  print, 'number gt 22000',na, nc
 ;testplot = plot(timearr, xarr, '1s', sym_size = 0.1, sym_filled = 1, xtitle = 'time', ytitle = 'xcen')
 ;plothist, npcentroidsarr, xhist, yhist, /noplot, bin = 0.01
 ;testplot = plot(xhist, yhist,  xtitle = 'NP', ytitle = 'Number', thick =3, color = 'blue')
@@ -580,7 +585,7 @@ print, 'time check', systime(1) - t1
 ;testplot the first AOR of raw raw flux before I start analyzing.
 
 ;tp = plot(planethash[aorname(0),'phase'], planethash[aorname(0),'flux'], '1rs')
-
+journal
 
 end
 
