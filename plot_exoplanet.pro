@@ -504,7 +504,8 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
      plotsym = 's'
      setyrange = [0.994, 1.005]
      if planetname eq 'WASP-80b' then setyrange = [0.96, 1.02];[0.999, 1.001]
-     if planetname eq 'HAT-P-22' then setyrange = [0.995, 1.004];[0.999, 1.001]
+     if planetname eq 'HAT-P-22' then setyrange = [0.995, 1.004] ;[0.999, 1.001]
+     if planetname eq 'HD75289' then setyrange = [1.52, 1.56]
      if keyword_set(phaseplot) then begin ;make the plot as a function of phase
         ;print, ' phase', bin_phase
 ;        print, 'corrflux',  (bin_corrfluxp/plot_corrnorm)
@@ -598,11 +599,20 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
                  if planetname eq 'HD209458' then corroffset = 0.001
               endelse
               print, 'corroffset', corroffset
-              pu = errorplot(bin_phasep, (bin_corrfluxp/plot_corrnorm) * corroffset, $
-                             bin_corrfluxerrp/plot_corrnorm,  '1s', sym_size = 0.7,  $
-                             symbol = plotsym, sym_filled = 1,color =scolor ,xtitle = 'Orbital Phase',$
-                             errorbar_color =  scolor, title = planetname, ytitle = 'Pmap Corrected Flux', $
-                             yrange = setyrange, xrange = setxrange);, position =[0.2,0.35,0.9,0.9]) ;
+              ;;pu = errorplot(bin_phasep, (bin_corrfluxp/plot_corrnorm) * corroffset, $
+              ;;               bin_corrfluxerrp/plot_corrnorm,  '1s', sym_size = 0.7,  $
+              ;;               symbol = plotsym, sym_filled = 1,color =scolor ,xtitle = 'Orbital Phase',$
+              ;;               errorbar_color =  scolor, title = planetname, ytitle = 'Pmap Corrected Flux', $
+              ;;               yrange = setyrange, xrange = setxrange);, position =[0.2,0.35,0.9,0.9]) ;
+              pu = errorplot(bin_phasep, bin_corrfluxp, $
+                             bin_corrfluxerrp,  '1s', sym_size = 1.0,  $
+                             symbol = plotsym, sym_filled = 1,color ='red' ,xtitle = 'Orbital Phase',$
+                             errorbar_color =  'black', title = planetname, ytitle = 'Pmap Corrected Flux', $
+                             yrange = setyrange, xrange = setxrange) ;, position =[0.2,0.35,0.9,0.9]) ;
+              pu = errorplot(bin_phasep, bin_fluxp, $
+                             bin_fluxerrp,  '1s', sym_size = 1.0,  $
+                             symbol = plotsym, sym_filled = 1,color ='black' ,$
+                             errorbar_color =  'black', overplot = pu)
               if keyword_set(function_fit) then begin
                  pu.xshowtext = 0
                  pu.position =  [0.2,0.35,0.9,0.9]
@@ -720,9 +730,15 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
                                 ;setup a plot for just the snaps
               if n_elements(aorname) gt 10 then begin
                  
-                 pu = errorplot(bin_phasep, (bin_corrfluxp/plot_corrnorm) * corroffset , bin_corrfluxerrp/plot_corrnorm, '1s', $
-                                sym_size = 0.7, symbol = plotsym, sym_filled = 1,color =colorarr[a] , $
-                                errorbar_color = colorarr[a], overplot = pu ) ;
+                 ;;pu = errorplot(bin_phasep, (bin_corrfluxp/plot_corrnorm) * corroffset , bin_corrfluxerrp/plot_corrnorm, '1s', $
+                 ;;               sym_size = 0.7, symbol = plotsym, sym_filled = 1,color =colorarr[a] , $
+                 ;;               errorbar_color = colorarr[a], overplot = pu ) ;
+                 pu = errorplot(bin_phasep, bin_corrfluxp , bin_corrfluxerrp, '1s', $
+                                sym_size = 0.7, symbol = plotsym, sym_filled = 1,color ='red', $
+                                errorbar_color = 'red', overplot = pu ) ;
+                pu = errorplot(bin_phasep, bin_fluxp , bin_fluxerrp, '1s', $
+                                sym_size = 0.7, symbol = plotsym, sym_filled = 1,color ='black', $
+                                errorbar_color = 'black', overplot = pu ) ;
               endif
            endif
            
