@@ -131,7 +131,7 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
          peakpixDNarr = xarr
          xuncarr = xarr
          yuncarr = xarr
-         piarr = fltarr(64*n_elements(fitsname),9*9)
+         piarr = fltarr(7,7,63L*n_elements(fitsname))
 
       endif
       if i eq startfits and naxis ne 3 then begin
@@ -152,7 +152,7 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
          peakpixDNarr = xarr
          xuncarr = xarr
          yuncarr = yarr
-         piarr = fltarr(n_elements(fitsname),9*9)
+         piarr =fltarr(7,7,n_elements(fitsname))
 
       endif
       fdarr = fltarr(n_elements(fitsname))
@@ -227,32 +227,17 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
       if keyword_set(pixval) then begin
         ;; print, 'inside pixval', naxis
          if naxis eq 3 then begin
-            if i eq startfits then nframe = 0
-            for subframe = 0, 63 do begin
-               earr = fltarr(81)
-               c = 0
-               
-               for xcoord = 11, 19 do begin
-                  for ycoord = 11, 19 do begin
-                     ;;if xcoord eq 11 and ycoord eq 11 and subframe eq 0 then print, '[11, 11, 0]', im[xcoord, ycoord, subframe]
-                     earr[c] =  im[xcoord, ycoord, subframe]
-                     c++
-                  endfor
-               endfor
-;;            if subframe eq 0 then print, 'earr', earr
-               piarr[nframe,*] =earr
-               nframe++
-            endfor
-         endif
+            pi = im[12:18, 12:18,*] ; now a 7x7x64 element array
+          endif
          
          if naxis eq 2 then begin
             ;print, 'inside naxis eq 2', x_center, y_center
             if x_center gt 4. and x_center lt 252. and y_center gt 4. and y_center lt 252. then begin
                ;print, 'setting pi'
-               pi = im[(fix(x_center) - 4):(fix(x_center+4)), (fix(y_center) - 4):(fix(y_center+4))] ; now a 9x9x64 element array
+               pi = im[(fix(x_center) - 3):(fix(x_center+3)), (fix(y_center) - 3):(fix(y_center+3))] ; now a 9x9x64 element array
             endif else begin
                ;;set some nans into pi
-               pi = im[(fix(128) - 4):(fix(128+4)), (fix(128) - 4):(fix(128+4))]
+               pi = im[(fix(128) - 3):(fix(128+3)), (fix(128) - 3):(fix(128+3))]
                pi[*] = alog10(-1)
             endelse
             
@@ -316,6 +301,13 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
          xfwhmarr[i*64] = xfwhm[0:*]
          yfwhmarr[i*64] = yfwhm[0:*]
          peakpixDNarr[i*64] = peakpixDN[0:*]
+         if keyword_set(pixval) then begin
+            for pj = 0, 62 do begin
+               ;;print, 'adding to piarr', pi[*,*,pj]
+               piarr(*,*,i*63 + pj) = pi[*,*,pj]
+            endfor
+         endif
+         
       endif 
       if naxis eq 2 then begin; and i eq 0 then begin
          xarr[i] = x_center
@@ -335,7 +327,7 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
          xfwhmarr[i] = xfwhm
          yfwhmarr[i] = yfwhm
          peakpixDNarr[i] = peakpixDN
-         if keyword_set(pixval) then piarr[i,*] = pi
+         if keyword_set(pixval) then  piarr[*,*,i] = pi
       endif
 
      ;; if a eq startaor and i eq startfits then begin
@@ -406,3 +398,36 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
 end
 
 
+;;old pixval
+ ;;        if naxis eq 3 then begin
+ ;;           if i eq startfits then nframe = 0
+ ;;           for subframe = 0, 63 do begin
+ ;;              earr = fltarr(81)
+ ;;              c = 0
+               
+ ;;              for xcoord = 11, 19 do begin
+ ;;                 for ycoord = 11, 19 do begin
+ ;;                    ;;if xcoord eq 11 and ycoord eq 11 and subframe eq 0 then print, '[11, 11, 0]', im[xcoord, ycoord, subframe]
+ ;;                    earr[c] =  im[xcoord, ycoord, subframe]
+ ;;                    c++
+ ;;                 endfor
+ ;;              endfor
+;;            if subframe eq 0 then print, 'earr', earr
+ ;;              piarr[nframe,*] =earr
+ ;;              nframe++
+ ;;           endfor
+ ;;        endif
+         
+ ;;        if naxis eq 2 then begin
+ ;;           ;print, 'inside naxis eq 2', x_center, y_center
+ ;;           if x_center gt 4. and x_center lt 252. and y_center gt 4. and y_center lt 252. then begin
+ ;;              ;print, 'setting pi'
+ ;;              pi = im[(fix(x_center) - 4):(fix(x_center+4)), (fix(y_center) - 4):(fix(y_center+4))] ; now a 9x9x64 element array
+ ;;           endif else begin
+               ;;set some nans into pi
+ ;;              pi = im[(fix(128) - 4):(fix(128+4)), (fix(128) - 4):(fix(128+4))]
+ ;;              pi[*] = alog10(-1)
+ ;;           endelse
+            
+ ;;        endif
+         
