@@ -145,7 +145,7 @@ if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pm
 else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
 fits_read,occ_filename, occdata, occheader
 startaor = 0
-stopaor =  0;  n_elements(aorname) - 1
+stopaor =   n_elements(aorname) - 1
 for a =startaor,  stopaor do begin
    print, '----------------------------'
    print, 'working on ',a, ' ', aorname(a)
@@ -173,7 +173,7 @@ for a =startaor,  stopaor do begin
    startfits = 0L
 
 
-   for i =startfits, n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
+   for i =startfits,  n_elements(fitsname) - 1  do begin ;read each cbcd file, find centroid, keep track
 ;       print, 'working on ', fitsname(i)         
       header = headfits(fitsname(i)) ;
       sclk_obs= sxpar(header, 'SCLK_OBS')
@@ -220,7 +220,7 @@ for a =startaor,  stopaor do begin
          xfwhmarr = xarr
          yfwhmarr = xarr
          peakpixDNarr = xarr
-         piarr = findgen(7,7,63L*n_elements(fitsname))
+         piarr = fltarr(7,7,63L*n_elements(fitsname))
       endif
       if i eq startfits and naxis ne 3 then begin
          xarr = fltarr(n_elements(fitsname))
@@ -238,7 +238,7 @@ for a =startaor,  stopaor do begin
          xfwhmarr = xarr
          yfwhmarr = xarr
          peakpixDNarr = xarr
-         piarr =findgen(7,7,n_elements(fitsname))
+         piarr =fltarr(7,7,n_elements(fitsname))
       endif
       fdarr = fltarr(n_elements(fitsname))
       fdarr[i] = framedly
@@ -343,7 +343,7 @@ for a =startaor,  stopaor do begin
 ;        pi = track_box(im, x_center, y_center)   ; tb now a 25 x 64 element array
       if naxis eq 3 then pi = im[12:18, 12:18,*] ; now a 7x7x64 element array
       if naxis eq 2 then pi = im[(fix(x_center) - 3):(fix(x_center+3)), (fix(y_center) - 3):(fix(y_center+3))] ; now a 7x7x64 element array
-      ;;print, 'im[15,15]', im[15,15,*]
+;;      print, 'im[15,15]', im[15,15,*]
 ;track the value of a column
       if keyword_set(columntrack) then begin 
          centerpixval1 = findgen(64)
@@ -437,10 +437,18 @@ for a =startaor,  stopaor do begin
          xfwhmarr[i*63] = xfwhm[1:*]
          yfwhmarr[i*63] = yfwhm[1:*]
          if keyword_set(rawfile) then peakpixDNarr[i*63] = peakpixDN[1:*]
-         piarr[i*63L] = pi[*,*,1L:*]
+         ;;print, 'testing pi', pi
+         ;;need to loop through each image individually
+         for pj = 0, 62 do begin
+            ;;print, 'adding to piarr', pi[*,*,pj]
+            piarr(*,*,i*63 + pj) = pi[*,*,pj]
+         endfor
+         
+         ;;piarr(i*63L) = pi ;;this line is my problem
          ;;pi
-        ;; print, 'adding to piarr', pi[*,*,1:*]
- ;        help, bmjd
+         ;;print, 'piarr', piarr[*,*,i*63L]
+        ;; print, 'setting up max piarr, min piarr', max(piarr), min(piarr)
+
          if keyword_set(columntrack) then begin 
                                 ; I think I deleted more parts of this than I may have intended, so if it is not working, that may be why
             centerpixarr1 = centerpixval1[1:*]
