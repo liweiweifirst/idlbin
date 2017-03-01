@@ -18,7 +18,7 @@ pro track_centroids, pixval=pixval
   ;;find which AORs need to be examined
   ;;need to also return JD and campaign
   zero = read_exoplanet_list(/calculate)
-  print, string(n_elements(aorname)),  ' aors: ',  aorname
+  ;;print, string(n_elements(aorname)),  ' aors: ',  aorname
   ;;will need to figure out which ones are new
   ;;compare JD of new lists
   ;;startnaor = 0 ;;;remove when done testingXXXXXX
@@ -26,10 +26,12 @@ pro track_centroids, pixval=pixval
 
   ;;set up a file to track which AOR has which number
   openw, outlun, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/master_aorlist.txt', /get_lun
-  for na =200, n_elements(aorname) -1 do begin
+  for na =startnaor, n_elements(aorname) -1 do begin
      ;;delete current planethash so I don't have a huge huge
      ;;file going forward.
-     if (na mod 200 eq 0) and (startnaor ne 0) then begin
+     print, 'na', na, (na - 1) mod 200
+     if ((na-1) mod 200 eq 0) and (na ne 0) then begin
+        print, 'deleting planethash'
         help, planethash
         print, planethash.remove(/all)
         help, planethash
@@ -168,7 +170,12 @@ pro track_centroids, pixval=pixval
      endfor                     ; for each channel
 
      ;;periodically save so that we have a copy if this crashes
-     if na mod 20 eq 0 then  save, planethash, filename=savename
+     if na mod 20 eq 0 then begin
+        print, 'saving', na,' ', savename
+        save, planethash, filename=savename
+        help, /structure, file_info(savename)
+     endif
+     
   endfor                        ; for each AOR
 
   ;;use the original list of AORs to set the observation durations
@@ -191,7 +198,8 @@ pro track_centroids, pixval=pixval
 
   
   ;;save
- ;; savename = '/Users/jkrick/track_centroids.sav'
+  ;; savename = '/Users/jkrick/track_centroids.sav'
+  print, 'saving', savename
   save, planethash, filename=savename
   free_lun, outlun
   toc
