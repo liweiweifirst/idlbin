@@ -29,8 +29,8 @@ pro track_centroids, pixval=pixval
   for na =startnaor, n_elements(aorname) -1 do begin
      ;;delete current planethash so I don't have a huge huge
      ;;file going forward.
-     print, 'na', na, (na - 1) mod 200
-     if ((na-1) mod 200 eq 0) and (na ne 0) then begin
+     ;;print, 'na', na, (na - 1) mod 200
+     if ((na-1) mod 200 eq 0) and (na ne 1) then begin
         print, 'deleting planethash'
         help, planethash
         print, planethash.remove(/all)
