@@ -277,7 +277,7 @@ colornames = ['blue', 'red','black','green','grey','purple','deep pink', 'thistl
      
      
   endif
-basedir = '/Volumes/IRAC-1/Calibration/Trending/'
+basedir = '/Volumes/IRAC/Calibration/Trending/'
 plotname = strcompress(basedir + 'ch' + string(ch) + '_track_binned.png',/remove_all)
 if keyword_set(binning) then pb.save, plotname
 plotname = strcompress(basedir + 'ch' + string(ch) + '_track_corrected.png',/remove_all)
