@@ -49,7 +49,7 @@ function read_exoplanet_list, calculate = calculate
   savecheck = file_test(lastsave)
   print, 'savecheck', savecheck
   if savecheck gt 0 then begin
-     print, 'restoring previous save file'
+     print, 'restoring previous save file', lastsave
      restore,lastsave
      aorlist = planethash.keys()
      naor = intarr(n_elements(aorlist))
