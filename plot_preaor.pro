@@ -1,6 +1,6 @@
 pro plot_preaor
 
-  savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_6.sav'
+  savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_07.sav'
   restore, savename
   plotname = '/Users/jkrick/external/irac_warm/trending/centroiding_ycen.pdf'
   
@@ -24,7 +24,7 @@ pro plot_preaor
      print, 'pid', pid, prepid[-1]
      
      if n gt 0 and prepid[-1] eq pid then begin
-        if  planethash[aorlist(n)].min_dur gt 60. then begin
+        if planethash[aorlist(n)].min_dur gt 60. then begin
            
            ;;make sure we are not looking at the pre-aor itself.
            print, 'got a matched pid set', pid, ' ', aorlist(n)
@@ -46,7 +46,8 @@ pro plot_preaor
               CURSOR, X1, Y1, /DOWN,/DATA
               CURSOR, X2, Y2, /DOWN,/DATA
               ;;directions
-              ;;negative X1 = pre-aor, value of short and slope = NAN
+              ;;negative X1 = pre-aor, or can't measure the
+              ;;value due to badish data = value of short and slope = NAN
               ;;negative X2-X1 = no short term drift = 0's
               
               print, 'cursor position pre-aor', X1, Y1, X2, Y2
@@ -98,7 +99,7 @@ pro plot_preaor
   endfor
   ;;p1.Save, plotname, /close
   save, planethash, filename=savename
-  save, short_driftarr, slope_driftarr, filename = '/Users/jkrick/external/irac_warm/trending/short_drift_6.sav'
+  save, short_driftarr, slope_driftarr, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/short_drift_07.sav'
 end
 
 
