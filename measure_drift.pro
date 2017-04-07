@@ -1,7 +1,7 @@
 pro measure_drift
 ;;XXX need to measure duration and slope of the short term drift with
 ;;and without pre_aors
-  savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav'
+  savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval.sav'
   restore, savename
   aorlist = planethash.keys()
   print, 'n_elements aorlist', n_elements(aorlist)
