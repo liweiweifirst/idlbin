@@ -29,6 +29,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
            pktime = sigmax     ; list(length=2)
            npmean = sigmax
            npunc = sigmax
+           aorname = strarr(n_elements(sigmax))
         endif
         
         for n = 0,  n_elements(aorlist) - 1 do begin
@@ -49,6 +50,8 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
            time0 = timearr(0)
            timearr = (timearr - time0)/60./60. ; now in hours instead of sclk
            exptimearr[totalaorcount] = planethash[aorlist(n)].exptime
+
+           aorname[totalaorcount] = aorlist(n)
            
            ;;-------------------------------------
            ;;sigmax & sigmay &sigmaxy vs. time
@@ -195,12 +198,13 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   short_drift = short_drift[0:totalaorcount - 1]
   slope_drift = slope_drift[0:totalaorcount - 1]
   startyear = startyear[0:totalaorcount - 1]
-  ;;nparr = nparr[0:totalaorcount - 1]
+  npmean = npmean[0:totalaorcount - 1]
+  npunc = npunc[0:totalaorcount - 1]
   
   pkperiod = pkperiod[0:totalaorcount - 1]
   pkstrength = pkstrength[0:totalaorcount-1]
   pktime = pktime[0:totalaorcount-1]
-
+  aorname = aorname[0:totalaorcount - 1]
 
   ;;set up color coding by exposure time
   colorarr = intarr(3, n_elements(exptimearr))
@@ -221,9 +225,9 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   for c = 0, n30 - 1 do colorarr[*,thirty(c)] = [0,0,255];'blue'
   for c = 0, n100 - 1 do colorarr[*,hundred(c)] = [155,48,255];'Purple'
 
-  print, 'set up colorarr', n_elements(startyear), totalaorcount
-  print, 'startyear', startyear
-  print, 'pkperiod', pkperiod
+  ;;print, 'set up colorarr', n_elements(startyear), totalaorcount
+  ;;print, 'startyear', startyear
+  ;;print, 'pkperiod', pkperiod
    ;;set up color coding by year of observation
   ;;coloryear = intarr(3, n_elements(exptimearr))
   coloryear = strarr( n_elements(exptimearr))
@@ -245,7 +249,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
 
   psx = plot(xjd(zerop02), sigmax(zerop02),'1s', sym_size = 0.5,   /sym_filled , ytitle = 'X Size of cloud (stddev in position)', $
              XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, yrange = [0, 0.2],$
-             color = 'maroon')
+             color = 'maroon', xtext_orientation =45)
   psx = plot(xjd(zerop1), sigmax(zerop1),'1s', sym_size = 0.5,   /sym_filled , overplot = psx, color = 'red')
   psx = plot(xjd(zerop4), sigmax(zerop4),'1s', sym_size = 0.5,   /sym_filled , overplot = psx, color = 'orange_red')
   psx = plot(xjd(twop0), sigmax(twop0),'1s', sym_size = 0.5,   /sym_filled , overplot = psx, color = 'dark_orange')
@@ -266,7 +270,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   ;----------
   psy = plot(xjd(zerop02), sigmay(zerop02),'1s', sym_size = 0.5,   /sym_filled , ytitle = 'Y Size of cloud (stddev in position)', $
              XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, yrange = [0, 0.2],$
-             color = 'maroon')
+             xtext_orientation = 45, color = 'maroon')
   psy = plot(xjd(zerop1), sigmay(zerop1),'1s', sym_size = 0.5,   /sym_filled , overplot = psy, color = 'red')
   psy = plot(xjd(zerop4), sigmay(zerop4),'1s', sym_size = 0.5,   /sym_filled , overplot = psy, color = 'orange_red')
   psy = plot(xjd(twop0), sigmay(twop0),'1s', sym_size = 0.5,   /sym_filled , overplot = psy, color = 'dark_orange')
@@ -312,21 +316,48 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   ;;noise pixel 
   ;;------------------------------------------------
 ;;;;vs. time
-  ;;pn = plot(xjd(zerop02), nparr(zerop02),'1s', sym_size = 0.5,   /sym_filled , ytitle = 'Mean Noise Pixel', $
-  ;;           XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, yrange = [0, 0.2],$
-  ;;           color = 'maroon')
-  ;;pn = plot(xjd(zerop1), nparr(zerop1),'1s', sym_size = 0.5,   /sym_filled , overplot = pn, color = 'red')
-  ;;pn = plot(xjd(zerop4), nparr(zerop4),'1s', sym_size = 0.5,   /sym_filled , overplot = pn, color = 'orange_red')
-  ;;pn = plot(xjd(twop0), nparr(twop0),'1s', sym_size = 0.5,   /sym_filled , overplot = pn, color = 'dark_orange')
-  ;;pn = plot(xjd(sixp0), nparr(sixp0),'1s', sym_size = 0.5,   /sym_filled , overplot = pn, color = 'lime_green')
-  ;;pn = plot(xjd(twelve), nparr(twelve),'1s', sym_size = 0.5,   /sym_filled , overplot = pn, color = 'aqua')
-  ;;pn = plot(xjd(thirty), nparr(thirty),'1s', sym_size = 0.5,   /sym_filled , overplot = pn, color = 'blue')
-  ;;if n100 gt 0 then pn = plot(xjd(hundred), nparr(hundred),'1s', sym_size = 0.5,   /sym_filled , overplot = pn, color = 'purple')
+  pn = errorplot(xjd(zerop02), npmean(zerop02),npunc(zerop02), '1s', sym_size = 0.5,   /sym_filled , ytitle = 'Mean Noise Pixel', $
+             XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, yrange = [0, 20],$ ; 
+             color = 'maroon', xtext_orientation = 45)
+  pn = errorplot(xjd(zerop1), npmean(zerop1),npunc(zerop1),'1s', sym_size = 0.5,   /sym_filled , overplot = pn, color = 'red')
+  pn = errorplot(xjd(zerop4), npmean(zerop4),npunc(zerop4),'1s', sym_size = 0.5,   /sym_filled , overplot = pn, color = 'orange_red')
+  pn = errorplot(xjd(twop0), npmean(twop0),npunc(twop0),'1s', sym_size = 0.5,   /sym_filled , overplot = pn, color = 'dark_orange')
+  pn = errorplot(xjd(sixp0), npmean(sixp0),npunc(sixp0),'1s', sym_size = 0.5,   /sym_filled , overplot = pn, color = 'lime_green')
+  pn = errorplot(xjd(twelve), npmean(twelve),npunc(twelve),'1s', sym_size = 0.5,   /sym_filled , overplot = pn, color = 'aqua')
+  pn = errorplot(xjd(thirty), npmean(thirty),npunc(thirty),'1s', sym_size = 0.5,   /sym_filled , overplot = pn, color = 'blue')
+  ;;if n100 gt 0 then pn = plot(xjd(hundred), npmean(hundred),npunc(hundred),'1s', sym_size = 0.5,   /sym_filled , overplot = pn, color = 'purple')
 
 
   ;;;;vs exptime
-  ;;pn2 = errorplot(exptimearr, npmean, npunc,'1s', /sym_filled, sym_size = 0.5, xtitle ='exposure time', ytitle = 'Mean Noise Pixel')
+  g = where(npunc lt 1, ng)
+  print, 'n  npunc lt 1', ng
   
+  pn2 = errorplot(exptimearr(g), npmean(g), npunc(g),'1s', /sym_filled, sym_size = 0.5, xtitle ='exposure time', ytitle = 'Mean Noise Pixel', yrange = [2, 13],/xlog, color = 'gray', sym_transparency = 50, errorbar_thick = 0)
+
+  ;;some binning of this to see if we see a trend
+  bins = [0, 0.02, 0.1, 1.0, 3.0, 20, 50, 100]
+  ebins = [0.01, 0.08, 0.38, 2.0, 5.0, 10.5, 27.0, 100.0]
+  meanmeannp = fltarr(n_elements(bins))
+  ebin = meanmeannp
+  binnedexptime = Value_Locate(bins, exptimearr(g))
+  help, binnedexptime
+  for b = 0, n_elements(bins) - 1 do begin
+     thisbin = where(binnedexptime eq b, nthisbin)
+     ;;meanmeannp(b) = mean(npmean(thisbin), /nan)
+     thismean = npmean(thisbin)
+     goodm = where(finite(thismean) gt 0)
+     thismean = thismean(goodm)
+     resistant_mean, thismean, 3.0, me, sig
+     meanmeannp(b) = me
+     print, 'n in this bin', nthisbin, ' ',bins(b), ' ', meanmeannp(b)
+  endfor
+  pn2 = plot(ebins, meanmeannp, '1s', /sym_filled, sym_size = 1.0, color = 'red', overplot = pn2, /xlog, xrange = [0.003, 300])
+  ;;reduce number of sigfigs
+  sigmean = sigfig(meanmeannp, 3)
+  for e = 0, n_elements(ebins) - 1 do begin
+     pn2t1 = text( ebins(e), meanmeannp(e) + 0.5,sigmean(e),/data, overplot = pn2, color = 'red',$
+                   vertical_alignment =1.0 , alignment = 0.5, font_style = 1.0);;strcompress(string(meanmeannp(e)),/remove_all)
+  endfor
   ;;------------------------------------------------
   ;;Long term xdrift vs. ydrift
   ;;------------------------------------------------
@@ -361,7 +392,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   ydpa = dpa(gy)
   print, 'max xjdgx', max(xjdgx)
   pdrift = plot(xjdgx, xdriftgx, '1s', sym_size = 0.7,   sym_filled = 1,  ytitle = 'Long Term Drift (px/hr)', $
-                yrange = [-0.04, 0.04],$;[-1*maxdrift, maxdrift+0.01],$
+                yrange = [-0.04, 0.04], xtext_orientation = 45,$;[-1*maxdrift, maxdrift+0.01],$
                 color = 'blue', XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11, name='xdrift')
   pdrift2 = plot(xjdgy, ydriftgy, '1s', sym_size = 0.7,   sym_filled = 1,  overplot = pdrift, color = 'red', name = 'ydrift')
 
@@ -414,7 +445,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   print, 'pkperiod', n_elements(pkperiod)
   pperiod = plot(pktime, pkperiod, '1s', /sym_filled, sym_size = 0.5, $
                  ytitle = 'Period of the power spectrum peaks (min)',XTICKFORMAT='(C(CMoA,1x,CYI))', $
-                 xtickunits = ['Time'], xminor =11 , yrange = [20,80])
+                 xtickunits = ['Time'], xminor =11 , yrange = [20,80], xtext_orientation = 45)
    
 
   ;;------------------------------------------------
@@ -430,10 +461,11 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   fourtcolor = 'slate blue'
   fiftcolor = 'dark violet'
   sixtcolor = 'medium violet red'
-
+  sevtcolor = 'dark orange'
   timeshortdrift = plot(xjd(twenty10), short_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Duration (hours)', $
                         XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,ytickinterval = 0.4,$
-                        xshowtext =0, position = [0.2,0.65,0.9,0.9], title = 'Ycen Short Term Drift',color = tencolor )
+                        xshowtext =0, position = [0.2,0.65,0.9,0.9], title = 'Ycen Short Term Drift',color = tencolor, $
+                        xtext_orientation = 45)
   timeshortdrift = plot(xjd(twenty11), short_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled , color = elevencolor, $
                         overplot = timeshortdrift )
   timeshortdrift = plot(xjd(twenty12), short_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled , color = twelvecolor, $
@@ -446,10 +478,13 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
                         overplot = timeshortdrift )
   timeshortdrift = plot(xjd(twenty16), short_drift(twenty16), '1D', sym_size = 1.0,   /sym_filled , color = sixtcolor, $
                         overplot = timeshortdrift )
-  
+  timeshortdrift = plot(xjd(twenty17), short_drift(twenty17), '1D', sym_size = 1.0,   /sym_filled , color = sevtcolor, $
+                        overplot = timeshortdrift )
+
   timedriftdist = plot(xjd(twenty10), drift_dist(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
                        XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,$
-                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3,color = tencolor)
+                       xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3,color = tencolor,$
+                      xtext_orientation = 45)
   timedriftdist = plot(xjd(twenty11), drift_dist(twenty11), '1D', sym_size = 1.0,   /sym_filled ,overplot = timedriftdist, $
                        color = elevencolor)
   timedriftdist = plot(xjd(twenty12), drift_dist(twenty12), '1D', sym_size = 1.0,   /sym_filled ,overplot = timedriftdist, $
@@ -462,10 +497,13 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
                        color = fiftcolor)
   timedriftdist = plot(xjd(twenty16), drift_dist(twenty16), '1D', sym_size = 1.0,   /sym_filled ,overplot = timedriftdist, $
                        color = sixtcolor)
-  
+   timedriftdist = plot(xjd(twenty17), drift_dist(twenty17), '1D', sym_size = 1.0,   /sym_filled ,overplot = timedriftdist, $
+                       color = sevtcolor)
+
   timeslopedrift = plot(xjd(twenty10), slope_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
                         XTICKFORMAT='(C(CMoA,1x,CYI))', xtickunits = ['Time'], xminor =11,color = tencolor,$
-                        /current, position = [0.2,0.11, 0.9,0.36])
+                        /current, position = [0.2,0.11, 0.9,0.36], $
+                       xtext_orientation = 45)
   timeslopedrift = plot(xjd(twenty11), slope_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
                         color = elevencolor)
   timeslopedrift = plot(xjd(twenty12), slope_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
@@ -478,7 +516,9 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
                         color = fiftcolor)
   timeslopedrift = plot(xjd(twenty16), slope_drift(twenty16), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
                         color = sixtcolor)
- 
+  timeslopedrift = plot(xjd(twenty17), slope_drift(twenty17), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                        color = sevtcolor)
+
   ;;-------------
   timeshortdrift = plot(pa(twenty10), short_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Duration (hours)', $
                         xshowtext =0, position = [0.2,0.65,0.9,0.9], ytickinterval = 0.4,title = 'Ycen Short Term Drift', $
@@ -495,7 +535,9 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
                         color = fiftcolor )
  timeshortdrift = plot(pa(twenty16), short_drift(twenty16), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
                         color = sixtcolor )
- 
+  timeshortdrift = plot(pa(twenty17), short_drift(twenty17), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
+                        color = sevtcolor )
+
   timedriftdist = plot(pa(twenty10), drift_dist(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
                        xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.4, color = tencolor)
   timedriftdist = plot(pa(twenty11), drift_dist(twenty11), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist, $
@@ -510,7 +552,9 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
                        color = fiftcolor)
  timedriftdist = plot(pa(twenty16), drift_dist(twenty16), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist, $
                        color = sixtcolor)
- 
+ timedriftdist = plot(pa(twenty17), drift_dist(twenty17), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist, $
+                       color = sevtcolor)
+
   timeslopedrift = plot(pa(twenty10), slope_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
                         /current, position = [0.2,0.11, 0.9,0.36], xtitle = 'Pitch Angle', color = tencolor)
   timeslopedrift = plot(pa(twenty11), slope_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
@@ -525,6 +569,8 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
                         color = fiftcolor)
  timeslopedrift = plot(pa(twenty16), slope_drift(twenty16), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
                         color = sixtcolor)
+ timeslopedrift = plot(pa(twenty17), slope_drift(twenty17), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                        color = sevtcolor)
  
   ;;--------------
   
@@ -543,6 +589,8 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
                         color = fiftcolor)
   timeshortdrift = plot(dpa(twenty16), short_drift(twenty16), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
                         color = sixtcolor)
+ timeshortdrift = plot(dpa(twenty17), short_drift(twenty17), '1D', sym_size = 1.0,   /sym_filled, overplot = timeshortdrift, $
+                        color = sevtcolor)
  
   timedriftdist = plot(dpa(twenty10), drift_dist(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Length (pixels)', $
                        xshowtext=0,/current, position = [0.2, 0.38, 0.9, 0.63],ytickinterval = 0.3, color = tencolor)
@@ -558,6 +606,8 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
                        color = fiftcolor)
   timedriftdist = plot(dpa(twenty16), drift_dist(twenty16), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist,$
                        color = sixtcolor)
+  timedriftdist = plot(dpa(twenty17), drift_dist(twenty17), '1D', sym_size = 1.0,   /sym_filled , overplot = timedriftdist,$
+                       color = sevtcolor)
   
   timeslopedrift = plot(dpa(twenty10), slope_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Slope (pix/hr)', $
                         /current, position = [0.2,0.11, 0.9,0.36], xtitle = 'Delta Pitch Angle', color =tencolor)
@@ -573,18 +623,20 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
                        color = fiftcolor)
  timeslopedrift = plot(dpa(twenty16), slope_drift(twenty16), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
                        color = sixtcolor)
+timeslopedrift = plot(dpa(twenty17), slope_drift(twenty17), '1D', sym_size = 1.0,   /sym_filled ,overplot = timeslopedrift, $
+                       color = sevtcolor)
 
 
 
 ;;make this for the SUP presentation
-  supplot = plot(pa(twenty10), slope_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Short Term Drift Slope (pix/hr)', $
-                       xtitle = 'Pitch Angle', color = tencolor)
-  supplot = plot(pa(twenty11), slope_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled ,overplot = supplot, $
-                        color = elevencolor)
-  supplot = plot(pa(twenty12), slope_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled ,overplot = supplot, $
-                        color = twelvecolor)
-  supplot = plot(pa(twenty13), slope_drift(twenty13), '1D', sym_size = 1.0,   /sym_filled ,overplot = supplot, $
-                        color = thirtcolor)
+  ;;supplot = plot(pa(twenty10), slope_drift(twenty10), '1D', sym_size = 1.0,   /sym_filled , ytitle = 'Short Term Drift Slope (pix/hr)', $
+  ;;                     xtitle = 'Pitch Angle', color = tencolor)
+  ;;supplot = plot(pa(twenty11), slope_drift(twenty11), '1D', sym_size = 1.0,   /sym_filled ,overplot = supplot, $
+  ;;                      color = elevencolor)
+  ;;supplot = plot(pa(twenty12), slope_drift(twenty12), '1D', sym_size = 1.0,   /sym_filled ,overplot = supplot, $
+  ;;                      color = twelvecolor)
+  ;;supplot = plot(pa(twenty13), slope_drift(twenty13), '1D', sym_size = 1.0,   /sym_filled ,overplot = supplot, $
+  ;;                      color = thirtcolor)
 
  ;;  
  ;;-------------
@@ -624,8 +676,8 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
 
  ;;;;;;;;;;;;;;;;;;;;;;
  basedir = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/'
- psx.Save,  strcompress(basedir + "stddevx_time.png")
- psy.save, strcompress(basedir + "stddevy_time.png")
+ ;psx.Save,  strcompress(basedir + "stddevx_time.png")
+ ;psy.save, strcompress(basedir + "stddevy_time.png")
 end
 
     ;;plothist, planethash[aorlist(n)].xcen, xhist, yhist, bin = 0.05,/noplot
