@@ -1,7 +1,7 @@
 function find_newest_file
   dirname = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/'
   cd, dirname
-  command  ="find . -name '*.sav' > ../filelist.txt"
+  command  ="find . -name 'track*.sav' > ../filelist.txt"
   spawn, command
   
   readcol, '../filelist.txt',savename, format = 'A', /silent
