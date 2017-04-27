@@ -1,9 +1,39 @@
 pro plot_preaor
 
-  savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_07.sav'
-  restore, savename
-  plotname = '/Users/jkrick/external/irac_warm/trending/centroiding_ycen.pdf'
+  lastsave = find_newest_file()
+  ;;savename = savename + '_pixval.sav'
+  savecheck = file_test(lastsave)
+  print, 'savecheck', savecheck
+  if savecheck gt 0 then begin
+     ;;first pull over the short_drift save file and figure out which
+     ;;AORs need to be updated
+     ;;do some string manipulation to get the correct savename from
+     ;;lastsave
+     shortsave = lastsave.substring(0, -30) + "short_drift_" + lastsave.substring(-6)
+     restore, shortsave
+     ;;aorlist variable has the aors which were already processed
+     done = aorlist
+
+     ;;now pull over the save file
+     print, 'restoring big save file', lastsave
+     restore, lastsave
+     aorlist = planethash.keys()
+
+     ;;find those AORs in aorlist, but not done
+     ;;first make these into strarrays
+     stringaorlist = aorlist.ToArray(Type="STRING") 
+     stringdone = done.ToArray(Type="STRING")
+     todo = cmset_op(stringaorlist, 'AND', /NOT2, stringdone)     
+     ;;now set aorlist to todo so that we use only those left to be
+     ;;done
+     aorlist = todo
+  endif else begin
+     print, 'COULDN"T FIND SAVE FILE'
+  endelse
+
   
+  plotname = '/Users/jkrick/external/irac_warm/trending/centroiding_ycen.pdf'
+
   aorlist = planethash.keys()
   print, 'n_elements aorlist', n_elements(aorlist)
   ;;loadct, 5
@@ -64,7 +94,13 @@ pro plot_preaor
                  short_driftarr(n) = sd
                  slope_driftarr(n) = slope
                  
-              endif
+              endif else begin
+                 
+               planethash[aorlist(n)].short_drift = alog10(-1)
+                 planethash[aorlist(n)].slope_drift = alog10(-1)
+                 short_driftarr(n) = alog10(-1)
+                 slope_driftarr(n) = alog10(-1)
+              endelse
               
            endif
         endif
@@ -99,7 +135,7 @@ pro plot_preaor
   endfor
   ;;p1.Save, plotname, /close
   save, planethash, filename=savename
-  save, short_driftarr, slope_driftarr, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/short_drift_07.sav'
+  save, aorlist, short_driftarr, slope_driftarr, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/short_drift_07.sav'
 end
 
 
