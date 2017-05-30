@@ -34,7 +34,7 @@ pro plot_preaor
   
   plotname = '/Users/jkrick/external/irac_warm/trending/centroiding_ycen.pdf'
 
-  aorlist = planethash.keys()
+  ;;aorlist = planethash.keys()
   print, 'n_elements aorlist', n_elements(aorlist)
   ;;loadct, 5
   short_driftarr = fltarr(n_elements(aorlist))
