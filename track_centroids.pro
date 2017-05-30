@@ -1,4 +1,8 @@
 pro track_centroids, pixval=pixval
+
+;;to pull the file from Elena:
+ ;; /ssc/ost/escire/centroiding/out_centroiding_allWarmMissionToDate.txt
+
   
 ;main code to automatically track centroids as a function of pitch
 ;angle for all warm mission long stares
@@ -9,7 +13,8 @@ pro track_centroids, pixval=pixval
   tic
   journal,  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_out.txt'
   ;;read in the ephemeris file of Spitzer positions only once 
-  readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/spitzer_warm_ephemeris.txt',date, spitzer_jd, blank, blank, ra_string, dec_string, skipline = 74, delimiter = ',', format = '(A, D10, A, A, A, A )'
+  readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/spitzer_warm_ephemeris.txt',date, $
+           spitzer_jd, blank, blank, ra_string, dec_string, skipline = 74, delimiter = ',', format = '(A, D10, A, A, A, A )'
 
   ;;warning: be careful of earth point and s2pcals and other
   ;;non-listed observations which could occur directly before a long stare
