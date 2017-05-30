@@ -41,6 +41,8 @@ Function Query_starid_v2,header, Found = found, ERRMSG = errmsg, $
   ;;how many objects were found?
   cnt = n_elements(strlen(result.text))
 
+  ;;somehow this isn't working, so don't bother with Nexsci for now
+  cnt = 0 
   ;;found at least one object
   if cnt ge 2 then begin
      if cnt gt 2 then print, strcompress('Warning - '+ string(cnt)+ ' matches found for position '  )
