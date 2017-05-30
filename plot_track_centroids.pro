@@ -6,6 +6,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
      starts = 0
      stops =  n_elements(savenames) - 1
      totalaorcount = 0
+     totaldcecount = 0L
      for s = starts, stops do begin
         
         restore, savenames(s)
@@ -24,12 +25,16 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
            short_drift = sigmax
            slope_drift = sigmax
            startyear = sigmax
+           startmonth = sigmax
            pkperiod = sigmax; list(length=2) ;n_elements(aorlist))
            pkstrength =  sigmax; list(length=2) 
            pktime = sigmax     ; list(length=2)
            npmean = sigmax
            npunc = sigmax
-           aorname = strarr(n_elements(sigmax))
+           avgxcen = sigmax
+           avgycen = sigmax
+           obsdur = sigmax
+           aorname = lonarr(n_elements(sigmax));strarr(n_elements(sigmax))
         endif
         
         for n = 0,  n_elements(aorlist) - 1 do begin
@@ -37,46 +42,62 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
            print, 'working on ',n, ' ', totalaorcount, ' ', aorlist(n), n_elements(planethash[aorlist(n)].xcen)
            timearr = planethash[aorlist(n)].timearr
            bmjdarr = planethash[aorlist(n)].bmjdarr
+           obsdur[totalaorcount] = max(bmjdarr) - bmjdarr(0)
            short_drift[totalaorcount] =  planethash[aorlist(n)].short_drift
-           npmean[totalaorcount] = mean(planethash[aorlist(n)].npcentroids,/nan)
-           npunc[totalaorcount] = stddev(planethash[aorlist(n)].npcentroids,/nan)
+           resistant_mean,planethash[aorlist(n)].npcentroids, 3.0, rmean, rsigma 
+           npmean[totalaorcount] = rmean; mean(planethash[aorlist(n)].npcentroids,/nan)
+           npunc[totalaorcount] =  robust_sigma(planethash[aorlist(n)].npcentroids)
+           avgxcen[totalaorcount] = mean(planethash[aorlist(n)].xcen,/nan)
+           avgycen[totalaorcount] = mean(planethash[aorlist(n)].ycen,/nan)
            ;;slope_drift[totalaorcount] =  planethash[aorlist(n)].slope_drift
            if planethash[aorlist(n)].haskey('slope_drift') gt 0 then slope_drift[totalaorcount] =  planethash[aorlist(n)].slope_drift else slope_drift[totalaorcount] = alog10(-1)
            print, 'slope drift', slope_drift[totalaorcount]
            xjd[totalaorcount] = bmjdarr(0) + 2400000.5
            CALDAT, xjd[totalaorcount], Month, Day, year
            startyear[totalaorcount] = year
+           startmonth[totalaorcount] = Month
            
            time0 = timearr(0)
            timearr = (timearr - time0)/60./60. ; now in hours instead of sclk
            exptimearr[totalaorcount] = planethash[aorlist(n)].exptime
 
-           aorname[totalaorcount] = aorlist(n)
+           ;;add to the total number of dces.
+           totaldcecount = totaldcecount + n_elements(bmjdarr)
            
+           aorname[totalaorcount] = aorlist(n)
+           print, 'aorname should be long', aorname[totalaorcount]
            ;;-------------------------------------
            ;;sigmax & sigmay &sigmaxy vs. time
            ;;not sure what sigmaxy is?
            if max(timearr) gt 1.2 then begin
-              sigmax[totalaorcount] = stddev(planethash[aorlist(n)].xcen,/nan)
-              sigmay[totalaorcount] = stddev(planethash[aorlist(n)].ycen,/nan)
+              ;;want to remove the first half hour to remove short
+              ;;term drift from this accounting
+              noshort = where(bmjdarr gt bmjdarr(0) + 0.0208)
+              xcen = planethash[aorlist(n)].xcen
+              ycen = planethash[aorlist(n)].ycen
+              xunc = planethash[aorlist(n)].xunc
+              yunc =  planethash[aorlist(n)].yunc
+              sigmax[totalaorcount] = robust_sigma(xcen(noshort));stddev(xcen(noshort),/nan)
+              sigmay[totalaorcount] = robust_sigma(ycen(noshort));stddev(ycen(noshort),/nan)
+              
               print, 'sigma x, y ', sigmax[totalaorcount], sigmay[totalaorcount]
               
               ;;-------------------------------------
               ;;long term xdrift vs.& y drift
-              start = [.05,15.0]
+              start = [-.05,15.0]
               ;;don't have errors in position, instead, fake it.
               noise = fltarr(n_elements(planethash[aorlist(n)].xcen))
               noise = noise + 1.
-              xcenfit= MPFITFUN('linear',timearr, planethash[aorlist(n)].xcen, noise, start,/Quiet)
+              xcenfit= MPFITFUN('linear',timearr(noshort), xcen(noshort), xunc(noshort), start,/Quiet)
               xdrift[totalaorcount] = xcenfit(0)
-              ycenfit= MPFITFUN('linear',timearr, planethash[aorlist(n)].ycen, noise, start,/Quiet)
+              ycenfit= MPFITFUN('linear',timearr(noshort), ycen(noshort), yunc(noshort), start,/Quiet)
               ydrift[totalaorcount] = ycenfit(0)
               ;;do some quick paring down of the data
-              xnum = findgen(n_elements(timearr))
-              i = where(xnum mod 10 lt 1) ;pick out the odd numbers only
-              tx = timearr(i)
-              ycen = planethash[aorlist(n)].ycen
-              ty = ycen(i)
+              ;;xnum = findgen(n_elements(timearr))
+              ;;i = where(xnum mod 10 lt 1) ;pick out the odd numbers only
+              ;;tx = timearr(i)
+              ;;ycen = planethash[aorlist(n)].ycen
+              ;;ty = ycen(i)
               ;;pl = plot(timearr, ycen, title = aorlist(n), xtitle = 'time(hrs)', yrange = [mean(planethash[aorlist(n)].ycen,/nan) -0.5, mean(planethash[aorlist(n)].ycen,/nan) +0.5])
               ;;pl = plot(timearr, ycenfit(0)*timearr + ycenfit(1), color = 'red', overplot = pl)
               ;;XX don't want to keep this value if dithered.
@@ -185,6 +206,8 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
      restore, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
      
   endelse
+  print, 'total dce count', totaldcecount
+  
   print, 'totalaorcount', totalaorcount
      
   xjd = xjd[0:totalaorcount - 1]
@@ -198,8 +221,12 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   short_drift = short_drift[0:totalaorcount - 1]
   slope_drift = slope_drift[0:totalaorcount - 1]
   startyear = startyear[0:totalaorcount - 1]
+  startmonth = startmonth[0:totalaorcount - 1]
   npmean = npmean[0:totalaorcount - 1]
   npunc = npunc[0:totalaorcount - 1]
+  avgxcen = avgxcen[0:totalaorcount - 1]
+  avgycen = avgycen[0:totalaorcount - 1]
+  obsdur = obsdur[0:totalaorcount - 1]
   
   pkperiod = pkperiod[0:totalaorcount - 1]
   pkstrength = pkstrength[0:totalaorcount-1]
