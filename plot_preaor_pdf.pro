@@ -1,16 +1,16 @@
 pro plot_preaor_pdf
 
-  savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_07.sav'
+  savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_05.sav'
   restore, savename
-  plotnamey = '/Users/jkrick/external/irac_warm/trending/centroiding_ycen_07.pdf'
-  plotnamex = '/Users/jkrick/external/irac_warm/trending/centroiding_xcen_07.pdf'
-  plotnameflux = '/Users/jkrick/external/irac_warm/trending/centroiding_flux_07.pdf'
+  plotnamey = '/Users/jkrick/external/irac_warm/trending/centroiding_ycen_05.pdf'
+  plotnamex = '/Users/jkrick/external/irac_warm/trending/centroiding_xcen_05.pdf'
+  plotnamef = '/Users/jkrick/external/irac_warm/trending/centroiding_flux_05.pdf'
 
   aorlist = planethash.keys()
   print, 'n_elements aorlist', n_elements(aorlist)
   ;;loadct, 5
   
-  for n =0,n_elements(aorlist) - 1 do begin
+  for n =0,30 - 1 do begin
      print, '--------------------------'
      timearr = planethash[aorlist(n)].timearr
      bmjdarr = planethash[aorlist(n)].bmjdarr
@@ -56,23 +56,23 @@ pro plot_preaor_pdf
                          yrange = [mean(ycen,/nan) -1.1, mean(ycen,/nan) +1.1], buffer = 1)
               p2y = plot((planethash[preaor].timearr - time0)/60./60.,planethash[preaor].ycen,'1s',sym_size = 0.3, $
                         /sym_filled,color = 'red', overplot = p1y)
-              p1y.Save, plotnamey,/append;,bitmap = 1
+              p1y.Save, plotnamey,/append,/bitmap 
 
 
-              p1x = plot((alltime - time0)/60./60., allxcen,'1s', sym_size = 0.3, /sym_filled,color = 'black',$
-                         xtitle = 'time(hr)', ytitle = 'xcen', title = aorlist(n), $
-                         yrange = [mean(xcen,/nan) -1.1, mean(xcen,/nan) +1.1], buffer = 1)
-              p2x = plot((planethash[preaor].timearr - time0)/60./60.,planethash[preaor].xcen,'1s',sym_size = 0.3, $
-                        /sym_filled,color = 'red', overplot = p1x)
-              p1x.Save, plotnamex,/append;,bitmap = 1
+ ;             p1x = plot((alltime - time0)/60./60., allxcen,'1s', sym_size = 0.3, /sym_filled,color = 'black',$
+ ;                        xtitle = 'time(hr)', ytitle = 'xcen', title = aorlist(n), $
+ ;                        yrange = [mean(xcen,/nan) -1.1, mean(xcen,/nan) +1.1], buffer = 1)
+ ;             p2x = plot((planethash[preaor].timearr - time0)/60./60.,planethash[preaor].xcen,'1s',sym_size = 0.3, $
+ ;                       /sym_filled,color = 'red', overplot = p1x)
+ ;             p1x.Save, plotnamex,/append;,bitmap = 1
               
               
-              p1f = plot((alltime - time0)/60./60., allflux,'1s', sym_size = 0.3, /sym_filled,color = 'black',$
-                         xtitle = 'time(hr)', ytitle = 'flux', title = aorlist(n), $
-                         yrange = [mean(flux,/nan) -0.02, mean(flux,/nan) +0.02], buffer = 1)
-              p2f = plot((planethash[preaor].timearr - time0)/60./60.,planethash[preaor].flux,'1s',sym_size = 0.3, $
-                        /sym_filled,color = 'red', overplot = p1f)
-              p1f.Save, plotnameflux,/append;,bitmap = 1
+ ;             p1f = plot((alltime - time0)/60./60., allflux,'1s', sym_size = 0.3, /sym_filled,color = 'black',$
+ ;                        xtitle = 'time(hr)', ytitle = 'flux', title = aorlist(n), $
+ ;                        yrange = [mean(flux,/nan) -0.02, mean(flux,/nan) +0.02], buffer = 1)
+ ;             p2f = plot((planethash[preaor].timearr - time0)/60./60.,planethash[preaor].flux,'1s',sym_size = 0.3, $
+ ;                       /sym_filled,color = 'red', overplot = p1f)
+ ;             p1f.Save, plotnamef,/append;,bitmap = 1
 
            endif
         endif
@@ -90,24 +90,24 @@ pro plot_preaor_pdf
         p1y = plot((timearr - timearr(0))/60./60., ycen,'1s', sym_size = 0.3, /sym_filled,color = 'black',$
                    xtitle = 'time(hr)', ytitle = 'ycen', title = aorlist(n), $
                    yrange = [mean(ycen,/nan) -1.1, mean(ycen,/nan) +1.1], buffer = 1)
-        p1y.Save, plotnamey,/append;,bitmap = 1
+        p1y.Save, plotnamey,/append,/bitmap 
 
-        p1x = plot((timearr - timearr(0))/60./60., xcen,'1s', sym_size = 0.3, /sym_filled,color = 'black',$
-                   xtitle = 'time(hr)', ytitle = 'xcen', title = aorlist(n), $
-                   yrange = [mean(ycen,/nan) -1.1, mean(ycen,/nan) +1.1], buffer = 1)
-        p1x.Save, plotnamex,/append;,bitmap = 1
+;        p1x = plot((timearr - timearr(0))/60./60., xcen,'1s', sym_size = 0.3, /sym_filled,color = 'black',$
+;                   xtitle = 'time(hr)', ytitle = 'xcen', title = aorlist(n), $
+;                   yrange = [mean(ycen,/nan) -1.1, mean(ycen,/nan) +1.1], buffer = 1)
+;        p1x.Save, plotnamex,/append;,bitmap = 1
         
-        p1f = plot((timearr - timearr(0))/60./60., flux,'1s', sym_size = 0.3, /sym_filled,color = 'black',$
-                   xtitle = 'time(hr)', ytitle = 'flux', title = aorlist(n), $
-                  yrange = [mean(flux,/nan) -0.02, mean(flux,/nan) +0.02], buffer = 1)
-        p1f.Save, plotnameflux,/append;,bitmap = 1
+;        p1f = plot((timearr - timearr(0))/60./60., flux,'1s', sym_size = 0.3, /sym_filled,color = 'black',$
+;                   xtitle = 'time(hr)', ytitle = 'flux', title = aorlist(n), $
+;                  yrange = [mean(flux,/nan) -0.02, mean(flux,/nan) +0.02], buffer = 1)
+;        p1f.Save, plotnamef,/append;,bitmap = 1
 
      endelse
     
   endfor
-  p1x.Save, plotname, /close
-  p1y.Save, plotname, /close
-  p1f.Save, plotname, /close
+;;  p1x.Save, plotnamex, /close
+  p1y.Save, plotnamey, /close
+;;  p1f.Save, plotnamef, /close
 
 
   
