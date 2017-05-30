@@ -12,8 +12,9 @@ pro save_track_centroids
 
   ;;this code writes out a csv file to use in python to attempt pretty plots
    restore,  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
-   laorname = long(aorname)
-
+   laorname =  long(aorname)
+   xjd = double(xjd)
+   print, 'laorname', laorname[0:10]
    ;;get rid of nans, these are likely the short AORs
    good = where(finite(npmean) gt 0) ;bunch of nans in this array
    npmean = npmean(good)
@@ -21,6 +22,7 @@ pro save_track_centroids
    exptimearr=exptimearr(good)
    xjd=xjd(good)
    startyear=startyear(good)
+   startmonth = startmonth(good)
    pa=pa(good)
    dpa=dpa(good)
    sigmax=sigmax(good)
@@ -32,6 +34,9 @@ pro save_track_centroids
    pkperiod=pkperiod(good)
    pkstrength=pkstrength(good)
    npunc=npunc(good)   
+   avgxcen = avgxcen(good)
+   avgycen = avgycen(good)
+   obsdur = obsdur(good)
    
    ;;remove some outliers
    b = where(xdrift gt 0.3)  ;;can't figure out otherwise how to narrow the range, there are only a few out there
@@ -77,13 +82,24 @@ pro save_track_centroids
    exptimearr(a) = 26.8
    a = where(exptimearr eq 93.6)
    exptimearr(a) = 96.8
+
+   print, 'laorname before array concatenation', [laorname[0:10]]
+   help, laorname
+
+   ;;look for certain aors
+   g = where(xjd gt  2457828.5, ng)
+   print, 'ng', ng
+   print, xjd(g)
    
    ;;array concatenation fun
-   data =[[laorname],[exptimearr],[xjd], [startyear], [pa],[dpa], [sigmax], [sigmay], [xdrift], [ydrift],[short_drift], [slope_drift], [pkperiod], [pkstrength], [npmean], [npunc] ]
+   data =[[laorname],[exptimearr],[xjd], [startyear],[startmonth], [pa],[dpa], [sigmax], [sigmay], [xdrift], [ydrift],[short_drift], [slope_drift], [pkperiod], [pkstrength], [npmean], [npunc] , [avgxcen], [avgycen],[obsdur*24.]]
+
+   print, 'testong', data[0]
+   help, data, exptimearr, xdrift, pkstrength, laorname
    datac = transpose(data)
 
    ;;write out the csv file for python plotting
-   h = ['AORNAME','EXPTIME','JD', 'STARTYEAR','PITCH_ANGLE', 'DELTA_PA', 'SIGMAX', 'SIGMAY', 'XDRIFT', 'YDRIFT', 'SHORT_DRIFT', 'SLOPE_DRIFT', 'PKPERIOD', 'PKSTRENGTH', 'NPMEAN', 'NPUNC']
+   h = ['AORNAME','EXPTIME','JD', 'STARTYEAR','STARTMONTH','PITCH_ANGLE', 'DELTA_PA', 'SIGMAX', 'SIGMAY', 'XDRIFT', 'YDRIFT', 'SHORT_DRIFT', 'SLOPE_DRIFT', 'PKPERIOD', 'PKSTRENGTH', 'NPMEAN', 'NPUNC','AVGXCEN','AVGYCEN','OBSDUR']
    write_csv, '~/pybin/track_centroids.csv', datac, $
               header = h
 end
