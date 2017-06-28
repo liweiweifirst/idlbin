@@ -688,7 +688,7 @@ timeslopedrift = plot(dpa(twenty17), slope_drift(twenty17), '1D', sym_size = 1.0
     
     xnoise = fltarr(n_elements(dpa(year)))
     xnoise = xnoise + 1.
-    lfitresult= MPFITFUN('linear',dpa(year), slope_drift(year), xnoise, start, bestnorm = bestnorm, perror = perror, dof = dof,/nan) ;,/Quiet)    
+    lfitresult= MPFITFUN('linear',dpa(year), slope_drift(year), xnoise, start, bestnorm = bestnorm , perror = perror, dof = dof,/nan) ;,/Quiet)  
     reduced_chi2 = SQRT(BESTNORM/DOF)
     param_err = perror*reduced_chi2
     slope(s) = lfitresult(0)

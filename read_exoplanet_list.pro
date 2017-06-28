@@ -3,11 +3,11 @@ function read_exoplanet_list, calculate = calculate
   ;;figure out where the exoplanet stares are.
 
  
-;;  readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/weeks456_553_666_749_768.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, I10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline = 1
+  ;;readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/weeks456_553_666_749_768.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, I10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline = 1
 
   
-  readcol, '/ssc/ost/escire/centroiding/out_centroiding_allWarmMissionToDate.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, L10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline =7520
-  ;;readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/out_centroiding_allWarmMissionToDate.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, L10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline =7520
+  ;;readcol, '/ssc/ost/escire/centroiding/out_centroiding_allWarmMissionToDate.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, L10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline =7520
+  readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/out_centroiding_allWarmMissionToDate.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, L10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline =7520
   ;;start by removing fantom AORs
   fa = where(aorname eq '49697024')
   remove, fa, aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45
