@@ -12,17 +12,20 @@ pro plot_preaor
      shortsave = lastsave.substring(0, -30) + "short_drift_" + lastsave.substring(-6)
      restore, shortsave
      ;;aorlist variable has the aors which were already processed
-     done = aorlist
-
+     doneaorlist = doneaorlist;list(aorlist,/EXTRACT)
+     doneshortdrift = totalshortdrift;short_driftarr
+     doneslopedrift = totalslopedrift;slope_driftarr
+     
      ;;now pull over the save file
      print, 'restoring big save file', lastsave
      restore, lastsave
      aorlist = planethash.keys()
-
+     allaor = aorlist
+     help, doneaorlist, aorlist
      ;;find those AORs in aorlist, but not done
      ;;first make these into strarrays
      stringaorlist = aorlist.ToArray(Type="STRING") 
-     stringdone = done.ToArray(Type="STRING")
+     stringdone = doneaorlist.ToArray(Type="STRING")
      todo = cmset_op(stringaorlist, 'AND', /NOT2, stringdone)     
      ;;now set aorlist to todo so that we use only those left to be
      ;;done
@@ -135,7 +138,15 @@ pro plot_preaor
   endfor
   ;;p1.Save, plotname, /close
   save, planethash, filename=savename
-  save, aorlist, short_driftarr, slope_driftarr, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/short_drift_07.sav'
+  ;;oops but this only saves the new ones, not the whole thing.
+  ;;concatenate those already done with the new ones
+  test = list(aorlist, /extract)
+  doneaorlist.add, test, /extract
+  
+  totalshortdrift = [doneshortdrift, short_driftarr]
+  totalslopedrift = [doneslopedrift, slope_driftarr]
+  
+  save, doneaorlist, totalshortdrift, totalslopedrift, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/short_drift_07.sav'
 end
 
 
