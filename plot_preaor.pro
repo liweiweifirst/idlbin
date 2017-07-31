@@ -1,6 +1,7 @@
 pro plot_preaor
 
   lastsave = find_newest_file()
+ ;; lastsave = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_07.sav'
   ;;savename = savename + '_pixval.sav'
   savecheck = file_test(lastsave)
   print, 'savecheck', savecheck
@@ -34,6 +35,12 @@ pro plot_preaor
      print, 'COULDN"T FIND SAVE FILE'
   endelse
 
+  ;;; starting a new save file
+  ;;  print, 'restoring big save file', lastsave
+  ;;   restore, lastsave
+  ;;   aorlist = planethash.keys()
+  ;;   allaor = aorlist
+ ;;;;
   
   plotname = '/Users/jkrick/external/irac_warm/trending/centroiding_ycen.pdf'
 
@@ -52,12 +59,13 @@ pro plot_preaor
      prepid=planethash[aorlist(n)].prepid
      preaor = planethash[aorlist(n)].preaor
      np = n_elements(preaor) - 1
-     print, 'n, aors ', n, ' ', aorlist(n), ' ',preaor
+     print, 'n, aors ', n, ', ', aorlist(n), ', ',preaor
      print, 'aor min_dur',  planethash[aorlist(n)].min_dur
      print, 'pid', pid, prepid[-1]
-     
+     help, planethash[aorlist(n)].min_dur
      if n gt 0 and prepid[-1] eq pid then begin
-        if planethash[aorlist(n)].min_dur gt 60. then begin
+        mindur = planethash[aorlist(n)].min_dur
+        if mindur(0) gt 60. then begin
            
            ;;make sure we are not looking at the pre-aor itself.
            print, 'got a matched pid set', pid, ' ', aorlist(n)
@@ -142,11 +150,18 @@ pro plot_preaor
   ;;concatenate those already done with the new ones
   test = list(aorlist, /extract)
   doneaorlist.add, test, /extract
-  
   totalshortdrift = [doneshortdrift, short_driftarr]
   totalslopedrift = [doneslopedrift, slope_driftarr]
+
+  ;;  starting a new save file
+  ;;doneaorlist = list(aorlist, /extract)
+  ;;totalshortdrift = short_driftarr
+  ;;totalslopedrift =  slope_driftarr
+
+  ;;
+
   
-  save, doneaorlist, totalshortdrift, totalslopedrift, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/short_drift_07.sav'
+  save, doneaorlist, totalshortdrift, totalslopedrift, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/short_drift_08.sav'
 end
 
 
