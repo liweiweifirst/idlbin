@@ -20,13 +20,12 @@ pro track_centroids, pixval=pixval
   ;;non-listed observations which could occur directly before a long stare
 
   startnaor = 0  ;; start at the beginning unless this gets changed in read_exoplanet_list
+  
   ;;find which AORs need to be examined
   ;;need to also return JD and campaign
   zero = read_exoplanet_list(/calculate)
   ;;print, string(n_elements(aorname)),  ' aors: ',  aorname
-  ;;will need to figure out which ones are new
-  ;;compare JD of new lists
-  ;;startnaor = 0 ;;;remove when done testingXXXXXX
+
   chname = ['ch1','ch2']
 
   ;;set up a file to track which AOR has which number
