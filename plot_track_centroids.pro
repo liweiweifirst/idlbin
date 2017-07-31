@@ -1,6 +1,6 @@
 pro plot_track_centroids, run_data = run_data, periodogram = periodogram
 
-  savenames = [ '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_01.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_02.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_03.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_04.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_05.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_06.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_07.sav'] ;'/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav',
+  savenames = [ '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_01.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_02.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_03.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_04.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_05.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_06.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_07.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_08.sav'] ;'/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav',
   
   if keyword_set(run_data) then begin
      starts = 0
@@ -8,7 +8,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
      totalaorcount = 0
      totaldcecount = 0L
      for s = starts, stops do begin
-        
+        print, 'restoring ', savenames(s)
         restore, savenames(s)
         aorlist = planethash.keys()
         
@@ -34,7 +34,8 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
            avgxcen = sigmax
            avgycen = sigmax
            obsdur = sigmax
-           aorname = lonarr(n_elements(sigmax));strarr(n_elements(sigmax))
+           aorname = lonarr(n_elements(sigmax)) ;strarr(n_elements(sigmax))
+           starname = strarr(n_elements(sigmax))
         endif
         
         for n = 0,  n_elements(aorlist) - 1 do begin
@@ -42,6 +43,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
            print, 'working on ',n, ' ', totalaorcount, ' ', aorlist(n), n_elements(planethash[aorlist(n)].xcen)
            timearr = planethash[aorlist(n)].timearr
            bmjdarr = planethash[aorlist(n)].bmjdarr
+           starnamestr = planethash[aorlist(n)].starname
            obsdur[totalaorcount] = max(bmjdarr) - bmjdarr(0)
            short_drift[totalaorcount] =  planethash[aorlist(n)].short_drift
            resistant_mean,planethash[aorlist(n)].npcentroids, 3.0, rmean, rsigma 
@@ -66,6 +68,9 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
            
            aorname[totalaorcount] = aorlist(n)
            print, 'aorname should be long', aorname[totalaorcount]
+
+
+           starname[totalaorcount] = starnamestr(0)
            ;;-------------------------------------
            ;;sigmax & sigmay &sigmaxy vs. time
            ;;not sure what sigmaxy is?
@@ -232,7 +237,8 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   pkstrength = pkstrength[0:totalaorcount-1]
   pktime = pktime[0:totalaorcount-1]
   aorname = aorname[0:totalaorcount - 1]
-
+  starname = starname[0:totalaorcount - 1]
+  
   ;;set up color coding by exposure time
   colorarr = intarr(3, n_elements(exptimearr))
   zerop02 = where(exptimearr lt 0.05 and exptimearr gt 0., n0p02)
