@@ -797,6 +797,49 @@ chname = 0
   planetinfo[planetname] = HASH(keys, values)
 
 ;---
+  planetname = 'EPIC204897050'
+  ra_ref = 240.42087
+  dec_ref = -20.368781
+  ;;aorname_ch2= ['r63203584', 'r63204096','r63204608']
+  aorname_ch2= [ 'r63204096']
+
+  basedir = '~/external/irac_warm/stauffer/' 
+  utmjd_center = double(57912.39952464)
+  transit_duration = 2.54 * 60. ;minutes
+  period = 10.05403
+  intended_phase = 0.0
+  exptime = 2.0
+  stareaor = 0
+  plot_norm = 1.
+  Plot = 1.
+
+  values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+  
+  
+  ;;---
+  planetname = 'EPIC204117263'
+  ra_ref = 242.75894
+  dec_ref = -23.597297
+  ;;aorname_ch2= ['r63203584', 'r63204096','r63204608']
+  aorname_ch2= [ 'r63203840']
+  
+  basedir = '~/external/irac_warm/stauffer/' 
+  utmjd_center = double(57915.3073228)
+  transit_duration = 2.54 * 60. ;minutes
+  period = 10.05403
+  intended_phase = 0.0
+  exptime = 2.0
+  stareaor = 0
+  plot_norm = 1.
+  Plot = 1.
+
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+   planetinfo[planetname] = HASH(keys, values)
+
+
+   
+;---
   planetname = 'epic201912552'
   ra_ref = 172.560133
   dec_ref = 7.587843
@@ -941,13 +984,30 @@ chname = 0
    values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
   planetinfo[planetname] = HASH(keys, values)
 
-
+;---
+  planetname = 'WASP-76b'
+  ra_ref = 26.63274583
+  dec_ref = 2.70057361
+  aorname_ch2 = [ 'r62823168','r62824448','r62824704','r62824960','r62823424']
+  aorname_ch1 = [ 'r62822656','r62823680','r62823936','r62824192','r62822912']  ; ch1
+  basedir = '/Users/jkrick/external/irac_warm/' 
+  utmjd_center = 56107.250
+  transit_duration=226.5
+  period = 1.809886
+  intended_phase = 0.5
+  exptime = 2
+  stareaor =0;4
+  plot_norm = 1
+  plot_corrnorm = 1
+  
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
 ;---
   planetname = 'wasp7'
   ra_ref = 311.04294
   dec_ref = -39.225186
-  aorname_ch2 = [ 'r31765248']
-  aorname_ch1 = [ 'r31770880']  ; ch1
+  aorname_ch2 = [ 'r62823168','r62824448','r62824704','r62824960','r62823424']
+  aorname_ch1 = [ 'r62822656', 'r62823680','r62823936','r62824192','r62822912'] 
   basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
   utmjd_center = 55374.29647
   transit_duration=226.5
