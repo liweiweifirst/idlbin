@@ -340,7 +340,6 @@ function binning_function, a,bin_level, pmapcorr, ch,  set_nbins = set_nbins, n_
 ;  bin_bkgderrp = bin_bkgderrp[0:cp-1]
   
   
-  
   return, 0
   
 end
