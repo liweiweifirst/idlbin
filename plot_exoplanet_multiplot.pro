@@ -69,7 +69,7 @@ pro plot_exoplanet_multiplot, planetname, bin_level, apradius, chname,  timeplot
 
 ; bin within each AOR only, don't want to bin across boundaries.
      junkpar = binning_function(a, bin_level, pmapcorr)
-     print, 'testing phase', (planethash[aorname(a),'phase'] )[0:10], (planethash[aorname(a),'phase'] )[100:110], bin_phase[0:10]
+   ;;  print, 'testing phase', (planethash[aorname(a),'phase'] )[0:10], (planethash[aorname(a),'phase'] )[100:110], bin_phase[0:10]
 ;     print, 'testing x', bin_xcen[0:10]
 ;     print, 'testing y', bin_ycen[0:10]
 ;     print, 'testing npcent', bin_npcent[0:10]
