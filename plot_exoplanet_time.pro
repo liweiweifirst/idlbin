@@ -10,7 +10,7 @@ pro plot_exoplanet_time, planetname, bin_level, apradius, chname, line_fit = lin
 ;
   endelse
 
-
+ra = 500
 ;run code to read in all the input planet parameters
   planetinfo = create_planetinfo()
   if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
@@ -28,6 +28,7 @@ pro plot_exoplanet_time, planetname, bin_level, apradius, chname, line_fit = lin
   stareaor = planetinfo[planetname, 'stareaor']
   exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
   exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
+  ;;ra = planetinfo[planetname, 'ra']
 ;exosystem = planetname
   if planetname eq 'WASP-13b' then exosystem = 'WASP-13 b'
   if planetname eq 'WASP-14b' then exosystem = 'WASP-14 b'
@@ -60,8 +61,8 @@ pro plot_exoplanet_time, planetname, bin_level, apradius, chname, line_fit = lin
      period = p_orbit
   endif else begin
                                 ;warning these could be junk as well
-;   ra_ref = planetinfo[planetname, 'ra']
-;   dec_ref = planetinfo[planetname, 'dec']
+   ra_ref = planetinfo[planetname, 'ra']
+   dec_ref = planetinfo[planetname, 'dec']
      utmjd_center = planetinfo[planetname, 'utmjd_center']
      period = planetinfo[planetname, 'period']
   endelse
