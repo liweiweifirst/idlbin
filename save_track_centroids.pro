@@ -37,6 +37,7 @@ pro save_track_centroids
    avgxcen = avgxcen(good)
    avgycen = avgycen(good)
    obsdur = obsdur(good)
+   pitch_earth = pitch_earth(good)
    
    ;;remove some outliers
    b = where(xdrift gt 0.3)  ;;can't figure out otherwise how to narrow the range, there are only a few out there
@@ -90,18 +91,28 @@ pro save_track_centroids
    g = where(xjd gt  2457828.5, ng)
    print, 'ng', ng
    print, xjd(g)
+
+   ;;want to remove either x or ydrift = -0.05
+   baddrift = where(xdrift lt-0.049995 and xdrift gt -0.050001, nbaddrift)
+   xdrift(baddrift) = alog10(-1)
+   baddrift = where(ydrift lt-0.049995 and ydrift gt -0.050001, nbaddrift)
+   ydrift(baddrift) = alog10(-1)
+   
+
    
    ;;array concatenation fun
-   data =[[laorname],[exptimearr],[xjd], [startyear],[startmonth], [pa],[dpa], [sigmax], [sigmay], [xdrift], [ydrift],[short_drift], [slope_drift], [pkperiod], [pkstrength], [npmean], [npunc] , [avgxcen], [avgycen],[obsdur*24.]]
+   data =[[laorname],[exptimearr],[xjd], [startyear],[startmonth], [pa],[dpa], [sigmax], [sigmay], [xdrift], [ydrift],[short_drift], [slope_drift], [pkperiod], [pkstrength], [npmean], [npunc] , [avgxcen], [avgycen],[obsdur*24.],[pitch_earth]]
 
    print, 'testong', data[0]
    help, data, exptimearr, xdrift, pkstrength, laorname
    datac = transpose(data)
 
    ;;write out the csv file for python plotting
-   h = ['AORNAME','EXPTIME','JD', 'STARTYEAR','STARTMONTH','PITCH_ANGLE', 'DELTA_PA', 'SIGMAX', 'SIGMAY', 'XDRIFT', 'YDRIFT', 'SHORT_DRIFT', 'SLOPE_DRIFT', 'PKPERIOD', 'PKSTRENGTH', 'NPMEAN', 'NPUNC','AVGXCEN','AVGYCEN','OBSDUR']
+   h = ['AORNAME','EXPTIME','JD', 'STARTYEAR','STARTMONTH','PITCH_ANGLE', 'DELTA_PA', 'SIGMAX', 'SIGMAY', 'XDRIFT', 'YDRIFT', 'SHORT_DRIFT', 'SLOPE_DRIFT', 'PKPERIOD', 'PKSTRENGTH', 'NPMEAN', 'NPUNC','AVGXCEN','AVGYCEN','OBSDUR','PITCH_EARTH']
    write_csv, '~/pybin/track_centroids.csv', datac, $
               header = h
+
+
 end
 
 

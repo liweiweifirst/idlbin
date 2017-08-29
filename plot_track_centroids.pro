@@ -1,6 +1,9 @@
 pro plot_track_centroids, run_data = run_data, periodogram = periodogram
 
-  savenames = [ '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_01.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_02.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_03.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_04.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_05.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_06.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_07.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_08.sav'] ;'/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav',
+  ;;savenames = [ '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_01.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_02.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_03.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_04.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_05.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_06.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_07.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_08.sav'] ;'/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval.sav',
+
+savenames = [ '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_01.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_02.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_03.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_04.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_05.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_06.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_07.sav','/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_08.sav']
+  
   
   if keyword_set(run_data) then begin
      starts = 0
@@ -34,6 +37,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
            avgxcen = sigmax
            avgycen = sigmax
            obsdur = sigmax
+           pitch_earth = sigmax
            aorname = lonarr(n_elements(sigmax)) ;strarr(n_elements(sigmax))
            starname = strarr(n_elements(sigmax))
         endif
@@ -71,6 +75,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
 
 
            starname[totalaorcount] = starnamestr(0)
+           pitch_earth[totalaorcount] = planethash[aorlist(n)].pitch_earth
            ;;-------------------------------------
            ;;sigmax & sigmay &sigmaxy vs. time
            ;;not sure what sigmaxy is?
@@ -95,8 +100,11 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
               noise = noise + 1.
               xcenfit= MPFITFUN('linear',timearr(noshort), xcen(noshort), xunc(noshort), start,/Quiet)
               xdrift[totalaorcount] = xcenfit(0)
+              if xcenfit(0) lt -0.05005 and xcenfit(0) gt -0.04995 then xdrift[totalaorcount] = alog10(-1)
               ycenfit= MPFITFUN('linear',timearr(noshort), ycen(noshort), yunc(noshort), start,/Quiet)
               ydrift[totalaorcount] = ycenfit(0)
+              if ycenfit(0) lt -0.05005 and ycenfit(0) gt -0.04995 then ydrift[totalaorcount] = alog10(-1)
+
               ;;do some quick paring down of the data
               ;;xnum = findgen(n_elements(timearr))
               ;;i = where(xnum mod 10 lt 1) ;pick out the odd numbers only
@@ -238,6 +246,7 @@ pro plot_track_centroids, run_data = run_data, periodogram = periodogram
   pktime = pktime[0:totalaorcount-1]
   aorname = aorname[0:totalaorcount - 1]
   starname = starname[0:totalaorcount - 1]
+  pitch_earth = pitch_earth[0:totalaorcount -1]
   
   ;;set up color coding by exposure time
   colorarr = intarr(3, n_elements(exptimearr))
