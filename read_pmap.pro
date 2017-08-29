@@ -10,7 +10,7 @@ pro read_pmap
   meanclip, ch2dat.ypos, meanypos, sigmaypos
   print,'meany, sigmay',  meanypos - 3*sigmaypos, meanypos + 3*sigmaypos
   meanclip, ch2dat.flux, meanflux, sigmaflux
-  print,'meanflux, sigma',  meanflux - 3*sigmaflux, meanflux + 3*sigmaflux
+  print,'meanflux, sigma',  meanflux - 1*sigmaflux, meanflux + 1*sigmaflux
   
   meanclip, ch2dat.dn_peak, meandn_peak, sigmadn_peak
   print,'meandn_peak, sigma',  meandn_peak - 3*sigmadn_peak, meandn_peak + 3*sigmadn_peak
@@ -36,10 +36,10 @@ pro read_pmap
  ;;            and ch2dat.sigma_bg_flux le 0.0004)
   ss = where(ch2dat.xpos gt 14.5 and ch2dat.xpos lt 15.5 and $
              ch2dat.ypos gt 14.5 and ch2dat.ypos lt 15.5 and $
-             ch2dat.flux[*,5] ge (meanflux - 3*sigmaflux) and ch2dat.flux[*,5] le (meanflux + 3*sigmaflux) $
+             ch2dat.flux[*,5] ge (meanflux - 1*sigmaflux) and ch2dat.flux[*,5] le 0.41 $
              and ch2dat.dn_peak lt 3500 $
              and ch2dat.sigma_flux gt (meansigma_flux - 3*sigmasigma_flux) and ch2dat.sigma_flux lt (meansigma_flux + 3*sigmasigma_flux)$
-             and ch2dat.bg_flux gt (meanbg_flux - 3*sigmabg_flux) and ch2dat.bg_flux lt (meanbg_flux + 3*sigmabg_flux) $
+            ;; and ch2dat.bg_flux gt (meanbg_flux - 3*sigmabg_flux) and ch2dat.bg_flux lt (meanbg_flux + 3*sigmabg_flux) $
              and ch2dat.sigma_bg_flux gt (meansigma_bg_flux - 3*sigmasigma_bg_flux) and ch2dat.sigma_bg_flux lt (meansigma_bg_flux + 3*sigmasigma_bg_flux))
   
   xpos = ch2dat.xpos(ss)
@@ -105,5 +105,6 @@ pro read_pmap
   
   write_csv, '//Users/jkrick/irac_warm/pmap/pmap_ch2_0p1s_x4_rmulti_s3_7.csv', trans_arr, header = header
   
-  print, n_elements(xpos)
+  print, n_elements(xpos), max(flux)
 end
+; [pix2_2] , [pix2_3], [pix2_4], [pix3_2] , [pix3_3], [pix3_4], [pix4_2] , [pix4_3], [pix4_4]
