@@ -2,14 +2,15 @@ FUNCTION pld_fit,pixgrid,flux,sigma_flux,fpredict=fpredict,fcorrect=fcorrect,sig
 
   ;; Build the matrices for linear least squares
   ;; Design matrix
-a = pld_design_matrix(pixgrid,ndat,ncoef,NOCONSTANT=noconstant,ORDER=order)
+
+  A = pld_design_matrix(pixgrid,ndat,ncoef,NOCONSTANT=noconstant,ORDER=order)
 
 IF N_ELEMENTS(sigma_flux) NE ndat then sigma_flux = REPLICATE(1.d0,ndat)
 sfmatrix = MAKE_ARRAY(ncoef,VALUE=1d0) # sigma_flux
 A /= sfmatrix
 ;;
 ;; Use Singular Value Decomposition on A
-;; 
+;;
 SVDC,A,W,U,V,/DOUBLE
 ;; Eliminate singular values
 ISING = WHERE(W LE 1e-6,nsing)

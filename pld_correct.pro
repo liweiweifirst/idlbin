@@ -13,6 +13,5 @@ FUNCTION pld_correct,pixgrid,flux,coeffs,sigma_coeffs,sigma_flux=sigma_flux,sigm
   ENDFOR
   fcorrect = flux/fpredict
   sigma_correct = fcorrect * SQRT( (sigma_fpredict/fpredict)^2 + (sigma_flux/flux)^2 )
-
   RETURN,fcorrect
 END

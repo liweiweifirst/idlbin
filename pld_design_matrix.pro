@@ -46,7 +46,7 @@ FUNCTION pld_design_matrix,pixgrid,ndat,ncoef,NOCONSTANT=noconstant,ORDER=order
          ENDFOR
       ENDFOR
    ENDIF
+   
 
-
-RETURN,a
+RETURN,A
 END

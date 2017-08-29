@@ -23,7 +23,9 @@ FUNCTION pld_correct_withfit,pixgrid,flux,sigma_flux,SCALE=scale,REQKEY=reqkey,$
 ;;                     with the exception of NaN's, will be used in the fit.
 ;;             ORDER:  2 or 1 (default).  Gives the upper order of terms to keep in the pixel
 ;;                     correlation equation.  
-;;                     
+;;
+
+
 ndat_tot = N_ELEMENTS(flux)
 IF N_ELEMENTS(ifit) EQ 0 THEN ifit = WHERE(finite(flux) AND finite(sigma_flux))
 IF N_ELEMENTS(REQKEY) EQ ndat_tot THEN BEGIN
@@ -49,6 +51,7 @@ IF N_ELEMENTS(sigma_flux) LT ndat_tot THEN sigma_flux = REPLICATE(1d0,ndat_tot)
 fcorrect = MAKE_ARRAY(ndat_tot,VALUE=!VALUES.D_NAN)
 corr_unc = MAKE_ARRAY(ndat_tot,VALUE=!VALUES.D_NAN)
 FOR j = 0,nreq-1 DO BEGIN
+   ON_ERROR, 2
    IF N_ELEMENTS(irk_fit[j]) EQ 0 THEN BEGIN
       PRINT,'*** PLD_CORRECT_WITHFIT:  NO FITTING DATA FOR AOR '+STRNG(rk[j])+'.  VALUES WILL RETURN NaN.****'
       CONTINUE
