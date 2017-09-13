@@ -76,7 +76,7 @@ pro track_centroids, pixval=pixval
            year_obs = float(date_obs.substring(0,3))
            ra = ra_rqst
            dec = dec_rqst
-           starname = Query_starid_v2( header, /Verbose)
+           starname = Query_starid_v2( header, na, /Verbose)
            print, 'starname: ', starname, ra, dec
 
         endif
@@ -108,26 +108,44 @@ pro track_centroids, pixval=pixval
            ;;time downlink
            pe = calc_earthpoint_pitch(bmjd0, pa_earth)
            
+
+           ;;run PLD
+           corrected_flux =function_pld_centroids()
            
            ;;save relevant info
            ;;can only be one channel per AOR with this saving
            ;;technique
            case 1 of
               (na le 200) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_01.sav'
-              (na gt 200 and na le 400) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_02.sav'
-              (na gt 400 and na le 600) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_03.sav'
-              (na gt 600 and na le 800) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_04.sav'
-              (na gt 800 and na le 1000) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_05.sav'
-              (na gt 1000 and na le 1200) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_06.sav'
-              (na gt 1200 and na le 1400) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_07.sav'
-              (na gt 1400 ) : savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_08.sav'
+              (na gt 200 and na le 400) : $
+                 savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_02.sav'
+              (na gt 400 and na le 600) : $
+                 savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_03.sav'
+              (na gt 600 and na le 800) : $
+                 savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_04.sav'
+              (na gt 800 and na le 1000) : $
+                 savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_05.sav'
+              (na gt 1000 and na le 1200) : $
+                 savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_06.sav'
+              (na gt 1200 and na le 1400) : $
+                 savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_07.sav'
+              (na gt 1400 ) : $
+                 savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_08.sav'
            endcase
            
            if keyword_set(pixval) then begin
               ;;keep track of central pixel values for PLD type analysis
-              keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'bmjd_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid','piarr','pid', 'naor_index','short_drift', 'slope_drift', 'min_dur', 'xunc', 'yunc','pitch_earth']
+              keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'bmjd_0', 'timearr', $
+                     'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d',$
+                     'chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd',$
+                     'preaor', 'prepid','piarr','pid', 'naor_index','short_drift', 'slope_drift', 'min_dur', 'xunc',$
+                     'yunc','pitch_earth','pld_flux']
 
-              values = list( ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], piarr,pid[na],na, alog10(-1),alog10(-1), min_dur(na), xuncarr, yuncarr,pe)
+              values = list( ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,$
+                             bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, $
+                             corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], $
+                             predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], piarr,pid[na],na, alog10(-1),$
+                             alog10(-1), min_dur(na), xuncarr, yuncarr,pe, corrected_flux)
               planethash[aorname(na)] = dictionary(keys, values)
               ;;savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_7.sav'
 
@@ -137,8 +155,8 @@ pro track_centroids, pixval=pixval
               ;;savename =  savename + '_pixval.sav'
            endif else begin
 ;;              print,na, 'pid at end', pid[na]
-              keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'bmjd_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid','pid','naor_index', 'short_drift', 'slope_drift',  'min_dur', 'xunc', 'yunc','pitch_earth']
-              values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], pid[na],na, alog10(-1), alog10(-1),min_dur(na), xuncarr, yuncarr,pe)
+              keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'bmjd_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid','pid','naor_index', 'short_drift', 'slope_drift',  'min_dur', 'xunc', 'yunc','pitch_earth','pld_flux']
+              values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], pid[na],na, alog10(-1), alog10(-1),min_dur(na), xuncarr, yuncarr,pe, corrected_flux)
               planethash[aorname(na)] = dictionary(keys, values)
               ;;savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_7.sav'
 
@@ -167,11 +185,15 @@ pro track_centroids, pixval=pixval
               print, 'about to do photometry on preaor'
               phot_exoplanet_aor,starname, apradius, pchname.Substring(-1), preaorname(n_elements(pppid) - 1) ;, /hybrid
 
+              ;;want to have correcgted fluxes be zeros because this
+              ;;is likely a short AOR
+              corrected_flux  = fluxarr - fluxarr
+              
               ;;save relevant info
               if keyword_set(pixval) then begin
-                 values =list(ra_rqst,  dec_rqst, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,pppitch[0:(n_elements(pp) - 3)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 3)], ppdec[0:(n_elements(pp) - 3)], ppjd[0:(n_elements(pp) - 3)], preaorname[0:(n_elements(pp) - 3)], pppid[0:(n_elements(pp) - 3)], piarr,pid[na],na, alog10(-1),alog10(-1),ppmin_dur[0:(n_elements(pp) - 4)], xuncarr, yuncarr,pe)
+                 values =list(ra_rqst,  dec_rqst, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,pppitch[0:(n_elements(pp) - 3)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 3)], ppdec[0:(n_elements(pp) - 3)], ppjd[0:(n_elements(pp) - 3)], preaorname[0:(n_elements(pp) - 3)], pppid[0:(n_elements(pp) - 3)], piarr,pid[na],na, alog10(-1),alog10(-1),ppmin_dur[0:(n_elements(pp) - 4)], xuncarr, yuncarr,pe, corrected_flux)
               endif else begin
-                 values=list(ra_rqst,  dec_rqst, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,pppitch[0:(n_elements(pp) - 3)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 3)], ppdec[0:(n_elements(pp) - 3)], ppjd[0:(n_elements(pp) - 3)], preaorname[0:(n_elements(pp) - 3)], pppid[0:(n_elements(pp) - 3)], pid[na],na,alog10(-1),alog10(-1),ppmin_dur[0:(n_elements(pp) - 4)],xuncarr, yuncarr,pe)
+                 values=list(ra_rqst,  dec_rqst, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,pppitch[0:(n_elements(pp) - 3)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 3)], ppdec[0:(n_elements(pp) - 3)], ppjd[0:(n_elements(pp) - 3)], preaorname[0:(n_elements(pp) - 3)], pppid[0:(n_elements(pp) - 3)], pid[na],na,alog10(-1),alog10(-1),ppmin_dur[0:(n_elements(pp) - 4)],xuncarr, yuncarr,pe, corrected_flux)
               endelse
               
               thepreaorname = preaorname(n_elements(pppid) - 1)

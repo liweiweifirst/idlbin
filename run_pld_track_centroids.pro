@@ -10,13 +10,13 @@ pro run_pld_track_centroids
 
   extra={xthick: 2, ythick:2, margin: 0.2, sym_size: 0.2,   sym_filled: 1, xstyle:1}
   
-  starts = 1
-  stops =  n_elements(savenames) - 1
+  starts = 0
+  stops =  0 ; n_elements(savenames) - 1
   totalaorcount = 0
   for s = starts, stops do begin
      TIC
-     print, 'restoring ', savenames(s)
-     restore, savenames(s)
+     print, 'restoring ', newsavenames(s)
+     restore, newsavenames(s)
      aorname = planethash.keys()
      
      
@@ -27,7 +27,7 @@ pro run_pld_track_centroids
      ;;basedir = planetinfo[planetname, 'basedir']    
      
      
-     for a = 0,  n_elements(aorname) - 1 do begin
+     for a = 0, n_elements(aorname) - 1 do begin
         pixgrid = planethash[aorname(a),'piarr']
         flux = planethash[aorname(a),'flux']
         sigma_flux = planethash[aorname(a),'fluxerr']
@@ -44,6 +44,9 @@ pro run_pld_track_centroids
            bad = where(finite(pixgrid) lt 1,nbad)
            
            if (meanpix ne 0.) and (nbad lt 1) then begin ; if pixgrid is zeros, PLD will crash
+              help, pixgrid
+              help, flux
+              help, sigma_flux
               corrected_flux = PLD_CORRECT_WITHFIT(pixgrid,flux,sigma_flux,CORR_UNC=corr_unc)
             
               ;;quick plot of the results
