@@ -1,13 +1,14 @@
-Function Query_starid_v2,header, Found = found, ERRMSG = errmsg, $
+Function Query_starid_v2,header, na, ra = ra, dec = dec, Found = found, ERRMSG = errmsg, $
     Verbose = verbose,  Print = print,Vmag=Vmag,Jmag=Jmag,Hmag=Hmag,Kmag=Kmag,parallax=parallax
 
   COMMON centroid_block
-
+;;  aorname = 63202816
+  
   ra_rqst = sxpar(header, 'RA_RQST') ;need to use these so that I know when there is a blank channel
   dec_rqst = sxpar(header, 'DEC_RQST')
   naxishere = sxpar(header, 'NAXIS')
-
-  
+  aorlabel = sxpar(header, 'AORLABEL')
+  chnlnum= sxpar(header, 'CHNLNUM')
   ;;some definitions
   ;;ra_rqst and dec_rqst are the center of the array 
 
@@ -70,7 +71,7 @@ Function Query_starid_v2,header, Found = found, ERRMSG = errmsg, $
      found = frame_check(header, ra, dec, found)
      if found eq 0 then goto, jump0
      ;;didn't find an object 
-  endif else begin
+  endif else begin  ;if cnt ge 2
      ;;-----------------------------------------------------------------------------------------
      print, 'No objects returned by NExScI. Searching SIMBAD...' ;  The server answered:'+ (result)]
      jump0: print, 'or maybe NExsci not on the frame'
@@ -194,6 +195,41 @@ Function Query_starid_v2,header, Found = found, ERRMSG = errmsg, $
   found = frame_check(header, ra, dec, found)
   if found eq 0 then starname = 'nostar'
   ;;if keyword_set(Verbose) then print, 'startname after frame_check: ',  starname, found
+
+  ;;last ditch effort to catch high proper motion subarray stars that
+  ;;are otherwise missed (prox cen)
+  if found eq 0 then begin
+     if naxishere gt 2 then begin
+
+        ;;is there a peak at the center of this subarray, if so use it
+
+        ;;need to read in the image
+        dirname = '/Users/jkrick/external/irac_warm/trending/'
+;;        dir = strcompress(dirname+ 'r' + string(aorname ) ,/remove_all)
+        dir = strcompress(dirname+ 'r' + string(aorname(na) ) ,/remove_all)
+        CD, dir                 ; change directories to the correct AOR directory
+
+        chstring = strcompress('ch' + string(chnlnum), /remove_all)
+        command  = strcompress( 'find ' + chstring + "/bcd -name 'SPITZER*_bcd.fits' > "+dirname+'bcdlist.txt')
+        spawn, command
+        
+        readcol,strcompress(dirname +'bcdlist.txt'),fitsname, format = 'A', /silent
+        fits_read, fitsname(1), data, header
+        slice = data[*, *, 10]  ; pick one subarray image
+
+  
+        yfit = mpfit2dpeak(slice, A)
+        if A(1) gt 10*A(0) then begin
+           ;;print, 'Got one'
+           found = 1
+           xyad, header, A(4), A(5), ra, dec
+           starname = aorlabel.Compress()
+        endif
+        
+     endif
+  endif
+  
+        
 
   
   return, starname
