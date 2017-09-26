@@ -236,13 +236,14 @@ pro make_parallax_coords, ra0, dec0, epoch0, pmra, pmdec, pi, epoch1, $
 	
 ; Determine observer position for first epoch, linearly interpolate between
 ; datum
-	if (iobs0 EQ 'spitzer') then restore, dir + spitzer_efile $
+	if (iobs0 EQ 'spitzer') then restore, '/Users/jkrick/idlbin/spitzer_3vec_position_from_sun_2019.sav' $;dir + spitzer_efile
 	else restore, dir + earth_efile
 	
 ; Check to see if desired epoch is within dates of ephemeris
-	bptr = where(iepoch0 lt min(sepoch) or iepoch0 gt max(sepoch), bcount)
+        bptr = where(iepoch0 lt min(sepoch) or iepoch0 gt max(sepoch), bcount)
+        print, 'min, max',  min(sepoch) , max(sepoch)
 	if (bcount gt 0) then message, 'Epoch 0 = ' + strn(iepoch0[bptr]) + $
-	                     ' outside of available ephemeris'
+	                     ' outside of available ephemeris' 
 
 ; Calculate parallax even if Sun is reference
 	if (iobs0 ne 'sun') then begin
