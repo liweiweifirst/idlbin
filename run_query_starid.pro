@@ -17,7 +17,7 @@ pro run_query_starid
   starname = Query_starid_v2( header, ra = ra, dec = dec ,/Verbose)
   print, 'starname: ', starname, ra, dec
   
-
-
-
-end
+  ;;result = get_exoplanet_info(ra, dec)
+  ;;print, result
+  ;;how many objects were found?
+ end

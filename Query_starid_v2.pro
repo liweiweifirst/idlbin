@@ -1,4 +1,4 @@
-Function Query_starid_v2,header, na, ra = ra, dec = dec, Found = found, ERRMSG = errmsg, $
+Function Query_starid_v2,header, na, Found = found, ERRMSG = errmsg, $ ; , ra = ra, dec = dec
     Verbose = verbose,  Print = print,Vmag=Vmag,Jmag=Jmag,Hmag=Hmag,Kmag=Kmag,parallax=parallax
 
   COMMON centroid_block
@@ -35,21 +35,22 @@ Function Query_starid_v2,header, na, ra = ra, dec = dec, Found = found, ERRMSG =
   QueryURL = strcompress(base1 + string(ra) + base2 + string(dec) + base3 + string(dist) + base4,/remove_all)
   if keyword_set(verbose) then print,queryURL
   
-  Result = webget(QueryURL)
+  ;;Result = webget(QueryURL)  webget and Nexsci not playing well together
+  Result = get_exoplanet_info(ra, dec)  ;; use Jim's workaround
   found = 0
   if keyword_set(Verbose) then print, 'Result', Result
 
   ;;how many objects were found?
-  cnt = n_elements(strlen(result.text))
+  cnt = n_elements(strlen(result))
 
   ;;somehow this isn't working, so don't bother with Nexsci for now
-  cnt = 0 
+  ;;cnt = 0 
   ;;found at least one object
   if cnt ge 2 then begin
      if cnt gt 2 then print, strcompress('Warning - '+ string(cnt)+ ' matches found for position '  )
         
      row = strarr(cnt-1, 7)
-     for i = 1, cnt - 1 do  row[i-1,*]=strsplit(result.text[i],',',/extract,/preserve_null)
+     for i = 1, cnt - 1 do  row[i-1,*]=strsplit(result[i],',',/extract,/preserve_null)
      
      dist = row[*,5]
      dist = float(dist)
@@ -60,15 +61,26 @@ Function Query_starid_v2,header, na, ra = ra, dec = dec, Found = found, ERRMSG =
      dec = row[c,4]             ;firstline[4]
      pmra = row[c,1]            ;firstline[1]  ;mas/yr
      pmdec = row[c,2]           ;firstline[2] ;mas/yr
-     print, 'pmra and dec', pmra, pmdec
+     ;;print, 'pmra and dec', pmra, pmdec
      ;;assume 2013 as the 'middle' of the warm mission to get
      ;;posistions closer
-     pmra = pmra*13/1000./60./60. ;arsec
-     pmdec = pmdec*13/1000./60./60. ;arcsec
-     ra = ra + pmra
-     dec = dec + pmdec
+     ra = double(ra)
+     dec = double(dec)
+     pmra = double(pmra)
+     pmdec = double(pmdec)
+     syear = 15   
+     pmra_asec = pmra*syear/1000./60./60. ;arsec
+     pmdec_asec = pmdec*syear/1000./60./60. ;arcsec
+     ra = ra + pmra_asec
+     dec = dec + pmdec_asec
+    ; print, 'ra and dec after pm', ra, dec
      found = 1
-     found = frame_check(header, ra, dec, found)
+     ;;print, 'abspmraa', abs(pmra), abs(pmdec), pmra, pmdec
+     if (abs(pmra) lt 1000.0) and (abs(pmdec) lt 1000.0) then begin
+        ;;print, 'inside small pm'
+        found = frame_check(header, ra, dec, found)
+     endif
+     ;;print, 'found', found
      if found eq 0 then goto, jump0
      ;;didn't find an object 
   endif else begin  ;if cnt ge 2
@@ -103,12 +115,12 @@ Function Query_starid_v2,header, na, ra = ra, dec = dec, Found = found, ERRMSG =
         id2 = where(Result.StartsWith('1|'), nlines)
         firstline = Result[id2[0]]
         junk = splitsimbadstring(firstline, starname=starname, ra=ra, dec=dec, pmra=pmra, pmdec=pmdec)
-        
-        ;;apply the proper motions
+         ;;apply the proper motions
         ;;assume 2013 as the 'middle' of the warm mission to get
         ;;posistions closer
-        pmra = pmra*13/1000./60./60. ;arsec
-        pmdec = pmdec*13/1000./60./60. ;arcsec
+        
+        pmra = pmra*syear/1000./60./60. ;arsec
+        pmdec = pmdec*syear/1000./60./60. ;arcsec
         ra = ra + pmra
         dec = dec + pmdec
 
@@ -192,7 +204,11 @@ Function Query_starid_v2,header, na, ra = ra, dec = dec, Found = found, ERRMSG =
      ENDELSE
   endelse
   ;;if keyword_set(Verbose) then print, 'startname before frame_check: ',  found
-  found = frame_check(header, ra, dec, found)
+  if (abs(pmra) lt 1000.0) and (abs(pmdec) lt 1000.0) then begin
+     print, 'inside final small pm'
+     found = frame_check(header, ra, dec, found)
+  endif
+  
   if found eq 0 then starname = 'nostar'
   ;;if keyword_set(Verbose) then print, 'startname after frame_check: ',  starname, found
 
@@ -240,6 +256,7 @@ function frame_check, header, ra, dec, found
   ;;check that the star is on the frame:
   ;;print, 'found starting frame check', found
   adxy, header, ra, dec, maybex, maybey
+  ;;print, 'maybex',maybex, 'maybey',maybey
   naxishere = sxpar(header, 'NAXIS')
   if naxishere eq 2 then begin
      xmax = 256-11 & ymax = 256-11
