@@ -6,7 +6,7 @@ pro track_centroids, pixval=pixval
   
 ;main code to automatically track centroids as a function of pitch
 ;angle for all warm mission long stares
-  COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, prepid, spitzer_jd, ra_string, dec_string,  naxis, xarr, yarr,xuncarr, yuncarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr, bmjd,  backarr, backerrarr, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, datacollect36, datacollect45, piarr, pre36, pre45, premin_dur, planethash, ra, dec, startnaor, min_dur, ra_rqst, dec_rqst, start_year
+  COMMON centroid_block, pid, campaign_name, start_jd, aorname, preaor, prera, predec, prejd, prepid, spitzer_jd, ra_string, dec_string,  naxis, xarr, yarr,xuncarr, yuncarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr, bmjd,  backarr, backerrarr, npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, datacollect36, datacollect45, piarr, pre36, pre45, premin_dur, planethash, ra, dec, startnaor, min_dur, ra_rqst, dec_rqst, start_year, starname
   apradius = 2.25 ;;fix this for now
   planethash = hash()  
 
@@ -55,6 +55,8 @@ pro track_centroids, pixval=pixval
      
      if datacollect36(na) eq 'f' then chname = ['ch2']
      if datacollect45(na) eq 'f' then chname = ['ch1']
+
+     
      ;;for now just work on one channel
      for c = 0,1 -1 do begin;  n_elements(chname) - 1 do begin
         ;;will need to get this AOR from the archive
@@ -76,6 +78,7 @@ pro track_centroids, pixval=pixval
            year_obs = float(date_obs.substring(0,3))
            ra = ra_rqst
            dec = dec_rqst
+           print, 'before query ra, dec', ra, dec
            starname = Query_starid_v2( header, na, /Verbose)
            print, 'starname: ', starname, ra, dec
 
@@ -110,7 +113,7 @@ pro track_centroids, pixval=pixval
            
 
            ;;run PLD
-           corrected_flux =function_pld_centroids()
+           corrected_flux =function_pld_centroids(na)
            
            ;;save relevant info
            ;;can only be one channel per AOR with this saving
