@@ -7,7 +7,7 @@ function read_exoplanet_list, calculate = calculate
 
   
   ;;readcol, '/ssc/ost/escire/centroiding/out_centroiding_allWarmMissionToDate.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, L10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline =7520
-  readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/out_centroiding_allWarmMissionToDate.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, L10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline =7520
+  readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/out_aors.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, L10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline =7520 ;centroiding_allWarmMissionToDate
   ;;start by removing fantom AORs
   fa = where(aorname eq '49697024')
   remove, fa, aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45
