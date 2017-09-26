@@ -1,4 +1,4 @@
-function function_pld_centroids
+function function_pld_centroids, na
 
   COMMON centroid_block
 
@@ -13,7 +13,7 @@ function function_pld_centroids
   ;set up for plotting
   extra={xthick: 2, ythick:2, margin: 0.2, sym_size: 0.2,   sym_filled: 1, xstyle:1}
   
-  print, 'correcting AOR ',a, ' ', aorname(a)
+  print, 'correcting AOR ', aorname(na)
   meanpix = mean(pixgrid,/nan) 
   bad = where(finite(pixgrid) lt 1,nbad)
   
@@ -85,7 +85,7 @@ function function_pld_centroids
      
      ;;set up some plots to be saved and not displayed
      plotx = (bin_bmjd - bin_bmjd[0]) * 24.
-     pp = plot(plotx, bin_xcen, '1s',  title = aorname(a) + '  ' + starname, $
+     pp = plot(plotx, bin_xcen, '1s',  title = aorname(na)+ '  ' + starname, $
                ytitle = 'X position', position =[0.2, 0.75, 0.9, 0.91], ytickinterval = 0.1, $
                xshowtext = 0, ytickformat = '(F10.2)', dimensions = [600, 900], _extra = extra, yminor = 0,$
                buffer = 1)
@@ -113,7 +113,7 @@ function function_pld_centroids
      ;;               ytitle = "PLD Flux", xtitle = 'Time in hours',/current,_extra = extra, $
      ;;               position = [0.2, 0.08, 0.9, 0.24],buffer = 1 ) ;, ytickinterval = 0.002 )
      
-     plotname = strcompress('/Users/jkrick/external/irac_warm/trending/plots/multi_' + string(aorname(a)) + '.png',/remove_all)
+     plotname = strcompress('/Users/jkrick/external/irac_warm/trending/plots/multi_' + string(aorname(na)) + '.png',/remove_all)
      print, plotname
      pp.save,plotname
      
