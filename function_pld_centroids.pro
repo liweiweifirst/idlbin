@@ -1,4 +1,4 @@
-function function_pld_centroids, na
+function function_pld_centroids, na, corr_unc = corr_unc
 
   COMMON centroid_block
 
@@ -17,7 +17,7 @@ function function_pld_centroids, na
   meanpix = mean(pixgrid,/nan) 
   bad = where(finite(pixgrid) lt 1,nbad)
   
-  if (meanpix ne 0.) and (nbad lt 1) then begin ; if pixgrid is zeros, PLD will crash
+  if (meanpix ne 0.) and (nbad lt 1) and (finite(mean(flux,/nan)) gt 0)then begin ; if pixgrid is zeros, PLD will crash
      help, pixgrid
      help, flux
      help, sigma_flux
@@ -102,12 +102,12 @@ function function_pld_centroids, na
      
      pp = plot(plotx, bin_flux/plot_norm, '1s',  ytitle = 'Raw Flux',xshowtext = 0,$
                position =[0.2, 0.25, 0.9, 0.41], /current, _extra = extra, $ ;ytickinterval = 0.002, $
-               yminor = 0, buffer = 1)
+               yminor = 0, buffer = 1, yrange = [0.97,1.02])
      
      
      pp = plot(plotx, bin_pldflux/normfactor, '1s',$
                ytitle = "PLD Flux", xtitle = 'Time in hours',/current,_extra = extra, $
-               position = [0.2, 0.08, 0.9, 0.24],buffer = 1 ) ;, ytickinterval = 0.002 )
+               position = [0.2, 0.08, 0.9, 0.24],buffer = 1, yrange = [0.97, 1.02] ) ;, ytickinterval = 0.002 )
      
      ;;pp = errorplot(plotx, bin_pldflux/normfactor, bin_corrunc/normfactor,'1s',$
      ;;               ytitle = "PLD Flux", xtitle = 'Time in hours',/current,_extra = extra, $

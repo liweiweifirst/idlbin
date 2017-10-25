@@ -7,7 +7,7 @@ savenames = [ '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centro
   
   if keyword_set(run_data) then begin
      starts = 0
-     stops =  n_elements(savenames) - 1
+     stops = n_elements(savenames) - 1
      totalaorcount = 0
      totaldcecount = 0L
      for s = starts, stops do begin
@@ -38,6 +38,11 @@ savenames = [ '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centro
            avgycen = sigmax
            obsdur = sigmax
            pitch_earth = sigmax
+           rms_slope_pld = sigmax
+           rms_absdev_pld = sigmax
+           rms_slope_raw = sigmax
+           rms_absdev_raw = sigmax
+           chname = strarr((2* (stops + 1 - starts) *n_elements(aorlist)))
            aorname = lonarr(n_elements(sigmax)) ;strarr(n_elements(sigmax))
            starname = strarr(n_elements(sigmax))
         endif
@@ -76,6 +81,27 @@ savenames = [ '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centro
 
            starname[totalaorcount] = starnamestr(0)
            pitch_earth[totalaorcount] = planethash[aorlist(n)].pitch_earth
+
+           if planethash[aorlist(n)].haskey('rms_slope_pld') gt 0 then $
+              rms_slope_pld[totalaorcount] = planethash[aorlist(n)].rms_slope_pld else  $
+                 rms_slope_pld[totalaorcount] = alog10(-1)
+           
+           if planethash[aorlist(n)].haskey('rms_absdev_pld') gt 0 then $
+              rms_absdev_pld[totalaorcount] = planethash[aorlist(n)].rms_absdev_pld else $
+                 rms_absdev_pld[totalaorcount] = alog10(-1)
+           
+           if planethash[aorlist(n)].haskey('rms_slope_raw') gt 0 then $
+              rms_slope_raw[totalaorcount] = planethash[aorlist(n)].rms_slope_raw else $
+                 rms_slope_raw[totalaorcount] = alog10(-1)
+           
+           
+           if planethash[aorlist(n)].haskey('rms_absdev_raw') gt 0 then $
+              rms_absdev_raw[totalaorcount] = planethash[aorlist(n)].rms_absdev_raw else $
+                 rms_absdev_raw[totalaorcount] = alog10(-1)
+           
+;;          help, planethash[aorlist(n)].chname
+;;           help, chname
+           chname[totalaorcount] = planethash[aorlist(n)].chname
            ;;-------------------------------------
            ;;sigmax & sigmay &sigmaxy vs. time
            ;;not sure what sigmaxy is?
@@ -213,7 +239,7 @@ savenames = [ '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centro
         endfor
      endfor                     ; for each save file restored
      
-     save, /variables, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
+     save, /variables, filename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids_test.sav'
   endif else begin ;;keyword_set run_data
      print, 'restoring data'
      restore, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
@@ -247,6 +273,12 @@ savenames = [ '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centro
   aorname = aorname[0:totalaorcount - 1]
   starname = starname[0:totalaorcount - 1]
   pitch_earth = pitch_earth[0:totalaorcount -1]
+
+  rms_slope_pld=rms_slope_pld[0:totalaorcount - 1]
+  rms_absdev_pld= rms_absdev_pld[0:totalaorcount - 1]
+  rms_slope_raw=rms_slope_raw[0:totalaorcount - 1]
+  rms_absdev_raw= rms_absdev_raw[0:totalaorcount - 1]
+  chname = chname[0:totalaorcount - 1]
   
   ;;set up color coding by exposure time
   colorarr = intarr(3, n_elements(exptimearr))

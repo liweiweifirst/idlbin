@@ -19,7 +19,6 @@ pro track_centroids, pixval=pixval
   ;;warning: be careful of earth point and s2pcals and other
   ;;non-listed observations which could occur directly before a long stare
 
-  startnaor = 0  ;; start at the beginning unless this gets changed in read_exoplanet_list
   
   ;;find which AORs need to be examined
   ;;need to also return JD and campaign
@@ -30,9 +29,11 @@ pro track_centroids, pixval=pixval
 
   ;;read in only once the table of earthlink pitch angles
   pa_earth  = read_csv_jim('/Users/jkrick/irac_warm/Spitzer_pitch.csv')
-  
+  ;;startnaor = 24
   ;;set up a file to track which AOR has which number
   openw, outlun, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/master_aorlist.txt', /get_lun
+    ;;startnaor = 0  ;; start at the beginning unless this gets changed in read_exoplanet_list
+
   for na =startnaor, n_elements(aorname) -1 do begin
      ;;delete current planethash so I don't have a huge huge
      ;;file going forward.
@@ -79,14 +80,30 @@ pro track_centroids, pixval=pixval
            ra = ra_rqst
            dec = dec_rqst
            print, 'before query ra, dec', ra, dec
-           starname = Query_starid_v2( header, na, /Verbose)
+           starname = Query_starid_v2( header, na, year_obs, /Verbose)
            print, 'starname: ', starname, ra, dec
 
         endif
         printf, outlun, na , '   ', aorname(na) , '   ', starname
 
         if starname ne 'nostar' then begin  ;;got a live one
-
+           
+           ;;high proper motion star with incorrect coords in archives
+           ;;is driving me crazy
+           if starname eq 'HD 219134' then begin
+              ra = 348.33709
+              dec = 57.169181
+           endif
+           if starname.StartsWith('Trappist-1') gt 0 then begin
+              ra = 346.62685
+              dec = -5.0432845
+           endif
+           if starname.StartsWith('Proxima') gt 0 then begin
+              ra = 217.38982
+              dec = -62.675699
+           endif
+           
+           
            ;;calculate pitch angle of the ra and dec
            pitchangle = calcpitch(ra, dec, start_jd(na))
            print, 'pitch angle ', pitchangle
@@ -113,7 +130,7 @@ pro track_centroids, pixval=pixval
            
 
            ;;run PLD
-           corrected_flux =function_pld_centroids(na)
+           corrected_flux =function_pld_centroids(na, corr_unc = corr_unc)
            
            ;;save relevant info
            ;;can only be one channel per AOR with this saving
@@ -142,13 +159,13 @@ pro track_centroids, pixval=pixval
                      'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d',$
                      'chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd',$
                      'preaor', 'prepid','piarr','pid', 'naor_index','short_drift', 'slope_drift', 'min_dur', 'xunc',$
-                     'yunc','pitch_earth','pld_flux']
+                     'yunc','pitch_earth','pld_flux', 'pld_unc']
 
               values = list( ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,$
                              bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, $
                              corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], $
                              predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], piarr,pid[na],na, alog10(-1),$
-                             alog10(-1), min_dur(na), xuncarr, yuncarr,pe, corrected_flux)
+                             alog10(-1), min_dur(na), xuncarr, yuncarr,pe, corrected_flux, corr_unc)
               planethash[aorname(na)] = dictionary(keys, values)
               ;;savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_7.sav'
 
@@ -158,8 +175,8 @@ pro track_centroids, pixval=pixval
               ;;savename =  savename + '_pixval.sav'
            endif else begin
 ;;              print,na, 'pid at end', pid[na]
-              keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'bmjd_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid','pid','naor_index', 'short_drift', 'slope_drift',  'min_dur', 'xunc', 'yunc','pitch_earth','pld_flux']
-              values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], pid[na],na, alog10(-1), alog10(-1),min_dur(na), xuncarr, yuncarr,pe, corrected_flux)
+              keys =['ra', 'dec', 'xcen', 'ycen', 'flux','fluxerr', 'corrflux', 'corrfluxerr', 'bmjd_0', 'timearr', 'bmjdarr', 'bkgd', 'bkgderr', 'npcentroids','exptime','xfwhm', 'yfwhm','framedly','corrflux_d','chname','pitchangle','prepitchangle','starname','naxis','apradius','prera', 'predec', 'prejd', 'preaor', 'prepid','pid','naor_index', 'short_drift', 'slope_drift',  'min_dur', 'xunc', 'yunc','pitch_earth','pld_flux', 'pld_unc']
+              values=list(ra,  dec, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, chname[c],pitchangle,prepitchangle, starname,naxis,apradius,prera[na,*], predec[na,*], prejd[na,*], preaor[na,*], prepid[na,*], pid[na],na, alog10(-1), alog10(-1),min_dur(na), xuncarr, yuncarr,pe, corrected_flux, corr_unc)
               planethash[aorname(na)] = dictionary(keys, values)
               ;;savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_7.sav'
 
@@ -194,9 +211,9 @@ pro track_centroids, pixval=pixval
               
               ;;save relevant info
               if keyword_set(pixval) then begin
-                 values =list(ra_rqst,  dec_rqst, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,pppitch[0:(n_elements(pp) - 3)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 3)], ppdec[0:(n_elements(pp) - 3)], ppjd[0:(n_elements(pp) - 3)], preaorname[0:(n_elements(pp) - 3)], pppid[0:(n_elements(pp) - 3)], piarr,pid[na],na, alog10(-1),alog10(-1),ppmin_dur[0:(n_elements(pp) - 4)], xuncarr, yuncarr,pe, corrected_flux)
+                 values =list(ra_rqst,  dec_rqst, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,pppitch[0:(n_elements(pp) - 3)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 3)], ppdec[0:(n_elements(pp) - 3)], ppjd[0:(n_elements(pp) - 3)], preaorname[0:(n_elements(pp) - 3)], pppid[0:(n_elements(pp) - 3)], piarr,pid[na],na, alog10(-1),alog10(-1),ppmin_dur[0:(n_elements(pp) - 4)], xuncarr, yuncarr,pe, corrected_flux, corr_unc)
               endif else begin
-                 values=list(ra_rqst,  dec_rqst, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,pppitch[0:(n_elements(pp) - 3)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 3)], ppdec[0:(n_elements(pp) - 3)], ppjd[0:(n_elements(pp) - 3)], preaorname[0:(n_elements(pp) - 3)], pppid[0:(n_elements(pp) - 3)], pid[na],na,alog10(-1),alog10(-1),ppmin_dur[0:(n_elements(pp) - 4)],xuncarr, yuncarr,pe, corrected_flux)
+                 values=list(ra_rqst,  dec_rqst, xarr, yarr, fluxarr, fluxerrarr, corrfluxarr, corrfluxerrarr, bmjd_0, timearr,  bmjd,  backarr, backerrarr,npcentroidsarr, exptime, xfwhmarr, yfwhmarr, fdarr, corrflux_d, pchname,pitchangle,pppitch[0:(n_elements(pp) - 3)], strcompress(starname+'preaor',/remove_all),naxis,apradius,ppra[0:(n_elements(pp) - 3)], ppdec[0:(n_elements(pp) - 3)], ppjd[0:(n_elements(pp) - 3)], preaorname[0:(n_elements(pp) - 3)], pppid[0:(n_elements(pp) - 3)], pid[na],na,alog10(-1),alog10(-1),ppmin_dur[0:(n_elements(pp) - 4)],xuncarr, yuncarr,pe, corrected_flux, corr_unc)
               endelse
               
               thepreaorname = preaorname(n_elements(pppid) - 1)
@@ -212,7 +229,7 @@ pro track_centroids, pixval=pixval
      if na mod 20 eq 0 then begin
         print, 'saving', na,' ', savename
         save, planethash, filename=savename
-        help, /structure, file_info(savename)
+        ;;help, /structure, file_info(savename)
      endif
      
   endfor                        ; for each AOR

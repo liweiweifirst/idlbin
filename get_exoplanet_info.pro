@@ -1,14 +1,14 @@
 FUNCTION get_exoplanet_info_Url_Callback, status, progress, data
  
    ; print the info msgs from the url object
-   PRINT, status
+   ;;PRINT, status
  
    ; return 1 to continue, return 0 to cancel
    RETURN, 1
 END
  
 ;-----------------------------------------------------------------
-FUNCTION get_exoplanet_info, ra, dec
+FUNCTION get_exoplanet_info, myurl_host, myurl_path, myurl_query
 
    CATCH, errorStatus
    IF (errorStatus NE 0) THEN BEGIN
@@ -44,12 +44,12 @@ FUNCTION get_exoplanet_info, ra, dec
    oUrl->SetProperty, url_scheme = 'https'
  
    ; The Exoplanets.org host
-   oUrl->SetProperty, URL_HOST = 'exoplanetarchive.ipac.caltech.edu'
+   oUrl->SetProperty, URL_HOST = myurl_host;'exoplanetarchive.ipac.caltech.edu'
  
    ; The FTP server path of the file to download
-   oUrl->SetProperty, URL_PATH = 'cgi-bin/nstedAPI/nph-nstedAPI'
+   oUrl->SetProperty, URL_PATH = myurl_path; 'cgi-bin/nstedAPI/nph-nstedAPI'
    
-   oUrl->SetProperty, URL_QUERY = strcompress('table=exoplanets&ra='+string(ra)+'&dec='+string(dec)+'&radius=4%20minutes&select=pl_hostname,st_pmra,st_pmdec',/remove_all)
+   oUrl->SetProperty, URL_QUERY = myurl_query; strcompress('table=exoplanets&ra='+string(ra)+'&dec='+string(dec)+'&radius=4%20minutes&select=pl_hostname,st_pmra,st_pmdec',/remove_all)
  
    ; Make a request to the server, output as a string array (each line of output is an element of the array).
     result = oUrl->Get( /STRING_ARRAY )
@@ -62,3 +62,7 @@ FUNCTION get_exoplanet_info, ra, dec
  
  RETURN,result
 END
+
+;;http://exoplanetarchive.ipac.caltech.edu/cgi-bin/nstedAPI/nph-nstedAPI?table=exoplanets&ra=227.68531&dec=-61.422365&radius=0.400000%20minutes&select=pl_hostname,st_pmra,st_pmdec
+
+;;http://simbad.u-strasbg.fr/simbad/sim-coo?Coord=227.68531-61.422365&Radius=0.400000&Radius.unit=arcmin&output.format=ASCII&coodisp1=d&list.pmsel=on

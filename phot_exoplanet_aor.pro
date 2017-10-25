@@ -131,7 +131,7 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
          peakpixDNarr = xarr
          xuncarr = xarr
          yuncarr = xarr
-         piarr = fltarr(7,7,63L*n_elements(fitsname))
+         piarr = fltarr(7,7,64L*n_elements(fitsname))
 
       endif
       if i eq startfits and naxis ne 3 then begin
@@ -302,9 +302,9 @@ pro phot_exoplanet_aor, planetname, apradius,chname,thisaor, hybrid = hybrid, si
          yfwhmarr[i*64] = yfwhm[0:*]
          peakpixDNarr[i*64] = peakpixDN[0:*]
          if keyword_set(pixval) then begin
-            for pj = 0, 63 do begin
-               ;;print, 'adding to piarr', pi[*,*,pj]
-               piarr(*,*,i*64 + pj) = pi[*,*,pj]
+            for pj = 0, 63L do begin
+               ;;print,i, pj, 'adding to piarr', pi[*,*,pj]
+               piarr(*,*,i*64L + pj) = pi[*,*,pj]
             endfor
          endif
          

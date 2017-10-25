@@ -1,4 +1,4 @@
-Function Query_starid_v2,header, na, Found = found, ERRMSG = errmsg, $ ; , ra = ra, dec = dec
+Function Query_starid_v2,header, na, year_obs, Found = found, ERRMSG = errmsg, $ ; , ra = ra, dec = dec
     Verbose = verbose,  Print = print,Vmag=Vmag,Jmag=Jmag,Hmag=Hmag,Kmag=Kmag,parallax=parallax
 
   COMMON centroid_block
@@ -20,7 +20,11 @@ Function Query_starid_v2,header, na, Found = found, ERRMSG = errmsg, $ ; , ra = 
      dec_ss = dec_rqst
   endelse
   
-
+  ;;what year to measure Proper
+  ;;motions relative to since we
+  ;;don't have the year of observation
+  syear = year_obs - 2000
+  print, 'figuround out start year', na, aorname(na), syear
 
   
   ;;First search NEXSCI
@@ -29,14 +33,18 @@ Function Query_starid_v2,header, na, Found = found, ERRMSG = errmsg, $ ; , ra = 
   base1 = "http://exoplanetarchive.ipac.caltech.edu/cgi-bin/nstedAPI/nph-nstedAPI?table=exoplanets&ra="
   base2 = "&dec="
   base3 = "&radius="
-  base4 = "%20minutes&select=pl_hostname,st_pmra, st_pmdec";&order=dist"
+  base4 = "%20minutes&select=pl_hostname,st_pmra, st_pmdec" ;&order=dist"
+
+  myurl_host = 'exoplanetarchive.ipac.caltech.edu'
+  myurl_path = 'cgi-bin/nstedAPI/nph-nstedAPI'
+  myurl_query = strcompress('table=exoplanets&ra='+string(ra)+'&dec='+string(dec)+'&radius=4%20minutes&select=pl_hostname,st_pmra,st_pmdec',/remove_all)
   if naxishere eq 2 then dist = 4
   if naxishere eq 3 then dist = 0.4
   QueryURL = strcompress(base1 + string(ra) + base2 + string(dec) + base3 + string(dist) + base4,/remove_all)
   if keyword_set(verbose) then print,queryURL
   
   ;;Result = webget(QueryURL)  webget and Nexsci not playing well together
-  Result = get_exoplanet_info(ra, dec)  ;; use Jim's workaround
+  Result = get_exoplanet_info(myurl_host, myurl_path, myurl_query)  ;; use Jim's workaround
   found = 0
   if keyword_set(Verbose) then print, 'Result', Result
 
@@ -68,15 +76,17 @@ Function Query_starid_v2,header, na, Found = found, ERRMSG = errmsg, $ ; , ra = 
      dec = double(dec)
      pmra = double(pmra)
      pmdec = double(pmdec)
-     syear = 15   
      pmra_asec = pmra*syear/1000./60./60. ;arsec
      pmdec_asec = pmdec*syear/1000./60./60. ;arcsec
      ra = ra + pmra_asec
      dec = dec + pmdec_asec
-    ; print, 'ra and dec after pm', ra, dec
+;;     help, syear
+;;     help, ra
+;;     help, dec
+     print, 'ra and dec after pm', syear, ra, dec
      found = 1
      ;;print, 'abspmraa', abs(pmra), abs(pmdec), pmra, pmdec
-     if (abs(pmra) lt 1000.0) and (abs(pmdec) lt 1000.0) then begin
+     if (abs(pmra) lt 900.0) and (abs(pmdec) lt 900.0) then begin
         ;;print, 'inside small pm'
         found = frame_check(header, ra, dec, found)
      endif
@@ -87,15 +97,22 @@ Function Query_starid_v2,header, na, Found = found, ERRMSG = errmsg, $ ; , ra = 
      ;;-----------------------------------------------------------------------------------------
      print, 'No objects returned by NExScI. Searching SIMBAD...' ;  The server answered:'+ (result)]
      jump0: print, 'or maybe NExsci not on the frame'
-     base1 = "http://simbad.u-strasbg.fr/simbad/sim-coo?Coord="
+     base1 = "https://simbad.u-strasbg.fr/simbad/sim-coo?Coord="
      base2 = "&Radius="
      base3 = "&Radius.unit=arcmin&output.format=ASCII&coodisp1=d&list.pmsel=on"
+
+     myurl_host = 'simbad.u-strasbg.fr'
+     myurl_path = 'simbad/sim-coo'
      ;;dec needs to have a sign attached
      if dec_ss lt 0 then sdec = string(dec_ss) else sdec = strcompress('+'+string(dec_ss),/remove)
+     myurl_query = strcompress('Coord=' + string(ra_ss) +  sdec + base2 + string(0.4) + base3,/remove)
+     
      QueryURL = strcompress(base1 + string(ra_ss) +  sdec + base2 + string(0.4) + base3,/remove)
      if keyword_set(verbose) then print, 'query', QueryURL
-     Result = webget(QueryURL)
-     Result = Result.text
+     ;;Result = webget(QueryURL)
+     Result = get_exoplanet_info(myurl_host, myurl_path, myurl_query)  ;; use Jim's workaround
+
+     ;;Result = Result.text
      if keyword_set(Verbose) then print, Result
      
      ;;how many objects did SIMBAD return?
@@ -107,7 +124,7 @@ Function Query_starid_v2,header, na, Found = found, ERRMSG = errmsg, $ ; , ra = 
         if keyword_set(Verbose) then print, 'SIMBAD number of matches: ', scnt
         
         if scnt GT 1 then begin 
-           print,strcompress('Warning - '+ string(cnt)+ ' SIMBAD matches found for position '  )
+           print,strcompress('Warning - '+ string(scnt)+ ' SIMBAD matches found for position '  )
         endif 	
         found=1   
         
@@ -124,7 +141,7 @@ Function Query_starid_v2,header, na, Found = found, ERRMSG = errmsg, $ ; , ra = 
         ra = ra + pmra
         dec = dec + pmdec
 
-        if keyword_set(Verbose) then print, 'Nearest star: ', starname      
+        if keyword_set(Verbose) then print, 'Nearest star: ', starname, syear, ra, dec 
         
      ENDIF ELSE BEGIN  ;;SIMBAD found either one star, or didn't find anything, now what??
         
@@ -139,6 +156,11 @@ Function Query_starid_v2,header, na, Found = found, ERRMSG = errmsg, $ ; , ra = 
            pos = cooline.split(' ')
            ra = pos[1]
            dec = pos[2]
+           idpm = where(Result.StartsWith('Proper'))
+           pmline = Result[idpm]
+           pm = pmline.split(' ')
+           pmra = pm[1]
+           pmdec = pm[2]
            btest = starname.StartsWith('NVSS')
            if btest gt 0 then GOTO, jumpif
         endif else begin
@@ -149,11 +171,16 @@ Function Query_starid_v2,header, na, Found = found, ERRMSG = errmsg, $ ; , ra = 
            ;;not at the sweet spot, but maybe at the center of the
            ;;array
            if dec_rqst lt 0 then sdec_rqst = string(dec_rqst) else sdec_rqst = strcompress('+'+string(dec_rqst),/remove)
-           narcmin =4
+           if naxishere eq 2 then narcmin =4
+           if naxishere eq 3 then narcmin = 0.3
            QueryURL = strcompress(base1 + string(ra_rqst) +  sdec_rqst + base2 + string(narcmin) + base3,/remove)
+           myurl_query = strcompress('Coord=' + string(ra_rqst) +  sdec_rqst + base2 + string(narcmin) + base3,/remove)
+
            print, 'query', QueryURL
-           Result = webget(QueryURL)
-           Result = Result.text
+           ;;Result = webget(QueryURL)
+           Result = get_exoplanet_info(myurl_host, myurl_path, myurl_query)  ;; use Jim's workaround
+           print, 'got something', Result
+           ;;Result = Result.text
            idx=where(strpos(Result, 'Number of objects') ne -1, nlines)
                          
            if nlines eq 1 then begin ;got more than one object
@@ -174,7 +201,7 @@ Function Query_starid_v2,header, na, Found = found, ERRMSG = errmsg, $ ; , ra = 
               pmdec = pmdec*13/1000./60./60. ;arcsec
               ra = ra + pmra
               dec = dec + pmdec
-              print, 'ra, dec', ra, dec
+              print, 'ra, dec, found', ra, dec, found
            endif
            ;;check for single star
            id1=where(strpos(Result, 'Object') ne -1, nlines)
@@ -204,12 +231,17 @@ Function Query_starid_v2,header, na, Found = found, ERRMSG = errmsg, $ ; , ra = 
      ENDELSE
   endelse
   ;;if keyword_set(Verbose) then print, 'startname before frame_check: ',  found
-  if (abs(pmra) lt 1000.0) and (abs(pmdec) lt 1000.0) then begin
-     print, 'inside final small pm'
-     found = frame_check(header, ra, dec, found)
-  endif
   
-  if found eq 0 then starname = 'nostar'
+  
+  if found eq 0 then begin
+     starname = 'nostar'
+  endif else begin
+     if ISA(pmra) gt 0 and (abs(pmra) lt 1000.0) and (abs(pmdec) lt 1000.0) then begin
+        found = frame_check(header, ra, dec, found)
+        print, 'inside final small pm', found
+
+     endif
+  endelse
   ;;if keyword_set(Verbose) then print, 'startname after frame_check: ',  starname, found
 
   ;;last ditch effort to catch high proper motion subarray stars that
@@ -235,11 +267,15 @@ Function Query_starid_v2,header, na, Found = found, ERRMSG = errmsg, $ ; , ra = 
 
   
         yfit = mpfit2dpeak(slice, A)
-        if A(1) gt 10*A(0) then begin
+        if (A(1) gt 10*A(0)) and (A(4) gt 10) and (A(4) lt 21) and (A(5) gt 10) and (A(5) lt 21) then begin
            ;;print, 'Got one'
            found = 1
            xyad, header, A(4), A(5), ra, dec
            starname = aorlabel.Compress()
+
+           ;;but still need to check that it is on the frame
+           found = frame_check(header, ra, dec, found)
+
         endif
         
      endif
