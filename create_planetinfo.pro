@@ -4,6 +4,62 @@ function create_planetinfo
   keys =['ra', 'dec','aorname_ch2','aorname_ch1','basedir','chname', 'utmjd_center', 'transit_duration', 'period', 'intended_phase', 'exptime','mask', 'maskreg','stareaor','plot_norm','plot_corrnorm']
 chname = 0
 ;---
+  planetname = 'WASP-121'
+  ra_ref = 8.7401487
+  dec_ref = 4.3811113
+  aorname_ch2 = ['r64972288'] ;ch2
+  aorname_ch1 = ['r0']
+  basedir = '/Users/jkrick/external/irac_warm/' 
+  utmjd_center = 57393.87454D	;junk
+  transit_duration= 60.0 ;min close but not perfect=
+  period =   0.959641  ;days 
+  exptime = [0.4,0.4,0.4]
+  intended_phase = 0.5
+  stareaor = 4
+  plot_norm = 1.0
+  plot_corrnorm = 1.0
+
+  values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
+  planetname = 'HD3167'
+  ra_ref = 8.7401487
+  dec_ref = 4.3811113
+  aorname_ch2 = ['r61072640','r61072896','r61070592'] ;ch2
+  aorname_ch1 = ['r0']
+  basedir = '/Users/jkrick/external/irac_warm/' 
+  utmjd_center = 57393.87454D	;junk
+  transit_duration= 60.0 ;min close but not perfect=
+  period =   0.959641  ;days 
+  exptime = [0.4,0.4,0.4]
+  intended_phase = 0.5
+  stareaor = 4
+  plot_norm = 1.0
+  plot_corrnorm = 1.0
+
+  values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+
+;---
+  planetname = 'K2-28b'
+  ra_ref = 335.62309
+  dec_ref = -7.956735
+  aorname_ch2 = ['r62339840'] ;ch2
+  aorname_ch1 = ['r0']
+  basedir = '/Users/jkrick/external/irac_warm/' 
+  utmjd_center = 56124.91751D	;junk
+  transit_duration= 60.0 ;min close but not perfect=
+  period =   2.44  ;days 
+  exptime = [0.4, 2.0]
+  intended_phase = 0.0
+  stareaor = 2
+  plot_norm = 1.0
+  plot_corrnorm = 1.0
+
+  values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
   planetname = 'WASP-80b'
   ra_ref = 303.167750
   dec_ref = -2.143944
@@ -418,7 +474,7 @@ chname = 0
   planetname = 'GJ3470'
   ra_ref = 119.77445833
   dec_ref = 15.39152778
-  aorname_ch1 = ['r56751360' ,'r50648576', 'r50658048','r56751616' ] 
+  aorname_ch1 = ['r61748224','r61748480', 'r61748992','r61749760','r61750016','r61749248'];['r56751360' ,'r50648576', 'r50658048','r56751616' ] 
   aorname_ch2 = ['r0000000000']
   basedir = '/Users/jkrick/external/dither_preaor/' 
   utmjd_center = 56089.9769D
@@ -1063,8 +1119,26 @@ chname = 0
   ra_ref = 168.63792
   dec_ref = 25.710523
   aorname_ch2 = [ 'r42608128','r48823552']
-  aorname_ch1 = ['r0000000000']
-  basedir = '/Users/jkrick/irac_warm/pcrs_planets/' 
+  aorname_ch1 = ['r49696512', 'r49697536', 'r49698048', 'r52197888', 'r52198144', 'r52198656']
+  basedir = '/Users/jkrick/external/irac_warm/' 
+  utmjd_center = 55981.5450
+  transit_duration=147.3
+  period = 4.234516
+  intended_phase =0.0
+  exptime = 0.1
+  stareaor =0;4
+  plot_norm = 0.01785
+  plot_corrnorm = 0.01785
+  
+   values=list(ra_ref, dec_ref, aorname_ch2, aorname_ch1, basedir, chname, utmjd_center, transit_duration, period, intended_phase, exptime, mask, maskreg, stareaor, plot_norm, plot_corrnorm)
+  planetinfo[planetname] = HASH(keys, values)
+;---
+  planetname = 'trappist1'
+  ra_ref = 346.62661
+  dec_ref =-5.0439419
+  aorname_ch2 = [ 'r0000']
+  aorname_ch1 = [ 'r62449408','r62459904','r62468864','r62458624','r62449152','r62459136','r62439680','r62445056','r62455808','r62457344','r62455040']
+  basedir = '/Users/jkrick/external/irac_warm/' 
   utmjd_center = 55981.5450
   transit_duration=147.3
   period = 4.234516
