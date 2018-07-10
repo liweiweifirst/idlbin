@@ -3,7 +3,7 @@ pro phot_exoplanet_ML, planetname, apradius,chname, columntrack = columntrack, b
 ;now with hashes of hashes!
 
   t1 = systime(1)
-  journal = '/Users/jkrick/external/irac_warm/HD75289/journal.txt'
+  journal = '/Users/jkrick/external/irac_warm/HD97658/journal.txt'
 ;convert aperture radius in pixels into what get_centroids_for_calstar_jk uses 
 case apradius of
 ;[ 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25]
@@ -77,6 +77,7 @@ if planetname eq 'simul_XO3' then exosystem = 'XO-3 b'
 if planetname eq 'tres2' then exosystem = 'TrES-2 b'
 if planetname eq 'WASP-63b' then exosystem = 'WASP-63 b'
 if planetname eq 'KOI069' then exosystem = 'Kepler-93 b'
+if planetname eq 'HD97658' then exosystem = 'HD 97658 b'
 
 ;print, exosystem, 'exosystem'
 if planetname eq 'WASP-52b' then teq_p = 1315
@@ -143,7 +144,8 @@ planethash = hash()
 if chname eq '2' then occ_filename =  '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_120827_occthresh.fits'$
 else occ_filename = '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120828_occthresh.fits'
 fits_read,occ_filename, occdata, occheader
-startaor =1
+startaor =0
+stopaor = 1
 stopaor =   n_elements(aorname) - 1
 for a =startaor,  stopaor do begin
    print, '----------------------------'
@@ -587,7 +589,7 @@ for a =startaor,  stopaor do begin
   header = ['xpos','xerr','ypos','yerr','flux', 'fluxerr','np', 'xfwhm','yfwhm', 'bmjd',  'bg_flux', 'sigma_bg_flux','pix1','pix2', 'pix3','pix4','pix5','pix6','pix7','pix8','pix9']
 
   ;;use write_csv
-  csvname = strcompress('/Users/jkrick/external/irac_warm/XO3/XO3_'+ aorname(a)+'.csv')
+  csvname = strcompress(basedir + '/'+ planetname + '/' + planetname +'_'+ aorname(a)+'.csv')
   print, csvname
   write_csv, csvname, trans_arr, header = header
 
