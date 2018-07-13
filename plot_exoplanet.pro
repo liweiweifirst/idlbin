@@ -2,18 +2,16 @@ pro plot_exoplanet, planetname, bin_level, apradius, chname, phaseplot = phasepl
 ;example call plot_exoplanet, 'wasp15', 2*63L
 
   COMMON bin_block, aorname, planethash, bin_xcen, bin_ycen, bin_bkgd, bin_flux, bin_fluxerr,  bin_timearr, bin_phase, bin_ncorr,bin_np, bin_npcent, bin_xcenp, bin_ycenp, bin_bkgdp, bin_fluxp, bin_fluxerrp,  bin_corrfluxp,  bin_timearrp, bin_corrfluxerrp,  bin_phasep,  bin_ncorrp, bin_nparrp, bin_npcentarrp, bin_bmjdarr, bin_xfwhm, bin_yfwhm,  bin_corrflux_dp, bin_bmjdarrp
-
+  
   if planetname eq 'WASP-14b' then begin
      colorarr = ['gray', 'gray','gray','gray','gray','burlywood','sandy_brown', 'rosy_brown','saddle_brown', 'brown', 'maroon', 'firebrick', 'crimson', 'salmon', 'orange_red', 'dark_orange', 'orange', 'goldenrod', 'gold', 'yellow','khaki', 'green_yellow', 'lime', 'lime_green', 'green', 'dark_green', 'olive', 'olive_drab', 'sea_green', 'light_green', 'medium_spring_green', 'medium_sea_green', 'teal', 'cadet_blue', 'aquamarine', 'cyan', 'light_sky_blue', 'dodger_blue', 'steel_blue', 'blue', 'dark_blue', 'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia']
   endif else begin
-   
-
- colorarr = ['black', 'rosy_brown', 'brown',  'firebrick', 'red', 'salmon',  'dark_orange','orange', 'goldenrod',  'yellow', 'green_yellow',  'lime_green', 'dark_green', 'green', 'olive_drab',  'light_green',  'medium_sea_green',  'cadet_blue',  'cyan', 'dodger_blue', 'blue',  'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia'] ;'burlywood'
-
-endelse
+     colorarr = ['black', 'rosy_brown', 'brown',  'firebrick', 'red', 'salmon',  'dark_orange','orange', 'goldenrod',  'yellow', 'green_yellow',  'lime_green', 'dark_green', 'green', 'olive_drab',  'light_green',  'medium_sea_green',  'cadet_blue',  'cyan', 'dodger_blue', 'blue',  'indigo', 'medium_slate_blue', 'purple', 'blue_violet', 'dark_orchid', 'orchid', 'pink', 'pale_violet_red', 'deep_pink', 'fuchsia'] ;'burlywood'
+     
+  endelse
   
-
-
+  
+  
 ;run code to read in all the input planet parameters
   planetinfo = create_planetinfo()
   if chname eq '2' then aorname= planetinfo[planetname, 'aorname_ch2'] else aorname = planetinfo[planetname, 'aorname_ch1'] 
@@ -31,7 +29,7 @@ endelse
   stareaor = planetinfo[planetname, 'stareaor']
   exoplanet_data_file = '/Users/jkrick/idlbin/exoplanets.csv'
   exosystem = strmid(planetname, 0, 8 )+ ' b' ;'HD 209458 b' ;
-;exosystem = planetname
+
   if planetname eq 'WASP-80b' then exosystem = 'WASP-80 b'
   if planetname eq 'WASP-13b' then exosystem = 'WASP-13 b'
   if planetname eq 'WASP-14b' then exosystem = 'WASP-14 b'
@@ -47,7 +45,8 @@ endelse
   if planetname eq 'HD209458' then exosystem = 'HD 209458 b'
   if planetname eq 'XO3' then exosystem = 'XO-3 b' 
   if planetname eq 'simul_XO3' then exosystem = 'XO-3 b' 
-
+  if planetname eq 'HD3167' then exosystem = 'HD 3167 b'
+  
   print, exosystem, 'exosystem'
   if planetname eq 'WASP-52b' then teq_p = 1315
   if planetname eq 'HD 7924 b' then begin
@@ -83,56 +82,46 @@ endelse
      omega = 252.11             ;degrees
   endif
 
-
-;print, 'using UTMJD', utmjd_center
 ;---------------
   
   dirname = strcompress(basedir + planetname +'/')                                                            ;+'/hybrid_pmap_nn/')
-;  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'.sav',/remove_all) ;
-  if chname eq '2' then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_160126.sav',/remove_all) ;'_150226_bcdnosdcorr.sav'
-  if chname eq '1' then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150722.sav',/remove_all) ;140716
+  if chname eq '2' then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_160126.sav',/remove_all) 
+  if chname eq '1' then  savefilename = strcompress(dirname + planetname +'_phot_ch'+chname+'_'+string(apradius)+'_150722.sav',/remove_all) 
   print, 'restoring ', savefilename
   restore, savefilename
   print, 'aorname', aorname(0)
   time_0 = (planethash[aorname(0),'timearr']) 
   time_0 = time_0(0)
-;  plothist, planethash[aorname(0),'npcentroids'], xhist, yhist, /noplot, bin = 0.01
-;  testplot = plot(xhist, yhist,  xtitle = 'NP', ytitle = 'Number', thick =3, color = 'blue')
-
-  ;print, 'testing phase', (planethash[aorname(0),'phase'] )[0:10], (planethash[aorname(0),'phase'] )[600:610]
-
  
 
 ;for debugging: skip some AORs
   startaor =  0                 ;  n_elements(aorname) -29
-  stopaor =    n_elements(aorname) - 1
+  stopaor =    n_elements(aorname) - 2 ; ignore the last AOR
 
 
   xsweet = 15.12
   ysweet = 15.00
-
  
-
-  
 ;-------------------------------------------------------
 ;make a bunch of plots before binning
 ;-------------------------------------------------------
 
 ;this one overlays the positions on the pmap contours
   if keyword_set(position_plot) then begin
-    ;; if chname eq '2' then fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch2_0p1s_x4_500x500_0043_121120.fits', pmapdata, pmapheader
-    ;; if chname eq '1' then fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_ch1_500x500_0043_120409.fits', pmapdata, pmapheader
-     if chname eq '2' then fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_100x100_ch2_r2p25_s3_7_0p1s_x4_150723.fits', pmapdata, pmapheader
-     if chname eq '1' then fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_500x500_ch1_r2p25_s3_7_sd_0p4s_sdark_150722.fits', pmapdata, pmapheader
-     c = contour(pmapdata, /fill, n_levels = 15, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, aspect_ratio = 1, xrange = [0,100], yrange = [0,100], axis_style = 0) ;21
-      if planethash[aorname(0),'exptime'] lt 10. then begin
+     if chname eq '2' then fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_100x100_ch2_r2p25_s3_7_0p1s_x4_150723.fits', $
+                                      pmapdata, pmapheader
+     if chname eq '1' then fits_read, '/Users/jkrick/irac_warm/pmap/pmap_fits/pmap_500x500_ch1_r2p25_s3_7_sd_0p4s_sdark_150722.fits', $
+                                      pmapdata, pmapheader
+     c = contour(pmapdata, /fill, n_levels = 15, rgb_table = 0, xtitle = 'X (pixel)', ytitle = 'Y (pixel)', title = planetname, $
+                 aspect_ratio = 1, xrange = [0,100], yrange = [0,100], axis_style = 0) ;21
+     if planethash[aorname(0),'exptime'] lt 10. then begin
         xss = 14.5
         yss = 14.5
      endif else begin
         xss = 23.5
         yss = 232.5
      endelse
-;  print, 'naor', n_elements(aorname)
+
      for a = startaor ,  stopaor  do begin
 ;     print, 'testing aors', a, colorarr[a]
 ;      if planethash[aorname(a),'exptime'] gt 0.2 then begin
@@ -177,8 +166,6 @@ endelse
 
 ;-----
 
-  ;print, 'min', min((planetob[a].timearr - planetob[0].timearr(0))/60./60.)
- ; z = pp_multiplot(multi_layout=[1,3], global_xtitle='Time (hrs) ')
   if keyword_set(unbinned_xplot) then begin
      for a =  startaor,stopaor do begin
         if a eq startaor then begin
@@ -397,12 +384,6 @@ endelse
      ;use time degraded corrfluxes
      bin_corrfluxp = bin_corrflux_dp
 
-
-;     print, 'testing phase', (planethash[aorname(a),'phase'] )[0:10], (planethash[aorname(a),'phase'] )[600:610]
-;     print, 'testing x', bin_xcen[0:10]
-;     print, 'testing y', bin_ycen[0:10]
-;     print, 'testing npcent', bin_npcent[0:10]
-;     print, 'testing error bars', colorarr[a], bin_corrfluxerrp
 ;------------------------------------------------------
      ;possible comparison statistic
      ;what is the distribution of standard deviations among the corrfluxes?
@@ -517,7 +498,7 @@ endelse
         if planetname eq 'WASP14-b' then corroffset =  1.000;0.0015
         if planetname eq 'HD209458' then corroffset = 0.001
        
-        setynormfluxrange = [0.99, 1.005];[0.97, 1.005]
+        setynormfluxrange = [0.998, 1.002];[0.97, 1.005]
 
  ;       cphase = where(bin_phase lt 0)
  ;       bin_phase(cphase) = bin_phase(cphase) + 1.0
@@ -810,8 +791,9 @@ endelse
         openw, unit, '/Users/jkrick/external/irac_warm/stauffer/EPIC204897050/epic204897050_data.txt',/get_lun
         corroffset = 0.0000
         print, 'making plot as a function of time'
-        corrnormoffset = 0;0.02
-        setynormfluxrange = [0.97, 1.05];[0.97, 1.005]
+        corrnormoffset = .008
+        setynormfluxrange = [0.995, 1.008] ;[0.97, 1.005]
+        time_0 = bin_timearr(0)
         if a eq startaor then begin ; for the first AOR
                                 ;set the normalization values from the
                                 ;medians of the first AOR...is close enough
@@ -847,9 +829,9 @@ endelse
                                 ytitle = 'Normalized Corrected Flux', title = planetname,aspect_ratio = 0.0, $
                                 margin = 0.2,yrange = setynormfluxrange )
               endif else begin
-                 pr = plot((bin_timearr - time_0)/60./60., (bin_flux/plot_corrnorm) -corrnormoffset,  '1s', $
+                 pr = plot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm) ,  '1s', $
                            sym_size = 0.3,   sym_filled = 1, color = colorarr[a],  xtitle = 'Time(hrs)', $
-                           ytitle = 'Normalized Flux', title = planetname, $
+                           ytitle = 'Normalized Corrected Flux', title = planetname, $
                            yrange = setynormfluxrange, aspect_ratio = 0.0, margin = 0.2)
               endelse           ;/errorbars
 
@@ -915,8 +897,8 @@ endelse
 ;                              /current)  ;pu
 
               ;;pr = plot((bin_timearr - time_0)/60./60., (bin_corrfluxp/plot_corrnorm)-corrnormoffset, overplot=pr, 's1', sym_size = 0.2,   sym_filled = 1, color = colorarr[a])
-              pr =  errorplot(((bin_timearrp - time_0)/60./60.) , (bin_corrfluxp/plot_corrnorm) + corroffset, $ ;- 5.5E3)/24.
-                              bin_corrfluxerrp/plot_corrnorm, sym_size = 0.7, symbol = plotsym, sym_filled = 1,$
+              pr =  plot(((bin_timearrp - time_0)/60./60.) , (bin_corrfluxp/plot_corrnorm) - corrnormoffset, $ ;bin_corrfluxerrp/plot_corrnorm,
+                               sym_size = 0.7, symbol = plotsym, sym_filled = 1,$
                               color = colorarr[a], errorbar_color =  colorarr[a], overplot = pr)  ;pu
 
            endif
