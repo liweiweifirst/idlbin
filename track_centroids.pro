@@ -34,7 +34,9 @@ pro track_centroids, pixval=pixval
   openw, outlun, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/master_aorlist.txt', /get_lun
     ;;startnaor = 0  ;; start at the beginning unless this gets changed in read_exoplanet_list
 
-  for na =startnaor, n_elements(aorname) -1 do begin
+  ;;startnaor = 1085  ; update a single AOR with the other channel
+  ;;stopnaor = 1085
+  for na =startnaor,  n_elements(aorname) -1 do begin
      ;;delete current planethash so I don't have a huge huge
      ;;file going forward.
      ;;print, 'na', na, (na - 1) mod 200
@@ -47,7 +49,7 @@ pro track_centroids, pixval=pixval
      
      print, '---------------'
      print, 'starting on ',aorname(na), ' ', na
-     chname = ['ch1','ch2']
+     chname = ['ch2','ch1']  ; look at ch2 first if data was taken in both channels
      pchname = ['ch1','ch2']
      ;;dwell test took data in both channels, but ch1 is blank
      if aorname(na) eq '51771392' then datacollect36(na) = 'f'
@@ -56,7 +58,7 @@ pro track_centroids, pixval=pixval
      
      if datacollect36(na) eq 'f' then chname = ['ch2']
      if datacollect45(na) eq 'f' then chname = ['ch1']
-
+     print, 'CHNAME',chname
      
      ;;for now just work on one channel
      for c = 0,1 -1 do begin;  n_elements(chname) - 1 do begin
@@ -149,8 +151,11 @@ pro track_centroids, pixval=pixval
                  savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_06.sav'
               (na gt 1200 and na le 1400) : $
                  savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_07.sav'
-              (na gt 1400 ) : $
+              (na gt 1400 and na le 1600) : $
                  savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_08.sav'
+              (na gt 1600 and na le 1800) : $
+                 savename =  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/centroids_save/track_centroids_pixval_09.sav'
+
            endcase
            
            if keyword_set(pixval) then begin
@@ -239,7 +244,7 @@ pro track_centroids, pixval=pixval
   aorlist = planethash.keys()
   print, 'n_elements aorlist', n_elements(aorlist)
   
-  readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/out_centroiding_allWarmMissionToDate.txt', aorname,pid,startUTC,campaign,min_dur_cat,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, L10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline =7520
+  readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/out_aors.txt', aorname,pid,startUTC,campaign,min_dur_cat,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, L10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline =7520
   
   for n =1, n_elements(aorlist) - 1 do begin
      a = where(aorname eq aorlist(n))
