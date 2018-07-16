@@ -11,7 +11,7 @@ end
 pro save_track_centroids
 
   ;;this code writes out a csv file to use in python to attempt pretty plots
-   restore,  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids_test.sav'
+   restore,  '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/plot_track_centroids.sav'
    laorname =  long(aorname)
    xjd = double(xjd)
    print, 'laorname', laorname[0:10]
@@ -43,6 +43,9 @@ pro save_track_centroids
    rms_slope_raw=rms_slope_raw(good)
    rms_absdev_raw= rms_absdev_raw(good)
    chname = chname(good)
+   cddp_raw = cddp_raw(good)
+   cddp_pld = cddp_pld(good)
+   piarrarr = piarrarr(good)
    
    ;;remove some outliers
    b = where(xdrift gt 0.3)  ;;can't figure out otherwise how to narrow the range, there are only a few out there
@@ -109,14 +112,14 @@ pro save_track_centroids
    chname_dble = double(chname.Substring(2))
    
    ;;array concatenation fun
-   data =[[laorname],[exptimearr],[xjd], [startyear],[startmonth], [pa],[dpa], [sigmax], [sigmay], [xdrift], [ydrift],[short_drift], [slope_drift], [pkperiod], [pkstrength], [npmean], [npunc] , [avgxcen], [avgycen],[obsdur*24.],[pitch_earth],[rms_slope_raw],[rms_absdev_raw],[rms_slope_pld], [rms_absdev_pld],[chname_dble]]
+   data =[[laorname],[exptimearr],[xjd], [startyear],[startmonth], [pa],[dpa], [sigmax], [sigmay], [xdrift], [ydrift],[short_drift], [slope_drift], [pkperiod], [pkstrength], [npmean], [npunc] , [avgxcen], [avgycen],[obsdur*24.],[pitch_earth],[rms_slope_raw],[rms_absdev_raw],[rms_slope_pld], [rms_absdev_pld],[chname_dble],[cddp_pld],[cddp_raw],[piarrarr]]
 
    print, 'testong', data[0]
    help, data, exptimearr, xdrift, pkstrength, laorname, chname
    datac = transpose(data)
 
    ;;write out the csv file for python plotting
-   h = ['AORNAME','EXPTIME','JD', 'STARTYEAR','STARTMONTH','PITCH_ANGLE', 'DELTA_PA', 'SIGMAX', 'SIGMAY', 'XDRIFT', 'YDRIFT', 'SHORT_DRIFT', 'SLOPE_DRIFT', 'PKPERIOD', 'PKSTRENGTH', 'NPMEAN', 'NPUNC','AVGXCEN','AVGYCEN','OBSDUR','PITCH_EARTH','RMS_SLOPE_RAW', 'RMS_ABSDEV_RAW','RMS_SLOPE_PLD','RMS_ABSDEV_PLD','CHNAME']
+   h = ['AORNAME','EXPTIME','JD', 'STARTYEAR','STARTMONTH','PITCH_ANGLE', 'DELTA_PA', 'SIGMAX', 'SIGMAY', 'XDRIFT', 'YDRIFT', 'SHORT_DRIFT', 'SLOPE_DRIFT', 'PKPERIOD', 'PKSTRENGTH', 'NPMEAN', 'NPUNC','AVGXCEN','AVGYCEN','OBSDUR','PITCH_EARTH','RMS_SLOPE_RAW', 'RMS_ABSDEV_RAW','RMS_SLOPE_PLD','RMS_ABSDEV_PLD','CHNAME','CDDP_PLD','CDDP_RAW','PEAKPIX_DN']
    write_csv, '~/pybin/track_centroids.csv', datac, $
               header = h
 
