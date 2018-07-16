@@ -1,10 +1,6 @@
 function read_exoplanet_list, calculate = calculate
   COMMON centroid_block
   ;;figure out where the exoplanet stares are.
-
- 
-  ;;readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/weeks456_553_666_749_768.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, I10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline = 1
-
   
   ;;readcol, '/ssc/ost/escire/centroiding/out_centroiding_allWarmMissionToDate.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, L10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline =7520
   readcol, '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/out_aors.txt', aorname,pid,startUTC,campaign,min_dur,RA,Dec,readoutfull,datacollect36,datacollect45, format = '(L10, L10, A, A, F10.4, D10.6, D10.6,A,A,A )', delimiter='|', skipline =7520 ;centroiding_allWarmMissionToDate
@@ -25,22 +21,7 @@ function read_exoplanet_list, calculate = calculate
   ;;set up for saving files
   catra = RA
   catdec = Dec
-  ;;needs to be in a loop or something 
-  ;;case start_year of
-  ;;   2010: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_10'
-  ;;   2011: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_11'
-  ;;   2012: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_12'
-  ;;   2013: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_13'
-  ;;   2014: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_14'
-  ;;   2015: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_15'
-  ;;   2016: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_16'
-  ;;   2017: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_17'
-  ;;   2018: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_18'
-     
-  ;;endcase
 
-
-  
   ;;which of these have already been analyzed?
   ;;check for the save file first 
   ;;savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_pixval_7.sav'
@@ -209,3 +190,15 @@ end
 ;;  min_dur = strmid(planets, 71, 6)
 ;;  start_time = strmid(planets, 79, 21)
 
+  ;;case start_year of
+  ;;   2010: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_10'
+  ;;   2011: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_11'
+  ;;   2012: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_12'
+  ;;   2013: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_13'
+  ;;   2014: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_14'
+  ;;   2015: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_15'
+  ;;   2016: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_16'
+  ;;   2017: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_17'
+  ;;   2018: savename = '/Users/jkrick/Library/Mobile Documents/com~apple~CloudDocs/track_centroids_18'
+     
+  ;;endcase
